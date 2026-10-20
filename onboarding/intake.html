@@ -1,0 +1,954 @@
+<title>Site Intake</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* Layout: intake dossier. Sticky section rail on the left, one question column on the right, action bar pinned to the bottom. */
+:root {
+  --bg: #F2F4F3;
+  --surface: #FFFFFF;
+  --sunk: #E7ECEA;
+  --ink: #11201D;
+  --muted: #566663;
+  --line: #D6DEDB;
+  --accent: #2143B8;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E3E9FB;
+  --rec: #0B7A6C;
+  --rec-soft: #DCF1ED;
+  --warn: #8F5300;
+  --warn-soft: #FBEBD2;
+  --found: #ECF0EE;
+  --f-display: "Alexandria", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C1412; --surface: #121D1A; --sunk: #0F1816; --ink: #E4ECE9; --muted: #93A39F; --line: #24332F;
+    --accent: #8FA6FF; --accent-ink: #0C1412; --accent-soft: #1A2547;
+    --rec: #4CC9B6; --rec-soft: #0F302A; --warn: #F0B35A; --warn-soft: #3A2A10; --found: #17231F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C1412; --surface: #121D1A; --sunk: #0F1816; --ink: #E4ECE9; --muted: #93A39F; --line: #24332F;
+  --accent: #8FA6FF; --accent-ink: #0C1412; --accent-soft: #1A2547;
+  --rec: #4CC9B6; --rec-soft: #0F302A; --warn: #F0B35A; --warn-soft: #3A2A10; --found: #17231F;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* Header */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-inner { max-width: 1160px; margin: 0 auto; padding-block: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand svg { width: 26px; height: 26px; color: var(--accent); flex: none; }
+.brand h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+.brand .ar { font-family: var(--f-body); color: var(--muted); font-size: 14px; }
+.tabs { display: flex; gap: 4px; background: var(--sunk); padding: 4px; border-radius: 999px; }
+.tab { border: 0; background: transparent; padding: 6px 14px; border-radius: 999px; cursor: pointer; color: var(--muted); font-weight: 500; white-space: nowrap; }
+.tab[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); }
+.tab .n { font-family: var(--f-mono); font-size: 12px; margin-inline-start: 6px; color: var(--muted); }
+.save { margin-inline-start: auto; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.save .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.save[data-s="saved"] .dot { background: var(--rec); }
+.save[data-s="saving"] .dot { background: var(--accent); }
+.save[data-s="local"] .dot, .save[data-s="readonly"] .dot, .save[data-s="error"] .dot { background: var(--warn); }
+.band { height: 10px; background: var(--accent); opacity: 0.22;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10' viewBox='0 0 20 10'%3E%3Cpath d='M10 0l2.1 2.9L15 5l-2.9 2.1L10 10 7.9 7.1 5 5l2.9-2.1z' fill='%23000'/%3E%3C/svg%3E") repeat-x center / 20px 10px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10' viewBox='0 0 20 10'%3E%3Cpath d='M10 0l2.1 2.9L15 5l-2.9 2.1L10 10 7.9 7.1 5 5l2.9-2.1z' fill='%23000'/%3E%3C/svg%3E") repeat-x center / 20px 10px; }
+
+/* Body layout */
+.layout { max-width: 1160px; margin: 0 auto; padding-block: 28px 160px; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 48px; }
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 92px); align-self: start; display: flex; flex-direction: column; gap: 2px; }
+.rail-title { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.rail a { display: flex; justify-content: space-between; gap: 8px; padding: 7px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; font-size: 14px; }
+.rail a:hover { background: var(--sunk); }
+.rail .c { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.rail .c.chg { color: var(--warn); }
+main { min-width: 0; display: flex; flex-direction: column; gap: 40px; }
+
+.intro { display: flex; flex-direction: column; gap: 14px; max-width: 68ch; }
+.intro h2 { font-size: clamp(26px, 4vw, 34px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+.intro p { margin: 0; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--muted); align-items: center; }
+.client-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.client-bar label { font-size: 13px; color: var(--muted); }
+.client-bar select, .client-bar input { padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-width: 0; }
+.client-bar select { max-width: 100%; }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 500; white-space: nowrap; }
+.btn:hover { background: var(--sunk); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.new-client { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.new-client input { flex: 1 1 220px; }
+
+/* Sections and questions */
+.sec { display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 110px; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.sec-head h2 { font-size: 20px; font-weight: 600; }
+.sec-head span { font-family: var(--f-mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 110px; }
+.q-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.q-id { font-family: var(--f-mono); font-size: 12px; color: var(--muted); background: var(--sunk); padding: 2px 7px; border-radius: 6px; flex: none; }
+.q-head h3 { font-size: 16.5px; font-weight: 600; line-height: 1.35; flex: 1 1 260px; min-width: 0; }
+.q-why { margin: 0; color: var(--muted); font-size: 14px; max-width: 72ch; }
+.tag { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.tag.rec { color: var(--rec); background: var(--rec-soft); }
+.tag.first { color: var(--accent); background: var(--accent-soft); }
+.tag.chg { color: var(--warn); background: var(--warn-soft); }
+.found { background: var(--found); border-radius: 8px; padding: 10px 12px; font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
+.found b { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.found p { margin: 0; }
+.opts { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.opt { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; background: var(--bg); }
+.opt:hover { border-color: var(--muted); }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.opt:has(input:disabled) { opacity: 0.5; cursor: not-allowed; }
+.opt input { margin: 3px 0 0; accent-color: var(--accent); flex: none; width: 16px; height: 16px; }
+.opt-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.opt-label { font-weight: 500; display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.opt-desc { color: var(--muted); font-size: 13.5px; }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+.text-in, .note { width: 100%; min-height: 76px; resize: vertical; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); line-height: 1.5; }
+.note { min-height: 60px; font-size: 14px; }
+.q-foot { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.linkbtn { border: 0; background: none; padding: 2px 0; color: var(--accent); cursor: pointer; font-size: 13.5px; font-weight: 500; }
+.linkbtn:hover { text-decoration: underline; }
+
+/* Action bar */
+.bar { position: fixed; inset: auto 0 0; z-index: 6; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.bar-inner { max-width: 1160px; margin: 0 auto; padding-block: 12px; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+.bar-stats { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; flex: 1 1 260px; min-width: 0; }
+.bar-stats strong { color: var(--ink); font-weight: 600; }
+.bar-msg { font-size: 13.5px; color: var(--rec); flex-basis: 100%; margin: 0; }
+.bar-msg:empty { display: none; }
+.copy-fallback { width: 100%; min-height: 120px; font-family: var(--f-mono); font-size: 12px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+
+@media (max-width: 880px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-top: 20px; }
+  .rail { display: none; }
+  .save { margin-inline-start: 0; flex-basis: 100%; }
+  .q { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } .opt, .btn, .tab { transition: background-color .15s, border-color .15s; } }
+</style>
+
+<header class="top">
+  <div class="top-inner gutter">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="5" y="5" width="14" height="14"/><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/><circle cx="12" cy="12" r="2.2"/></svg>
+      <h1>Site Intake</h1>
+      <span class="ar" lang="ar" dir="rtl">استبيان إطلاق الموقع</span>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Questionnaire part">
+      <button class="tab" role="tab" id="tab-platform" aria-selected="true" data-tab="platform">Platform<span class="n" id="n-platform"></span></button>
+      <button class="tab" role="tab" id="tab-client" aria-selected="false" data-tab="client">Client<span class="n" id="n-client"></span></button>
+    </div>
+    <div class="save" id="save" data-s="idle" role="status" aria-live="polite"><span class="dot"></span><span id="save-text">Connecting…</span></div>
+  </div>
+  <div class="band" aria-hidden="true"></div>
+</header>
+
+<div class="layout gutter">
+  <nav class="rail" id="rail" aria-label="Sections"></nav>
+  <main id="main"></main>
+</div>
+
+<div class="bar">
+  <div class="bar-inner gutter">
+    <div class="bar-stats" id="stats"></div>
+    <button class="btn" id="copy-btn" type="button">Copy as text</button>
+    <button class="btn primary" id="send-btn" type="button">Send to Claude</button>
+    <p class="bar-msg" id="bar-msg" role="status" aria-live="polite"></p>
+    <textarea class="copy-fallback" id="copy-fallback" hidden readonly aria-label="Answers as text"></textarea>
+  </div>
+</div>
+
+<script>
+// ---------- Question bank ----------
+const O = (v, label, desc, rec) => ({ v, label, desc: desc || "", rec: !!rec });
+const R = (v, label, desc) => O(v, label, desc, true);
+
+const SECTIONS = [
+  // ===== PART A: PLATFORM (answered once, applies to every client) =====
+  { part: "platform", id: "a-scope", title: "Scope and reuse", qs: [
+    { id: "A01", type: "single", title: "Who will the future clients be?",
+      why: "Decides whether the base template is school-shaped (admissions, academics, calendar) or generic with a school content pack on top.",
+      options: [
+        O("schools", "Schools and education groups only (EduSync customers)"),
+        R("schools-first", "Schools first, other Islamic-market businesses too", "Design systems stay generic; a 'school' content pack adds admissions, academics and calendar."),
+        O("any", "Any business in KSA, the GCC or MENA") ] },
+    { id: "A02", type: "single", title: "How many client sites do you expect in the next 12 months?",
+      why: "Sets how much we automate up front versus doing by hand per client.",
+      options: [ O("1-5", "1 to 5"), R("5-20", "5 to 20"), O("20-100", "20 to 100"), O("100plus", "More than 100") ] },
+    { id: "A03", type: "single", title: "Repository layout",
+      why: "This repo (fast-shipping-sites) is empty, so we choose now.",
+      options: [
+        R("mono", "One monorepo: engine, design systems and every client's content", "A fix lands once and improves every site. Each client still builds and deploys separately."),
+        O("template", "A template repo, forked per client", "Simple, but fixes never flow back to older clients."),
+        O("split", "Engine monorepo plus one private content repo per client") ] },
+    { id: "A04", type: "multi", title: "What is the minimum a new client hands over?",
+      why: "This is the onboarding promise: 'give us this, see design samples the same day'.",
+      options: [
+        R("url", "Their current website URL (we import the text and images)"),
+        R("logo", "Their logo file"),
+        R("intake", "This intake (Part B), filled by us or by them"),
+        O("photos", "A folder of real photos"),
+        O("brand", "Brand guidelines or colors"),
+        O("socials", "Social media links") ] },
+    { id: "A05", type: "single", title: "Who runs onboarding day to day?",
+      options: [
+        R("staff-claude", "Syncology staff using Claude Code: one command per client"),
+        O("staff-ui", "Non-technical staff through a web dashboard"),
+        O("self", "Clients self-serve: they fill the form and samples generate automatically") ] },
+  ]},
+  { part: "platform", id: "a-design", title: "Design systems", qs: [
+    { id: "A06", type: "single", title: "How many design systems in the first batch?", first: true,
+      why: "Each one is a complete look: tokens, layouts, section variants and motion. More systems take longer to build but give every future client more choice.",
+      options: [ O("3", "3"), R("4", "4"), O("5", "5"), O("6", "6") ] },
+    { id: "A07", type: "multi", title: "Which directions should the first batch cover?", first: true,
+      why: "Every direction is built to respect Islamic tradition: none depends on figurative imagery, and geometric art carries the visuals.",
+      options: [
+        R("mashrabiya", "Mashrabiya: light through lattice", "Bright, calm luxury. Sections reveal through carved geometric screens, with light and shadow moving as you scroll."),
+        R("aurora", "Aurora: dark and luminous", "Deep night palette, flowing WebGL light, glass panels, 3D tilt. Premium and tech-forward."),
+        R("playground", "Playground: for KG and primary", "Chunky shapes with bouncy physics, bright colors, hand-drawn doodles. Works without any faces."),
+        R("tessellate", "Tessellate: living geometry", "Generative Islamic star patterns that draw, rotate and re-tile as you scroll. Jewel tones."),
+        O("rawashin", "Rawashin: Hijazi heritage, modern", "Carved wooden Hijazi balconies of Makkah and Jeddah, Al-Sadu weave bands, on a clean modern grid."),
+        O("kinetic", "Kinetic Type: editorial", "Huge bilingual headlines, scroll-scrubbed text, an Arabic calligraphic display face. Little imagery needed."),
+        O("bento", "Bento: clean corporate", "Modular bento grids and crisp micro-interactions. The safe, fast option.") ] },
+    { id: "A08", type: "single", title: "Where should the design systems live?",
+      why: "Standalone Claude Design (claude.ai/design) closes on 14 December 2026. Design systems now live inside Claude as browsable 'Design System' artifacts.",
+      options: [
+        R("both", "In code (tokens and components) and as Claude Design System artifacts", "Code is the source of truth. The artifact is the browsable reference that clients, designers and agents read."),
+        O("code", "Code only"),
+        O("claude", "Claude Design System artifacts only") ] },
+    { id: "A09", type: "single", title: "How separable should a design system be?",
+      options: [
+        R("mix", "Full themes whose palette, type, layout and motion can be mixed", "Lets a client say 'Aurora's layout with Mashrabiya's colors'."),
+        O("whole", "Full themes, chosen as a whole"),
+        O("tokens", "Tokens only (colors and fonts) over shared layouts") ] },
+    { id: "A10", type: "single", title: "Default animation intensity",
+      options: [
+        O("max", "Maximal: WebGL hero, scroll-scrubbed scenes, page transitions everywhere"),
+        R("bold", "Bold but fast: one signature hero moment per system, scroll reveals, micro-interactions", "Heavy effects load only on capable devices and switch off for visitors who prefer reduced motion."),
+        O("subtle", "Subtle: fades and hovers only") ] },
+    { id: "A11", type: "single", title: "Performance floor on a mid-range Android phone",
+      why: "Most Saudi school parents will visit on a phone.",
+      options: [
+        R("90", "Lighthouse mobile performance of 90 or more; animations degrade gracefully"),
+        O("95", "Strict 95 or more, even if some of the wow is lost"),
+        O("wow", "Wow first, performance second") ] },
+  ]},
+  { part: "platform", id: "a-stack", title: "Tech stack", qs: [
+    { id: "A12", type: "single", title: "Framework", first: true,
+      options: [
+        R("astro", "Astro", "Static output, built-in i18n and RTL routing, zero JavaScript by default, animated parts loaded as islands. The cheapest to host."),
+        O("next", "Next.js (static export)", "Pick this if your team lives in React and may want server rendering later."),
+        O("nuxt", "Nuxt (Vue)"),
+        O("any", "No preference") ] },
+    { id: "A13", type: "multi", title: "Besides Claude, who will touch this code?",
+      options: [
+        R("me", "Only me and Claude"),
+        O("react", "Developers who know React"),
+        O("vue", "Developers who know Vue"),
+        O("odoo", "Odoo / Python developers"),
+        O("designer", "A designer working in Figma") ] },
+    { id: "A14", type: "single", title: "How is content updated after launch?",
+      options: [
+        R("git", "We edit content files through Claude Code and the site rebuilds", "Free, fast and versioned. A CMS can be added later for clients who want one."),
+        O("cms", "A free git-based CMS (Sveltia or Decap) so clients edit text and news themselves"),
+        O("odoo", "Pull news, events and jobs from the client's EduSync (Odoo)"),
+        O("headless", "A hosted headless CMS (Sanity, Strapi, Payload)") ] },
+  ]},
+  { part: "platform", id: "a-host", title: "Hosting and environment", qs: [
+    { id: "A15", type: "single", title: "Hosting",
+      found: "Infra Agent: syncology.tech DNS is on Cloudflare, with no wildcard record. You prefer free hosting and no servers. The simplest fit is Cloudflare Pages (free, a preview per branch), or Amplify like the Console.",
+      options: [
+        R("cfpages", "Cloudflare Pages, connected to this GitHub repo"),
+        O("amplify", "AWS Amplify, like console.syncology.tech"),
+        O("s3", "S3 and CloudFront", "Needs a new certificate in us-east-1."),
+        O("handoff", "Hand each build to the Infra Agent to deploy") ] },
+    { id: "A16", type: "single", title: "Preview URLs for design samples",
+      found: "Every subdomain needs its own DNS record. lfis.syncology.tech is LFIS's live, paid EduSync system and is off-limits. lfis-a and lfis-b are free.",
+      options: [
+        R("gallery", "One preview domain per client, with a path per design system", "lfis-preview.syncology.tech shows the comparison gallery; /mashrabiya, /aurora and so on are the samples. One DNS record per client."),
+        O("per-system", "One subdomain per sample: lfis-a, lfis-b, lfis-c.syncology.tech"),
+        O("pagesdev", "Free *.pages.dev URLs for samples; syncology.tech only for production") ] },
+    { id: "A17", type: "single", title: "Final production domain for LFIS",
+      found: "The old site is WordPress on leadersfis.com. Search also finds leaders.edu.sa ('تأسيس القادة العالمية', Pre-K to Grade 9, Al-Rashidiyyah, Makkah). Is that the same school's newer site?",
+      options: [
+        R("keep", "leadersfis.com: repoint its DNS to the new host"),
+        O("edusa", "leaders.edu.sa"),
+        O("web", "lfis-web.syncology.tech"),
+        O("tbd", "Not decided yet") ] },
+    { id: "A18", type: "single", title: "Go-ahead for deployment", first: true,
+      why: "The Infra Agent will only create resources on your instruction, not on mine.",
+      options: [
+        R("tell", "I'll tell the Infra Agent to create the Cloudflare Pages project and the preview DNS record"),
+        O("pagesdev", "Hold DNS; use pages.dev URLs for now"),
+        O("wait", "Hold everything until the samples are ready") ] },
+    { id: "A19", type: "single", title: "This cloud environment blocks most of the internet. How do we fix that?", first: true,
+      found: "Blocked now: leadersfis.com, leaders.edu.sa, Unsplash, Pexels, Pixabay, Instagram and image-generation APIs. Allowed: GitHub, Google Fonts, npm and PyPI. I can't import the old site until this changes.",
+      options: [
+        R("full", "I'll switch this environment's network access to Full"),
+        O("allow", "I'll add specific allowed domains", "leadersfis.com, leaders.edu.sa, images.unsplash.com, api.unsplash.com, images.pexels.com, api.pexels.com, pixabay.com, cdn.pixabay.com, plus the image API host if any."),
+        O("upload", "I'll upload the content and images myself") ] },
+  ]},
+  { part: "platform", id: "a-media", title: "Media pipeline", qs: [
+    { id: "A20", type: "multi", title: "Which image sources may I use?",
+      options: [
+        R("upscale", "Old-site images, upscaled with a free open-source model (Real-ESRGAN)"),
+        R("stock", "Free stock from Unsplash, Pexels and Pixabay, each image checked against the client's media rules"),
+        R("code", "Art generated in code: geometric patterns, SVG illustrations, WebGL scenes"),
+        O("ai", "AI-generated images through an API", "I can't produce photographs on my own. Name the provider in a note: OpenAI, Google Imagen, or Flux through Replicate or fal.") ] },
+    { id: "A21", type: "single", title: "Monthly budget for paid APIs (image generation, upscaling, stock)",
+      options: [ R("0", "$0: free tools only"), O("20", "Up to $20"), O("100", "Up to $100"), O("more", "More, if the results justify it") ] },
+  ]},
+  { part: "platform", id: "a-approval", title: "Client approval", qs: [
+    { id: "A22", type: "single", title: "How does a client choose between samples?",
+      options: [
+        R("gallery", "A comparison gallery: live samples side by side, a 'choose this' button and comments"),
+        O("links", "Just send them the links"),
+        O("video", "A recorded walkthrough") ] },
+    { id: "A23", type: "single", title: "How complete is each sample?",
+      options: [
+        R("home-inner", "A full homepage plus one inner page, with real content in both languages"),
+        O("hero", "The homepage hero only"),
+        O("full", "The entire site in every design system") ] },
+  ]},
+
+  // ===== PART B: CLIENT INTAKE (one per client) =====
+  { part: "client", id: "b-identity", title: "Identity", qs: [
+    { id: "B01", type: "text", title: "Official name in English and Arabic", placeholder: "English name\nالاسم بالعربية" },
+    { id: "B02", type: "single", title: "Logo",
+      options: [
+        R("vector", "The client provides a vector file (SVG, AI or PDF)"),
+        O("redraw", "Take it from the old site and redraw it as SVG"),
+        O("refresh", "The client wants a logo refresh as well") ] },
+    { id: "B03", type: "single", title: "Brand colors",
+      options: [
+        R("logo", "Derive them from the logo; each design system adapts them"),
+        O("guide", "The client has brand guidelines (I'll upload them)"),
+        O("free", "Free to propose new palettes") ] },
+    { id: "B04", type: "text", title: "Motto or tagline, in both languages", placeholder: "English\nالعربية" },
+    { id: "B05", type: "multi", title: "Tone of voice", max: 2,
+      options: [
+        O("prestige", "Prestigious and formal"),
+        R("warm", "Warm and nurturing"),
+        R("ambitious", "Modern and ambitious, in the spirit of Vision 2030"),
+        O("playful", "Playful") ] },
+  ]},
+  { part: "client", id: "b-audience", title: "Audience and language", qs: [
+    { id: "B06", type: "multi", title: "What must the site achieve?",
+      options: [
+        R("admissions", "Admissions enquiries and applications"),
+        R("trust", "Prestige and trust"),
+        O("parents", "Parent information: calendar, news, policies"),
+        O("hiring", "Recruiting teachers and staff"),
+        R("portal", "A gateway to EduSync: parent and student login") ] },
+    { id: "B07", type: "single", title: "Default language",
+      options: [
+        R("ar", "Arabic first, English one tap away"),
+        O("en", "English first", "If most families choose the school for its English programme."),
+        O("auto", "Follow the visitor's browser language") ] },
+    { id: "B08", type: "single", title: "Numerals in the Arabic version",
+      options: [ R("western", "Western digits (0–9), as most Saudi sites use"), O("indic", "Arabic-Indic digits (٠–٩)") ] },
+    { id: "B09", type: "single", title: "Dates",
+      options: [ R("both", "Gregorian, with the Hijri date alongside"), O("greg", "Gregorian only"), O("hijri", "Hijri only") ] },
+  ]},
+  { part: "client", id: "b-content", title: "Content and pages", qs: [
+    { id: "B10", type: "multi", title: "Pages to include",
+      options: [
+        R("home", "Home"), R("about", "About: message from the Superintendent, vision, mission"),
+        R("academics", "Academics, by stage"), R("admissions", "Admissions: steps, requirements, documents"),
+        R("news", "News"), R("contact", "Contact"), R("portal", "Parent and student portal link (EduSync)"),
+        O("careers", "Careers"), O("calendar", "Academic calendar"), O("gallery", "Photo gallery"),
+        O("faq", "FAQ"), O("transport", "Transport"), O("uniform", "Uniform"), O("policies", "Policies") ] },
+    { id: "B11", type: "text", title: "Grade levels offered", placeholder: "e.g. Pre-K to Grade 9" },
+    { id: "B12", type: "text", title: "Curriculum, accreditation and licences", placeholder: "Curriculum, MoE licence number, accreditations (Cognia, etc.)" },
+    { id: "B13", type: "single", title: "Fees on the website",
+      options: [
+        R("none", "Don't show fees; offer a 'Request fees' button"),
+        O("from", "Show 'from X SAR' only"),
+        O("table", "A full fee table per grade") ] },
+    { id: "B14", type: "single", title: "Weekly plans (PDFs on the old site)",
+      options: [
+        R("portal", "Move them into EduSync for parents (private)"),
+        O("keep", "Keep them on the public site"),
+        O("drop", "Drop them") ] },
+    { id: "B15", type: "single", title: "Pages that list children by name",
+      options: [
+        R("remove", "Remove them from the public site", "Children's names should not be public, for safeguarding and under Saudi data protection law (PDPL)."),
+        O("portal", "Move them behind the EduSync login"),
+        O("keep", "Keep them") ] },
+    { id: "B16", type: "single", title: "Copy quality",
+      options: [
+        R("polish", "Rewrite and polish in both languages, keeping every fact"),
+        O("asis", "Use the old text as it is"),
+        O("client", "The client will send new copy") ] },
+    { id: "B17", type: "multi", title: "Arabic copy",
+      options: [
+        R("existing", "Start from the old site's Arabic and polish it"),
+        R("translate", "Translate from the English wherever Arabic is missing"),
+        R("review", "A native speaker at the client proofreads before launch") ] },
+    { id: "B18", type: "text", title: "Numbers and social proof to feature", placeholder: "Students, teachers, nationalities, teacher-to-student ratio, years, results, parent testimonials (with permission)" },
+  ]},
+  { part: "client", id: "b-islamic", title: "Islamic and cultural media rules", qs: [
+    { id: "B19", type: "single", title: "People in photos", first: true,
+      why: "The strictest answer here becomes the rule for every image, whether from the client, stock or generated.",
+      options: [
+        O("none", "No people at all: architecture, classrooms, books, nature, geometric art"),
+        R("faceless", "People without visible faces: from behind, hands at work, silhouettes, soft blur"),
+        O("consent", "The school's own students, with parental consent and modest dress"),
+        O("stock", "Stock photos of people, if modest") ] },
+    { id: "B20", type: "single", title: "Boys and girls in imagery", first: true,
+      options: [
+        R("separate", "Separate scenes; girls shown only at young ages or in hijab"),
+        O("boys", "Boys only"),
+        O("young", "Young children only (KG and early primary)"),
+        O("mixed", "Mixed scenes are fine for the early years") ] },
+    { id: "B21", type: "single", title: "Women (teachers, staff, mothers) in imagery", first: true,
+      options: [
+        R("never", "Never shown"),
+        O("covered", "Only fully covered, with the face not shown"),
+        O("hijab", "In hijab, with the face visible") ] },
+    { id: "B22", type: "single", title: "AI-generated images", first: true,
+      options: [
+        R("non-living", "Only for scenes without people or animals: buildings, books, landscapes", "Many scholars discourage making images of beings with souls; this avoids the question."),
+        O("never", "Never use AI images"),
+        O("all", "Allowed for everything, within the modesty rules") ] },
+    { id: "B23", type: "single", title: "Illustrations and mascots",
+      options: [
+        O("geometric", "Geometric and abstract only"),
+        R("faceless", "Faceless characters are fine"),
+        O("faces", "Cartoon characters with faces are fine"),
+        O("animal", "An animal mascot is fine") ] },
+    { id: "B24", type: "single", title: "Sound and video",
+      options: [
+        R("none", "No music. Video is silent or voice-only, and nothing autoplays with sound"),
+        O("nasheed", "Vocal nasheeds without instruments are fine"),
+        O("duff", "Nasheeds with a duff are fine"),
+        O("music", "Background music is fine") ] },
+    { id: "B25", type: "single", title: "Quran verses, hadith, Bismillah",
+      options: [
+        R("careful", "Yes, shown with care", "Proper script, never animated playfully, never over photos, never on patterns that get cropped or overlapped."),
+        O("bismillah", "Only the Bismillah or a greeting"),
+        O("none", "None") ] },
+    { id: "B26", type: "multi", title: "Seasonal themes the site can switch to",
+      options: [
+        R("ramadan", "Ramadan"), R("fitr", "Eid al-Fitr"), R("adha", "Eid al-Adha"),
+        R("national", "Saudi National Day (23 September)"), R("founding", "Founding Day (22 February)"),
+        O("flag", "Flag Day (11 March)"), O("hijri", "Islamic New Year"), O("none", "None") ] },
+    { id: "B27", type: "multi", title: "Always avoid",
+      options: [
+        R("symbols", "Crosses and other faiths' religious symbols"),
+        R("holidays", "Christmas, Halloween, Valentine's Day and similar themes"),
+        R("immodest", "Immodest, tight or revealing clothing"),
+        R("mixed", "Mixed-gender adult scenes"),
+        R("vices", "Alcohol, pork, gambling, smoking"),
+        R("dogs", "Dogs as pets or mascots"),
+        R("instruments", "Musical instruments and music notes"),
+        R("zodiac", "Zodiac signs, astrology, horoscopes"),
+        R("sacred-decor", "The Kaaba or Mushaf pages used as decoration or background") ] },
+    { id: "B28", type: "multi", title: "Heritage and identity motifs",
+      options: [
+        R("geometric", "Classic Islamic geometric patterns (girih, star tilings)"),
+        R("hijazi", "Hijazi architecture: the carved rawashin balconies of Makkah and Jeddah"),
+        O("sadu", "Al-Sadu weaving patterns"),
+        O("calligraphy", "Arabic calligraphy as display art"),
+        O("skyline", "The Makkah skyline (Clock Tower)") ] },
+  ]},
+  { part: "client", id: "b-assets", title: "Photos, video and campus", qs: [
+    { id: "B29", type: "single", title: "Real photos of the school",
+      options: [
+        R("shoot", "The client sends a fresh set: campus, classrooms, activities"),
+        O("social", "Use their Instagram and Facebook photos (they send the originals)"),
+        O("none", "None: stock and generated art only") ] },
+    { id: "B30", type: "single", title: "Hero video",
+      options: [
+        R("none", "No video: a generative animation instead"),
+        O("client", "The client has campus or drone footage"),
+        O("stock", "Stock footage") ] },
+    { id: "B31", type: "text", title: "Campus, branches and school hours", placeholder: "Address, number of campuses, boys' and girls' sections, hours" },
+  ]},
+  { part: "client", id: "b-features", title: "Features and integrations", qs: [
+    { id: "B32", type: "single", title: "Admissions",
+      options: [
+        R("link", "'Apply now' links to the EduSync admission form"),
+        O("native", "A form on the new site that creates the application in EduSync"),
+        O("inquiry", "A simple enquiry form (email or WhatsApp)") ] },
+    { id: "B33", type: "multi", title: "Contact channels",
+      options: [
+        R("whatsapp", "WhatsApp chat button"), R("phone", "Phone"),
+        R("emails", "Department emails: front desk, admissions, HR, accounts"),
+        R("form", "Contact form"), R("map", "Map with directions"),
+        R("socials", "Social links: Instagram, X, Snapchat, Facebook") ] },
+    { id: "B34", type: "single", title: "Where do form submissions go?",
+      options: [
+        R("odoo", "Into EduSync (Odoo) as leads"),
+        O("email", "Email to the right department"),
+        O("whatsapp", "A WhatsApp notification (through 4jawaly)"),
+        O("sheet", "A Google Sheet") ] },
+    { id: "B35", type: "single", title: "Careers",
+      options: [
+        R("list", "Job list on the site; applications go to your recruiting system"),
+        O("cv", "A simple 'send your CV' form"),
+        O("none", "No careers page") ] },
+    { id: "B36", type: "single", title: "News",
+      options: [
+        R("git", "Posts kept in the site's content files (we add them)"),
+        O("odoo", "Pulled from EduSync / Odoo"),
+        O("instagram", "Show their latest Instagram posts"),
+        O("none", "No news section") ] },
+    { id: "B37", type: "single", title: "Analytics",
+      options: [
+        R("cf", "Cloudflare Web Analytics: free, no cookies, no consent banner"),
+        O("ga4", "Google Analytics 4"),
+        O("clarity", "Microsoft Clarity (heatmaps and recordings)"),
+        O("none", "None") ] },
+    { id: "B38", type: "single", title: "Old URLs",
+      options: [
+        R("redirect", "Redirect every old URL to its new page, keeping Google rankings"),
+        O("fresh", "Fresh start") ] },
+  ]},
+  { part: "client", id: "b-approval", title: "Approval and timeline", qs: [
+    { id: "B39", type: "text", title: "Who signs off at the client?", placeholder: "Name, role, WhatsApp or email" },
+    { id: "B40", type: "text", title: "Deadlines", placeholder: "First samples by…, launch by…" },
+    { id: "B41", type: "single", title: "How many samples does this client see?",
+      options: [ O("2", "2"), R("3", "3"), O("4", "4"), O("all", "Every design system") ] },
+    { id: "B42", type: "text", title: "Websites they love or hate", placeholder: "Links, and what they like or dislike about each" },
+  ]},
+];
+
+// What I found about specific clients, and the text answers I could prefill.
+const FOUND = {
+  lfis: {
+    B01: "Sources mix 'مدرسة' (school, singular) and 'مدارس' (schools, plural). Which one is official?",
+    B04: "From the General Superintendent's message on the old About page. I need the official Arabic wording.",
+    B11: "Sources disagree. leaders.edu.sa: Pre-K to Grade 9. mdares.ai: KG to Grade 4. ksaschools: elementary and secondary. Instagram: KG, primary and middle.",
+    B12: "mdares.ai says American curriculum. ksaschools claims the school is not accredited by the Ministry of Education. Please verify; nothing unconfirmed goes on the site.",
+    B13: "Third-party listings disagree: from 15,300 SAR (mdares.ai) versus from 19,750 SAR (ksaschools). The old News page mentions interest-free instalment plans.",
+    B14: "The old WordPress site hosts weekly lesson plans as PDFs (for example Grade 5 and KG 2).",
+    B15: "The old site has a 'Student' page with a roster by class.",
+    B20: "Does LFIS have separate boys' and girls' sections?",
+    B31: "The contact page gives a 'new admission location'. Is there more than one campus? Two shifts are listed: 8:00am to 2:00pm and 4:30pm to 9:30pm. What is the evening shift?",
+    B32: "LFIS's EduSync (Odoo 18) is at lfis.syncology.tech. Which pages there should the site link to: admission application, parent login, transport registration?",
+    B33: "Old contact page lists separate emails for front desk, HR, admissions and accounts. Socials: Instagram @leadersfis, X @lfischool, Snapchat leadersfis, Facebook leadersfis.",
+    B35: "The Infra Agent lists an ai-recruit.syncology.tech. Should LFIS jobs go there?",
+  },
+};
+const PREFILL = {
+  lfis: {
+    B01: "Leaders' Foundation International School (LFIS)\nمدارس تأسيس القادة العالمية",
+    B04: "Think to bring about a difference.",
+    B11: "Pre-K to Grade 9?",
+    B12: "American curriculum?",
+    B18: "Founded in 2021.",
+    B31: "Ar Rashidiyyah, Makkah 24273, Saudi Arabia",
+  },
+};
+
+const QUESTIONS = [];
+const QMAP = {};
+for (const s of SECTIONS) for (const q of s.qs) { q.part = s.part; q.section = s.id; QUESTIONS.push(q); QMAP[q.id] = q; }
+
+// ---------- State ----------
+const LS_KEY = "site-intake-v1";
+const state = { tab: "platform", client: "lfis" };
+let records = {
+  platform: { answers: {}, notes: {}, status: "draft", submittedAt: null },
+  clients: { lfis: { name: "Leaders' Foundation International School", answers: {}, notes: {}, status: "draft", submittedAt: null } },
+};
+let db = null;
+let readOnly = false;
+let dirty = false;
+
+function lsGet() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch (e) { return null; } }
+function lsSet() { try { localStorage.setItem(LS_KEY, JSON.stringify({ records, state })); } catch (e) {} }
+
+const saved = lsGet();
+if (saved && saved.records) {
+  records = saved.records;
+  if (!records.clients || !records.clients.lfis) records.clients = Object.assign({ lfis: { name: "Leaders' Foundation International School", answers: {}, notes: {}, status: "draft" } }, records.clients || {});
+  if (saved.state) Object.assign(state, saved.state);
+  if (!records.clients[state.client]) state.client = "lfis";
+}
+
+const scopeOf = (part) => part === "platform" ? "platform" : state.client;
+const recOf = (scope) => scope === "platform" ? records.platform : records.clients[scope];
+
+function defaultFor(q, scope) {
+  if (q.type === "text") return (PREFILL[scope] && PREFILL[scope][q.id]) || "";
+  const recs = q.options.filter(o => o.rec).map(o => o.v);
+  return q.type === "single" ? (recs[0] || null) : recs;
+}
+function valueFor(q, scope) {
+  const r = recOf(scope);
+  return Object.prototype.hasOwnProperty.call(r.answers, q.id) ? r.answers[q.id] : defaultFor(q, scope);
+}
+function sameValue(a, b) {
+  if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && [...a].sort().join("|") === [...b].sort().join("|");
+  return a === b;
+}
+function isChanged(q, scope) {
+  const r = recOf(scope);
+  return Object.prototype.hasOwnProperty.call(r.answers, q.id) && !sameValue(r.answers[q.id], defaultFor(q, scope));
+}
+const labelOf = (q, v) => { const o = q.options.find(x => x.v === v); return o ? o.label : v; };
+
+// ---------- Persistence ----------
+const saveEl = document.getElementById("save");
+const saveText = document.getElementById("save-text");
+const STATUS_TEXT = {
+  idle: "Connecting…", saving: "Saving…", saved: "Saved, Claude can read it",
+  local: "Saved in this browser only. Use Copy as text", readonly: "Read-only here. Use Copy as text",
+  error: "Couldn't save. Will retry on your next change",
+};
+function setStatus(s) { saveEl.dataset.s = s; saveText.textContent = STATUS_TEXT[s] || s; }
+
+function serialize(scope) {
+  const part = scope === "platform" ? "platform" : "client";
+  const r = recOf(scope);
+  const final = {};
+  const changed = [];
+  for (const q of QUESTIONS) {
+    if (q.part !== part) continue;
+    const v = valueFor(q, scope);
+    const a = q.type === "text" ? v : q.type === "single" ? labelOf(q, v) : v.map(x => labelOf(q, x));
+    const ch = isChanged(q, scope);
+    final[q.id] = { q: q.title, a, changed: ch };
+    if (r.notes[q.id]) final[q.id].note = r.notes[q.id];
+    if (ch) changed.push(q.id);
+  }
+  return {
+    kind: part, slug: scope === "platform" ? "" : scope, name: r.name || "",
+    answers: r.answers, notes: r.notes, final, changed,
+    status: r.status || "draft", submittedAt: r.submittedAt || "", updatedAt: new Date().toISOString(),
+  };
+}
+
+const docIdOf = (scope) => scope === "platform" ? "platform" : "client-" + scope;
+let chain = Promise.resolve();
+const timers = {};
+function scheduleSave(scope) {
+  dirty = true;
+  lsSet();
+  if (readOnly) { setStatus("readonly"); return; }
+  if (!db) { setStatus("local"); return; }
+  setStatus("saving");
+  clearTimeout(timers[scope]);
+  timers[scope] = setTimeout(() => saveNow(scope), 800);
+}
+function saveNow(scope) {
+  lsSet();
+  if (!db || readOnly) return Promise.resolve(false);
+  const body = serialize(scope);
+  chain = chain.then(() => db.doc("intakes/" + docIdOf(scope)).set(body))
+    .then(() => { setStatus("saved"); return true; })
+    .catch(e => {
+      if (e && e.code === "invalid_argument") { readOnly = true; setStatus("readonly"); }
+      else setStatus("error");
+      return false;
+    });
+  return chain;
+}
+
+// ---------- Rendering ----------
+const mainEl = document.getElementById("main");
+const railEl = document.getElementById("rail");
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === false || v == null) continue;
+    if (k === "class") el.className = v; else if (k === "text") el.textContent = v; else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const kid of kids) if (kid != null && kid !== false) el.append(kid);
+  return el;
+}
+
+function renderIntro(part) {
+  const wrap = h("section", { class: "intro" });
+  if (part === "platform") {
+    wrap.append(
+      h("h2", { text: "How Syncology builds every client site" }),
+      h("p", { text: "Answer once. These choices decide the engine, the design systems, hosting and the approval flow for LFIS and every client after it." }));
+  } else {
+    wrap.append(
+      h("h2", { text: "Client intake" }),
+      h("p", { text: "One per client. For LFIS I've filled in what I could find; anything under 'What I found' needs confirming. Next time, send this part to the client or fill it in on a call." }));
+    const bar = h("div", { class: "client-bar" });
+    const sel = h("select", { id: "client-select", "aria-label": "Client" });
+    for (const [slug, r] of Object.entries(records.clients)) {
+      const o = h("option", { value: slug, text: r.name || slug });
+      if (slug === state.client) o.selected = true;
+      sel.append(o);
+    }
+    sel.addEventListener("change", () => { state.client = sel.value; lsSet(); render(); });
+    const newBtn = h("button", { class: "btn", type: "button", id: "new-client-btn", "aria-expanded": "false", text: "New client" });
+    const form = h("form", { class: "new-client", id: "new-client-form", hidden: true });
+    const input = h("input", { id: "new-client-name", type: "text", placeholder: "Client name, e.g. Al-Noor Academy", required: true, "aria-label": "New client name" });
+    form.append(input, h("button", { class: "btn primary", type: "submit", text: "Create intake" }));
+    newBtn.addEventListener("click", () => { form.hidden = !form.hidden; newBtn.setAttribute("aria-expanded", String(!form.hidden)); if (!form.hidden) input.focus(); });
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = input.value.trim();
+      if (!name) return;
+      let base = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "client";
+      let slug = base, i = 2;
+      while (records.clients[slug]) slug = base + "-" + i++;
+      records.clients[slug] = { name, answers: {}, notes: {}, status: "draft", submittedAt: null };
+      state.client = slug;
+      render();
+      scheduleSave(slug);
+    });
+    bar.append(h("label", { for: "client-select", text: "Client" }), sel, newBtn, form);
+    wrap.append(bar);
+  }
+  const legend = h("div", { class: "legend" },
+    h("span", { class: "tag rec", text: "Recommended" }), h("span", { text: "pre-selected; change only what you disagree with" }),
+    h("span", { class: "tag first", text: "Needed first" }), h("span", { text: "blocks the first build" }));
+  wrap.append(legend);
+  return wrap;
+}
+
+function renderQuestion(q, scope) {
+  const r = recOf(scope);
+  const art = h("article", { class: "q", id: "q-" + q.id });
+  const head = h("div", { class: "q-head" }, h("span", { class: "q-id", text: q.id }), h("h3", { id: "t-" + q.id, text: q.title }));
+  if (q.first) head.append(h("span", { class: "tag first", text: "Needed first" }));
+  art.append(head);
+  if (q.why) art.append(h("p", { class: "q-why", text: q.why }));
+  const found = q.found || (FOUND[scope] && FOUND[scope][q.id]);
+  if (found) art.append(h("div", { class: "found" }, h("b", { text: "What I found" }), h("p", { text: found })));
+
+  const v = valueFor(q, scope);
+  if (q.type === "text") {
+    const ta = h("textarea", { class: "text-in", id: "in-" + q.id, "data-q": q.id, "aria-labelledby": "t-" + q.id, placeholder: q.placeholder || "" });
+    ta.value = v || "";
+    art.append(ta);
+  } else {
+    const fs = h("fieldset", { class: "opts" }, h("legend", { class: "sr", text: q.title }));
+    for (const o of q.options) {
+      const id = q.id + "-" + o.v;
+      const input = h("input", { type: q.type === "single" ? "radio" : "checkbox", id, name: q.id, value: o.v });
+      input.checked = q.type === "single" ? v === o.v : v.includes(o.v);
+      const label = h("span", { class: "opt-label" }, o.label);
+      if (o.rec) label.append(h("span", { class: "tag rec", text: "Recommended" }));
+      const body = h("span", { class: "opt-body" }, label);
+      if (o.desc) body.append(h("span", { class: "opt-desc", text: o.desc }));
+      fs.append(h("label", { class: "opt", for: id }, input, body));
+    }
+    art.append(fs);
+    if (q.max) art.append(h("p", { class: "hint", text: "Pick up to " + q.max + "." }));
+  }
+
+  const hasNote = !!r.notes[q.id];
+  const foot = h("div", { class: "q-foot" },
+    h("button", { class: "linkbtn note-btn", type: "button", "data-q": q.id, "aria-controls": "note-" + q.id, "aria-expanded": String(hasNote), text: hasNote ? "Hide note" : "Add note" }),
+    h("span", { class: "tag chg", id: "chg-" + q.id, hidden: !isChanged(q, scope), text: "Changed from my pick" }));
+  art.append(foot);
+  const note = h("textarea", { class: "note", id: "note-" + q.id, "data-q": q.id, hidden: !hasNote, placeholder: "Note for Claude", "aria-label": "Note for " + q.id });
+  note.value = r.notes[q.id] || "";
+  art.append(note);
+  if (q.max) enforceMax(q, art);
+  return art;
+}
+
+function enforceMax(q, root) {
+  const boxes = (root || mainEl).querySelectorAll('input[name="' + q.id + '"]');
+  const n = [...boxes].filter(b => b.checked).length;
+  boxes.forEach(b => { b.disabled = !b.checked && n >= q.max; });
+}
+
+function render() {
+  const part = state.tab;
+  const scope = scopeOf(part);
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.tab === part)));
+  mainEl.replaceChildren(renderIntro(part));
+  for (const s of SECTIONS) {
+    if (s.part !== part) continue;
+    const sec = h("section", { class: "sec", id: "sec-" + s.id, "aria-labelledby": "h-" + s.id },
+      h("div", { class: "sec-head" }, h("h2", { id: "h-" + s.id, text: s.title }), h("span", { text: s.qs.length + (s.qs.length === 1 ? " question" : " questions") })));
+    for (const q of s.qs) sec.append(renderQuestion(q, scope));
+    mainEl.append(sec);
+  }
+  renderRail();
+  updateStats();
+  document.getElementById("bar-msg").textContent = "";
+  document.getElementById("copy-fallback").hidden = true;
+}
+
+function renderRail() {
+  const part = state.tab;
+  const scope = scopeOf(part);
+  railEl.replaceChildren(h("div", { class: "rail-title", text: part === "platform" ? "Platform" : (recOf(scope).name || scope) }));
+  for (const s of SECTIONS) {
+    if (s.part !== part) continue;
+    const ch = s.qs.filter(q => isChanged(q, scope)).length;
+    const a = h("a", { href: "#sec-" + s.id, "data-sec": s.id }, h("span", { text: s.title }),
+      h("span", { class: "c" + (ch ? " chg" : ""), text: ch ? ch + " changed" : String(s.qs.length) }));
+    railEl.append(a);
+  }
+}
+
+function updateStats() {
+  const part = state.tab;
+  const scope = scopeOf(part);
+  const r = recOf(scope);
+  const qs = QUESTIONS.filter(q => q.part === part);
+  const changed = qs.filter(q => isChanged(q, scope)).length;
+  const notes = qs.filter(q => r.notes[q.id]).length;
+  const emptyText = qs.filter(q => q.type === "text" && !String(valueFor(q, scope)).trim()).length;
+  const stats = document.getElementById("stats");
+  stats.replaceChildren(
+    h("strong", { text: qs.length + " questions" }), " · " + changed + " changed from my picks · " + notes + (notes === 1 ? " note" : " notes"),
+    emptyText ? " · " + emptyText + " text answers empty" : "",
+    r.status === "submitted" && r.submittedAt ? " · sent " + new Date(r.submittedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "");
+  document.getElementById("n-platform").textContent = QUESTIONS.filter(q => q.part === "platform").length;
+  document.getElementById("n-client").textContent = QUESTIONS.filter(q => q.part === "client").length;
+  document.getElementById("send-btn").textContent = r.status === "submitted" ? "Send again" : "Send to Claude";
+}
+
+// ---------- Events ----------
+function setAnswer(scope, qid, val) {
+  const q = QMAP[qid];
+  const r = recOf(scope);
+  if (sameValue(val, defaultFor(q, scope))) delete r.answers[qid]; else r.answers[qid] = val;
+  const chg = document.getElementById("chg-" + qid);
+  if (chg) chg.hidden = !isChanged(q, scope);
+  renderRail();
+  updateStats();
+  scheduleSave(scope);
+}
+
+mainEl.addEventListener("change", (e) => {
+  const t = e.target;
+  if (!t.matches('.opts input')) return;
+  const q = QMAP[t.name];
+  const scope = scopeOf(state.tab);
+  const val = q.type === "single" ? t.value : [...mainEl.querySelectorAll('input[name="' + q.id + '"]:checked')].map(i => i.value);
+  if (q.max) enforceMax(q);
+  setAnswer(scope, q.id, val);
+});
+mainEl.addEventListener("input", (e) => {
+  const t = e.target;
+  const scope = scopeOf(state.tab);
+  if (t.matches(".text-in")) setAnswer(scope, t.dataset.q, t.value);
+  else if (t.matches(".note")) {
+    const r = recOf(scope);
+    const v = t.value;
+    if (v.trim()) r.notes[t.dataset.q] = v; else delete r.notes[t.dataset.q];
+    updateStats();
+    scheduleSave(scope);
+  }
+});
+mainEl.addEventListener("click", (e) => {
+  const b = e.target.closest(".note-btn");
+  if (!b) return;
+  const note = document.getElementById("note-" + b.dataset.q);
+  note.hidden = !note.hidden;
+  b.setAttribute("aria-expanded", String(!note.hidden));
+  b.textContent = note.hidden ? (note.value.trim() ? "Show note" : "Add note") : "Hide note";
+  if (!note.hidden) note.focus();
+});
+railEl.addEventListener("click", (e) => {
+  const a = e.target.closest("a[data-sec]");
+  if (!a) return;
+  e.preventDefault();
+  document.getElementById("sec-" + a.dataset.sec).scrollIntoView({ block: "start" });
+});
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  state.tab = t.dataset.tab; lsSet(); render(); window.scrollTo({ top: 0 });
+}));
+
+function asText(scope) {
+  const part = scope === "platform" ? "platform" : "client";
+  const r = recOf(scope);
+  const lines = [part === "platform" ? "SITE INTAKE · PLATFORM" : "SITE INTAKE · CLIENT: " + (r.name || scope), ""];
+  for (const s of SECTIONS) {
+    if (s.part !== part) continue;
+    lines.push("## " + s.title);
+    for (const q of s.qs) {
+      const v = valueFor(q, scope);
+      const a = q.type === "text" ? (String(v).trim() || "(empty)").replace(/\n/g, " / ") : q.type === "single" ? labelOf(q, v) : (v.map(x => labelOf(q, x)).join("; ") || "(none)");
+      lines.push(q.id + " " + q.title + "\n   → " + a + (isChanged(q, scope) ? "   [changed]" : ""));
+      if (r.notes[q.id]) lines.push("   note: " + r.notes[q.id].replace(/\n/g, " / "));
+    }
+    lines.push("");
+  }
+  return lines.join("\n");
+}
+
+document.getElementById("copy-btn").addEventListener("click", () => {
+  const scope = scopeOf(state.tab);
+  const text = asText(scope);
+  const msg = document.getElementById("bar-msg");
+  const fb = document.getElementById("copy-fallback");
+  const showFallback = () => { fb.value = text; fb.hidden = false; fb.focus(); fb.select(); msg.textContent = "Couldn't reach the clipboard. The text is selected below; copy it from there."; };
+  try {
+    navigator.clipboard.writeText(text).then(() => { fb.hidden = true; msg.textContent = "Copied. Paste it into the chat with Claude."; }, showFallback);
+  } catch (err) { showFallback(); }
+});
+
+document.getElementById("send-btn").addEventListener("click", async () => {
+  const scope = scopeOf(state.tab);
+  const r = recOf(scope);
+  const msg = document.getElementById("bar-msg");
+  r.status = "submitted";
+  r.submittedAt = new Date().toISOString();
+  clearTimeout(timers[scope]);
+  updateStats();
+  if (!db || readOnly) {
+    lsSet();
+    msg.textContent = "This view can't reach Claude's copy. Use Copy as text and paste it into the chat.";
+    return;
+  }
+  setStatus("saving");
+  const ok = await saveNow(scope);
+  msg.textContent = ok
+    ? "Sent. Tell Claude in the chat: 'answers are in'" + (state.tab === "platform" ? ", then fill the Client tab." : ".")
+    : "Couldn't send. Try again, or use Copy as text.";
+});
+
+// ---------- Boot ----------
+render();
+const usePromise = (window.claude && typeof window.claude.use === "function") ? window.claude.use("db") : Promise.resolve(null);
+usePromise.then(async (d) => {
+  if (!d) { setStatus("local"); return; }
+  db = d;
+  try {
+    const snap = await db.collection("intakes").get();
+    if (!dirty) {
+      for (const doc of snap.docs) {
+        const v = doc.data();
+        if (!v) continue;
+        const rec = { name: v.name || "", answers: v.answers || {}, notes: v.notes || {}, status: v.status || "draft", submittedAt: v.submittedAt || null };
+        if (v.kind === "platform") records.platform = rec;
+        else if (v.kind === "client" && v.slug) records.clients[v.slug] = rec;
+      }
+      if (!records.clients[state.client]) state.client = "lfis";
+      lsSet();
+      render();
+    } else {
+      saveNow("platform");
+      for (const slug of Object.keys(records.clients)) saveNow(slug);
+    }
+    setStatus("saved");
+  } catch (e) {
+    setStatus(e && e.code === "invalid_argument" ? "readonly" : "error");
+  }
+}).catch(() => setStatus("local"));
+</script>
