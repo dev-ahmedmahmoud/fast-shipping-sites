@@ -1,18 +1,30 @@
 {
   "slug": "lfis",
   "name": {
-    "en": "Leaders' Foundation International School (LFIS)",
-    "ar": "مدارس تأسيس القادة العالمية"
+    "en": "Leaders’ Foundation International School",
+    "ar": "مدرسة تأسيس القادة العالمية"
   },
-  "shortName": { "en": "LFIS", "ar": "LFIS" },
+  "nameAr": "مدرسة تأسيس القادة العالمية",
+  "nameArAlt": "مدارس تأسيس القادة العالمية",
+  "shortName": {
+    "en": "LFIS",
+    "ar": "LFIS"
+  },
   "motto": {
     "en": "Think to bring about a difference.",
     "ar": "فلتكن سببا في إحداث فارق"
   },
   "founded": 2021,
-  "logo": null,
+  "logo": "lfis_Only.png",
+  "logoWordmark": {
+    "en": "lfis_Name_Only.png",
+    "ar": "lfis_Name_Only_AR-1.png"
+  },
   "defaultLocale": "ar",
-  "numerals": { "ar": "arab", "en": "latn" },
+  "numerals": {
+    "ar": "arab",
+    "en": "latn"
+  },
   "calendar": "gregory",
   "domains": {
     "production": "leadersfis.com",
@@ -20,47 +32,185 @@
   },
   "edusync": {
     "base": "https://lfis.syncology.tech",
-    "portal": "https://lfis.syncology.tech",
-    "admission": null,
-    "careers": null,
-    "fallbacks": { "admission": "page:admission" }
+    "portal": {
+      "en": "https://lfis.syncology.tech/web/login",
+      "ar": "https://lfis.syncology.tech/ar/web/login"
+    },
+    "admission": {
+      "en": "https://lfis.syncology.tech/admission",
+      "ar": "https://lfis.syncology.tech/ar/admission"
+    },
+    "careers": {
+      "en": "https://lfis.syncology.tech/jobs",
+      "ar": "https://lfis.syncology.tech/ar/jobs"
+    },
+    "fallbacks": {
+      "admission": "page:admission"
+    }
   },
   "headerCta": {
-    "label": { "en": "Apply now", "ar": "قدّم الآن" },
+    "label": {
+      "en": "Apply now",
+      "ar": "قدم الآن"
+    },
     "href": "edusync:admission"
   },
   "navExternal": [
-    { "label": { "en": "Careers", "ar": "الوظائف" }, "href": "edusync:careers" },
-    { "label": { "en": "Portal login", "ar": "دخول البوابة" }, "href": "edusync:portal" }
+    {
+      "label": {
+        "en": "Career",
+        "ar": "المسار الوظيفي"
+      },
+      "href": "edusync:careers"
+    }
+  ],
+  "portals": [
+    {
+      "id": "classera",
+      "label": {
+        "en": "Portal",
+        "ar": "بوابة"
+      },
+      "href": "https://me.classera.com/",
+      "enabled": true
+    },
+    {
+      "id": "ealpha",
+      "label": {
+        "en": "Ealpha",
+        "ar": "إيلفا"
+      },
+      "href": "https://www.ealpha.info/accounts_1/login/",
+      "enabled": true
+    },
+    {
+      "id": "edusync",
+      "label": {
+        "en": "EduSync",
+        "ar": "EduSync"
+      },
+      "href": "edusync:portal",
+      "enabled": true
+    }
   ],
   "contact": {
-    "address": { "en": "Ar Rashidiyyah, Mecca 24273, Saudi Arabia", "ar": null },
-    "phones": [],
-    "emails": {
-      "frontDesk": { "label": { "en": "Front desk", "ar": "الاستقبال" }, "address": null },
-      "admissions": { "label": { "en": "Admissions", "ar": "القبول" }, "address": null },
-      "hr": { "label": { "en": "HR", "ar": "الموارد البشرية" }, "address": null },
-      "accounts": { "label": { "en": "Accounts", "ar": "الحسابات" }, "address": null }
+    "address": {
+      "en": "Ar Rashidiyyah, Mecca 24273, Saudi Arabia",
+      "ar": "الراشدية، مكة المكرمة 24273, المملكة العربية السعودية"
     },
-    "mapUrl": null,
-    "hours": ["8:00am to 2:00pm", "4:30pm to 9:30pm"]
+    "phones": [
+      {
+        "label": {
+          "en": "",
+          "ar": ""
+        },
+        "number": "800 245 0024"
+      },
+      {
+        "label": {
+          "en": "FrontDesk",
+          "ar": "المقعدالامامي"
+        },
+        "number": "012 566 6688"
+      }
+    ],
+    "whatsapp": [
+      "966125668111",
+      "966556072392"
+    ],
+    "emails": {
+      "frontDesk": {
+        "label": {
+          "en": "FrontDesk",
+          "ar": "المقعدالامامي"
+        },
+        "address": "info@leadersfis.com"
+      },
+      "hr": {
+        "label": {
+          "en": "HR Department",
+          "ar": "قسم الموارد البشرية"
+        },
+        "address": "hr@leadersfis.com"
+      },
+      "admissions": {
+        "label": {
+          "en": "Admission Department",
+          "ar": "قسم القبول"
+        },
+        "address": "admission@leadersfis.com"
+      },
+      "counselor": {
+        "label": {
+          "en": "School Counselor Department",
+          "ar": "قسم المستشار المدرسي"
+        },
+        "address": "academic.supervisor@leadersfis.com"
+      },
+      "accounts": {
+        "label": {
+          "en": "Accounting & Finance Department",
+          "ar": "قسم المحاسبة والمالية"
+        },
+        "address": "accounts@leadersfis.com"
+      }
+    },
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=21.4496383%2C39.9780717",
+    "hours": {
+      "en": "From 08:00 am till 02:30 pm",
+      "ar": "من الساعة 08:00 صباحا حتى 02:30 مساءا"
+    }
   },
   "social": {
-    "instagram": { "label": "Instagram", "href": "https://www.instagram.com/leadersfis/" },
-    "x": { "label": "X", "href": "https://twitter.com/lfischool" },
-    "snapchat": { "label": "Snapchat", "href": "https://www.snapchat.com/add/leadersfis" },
-    "facebook": { "label": "Facebook", "href": "https://www.facebook.com/leadersfis/" }
+    "facebook": {
+      "label": "Facebook",
+      "href": "https://www.facebook.com/leadersfis"
+    },
+    "instagram": {
+      "label": "Instagram",
+      "href": "https://www.instagram.com/leadersfis/"
+    },
+    "whatsapp": {
+      "label": "WhatsApp",
+      "href": "https://wa.me/966125668111"
+    },
+    "snapchat": {
+      "label": "Snapchat",
+      "href": "https://www.snapchat.com/add/leadersfis/"
+    }
+  },
+  "copyright": {
+    "en": "© 2021 All rights reserved.",
+    "ar": "© 2021 جميع الحقوق محفوظة."
+  },
+  "footerCredit": {
+    "show": true,
+    "text": {
+      "en": "by Syncology",
+      "ar": "بواسطة سينكولوجي"
+    },
+    "href": "https://syncology.tech"
+  },
+  "weeklyPlans": {
+    "host": "https://leadersfis.com",
+    "files": 674,
+    "totalMB": 289.9,
+    "missingOnOldSite": 10
   },
   "samples": [
-    { "id": "baseline", "palette": "baseline", "type": "baseline", "layout": "baseline", "motion": "baseline" }
+    {
+      "id": "baseline",
+      "palette": "baseline",
+      "type": "baseline",
+      "layout": "baseline",
+      "motion": "baseline"
+    }
   ],
   "todo": [
-    "logo: redraw the old site's logo as SVG (intake B02)",
-    "contact: phones, department email addresses, Arabic address and map link, copied as-is from the old contact page (B31, B33)",
-    "contact.hours: confirm both shifts as written on the old site",
-    "edusync.admission: exact EduSync admission form URL (B32); until then 'Apply now' opens the Admission page",
-    "edusync.careers: exact EduSync public job list URL (B35); Careers stays out of the menu until set",
-    "shortName.ar: Arabic short name, if the school uses one",
+    "weeklyPlans: the 674 weekly-plan PDFs (290 MB) are still linked from https://leadersfis.com/wp-content/uploads/. They stop working when leadersfis.com points to the new site. Move them to file storage (e.g. Cloudflare R2 or a files.leadersfis.com subdomain) and update weeklyPlans.host. 10 of them are already missing on the old site.",
+    "motto: the old home page says 'Think to make the difference.' / 'فكر لتصنع الفرق'; the intake gave 'Think to bring about a difference.' / 'فلتكن سببا في إحداث فارق' (used in the header and footer).",
+    "contact forms: the Admission, HR and School Counselor forms on the contact page do not send yet; they need the EduSync lead endpoint.",
+    "logo: redraw lfis_Only.png as SVG (intake B02).",
     "samples: the three design systems LFIS will see (B41), once chosen"
   ]
 }

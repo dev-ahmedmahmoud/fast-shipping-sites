@@ -1,47 +1,56 @@
 ---
 id: home
 locale: ar
-slug: ""
+slug: ar
 title: "الرئيسية"
+nav: 0
 template: home
-description: مدارس تأسيس القادة العالمية، مكة المكرمة.
+description: "مدرسة تأسيس القادة العالمية – LFIS"
+source: "https://leadersfis.com/ar"
 hero:
   eyebrow: LFIS
-  title: مدارس تأسيس القادة العالمية
-  lead: فلتكن سببا في إحداث فارق
+  title: "مرحبًا بكم في مدرسة تأسيس القادة العالمية"
+  lead: "فكر لتصنع الفرق"
+  images:
+    - ban01.jpeg
+    - PAN03.jpg
+    - PAN02.jpg
+    - PAN01.jpg
   actions:
-    - label: قدّم الآن
+    - label: "قدم الآن"
       href: edusync:admission
-    - label: من نحن
+    - label: "معلومات عنا"
       href: page:about
+intro:
+  title: "من نحن"
 features:
-  title: تعرّف على المدارس
   items:
-    - title: من نحن
-      text: سيتم استيراد الملخص من الموقع القديم.
+    - title: "معلومات عنا"
       href: page:about
-    - title: الشؤون الأكاديمية
-      text: سيتم استيراد الملخص من الموقع القديم.
-      href: page:academics
-    - title: القبول والتسجيل
-      text: سيتم استيراد الملخص من الموقع القديم.
+    - title: "تسجيل"
       href: page:admission
+    - title: "خدماتنا"
+      href: page:facilities
+    - title: "أكاديميون"
+      href: page:academics
 stats:
   items:
     - value: 2021
       format: year
-      label: سنة التأسيس
+      label: "سنة التأسيس"
 news:
-  title: الأخبار
+  title: "أخبار & الأحداث"
   limit: 3
   more: page:news
 cta:
-  title: القبول والتسجيل
-  text: سيتم استيراد تفاصيل القبول من الموقع القديم.
+  title: "تسجيل"
+  text: "القبول للمتقدمين مفتوح فقط للدرجات التي يتوفر بها مكان."
   action:
-    label: تفاصيل القبول
-    href: page:admission
-todo:
-  - "Arabic home URL: confirm whether the old Arabic home is / or /ar"
-  - Replace section copy with the old site's Arabic text, as is (no polishing)
+    label: "قدم الآن"
+    href: edusync:admission
 ---
+- تأسست مدرسة تأسيس القادة العالمية بالمملكة العربية السعودية (مكة المكرمة – الشرائع – مخطط الفهد) في عام 2021 وهي معتمدة من قبل وزارة التربية والتعليم في المملكة العربية السعودية كمدرسة دولية لمرحلة ما قبل رياض الأطفال وحتى الصف الخامس الابتدائي. قامت على أسس تربوية تعليمية متينة لبناء مدارس عالمية متميزة وراقية تُضاهي المدارس العالمية على يد مؤسسها الأستاذ حسن بن بخيت المطرفي (مشرف تربوي وزاري سابق تعليم أجنبي بوزارة التعليم بالمملكة العربية السعودية).
+- نحن نقدم منهجًا أمريكيًا يخدم مجموعة متنوعة من الطلاب من خلال نهج شامل يربط الطلاب والمعلمات، ويوفر لهم بيئة تعاونية وتفاعلية تؤثر على كل جانب من جوانب التعليم.
+- يتم تقديم تعليم وتعلم متميز للجميع بما يواكب التوجهات العالمية في ضوء السياسات التعليمية لرؤية المملكة العربية السعودية وبمشاركة مجتمعية في بيئة تعليمية جاذبة وآمنة ترتقي بالمهارات والقدرات وتثري البحث العلمي وتشجع على الابتكار والإبداع بقيادة الأستاذة مها بنت عبدالله الدغيشم (المشرفة العامة على المدارس).
+
+<video controls preload="metadata" playsinline src="/media/WhoWeAre.mp4"></video>
