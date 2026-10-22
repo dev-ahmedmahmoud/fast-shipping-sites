@@ -1,0 +1,47 @@
+---
+import type { PageContext } from '@engine/context';
+interface Item { title: string; text?: string; href?: string; external?: boolean }
+interface Props { ctx: PageContext; title?: string; items: Item[] }
+const { title, items } = Astro.props;
+---
+<section class="section">
+  <div class="container stack">
+    {title && <h2 data-reveal>{title}</h2>}
+    <ul class="grid" role="list">
+      {items.map((item) => (
+        <li data-reveal>
+          {item.href ? (
+            <a class="card" href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noopener' : undefined}>
+              <h3>{item.title}</h3>
+              {item.text && <p>{item.text}</p>}
+              <svg class="arrow flip-rtl" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </a>
+          ) : (
+            <div class="card">
+              <h3>{item.title}</h3>
+              {item.text && <p>{item.text}</p>}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  h2 { font-size: var(--step-3); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--space-4); }
+  .grid > li { display: flex; }
+  .card {
+    flex: 1; display: flex; flex-direction: column; gap: var(--space-3);
+    padding: var(--space-5); border-radius: var(--radius-m);
+    background: var(--c-surface); border: 1px solid var(--c-line);
+    color: var(--c-ink); text-decoration: none;
+    transition: border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  a.card:hover { border-color: var(--c-accent); }
+  h3 { font-size: var(--step-1); }
+  p { color: var(--c-muted); }
+  .arrow { margin-block-start: auto; color: var(--c-accent); }
+</style>

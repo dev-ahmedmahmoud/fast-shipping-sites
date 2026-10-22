@@ -1,0 +1,60 @@
+---
+// Baseline motion: gentle reveals and smooth scrolling. GSAP and Lenis load only
+// in the browser, only when the visitor has not asked for reduced motion.
+---
+<script>
+  import { splitWords } from '@engine/split';
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Heavy effects (smooth scrolling here; WebGL in richer systems) need a capable device.
+  function capable(): boolean {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    return (nav.hardwareConcurrency ?? 4) >= 4 && (nav.deviceMemory ?? 4) >= 4 && !nav.connection?.saveData;
+  }
+
+  function cssTime(name: string, fallback: number): number {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const n = parseFloat(v);
+    if (Number.isNaN(n)) return fallback;
+    return v.endsWith('ms') ? n / 1000 : n;
+  }
+
+  async function start() {
+    const [{ gsap }, { ScrollTrigger }] = await Promise.all([import('gsap'), import('gsap/ScrollTrigger')]);
+    gsap.registerPlugin(ScrollTrigger);
+
+    const root = getComputedStyle(document.documentElement);
+    const duration = cssTime('--dur-slow', 0.8);
+    const distance = parseFloat(root.getPropertyValue('--reveal-distance')) || 0;
+    const ease = 'power3.out';
+
+    // Content is visible without JavaScript; animations only start from it.
+    document.querySelectorAll<HTMLElement>('[data-split-words]').forEach((el) => {
+      const words = splitWords(el);
+      gsap.from(words, { opacity: 0, y: distance, duration, ease, stagger: 0.06 });
+    });
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+      gsap.from(el, {
+        opacity: 0, y: distance, duration, ease,
+        scrollTrigger: { trigger: el, start: 'top 92%', once: true },
+      });
+    });
+
+    if (capable()) {
+      const { default: Lenis } = await import('lenis');
+      const lenis = new Lenis({ autoRaf: false });
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((time) => lenis.raf(time * 1000));
+      gsap.ticker.lagSmoothing(0);
+    }
+  }
+
+  if (!reduce) start().catch(() => { /* motion is decoration; the page works without it */ });
+</script>
+
+<style is:global>
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-stopped { overflow: hidden; }
+</style>

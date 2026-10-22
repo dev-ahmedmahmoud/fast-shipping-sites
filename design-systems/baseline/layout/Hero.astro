@@ -1,0 +1,32 @@
+---
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[] }
+const { eyebrow, title, lead, actions } = Astro.props;
+---
+<section class="hero">
+  <div class="container inner">
+    {eyebrow && <p class="label" data-reveal>{eyebrow}</p>}
+    <h1 data-split-words>{title}</h1>
+    {lead && <p class="lead" data-reveal>{lead}</p>}
+    {actions.length > 0 && (
+      <div class="actions" data-reveal>
+        {actions.map((a, i) => (
+          <a class:list={['btn', i === 0 ? 'btn--primary' : 'btn--ghost']} href={a.href}
+             target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>{a.label}</a>
+        ))}
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: var(--space-9) var(--space-8);
+    background: linear-gradient(to bottom, var(--c-accent-soft), var(--c-bg));
+  }
+  .inner { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-5); }
+  h1 { font-size: var(--step-5); max-inline-size: 18ch; }
+  .lead { font-size: var(--step-2); color: var(--c-muted); max-inline-size: 40ch; line-height: 1.5; }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); padding-block-start: var(--space-2); }
+</style>

@@ -1,0 +1,32 @@
+---
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+interface Props { ctx: PageContext; title: string; text?: string; action: Action | null }
+const { title, text, action } = Astro.props;
+---
+<section class="section">
+  <div class="container">
+    <div class="band" data-reveal>
+      <div class="copy">
+        <h2>{title}</h2>
+        {text && <p>{text}</p>}
+      </div>
+      {action && (
+        <a class="btn invert" href={action.href} target={action.external ? '_blank' : undefined} rel={action.external ? 'noopener' : undefined}>{action.label}</a>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .band {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-5);
+    padding: var(--space-7) var(--space-6); border-radius: var(--radius-l);
+    background: var(--c-accent); color: var(--c-accent-ink);
+  }
+  .copy { display: flex; flex-direction: column; gap: var(--space-2); min-inline-size: 0; flex: 1 1 20rem; }
+  h2 { font-size: var(--step-3); }
+  p { opacity: 0.9; max-inline-size: 50ch; }
+  .invert { background: var(--c-accent-ink); color: var(--c-accent); }
+  .invert:hover { filter: brightness(0.96); }
+</style>

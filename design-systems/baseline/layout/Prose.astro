@@ -1,0 +1,39 @@
+---
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; title: string; lead?: string; todo?: string[] }
+const { ctx, title, lead, todo = [] } = Astro.props;
+---
+<article class="section">
+  <div class="container narrow">
+    <header class="head">
+      <h1 data-split-words>{title}</h1>
+      {lead && <p class="lead">{lead}</p>}
+    </header>
+    {todo.length > 0 && (
+      <aside class="todo-note">
+        <strong>{ctx.ui.pending}</strong>
+        <ul lang="en" dir="ltr">{todo.map((t) => <li>{t}</li>)}</ul>
+      </aside>
+    )}
+    <div class="prose">
+      <slot />
+    </div>
+  </div>
+</article>
+
+<style>
+  .narrow { max-inline-size: calc(46rem + 2 * var(--gutter)); display: flex; flex-direction: column; gap: var(--space-5); }
+  .head { display: flex; flex-direction: column; gap: var(--space-3); padding-block-start: var(--space-4); }
+  h1 { font-size: var(--step-4); }
+  .lead { font-size: var(--step-1); color: var(--c-muted); }
+  .prose { max-inline-size: 68ch; }
+  .prose :global(> * + *) { margin-block-start: var(--space-4); }
+  .prose :global(h2) { font-size: var(--step-2); margin-block-start: var(--space-7); }
+  .prose :global(h3) { font-size: var(--step-1); margin-block-start: var(--space-6); }
+  .prose :global(ul), .prose :global(ol) { padding-inline-start: var(--space-5); }
+  .prose :global(li + li) { margin-block-start: var(--space-2); }
+  .prose :global(img) { border-radius: var(--radius-m); }
+  .prose :global(blockquote) { margin-inline: 0; padding-inline-start: var(--space-4); border-inline-start: 3px solid var(--c-accent); color: var(--c-muted); }
+  .prose :global(table) { border-collapse: collapse; inline-size: 100%; display: block; overflow-x: auto; }
+  .prose :global(th), .prose :global(td) { border: 1px solid var(--c-line); padding: var(--space-2) var(--space-3); text-align: start; }
+</style>

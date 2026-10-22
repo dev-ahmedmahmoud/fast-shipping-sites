@@ -1,0 +1,48 @@
+---
+import type { PageContext } from '@engine/context';
+interface NewsItem { title: string; href: string; date?: string; excerpt?: string }
+interface Props { ctx: PageContext; title?: string; items: NewsItem[]; more?: { label: string; href: string } | null; headingLevel?: 1 | 2 }
+const { ctx, title, items, more, headingLevel = 2 } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+---
+<section class="section">
+  <div class="container stack">
+    <div class="head">
+      {title && <Heading class:list={['title', { big: headingLevel === 1 }]} data-reveal>{title}</Heading>}
+      {more && items.length > 0 && <a href={more.href}>{more.label}</a>}
+    </div>
+    {items.length === 0 ? (
+      <p class="empty">{ctx.ui.noNews}</p>
+    ) : (
+      <ul class="list" role="list">
+        {items.map((n) => (
+          <li data-reveal>
+            <a class="item" href={n.href}>
+              {n.date && <time class="date">{n.date}</time>}
+              <h3>{n.title}</h3>
+              {n.excerpt && <p>{n.excerpt}</p>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-5); }
+  .head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+  .title { font-size: var(--step-3); }
+  .title.big { font-size: var(--step-4); }
+  .empty { color: var(--c-muted); padding: var(--space-5); border: 1px dashed var(--c-line); border-radius: var(--radius-m); }
+  .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); gap: var(--space-4); }
+  .item {
+    display: flex; flex-direction: column; gap: var(--space-2); block-size: 100%;
+    padding: var(--space-5); border-radius: var(--radius-m); background: var(--c-surface);
+    border: 1px solid var(--c-line); color: var(--c-ink); text-decoration: none;
+  }
+  .item:hover { border-color: var(--c-accent); }
+  .date { font-size: var(--step--1); color: var(--c-muted); font-variant-numeric: tabular-nums; }
+  h3 { font-size: var(--step-1); }
+  p { color: var(--c-muted); }
+</style>
