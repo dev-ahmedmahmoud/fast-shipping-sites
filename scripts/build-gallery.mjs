@@ -41,6 +41,7 @@ for (const s of client.samples) {
     DS_MOTION: s.motion,
     BASE: `${galleryBase}/${s.id}`,
     OUT_DIR: path.join(out, s.id),
+    HERO_VIDEO: s.heroVideo || '',
     // Previews stay out of search results.
     NOINDEX: '1',
   });

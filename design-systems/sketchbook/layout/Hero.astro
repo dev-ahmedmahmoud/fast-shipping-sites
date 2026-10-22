@@ -2,10 +2,11 @@
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
-import type { Action } from '@engine/content';
+import type { Action, HeroVideo } from '@engine/content';
+import HeroMedia from '@engine/HeroMedia.astro';
 import Doodle from './Doodle.astro';
-interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[] }
-const { eyebrow, title, lead, actions, images = [] } = Astro.props;
+interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[]; video?: HeroVideo | null }
+const { eyebrow, title, lead, actions, images = [], video } = Astro.props;
 // A collage: the first photo as a big print, the next two as wide panorama strips taped
 // across it (school photos are often panoramas; a strip crop keeps their best band).
 const photos = images.slice(0, 3);
@@ -46,9 +47,11 @@ const tapes = ['var(--crayon-6)', 'var(--crayon-3)', 'var(--crayon-2)'];
           <figure class:list={['polaroid', `p${i}`, { strip: i > 0 }]} style={`--tilt:${tilts[i]};--tape:${tapes[i]}`} data-reveal="drop">
             <span class="tape" aria-hidden="true"></span>
             {i > 0 && <span class="tape end" aria-hidden="true"></span>}
-            <Image src={img} alt="" widths={i === 0 ? [360, 560, 840] : [480, 720, 1024]}
-                   sizes={i === 0 ? '(max-width: 900px) 62vw, 24rem' : '(max-width: 900px) 80vw, 30rem'}
-                   loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />
+            {i === 0 ? (
+              <HeroMedia image={img} video={video} widths={[360, 560, 840]} sizes="(max-width: 900px) 62vw, 24rem" fetchpriority="high" />
+            ) : (
+              <Image src={img} alt="" widths={[480, 720, 1024]} sizes="(max-width: 900px) 80vw, 30rem" loading="lazy" />
+            )}
           </figure>
         ))}
         <Doodle name="star" tone={4} filled class="pile-star" loop="twinkle" />
@@ -99,7 +102,8 @@ const tapes = ['var(--crayon-6)', 'var(--crayon-3)', 'var(--crayon-2)'];
   .pile { position: relative; aspect-ratio: 1 / 0.98; }
   .pile .polaroid { position: absolute; }
   .pile .p0 { inset-block-start: 0; inset-inline-start: 12%; inline-size: 50%; z-index: 2; }
-  .pile .p0 :global(img) { aspect-ratio: 4 / 5; object-position: 92% 40%; }
+  .pile .p0 :global(img) { aspect-ratio: 4 / 5; object-position: 50% 40%; }
+  .pile .p0 :global(video) { object-position: 50% 40%; }
   .pile .strip { padding: 0.45rem; }
   .pile .strip :global(img) { aspect-ratio: 3.6 / 1; object-position: 50% 50%; }
   .pile .strip .tape { inline-size: 3.4rem; inset-inline: auto; inset-inline-start: -1rem; inset-block-start: 30%; rotate: -70deg; }

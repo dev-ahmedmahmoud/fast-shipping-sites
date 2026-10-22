@@ -3,6 +3,7 @@
 // own `slug`, which is the exact URL path the old site used. News items live under
 // content/<locale>/news/ and have no URL of their own: they appear in full on the
 // locale's news page (template: news) and are linked by anchor.
+import type { ImageMetadata } from 'astro';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
 import client from '@client/client.json';
 import { LOCALES, type Locale } from './i18n';
@@ -38,6 +39,13 @@ export interface Entry {
   fm: Record<string, unknown>;
   Content: AstroComponentFactory;
   file: string;
+}
+
+/** A silent hero clip: `src` (MP4) and optional `webm` are files in the client's public/ folder, `poster` its first frame in media/. */
+export interface HeroVideo {
+  src: string;
+  webm?: string;
+  poster: ImageMetadata;
 }
 
 export interface Action {

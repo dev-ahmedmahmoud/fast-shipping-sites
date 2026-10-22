@@ -4,7 +4,8 @@ import Base from '../layouts/Base.astro';
 import { components } from '@layout/index';
 import { pages, newsFor, resolveAction, resolveHref, type Entry } from '@engine/content';
 import { buildContext } from '@engine/context';
-import { mediaList } from '@engine/media';
+import { heroVideo, mediaList } from '@engine/media';
+import client from '@client/client.json';
 
 export function getStaticPaths() {
   // A gallery-index build renders only the comparison page (src/gallery/Index.astro).
@@ -40,12 +41,16 @@ const linkItems = (items: any[] = []) =>
     const target = it.href ? resolveHref(it.href, ctx.locale) : null;
     return { title: it.title, text: it.text, href: target?.href, external: target?.external };
   });
+const video = entry.template === 'home' && fm.hero
+  ? heroVideo(fm.hero.video, (client as { heroVideos?: Record<string, { src: string; poster: string }> }).heroVideos)
+  : null;
 ---
 {entry.template === 'home' ? (
   <Base ctx={ctx} title={ctx.site.name} description={entry.description}>
     {fm.hero && (
       <Hero ctx={ctx} eyebrow={fm.hero.eyebrow} title={fm.hero.title} lead={fm.hero.lead}
-        images={mediaList(fm.hero.images)}
+        images={video ? [video.poster, ...mediaList(fm.hero.images)] : mediaList(fm.hero.images)}
+        video={video}
         actions={(fm.hero.actions ?? []).map((a: unknown) => resolveAction(a, ctx.locale)).filter(Boolean)} />
     )}
     {fm.intro && <Prose ctx={ctx} title={fm.intro.title} headingLevel={2}><Content /></Prose>}

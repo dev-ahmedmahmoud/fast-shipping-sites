@@ -214,27 +214,47 @@
     "copied": 660,
     "missingOnOldSite": 10
   },
+  "heroVideos": {
+    "superhero-boy": {
+      "src": "/media/stock/hero-superhero-boy.mp4",
+      "poster": "stock/hero-superhero-boy.jpg",
+      "webm": "/media/stock/hero-superhero-boy.webm"
+    },
+    "class-drawing": {
+      "src": "/media/stock/hero-class-drawing.mp4",
+      "poster": "stock/hero-class-drawing.jpg",
+      "webm": "/media/stock/hero-class-drawing.webm"
+    },
+    "paper-plane": {
+      "src": "/media/stock/hero-paper-plane.mp4",
+      "webm": "/media/stock/hero-paper-plane.webm",
+      "poster": "stock/hero-paper-plane.jpg"
+    }
+  },
   "samples": [
     {
       "id": "playground",
       "palette": "playground",
       "type": "playground",
       "layout": "playground",
-      "motion": "playground"
+      "motion": "playground",
+      "heroVideo": "paper-plane"
     },
     {
       "id": "sketchbook",
       "palette": "sketchbook",
       "type": "sketchbook",
       "layout": "sketchbook",
-      "motion": "sketchbook"
+      "motion": "sketchbook",
+      "heroVideo": "class-drawing"
     },
     {
       "id": "comic-class",
       "palette": "comic-class",
       "type": "comic-class",
       "layout": "comic-class",
-      "motion": "comic-class"
+      "motion": "comic-class",
+      "heroVideo": "superhero-boy"
     }
   ],
   "todo": [

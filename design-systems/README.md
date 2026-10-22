@@ -52,7 +52,7 @@ Section components also get their section data, with links already resolved:
 | Component | Props besides `ctx` |
 | --- | --- |
 | Header, Footer | none |
-| Hero | `eyebrow?`, `title`, `lead?`, `actions: {label, href, external}[]`, `images?: ImageMetadata[]` (the client's hero photos; show any, all or none) |
+| Hero | `eyebrow?`, `title`, `lead?`, `actions: {label, href, external}[]`, `images?: ImageMetadata[]` (the client's hero photos; show any, all or none), `video?: HeroVideo \| null` (a silent clip; render the first frame with `@engine/HeroMedia.astro`, which shows its poster and handles loading) |
 | FeatureGrid | `title?`, `items: {title, text?, href?, external?}[]` |
 | Stats | `title?`, `items: {value, label}[]` (values already formatted) |
 | NewsList | `title?`, `items: {title, href, date?, excerpt?}[]`, `more?`, `headingLevel?` |

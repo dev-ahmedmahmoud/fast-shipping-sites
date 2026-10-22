@@ -78,6 +78,7 @@ export default defineConfig({
       'import.meta.env.FSS_SHOW_DRAFTS': JSON.stringify(env.SHOW_DRAFTS === '1'),
       'import.meta.env.FSS_SHOW_TODO': JSON.stringify(env.SHOW_TODO !== '0'),
       'import.meta.env.FSS_NOINDEX': JSON.stringify(env.NOINDEX === '1'),
+      'import.meta.env.FSS_HERO_VIDEO': JSON.stringify(env.HERO_VIDEO || ''),
     },
     resolve: {
       alias: {

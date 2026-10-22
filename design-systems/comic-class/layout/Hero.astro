@@ -8,9 +8,10 @@
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
-import type { Action } from '@engine/content';
-interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[] }
-const { ctx, eyebrow, title, lead, actions, images = [] } = Astro.props;
+import type { Action, HeroVideo } from '@engine/content';
+import HeroMedia from '@engine/HeroMedia.astro';
+interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[]; video?: HeroVideo | null }
+const { ctx, eyebrow, title, lead, actions, images = [], video } = Astro.props;
 const shots = images.slice(0, 3);
 const rot = ['-1.2deg', '1.4deg', '-0.6deg', '0.8deg'];
 
@@ -49,9 +50,13 @@ const burst = Array.from({ length: 36 }, (_, k) => {
       {shots.map((img, i) => (
         <figure class:list={['panel', 'shot', `shot-${i + 1}`]} style={`--i:${i + 1};--rot:${rot[i + 1]}`}>
           <div class="ink" data-tilt>
-            <Image src={img} alt="" widths={i === 2 ? [480, 960, 1440] : [360, 560, 800]}
-              sizes={i === 2 ? '(max-width: 880px) 100vw, 76rem' : '(max-width: 880px) 50vw, 32rem'}
-              loading="eager" />
+            {i === 0 ? (
+              <HeroMedia image={img} video={video} widths={[360, 560, 800]} sizes="(max-width: 880px) 50vw, 32rem" />
+            ) : (
+              <Image src={img} alt="" widths={i === 2 ? [480, 960, 1440] : [360, 560, 800]}
+                sizes={i === 2 ? '(max-width: 880px) 100vw, 76rem' : '(max-width: 880px) 50vw, 32rem'}
+                loading="eager" />
+            )}
           </div>
         </figure>
       ))}
@@ -167,7 +172,7 @@ const burst = Array.from({ length: 36 }, (_, k) => {
   }
   /* Banners usually keep their subject at one end and baked-in text at the other;
      aim the first panel's crop at the subject. */
-  .shot-1 :global(img) { object-position: 100% 35%; }
+  .shot-1 :global(img), .shot-1 :global(video) { object-position: 50% 40%; }
   .shot-1 { grid-column: 8 / span 5; grid-row: 1; }
   .shot-2 { grid-column: 8 / span 5; grid-row: 2; }
   .shot-3 { grid-column: 1 / -1; grid-row: 3; }

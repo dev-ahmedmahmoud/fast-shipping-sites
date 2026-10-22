@@ -1,0 +1,71 @@
+---
+// The main hero picture, optionally with a silent looping clip on top. Design systems
+// use it for their first hero frame instead of a plain <Image>, so every system gets
+// the same loading rules:
+// - the poster is a normal optimized image (it is what a slow phone, a crawler or a
+//   reduced-motion visitor sees, and the page's largest paint);
+// - the clip has no src until the page has loaded, and loads only when the frame is on
+//   screen, the visitor allows motion, and the connection is not data-saving or 2G/3G;
+// - it plays muted and inline, pauses off screen, and is hidden from assistive tech.
+// The wrapper takes the image's box, so the clip covers exactly what the poster covers.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { HeroVideo } from './content';
+
+interface Props {
+  image: ImageMetadata;
+  video?: HeroVideo | null;
+  widths: number[];
+  sizes: string;
+  loading?: 'eager' | 'lazy';
+  fetchpriority?: 'high' | 'auto';
+  class?: string;
+}
+const { image, video, widths, sizes, loading = 'eager', fetchpriority, class: cls } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+const poster = video?.poster ?? image;
+---
+<span class:list={['fss-hero-media', cls]}>
+  <Image src={poster} alt="" widths={widths} sizes={sizes} loading={loading} fetchpriority={fetchpriority} />
+  {video && (
+    <video data-hero-video data-src={`${base}${video.src}`} data-webm={video.webm ? `${base}${video.webm}` : undefined}
+           muted loop playsinline preload="none"
+           disablepictureinpicture aria-hidden="true" tabindex="-1"></video>
+  )}
+</span>
+
+<script>
+  function canPlay() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+    const c = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    return !(c && (c.saveData || /(^|-)(2g|3g)$/.test(c.effectiveType ?? '')));
+  }
+  function start() {
+    if (!canPlay()) return;
+    for (const v of document.querySelectorAll<HTMLVideoElement>('video[data-hero-video]')) {
+      new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting) return v.pause();
+        if (!v.src) {
+          v.addEventListener('playing', () => v.classList.add('is-playing'), { once: true });
+          // WebM (VP9) is smaller; MP4 (H.264) covers Safari and older devices.
+          const webm = v.dataset.webm && v.canPlayType('video/webm; codecs="vp9"') ? v.dataset.webm : '';
+          v.src = webm || v.dataset.src || '';
+        }
+        v.play().catch(() => {});
+      }, { threshold: 0.2 }).observe(v);
+    }
+  }
+  if (document.readyState === 'complete') start();
+  else addEventListener('load', start, { once: true });
+</script>
+
+<style>
+  .fss-hero-media { position: relative; display: block; block-size: 100%; }
+  video {
+    position: absolute; inset: 0; inline-size: 100%; block-size: 100%;
+    object-fit: cover; opacity: 0; transition: opacity 0.6s ease;
+    pointer-events: none;
+  }
+  video.is-playing { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { video { display: none; } }
+</style>

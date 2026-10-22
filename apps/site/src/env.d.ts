@@ -8,4 +8,5 @@ interface ImportMetaEnv {
   readonly FSS_SHOW_TODO: boolean;
   readonly FSS_NOINDEX: boolean;
   readonly FSS_SHOW_DRAFTS: boolean;
+  readonly FSS_HERO_VIDEO: string;
 }
