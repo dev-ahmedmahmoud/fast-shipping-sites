@@ -17,7 +17,7 @@ pnpm install
 ```
 CLIENT=lfis SYSTEM=baseline pnpm build     # one site → dist/lfis/baseline
 CLIENT=lfis pnpm build:gallery             # one client's preview gallery → dist/lfis/gallery
-pnpm build:previews                        # every client's gallery → dist/previews (what Cloudflare Pages deploys)
+pnpm build:previews                        # every client's gallery → dist/previews (what the shared preview site deploys)
 CLIENT=lfis SYSTEM=baseline pnpm dev       # local dev server
 ```
 
@@ -25,7 +25,7 @@ To mix parts from different systems, set `DS_PALETTE`, `DS_TYPE`, `DS_LAYOUT` or
 
 The gallery build writes a comparison page at the root and one full site per sample under `/<sample-id>/`, from the `samples` list in `clients/<slug>/client.json`. Its sample pages carry `noindex`.
 
-`pnpm build:previews` builds every client that has samples into one site, served at `https://websites-preview.syncology.tech/<client>/` (comparison page) and `/<client>/<sample>/` (each sample). The root page names no client, and the whole site sends `noindex` and a disallow-all `robots.txt`. A new client needs no hosting or DNS work: add `clients/<slug>/` with samples and push. `CLIENTS=a,b` limits the build; `PREVIEW_ORIGIN` overrides the domain.
+`pnpm build:previews` builds every client that has samples into one site, served at `https://websites-preview.syncology.tech/<client>/` (comparison page) and `/<client>/<sample>/` (each sample). The root page names no client, and the whole site sends `noindex` and a disallow-all `robots.txt`. One Cloudflare Pages project builds it on every push (build command `pnpm install --frozen-lockfile && pnpm build:previews`, output `dist/previews`). A new client needs no hosting or DNS work: add `clients/<slug>/` with samples and push. Each client's live site gets its own Pages project at launch, on the client's own domain. `CLIENTS=a,b` limits the build; `PREVIEW_ORIGIN` overrides the domain.
 
 Shared client files that are too big for the repository (such as LFIS's 660 weekly-plan PDFs) live in the R2 bucket served at `https://websites-files.syncology.tech/<client>/`.
 
