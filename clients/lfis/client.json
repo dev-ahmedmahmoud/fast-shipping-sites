@@ -29,7 +29,7 @@
   "calendar": "gregory",
   "domains": {
     "production": "leadersfis.com",
-    "preview": "websites-preview.syncology.tech/lfis"
+    "preview": "lfis-preview.syncology.tech"
   },
   "edusync": {
     "base": "https://lfis.syncology.tech",

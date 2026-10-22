@@ -34,6 +34,9 @@ const samples = (client.samples as { id: string; palette: string; type: string; 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex" />
     <title>{client.name.ar} · اختيار التصميم</title>
+    {(client as { favicon?: string }).favicon && samples[0] && (
+      <link rel="icon" type="image/png" href={`${prefix}/${samples[0].id}/${(client as { favicon?: string }).favicon}`} />
+    )}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" />
