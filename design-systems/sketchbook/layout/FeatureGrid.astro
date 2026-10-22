@@ -1,0 +1,73 @@
+---
+import type { PageContext } from '@engine/context';
+import Doodle, { type DoodleName } from './Doodle.astro';
+interface Item { title: string; text?: string; href?: string; external?: boolean }
+interface Props { ctx: PageContext; title?: string; items: Item[] }
+const { title, items } = Astro.props;
+const icons: DoodleName[] = ['book', 'pencil', 'globe', 'bulb', 'ruler', 'rocket', 'star', 'sun'];
+const tilts = ['-1.8deg', '1.3deg', '-0.9deg', '1.9deg', '-1.2deg'];
+---
+<section class="section">
+  <div class="container stack">
+    {title && <h2 data-reveal>{title}</h2>}
+    <ul class="grid" role="list">
+      {items.map((item, i) => {
+        const Tag = item.href ? 'a' : 'div';
+        return (
+          <li data-reveal="flip" style={`--tilt:${tilts[i % tilts.length]}`} class={`note-${(i % 5) + 1}`}>
+            <Tag class="card" href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noopener' : undefined}>
+              <span class="pin" aria-hidden="true"></span>
+              <Doodle name={icons[i % icons.length]} tone="ink" class="icon" />
+              <h3>{item.title}</h3>
+              {item.text && <p>{item.text}</p>}
+              {item.href && <Doodle name="arrow" tone="ink" flip class="arrow" draw={false} />}
+            </Tag>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  h2 { font-size: var(--step-3); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14.5rem), 1fr)); gap: var(--space-6) var(--space-5); padding-block: var(--space-3); }
+  .grid > li { display: flex; transform-origin: 50% 0; }
+  .card {
+    position: relative; flex: 1; display: flex; flex-direction: column; gap: var(--space-3);
+    min-block-size: 12rem; padding: var(--space-6) var(--space-5) var(--space-5);
+    background: color-mix(in oklab, var(--note) 24%, var(--c-surface));
+    color: var(--c-ink); text-decoration: none;
+    box-shadow: var(--shadow-paper);
+    rotate: var(--tilt); transform-origin: 50% 0;
+    transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) ease-out, transform var(--dur-base) var(--ease-out);
+  }
+  /* The folded bottom corner of a sticky note. */
+  .card::after {
+    content: ""; position: absolute; inset-block-end: 0; inset-inline-end: 0; inline-size: 1.9rem; block-size: 1.9rem;
+    background: linear-gradient(315deg, var(--c-bg) 50%, color-mix(in oklab, var(--note) 42%, var(--c-surface)) 50%);
+    box-shadow: -2px -2px 4px rgb(0 0 0 / 0.08);
+    transition: inline-size var(--dur-base) var(--ease-out), block-size var(--dur-base) var(--ease-out);
+  }
+  :global([dir="rtl"]) .card::after { background: linear-gradient(45deg, var(--c-bg) 50%, color-mix(in oklab, var(--note) 42%, var(--c-surface)) 50%); box-shadow: 2px -2px 4px rgb(0 0 0 / 0.08); }
+  .pin {
+    position: absolute; inset-block-start: 0.55rem; inset-inline: 0; margin-inline: auto; inline-size: 1rem; block-size: 1rem; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--note) 40%, white) 0 18%, var(--note) 45%, color-mix(in srgb, var(--note) 70%, black) 100%);
+    box-shadow: 1px 3px 3px rgb(0 0 0 / 0.25);
+  }
+  a.card:hover, a.card:focus-visible {
+    rotate: 0deg; translate: 0 -6px; box-shadow: var(--shadow-lift);
+    transform: perspective(700px) rotateX(5deg);
+  }
+  a.card:hover::after, a.card:focus-visible::after { inline-size: 2.8rem; block-size: 2.8rem; }
+  .card :global(.icon) { inline-size: 3.4rem; block-size: 3.4rem; --doodle-w: 4; }
+  h3 { font-size: var(--step-2); }
+  p { color: var(--c-muted); }
+  .card :global(.arrow) {
+    margin-block-start: auto; align-self: flex-end; inline-size: 2.6rem; block-size: 2.6rem; --doodle-w: 6;
+    transition: translate var(--dur-base) var(--ease-out);
+  }
+  a.card:hover :global(.arrow) { translate: 6px 0; }
+  :global([dir="rtl"]) a.card:hover :global(.arrow) { translate: -6px 0; }
+</style>

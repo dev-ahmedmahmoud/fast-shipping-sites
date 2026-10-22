@@ -1,0 +1,93 @@
+---
+// Hand-drawn crayon doodles. Each stroke has pathLength="1", so the motion part can
+// draw it on screen with stroke-dashoffset; without motion it is simply shown.
+// Doodles are decoration only (aria-hidden) and never carry meaning.
+export type DoodleName =
+  | 'star' | 'sparkle' | 'sun' | 'arrow' | 'loop-arrow' | 'underline' | 'circle'
+  | 'rocket' | 'book' | 'pencil' | 'bulb' | 'plane' | 'globe' | 'check' | 'cloud'
+  | 'spiral' | 'squiggle' | 'ruler' | 'clip';
+
+interface Props {
+  name: DoodleName;
+  class?: string;
+  /** Crayon 1–6, or 'ink'. */
+  tone?: 1 | 2 | 3 | 4 | 5 | 6 | 'ink';
+  /** Draw the strokes when the doodle scrolls into view. */
+  draw?: boolean;
+  /** Ambient loop handled by the motion part: 'spin', 'twinkle', 'bob', 'float'. */
+  loop?: string;
+  /** Mirror for right-to-left pages (arrows and other directional doodles). */
+  flip?: boolean;
+  /** Fill the shape with sticker yellow (a gold star; the bulb is always lit). */
+  filled?: boolean;
+  style?: string;
+}
+
+const PATHS: Record<DoodleName, string[]> = {
+  star: ['M50 9 L60.5 37 L91 38.5 L67 57.5 L76 89 L50 71 L23.5 89.5 L33 57 L8.5 39 L39.5 37.5 L51 11'],
+  sparkle: ['M50 8 C52 38 61 48 92 50 C61 52 52 62 50 92 C48 62 39 52 8 50 C39 48 48 38 50 8'],
+  sun: [
+    'M50 29 C63 29 71 38 71 50 C71 63 62 71 50 71 C37 71 29 62 29 50 C29 38 38 30 53 30',
+    'M50 7 L50 18 M50 82 L50 93 M7 50 L18 50 M82 50 L93 50 M20 20 L28 28 M72 72 L80 80 M80 20 L72 28 M28 72 L20 80',
+  ],
+  arrow: ['M10 72 C24 44 52 30 84 40', 'M66 26 L85 40 L67 55'],
+  'loop-arrow': ['M8 80 C30 84 42 62 32 51 C22 40 8 58 25 65 C45 73 68 55 88 30', 'M72 27 L89 28 L86 45'],
+  underline: ['M4 58 C28 50 62 47 96 52', 'M12 72 C38 64 66 62 90 66'],
+  circle: ['M78 24 C64 8 22 10 10 36 C0 60 30 84 60 80 C88 76 100 50 84 28 C76 18 60 14 44 17'],
+  rocket: [
+    'M50 8 C65 21 70 45 65 66 L35 66 C30 45 35 21 50 8 Z',
+    'M50 26 C55 26 58 30 58 34 C58 39 54 42 50 42 C45 42 42 38 42 34 C42 29 46 26 51 26',
+    'M35 50 L22 68 L35 66 M65 50 L78 68 L65 66',
+    'M41 71 C43 80 47 85 50 94 C53 85 57 80 59 71',
+  ],
+  book: [
+    'M50 30 C38 21 21 21 9 26 L9 78 C21 73 38 73 50 82 C62 73 79 73 91 78 L91 26 C79 21 62 21 50 30 Z',
+    'M50 30 L50 82',
+    'M18 38 C26 36 34 36 42 39 M58 39 C66 36 74 36 82 38 M18 50 C26 48 34 48 42 51 M58 51 C66 48 74 48 82 50',
+  ],
+  pencil: [
+    'M18 82 L26 61 L70 17 C73 14 78 14 81 17 L83 19 C86 22 86 27 83 30 L39 74 Z',
+    'M26 61 L39 74 M18 82 L31 77 M64 23 L77 36',
+  ],
+  bulb: [
+    'M50 10 C33 10 22 22 22 37 C22 50 31 56 35 65 L65 65 C69 56 78 50 78 37 C78 22 67 10 50 10 Z',
+    'M38 73 L62 73 M40 81 L60 81 M45 89 L55 89',
+    'M42 52 L46 44 L50 52 L54 44 L58 52',
+  ],
+  plane: ['M6 52 L94 12 L68 90 L52 62 Z', 'M52 62 L94 12 M52 62 L46 80 L58 68'],
+  globe: [
+    'M50 11 C72 11 89 28 89 50 C89 72 72 89 50 89 C28 89 11 72 11 50 C11 28 28 11 52 11',
+    'M11 50 L89 50 M19 30 C38 37 62 37 81 30 M19 70 C38 63 62 63 81 70',
+    'M50 11 C35 29 35 71 50 89 M50 11 C65 29 65 71 50 89',
+  ],
+  check: ['M14 54 L40 78 L88 20'],
+  cloud: ['M26 72 C10 72 7 52 22 47 C21 30 42 24 52 35 C58 22 81 25 81 44 C95 46 96 72 78 72 Z'],
+  spiral: ['M50 50 C54 46 58 50 56 54 C52 60 44 58 42 52 C40 42 50 36 58 38 C70 42 72 56 64 64 C54 74 36 70 32 58 C26 42 38 28 52 26 C70 24 82 38 82 52'],
+  squiggle: ['M4 50 C12 30 20 30 26 50 C32 70 40 70 46 50 C52 30 60 30 66 50 C72 70 80 70 86 50 C90 38 94 36 97 40'],
+  ruler: ['M8 66 L66 8 L92 34 L34 92 Z', 'M20 54 L28 62 M30 44 L35 49 M40 34 L48 42 M50 24 L55 29 M60 14 L68 22'],
+  clip: ['M38 20 L38 72 C38 85 62 85 62 72 L62 28 C62 19 48 19 48 28 L48 66'],
+};
+
+// Shapes that also get a soft color fill once drawn (the bulb lights up).
+const FILLS: Partial<Record<DoodleName, string>> = {
+  bulb: 'M50 10 C33 10 22 22 22 37 C22 50 31 56 35 65 L65 65 C69 56 78 50 78 37 C78 22 67 10 50 10 Z',
+  star: 'M50 9 L60.5 37 L91 38.5 L67 57.5 L76 89 L50 71 L23.5 89.5 L33 57 L8.5 39 L39.5 37.5 Z',
+};
+
+const { name, class: cls, tone = 1, draw = true, loop, flip = false, filled, style } = Astro.props;
+const stretch = name === 'underline' || name === 'squiggle';
+const fill = (filled ?? name === 'bulb') ? FILLS[name] : undefined;
+---
+<svg
+  class:list={['doodle', `doodle--${name}`, `tone-${tone}`, cls, { 'flip-rtl': flip }]}
+  viewBox="0 0 100 100"
+  preserveAspectRatio={stretch ? 'none' : undefined}
+  aria-hidden="true"
+  focusable="false"
+  data-draw={draw ? '' : undefined}
+  data-loop={loop}
+  style={style}
+>
+  {fill && <path class="doodle-fill" d={fill} />}
+  {PATHS[name].map((d, i) => <path d={d} pathLength="1" style={`--n:${i}`} />)}
+</svg>

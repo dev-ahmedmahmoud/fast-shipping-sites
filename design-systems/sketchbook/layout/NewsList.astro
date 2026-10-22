@@ -1,0 +1,91 @@
+---
+import type { PageContext } from '@engine/context';
+import Doodle from './Doodle.astro';
+interface NewsItem { title: string; href: string; date?: string; excerpt?: string }
+interface Props { ctx: PageContext; title?: string; items: NewsItem[]; more?: { label: string; href: string } | null; headingLevel?: 1 | 2 }
+const { ctx, title, items, more, headingLevel = 2 } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+const tilts = ['-1.4deg', '1deg', '-0.6deg', '1.5deg', '-1deg'];
+---
+<section class="section">
+  <div class="container stack">
+    <div class="head">
+      {title && (
+        <div class="title-wrap">
+          <Heading class:list={['title', { big: headingLevel === 1 }]} data-split-words={headingLevel === 1 ? '' : undefined} data-reveal={headingLevel === 1 ? undefined : ''}>{title}</Heading>
+          <Doodle name="squiggle" tone={2} class="title-line" />
+        </div>
+      )}
+      {more && items.length > 0 && (
+        <a class="more" href={more.href}>{more.label}<Doodle name="arrow" tone="ink" flip draw={false} class="more-arrow" /></a>
+      )}
+    </div>
+    {items.length === 0 ? (
+      <p class="empty">{ctx.ui.noNews}</p>
+    ) : (
+      <ul class="list" role="list">
+        {items.map((n, i) => (
+          <li data-reveal="drop" style={`--tilt:${tilts[i % tilts.length]}`}>
+            <a class="page" href={n.href}>
+              <Doodle name="clip" tone="ink" draw={false} class="clip" />
+              {n.date && <time class="stamp">{n.date}</time>}
+              <h3>{n.title}</h3>
+              {n.excerpt && <p>{n.excerpt}</p>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  .head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-3) var(--space-5); }
+  .title-wrap { display: flex; flex-direction: column; gap: var(--space-1); }
+  .title { font-size: var(--step-3); }
+  .title.big { font-size: var(--step-4); }
+  .title-wrap :global(.title-line) { inline-size: min(12rem, 70%); block-size: 0.9rem; --doodle-w: 5; }
+  .more {
+    display: inline-flex; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-weight: 600;
+    color: var(--c-ink); text-decoration: none; min-block-size: 44px; padding-block: var(--space-2);
+  }
+  .more:hover { color: var(--c-accent); }
+  .more :global(.more-arrow) { inline-size: 2rem; block-size: 2rem; --doodle-w: 6; }
+  .empty { color: var(--c-muted); padding: var(--space-5); border: 2px dashed var(--c-line); border-radius: var(--radius-m); background: var(--c-surface); }
+
+  .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--space-7) var(--space-5); padding-block-start: var(--space-5); }
+  .list > li { display: flex; rotate: var(--tilt); filter: drop-shadow(0 7px 9px rgb(0 0 0 / 0.16)); transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out); }
+  .list > li:hover, .list > li:focus-within { rotate: 0deg; translate: 0 -5px; }
+  /* The torn edge is a mask, which would clip a focus ring, so the ring goes on the item. */
+  .list > li:has(.page:focus-visible) { outline: 3px dashed var(--c-accent); outline-offset: 6px; border-radius: 6px; }
+  .page:focus-visible { outline: none; }
+  /* A page torn out of a spiral notebook: punched holes along the top, blue rules, red margin. */
+  .page {
+    position: relative; flex: 1; display: flex; flex-direction: column; gap: var(--space-3);
+    padding: var(--space-6) var(--space-5) var(--space-5); padding-inline-start: calc(var(--space-5) + 1rem);
+    background-color: var(--c-surface);
+    background-image: linear-gradient(to bottom, transparent calc(1.9rem - 1px), var(--rule) calc(1.9rem - 1px), var(--rule) 1.9rem);
+    background-size: 100% 1.9rem; background-position: 0 0.6rem;
+    color: var(--c-ink); text-decoration: none;
+    -webkit-mask: radial-gradient(circle at 50% 0, transparent 5px, #000 5.5px) 0 0 / 18px 100% repeat-x;
+    mask: radial-gradient(circle at 50% 0, transparent 5px, #000 5.5px) 0 0 / 18px 100% repeat-x;
+  }
+  .page::before {
+    content: ""; position: absolute; inset-block: 0; inset-inline-start: 1rem; inline-size: 0;
+    border-inline-start: 2px solid var(--margin-line);
+  }
+  .page :global(.clip) {
+    position: absolute; inset-block-start: 0.5rem; inset-inline-end: 1.2rem; inline-size: 1.6rem; block-size: 3rem;
+    --doodle-w: 6; opacity: 0.7;
+  }
+  .stamp {
+    align-self: flex-start; padding: 0.1rem var(--space-3);
+    border: 2px solid var(--c-highlight); border-radius: var(--radius-s); color: var(--c-highlight);
+    font-family: var(--font-display); font-size: var(--step--1); font-weight: 600; font-variant-numeric: tabular-nums;
+    rotate: -5deg; opacity: 0.9;
+  }
+  h3 { font-size: var(--step-1); line-height: 1.4; }
+  .page:hover h3 { color: var(--c-accent); }
+  p { color: var(--c-muted); }
+</style>

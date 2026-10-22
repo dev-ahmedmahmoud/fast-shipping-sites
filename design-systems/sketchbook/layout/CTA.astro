@@ -1,0 +1,58 @@
+---
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import Doodle from './Doodle.astro';
+interface Props { ctx: PageContext; title: string; text?: string; action: Action | null }
+const { title, text, action } = Astro.props;
+---
+<section class="section">
+  <div class="container">
+    <div class="note" data-reveal="pop">
+      <span class="tape t1" aria-hidden="true"></span>
+      <span class="tape t2" aria-hidden="true"></span>
+      <div class="copy">
+        <h2 data-split-words>{title}</h2>
+        {text && <p>{text}</p>}
+      </div>
+      {action && (
+        <div class="go">
+          <Doodle name="arrow" tone={2} flip class="point" />
+          <a class="btn btn--primary" href={action.href} target={action.external ? '_blank' : undefined} rel={action.external ? 'noopener' : undefined}>{action.label}</a>
+        </div>
+      )}
+      <Doodle name="star" tone={2} filled class="gold" loop="twinkle" />
+      <Doodle name="pencil" tone={5} class="pencil" />
+    </div>
+  </div>
+</section>
+
+<style>
+  /* One big sticky note slapped across the page. */
+  .note {
+    position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-5) var(--space-7);
+    padding: var(--space-7) var(--space-7) var(--space-7);
+    background: color-mix(in oklab, var(--crayon-6) 62%, var(--c-surface));
+    box-shadow: var(--shadow-lift);
+    rotate: -1deg;
+  }
+  .note::after {
+    content: ""; position: absolute; inset-block-end: 0; inset-inline-start: 0; inline-size: 3rem; block-size: 3rem;
+    background: linear-gradient(45deg, var(--c-bg) 50%, color-mix(in oklab, var(--crayon-6) 85%, var(--c-ink) 6%) 50%);
+  }
+  :global([dir="rtl"]) .note::after { background: linear-gradient(315deg, var(--c-bg) 50%, color-mix(in oklab, var(--crayon-6) 85%, var(--c-ink) 6%) 50%); }
+  .t1 { inset-inline: auto; inset-inline-start: 8%; --tape: var(--crayon-3); rotate: -8deg; }
+  .t2 { inset-inline: auto; inset-inline-end: 8%; --tape: var(--crayon-2); rotate: 6deg; }
+  .copy { display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; flex: 1 1 20rem; }
+  h2 { font-size: var(--step-4); }
+  p { font-size: var(--step-1); max-inline-size: 46ch; color: var(--c-ink); }
+  .go { position: relative; display: flex; align-items: center; gap: var(--space-3); }
+  .go :global(.point) { inline-size: 4rem; block-size: 4rem; --doodle-w: 5; }
+  .note :global(.gold) { position: absolute; inset-block-start: -1.6rem; inset-inline-end: 22%; inline-size: 3.6rem; block-size: 3.6rem; --doodle-w: 4; }
+  .note :global(.pencil) { position: absolute; inset-block-end: -1.4rem; inset-inline-end: 3%; inline-size: 4.4rem; block-size: 4.4rem; --doodle-w: 3.5; rotate: 20deg; }
+
+  @media (max-width: 600px) {
+    .note { padding: var(--space-6) var(--space-5); }
+    .go :global(.point) { display: none; }
+    .note :global(.pencil) { inline-size: 3.2rem; block-size: 3.2rem; }
+  }
+</style>

@@ -1,0 +1,153 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import Doodle from './Doodle.astro';
+interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[] }
+const { eyebrow, title, lead, actions, images = [] } = Astro.props;
+// A collage: the first photo as a big print, the next two as wide panorama strips taped
+// across it (school photos are often panoramas; a strip crop keeps their best band).
+const photos = images.slice(0, 3);
+const tilts = ['-4deg', '2.5deg', '-2deg'];
+const tapes = ['var(--crayon-6)', 'var(--crayon-3)', 'var(--crayon-2)'];
+---
+<section class:list={['hero', { 'no-photos': photos.length === 0 }]} data-loop-scope>
+  <div class="container grid">
+    <div class="copy">
+      {eyebrow && (
+        <p class="eyebrow">
+          <span>{eyebrow}</span>
+          <Doodle name="circle" tone={2} class="eyebrow-ring" />
+        </p>
+      )}
+      <h1 data-split-words data-pop>{title}</h1>
+      <Doodle name="underline" tone={3} class="title-line" />
+      {lead && (
+        <p class="lead">
+          <Doodle name="bulb" tone="ink" class="bulb" />
+          <span class="sb-hl" data-highlight>{lead}</span>
+        </p>
+      )}
+      {actions.length > 0 && (
+        <div class="actions">
+          {actions.map((a, i) => (
+            <a class:list={['btn', i === 0 ? 'btn--primary' : 'btn--ghost']} href={a.href}
+               target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>{a.label}</a>
+          ))}
+          <Doodle name="loop-arrow" tone={2} flip class="to-cta" />
+        </div>
+      )}
+    </div>
+
+    {photos.length > 0 && (
+      <div class:list={['pile', `n${photos.length}`]} data-tilt>
+        {photos.map((img, i) => (
+          <figure class:list={['polaroid', `p${i}`, { strip: i > 0 }]} style={`--tilt:${tilts[i]};--tape:${tapes[i]}`} data-reveal="drop">
+            <span class="tape" aria-hidden="true"></span>
+            {i > 0 && <span class="tape end" aria-hidden="true"></span>}
+            <Image src={img} alt="" widths={i === 0 ? [360, 560, 840] : [480, 720, 1024]}
+                   sizes={i === 0 ? '(max-width: 900px) 62vw, 24rem' : '(max-width: 900px) 80vw, 30rem'}
+                   loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />
+          </figure>
+        ))}
+        <Doodle name="star" tone={4} filled class="pile-star" loop="twinkle" />
+        <Doodle name="rocket" tone={5} class="rocket" loop="bob" />
+      </div>
+    )}
+  </div>
+
+  <Doodle name="sun" tone={4} class="sun" loop="spin" />
+  <Doodle name="plane" tone={1} class="plane" loop="float" flip />
+  <Doodle name="sparkle" tone={2} class="spark s1" loop="twinkle" />
+  <Doodle name="sparkle" tone={3} class="spark s2" loop="twinkle" />
+  <Doodle name="spiral" tone={5} class="swirl" />
+</section>
+
+<style>
+  .hero { position: relative; padding-block: var(--space-7) var(--space-8); overflow: clip; }
+  .grid {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: center; gap: var(--space-7);
+  }
+  .no-photos .grid { grid-template-columns: minmax(0, 1fr); }
+  .copy { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; }
+
+  .eyebrow {
+    position: relative; display: inline-grid; place-items: center; padding: var(--space-2) var(--space-5);
+    font-family: var(--font-display); font-weight: 700; font-size: var(--step-1); color: var(--c-highlight);
+    rotate: -3deg;
+  }
+  .eyebrow > span { position: relative; z-index: 1; }
+  .eyebrow :global(.eyebrow-ring) { position: absolute; inset-block: -0.3rem; inset-inline: -0.4rem; inline-size: calc(100% + 0.8rem); block-size: calc(100% + 0.6rem); --doodle-w: 3.5; }
+
+  /* Between step 4 and 5: Marhey is wide, and school names are long. */
+  h1 { font-size: clamp(2.2rem, 1.45rem + 2.7vw, 3.8rem); line-height: 1.22; max-inline-size: 18ch; }
+  .copy :global(.title-line) { inline-size: min(22rem, 80%); block-size: 1.1rem; margin-block-start: calc(-1 * var(--space-3)); --doodle-w: 5; }
+
+  .lead { display: flex; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1.4; }
+  .lead :global(.bulb) { inline-size: 3.2rem; block-size: 3.2rem; flex: none; --doodle-w: 4; rotate: -10deg; }
+
+  .actions { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); padding-block: var(--space-3) var(--space-6); }
+  /* A curly arrow climbing up to the first button. */
+  .actions :global(.to-cta) {
+    position: absolute; inset-block-start: calc(100% - 2.6rem); inset-inline-start: 1.6rem; inline-size: 4.4rem; block-size: 4.4rem;
+    rotate: -12deg; --doodle-w: 4;
+  }
+
+  /* The photo collage. */
+  .pile { position: relative; aspect-ratio: 1 / 0.98; }
+  .pile .polaroid { position: absolute; }
+  .pile .p0 { inset-block-start: 0; inset-inline-start: 12%; inline-size: 50%; z-index: 2; }
+  .pile .p0 :global(img) { aspect-ratio: 4 / 5; object-position: 92% 40%; }
+  .pile .strip { padding: 0.45rem; }
+  .pile .strip :global(img) { aspect-ratio: 3.6 / 1; object-position: 50% 50%; }
+  .pile .strip .tape { inline-size: 3.4rem; inset-inline: auto; inset-inline-start: -1rem; inset-block-start: 30%; rotate: -70deg; }
+  .pile .strip .tape.end { inset-inline-start: auto; inset-inline-end: -1rem; rotate: 70deg; }
+  .pile .p1 { inset-block-start: 55%; inset-inline-end: 0; inline-size: 80%; z-index: 3; }
+  .pile .p2 { inset-block-start: 77%; inset-inline-start: 0; inline-size: 76%; z-index: 4; }
+  .pile.n1 { aspect-ratio: 4 / 3.2; }
+  .pile.n1 .p0 { inline-size: 88%; inset-inline-start: 6%; }
+  .pile.n2 { aspect-ratio: 1 / 0.78; }
+  .pile .polaroid:hover { rotate: 0deg; translate: 0 -6px; z-index: 5; box-shadow: var(--shadow-lift); }
+  .pile :global(.pile-star) { position: absolute; inset-block-start: -1.2rem; inset-inline-end: 22%; inline-size: 3.6rem; block-size: 3.6rem; z-index: 6; --doodle-w: 4; }
+  .pile :global(.rocket) { position: absolute; inset-block-start: 12%; inset-inline-end: 2%; inline-size: 5rem; block-size: 5rem; z-index: 1; rotate: 24deg; }
+  :global([dir="rtl"]) .pile :global(.rocket) { rotate: -24deg; }
+
+  /* Loose doodles on the page around the hero. */
+  .hero > :global(.sun) { position: absolute; inset-block-start: 0.6rem; inset-inline-end: 2%; inline-size: 5.5rem; block-size: 5.5rem; --doodle-w: 4; }
+  .hero > :global(.plane) { position: absolute; inset-block-start: 1.2rem; inset-inline-start: 46%; inline-size: 4rem; block-size: 4rem; --doodle-w: 4; }
+  .hero > :global(.spark) { position: absolute; inline-size: 1.9rem; block-size: 1.9rem; --doodle-w: 5; }
+  .hero > :global(.s1) { inset-block-start: 14%; inset-inline-start: 2%; }
+  .hero > :global(.s2) { inset-block-end: 10%; inset-inline-start: 40%; }
+  .hero > :global(.swirl) { position: absolute; inset-block-end: 4%; inset-inline-end: 44%; inline-size: 3rem; block-size: 3rem; opacity: 0.8; }
+
+  /* Choreography for the motion part (--d is the start delay of each entrance). */
+  .eyebrow :global(.eyebrow-ring) { --d: 0.1s; }
+  .copy :global(.title-line) { --d: 0.4s; }
+  .lead :global(.bulb) { --d: 0.55s; }
+  .lead :global([data-highlight]) { --d: 0.5s; }
+  .actions :global(.to-cta) { --d: 1.1s; }
+  .pile .polaroid { --d: 0.05s; }
+  .pile :global(.pile-star) { --d: 0.8s; }
+  .pile :global(.rocket) { --d: 0.9s; }
+  .hero > :global(.sun) { --d: 0.2s; }
+  .hero > :global(.plane) { --d: 0.5s; }
+  .hero > :global(.spark) { --d: 0.9s; }
+  .hero > :global(.swirl) { --d: 1s; }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+    .hero { padding-block: var(--space-6) var(--space-7); }
+    .pile { inline-size: min(100%, 30rem); margin-inline: auto; }
+    .pile :global(.rocket) { inline-size: 3.6rem; block-size: 3.6rem; }
+    .hero > :global(.plane) { inset-inline-start: auto; inset-inline-end: 22%; inset-block-start: 0.4rem; inline-size: 3rem; block-size: 3rem; }
+    .hero > :global(.sun) { inline-size: 3.8rem; block-size: 3.8rem; inset-block-start: 0.2rem; }
+    .hero > :global(.s2), .hero > :global(.swirl) { display: none; }
+    .actions :global(.to-cta) { display: none; }
+  }
+  @media (max-width: 480px) {
+    .lead { font-size: var(--step-1); }
+    .lead :global(.bulb) { inline-size: 2.6rem; block-size: 2.6rem; }
+  }
+</style>

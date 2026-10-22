@@ -1,0 +1,225 @@
+---
+import type { PageContext } from '@engine/context';
+import Doodle from './Doodle.astro';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  todo?: string[];
+  /** 1 for a page's own title (default); 2 when several Prose blocks share a page, e.g. news items. */
+  headingLevel?: 1 | 2;
+  /** Anchor id, so other pages can link to this block. */
+  id?: string;
+}
+const { ctx, title, lead, todo = [], headingLevel = 1, id } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+const page = headingLevel === 1;
+---
+<article class:list={['section', page ? 'page' : 'item']} id={id}>
+  <div class="container narrow">
+    <header class="head">
+      <Heading data-split-words>{title}</Heading>
+      {page && <Doodle name="underline" tone={2} class="title-line" />}
+      {page && <Doodle name="star" tone={4} filled class="title-star" loop="twinkle" />}
+      {lead && <p class:list={['lead', { stamp: !page }]}>{lead}</p>}
+    </header>
+    {todo.length > 0 && (
+      <aside class="todo-note">
+        <strong>{ctx.ui.pending}</strong>
+        <ul lang="en" dir="ltr">{todo.map((t) => <li>{t}</li>)}</ul>
+      </aside>
+    )}
+    <div class="sheet">
+      <span class="tape tl" aria-hidden="true"></span>
+      <span class="tape tr" aria-hidden="true"></span>
+      <div class="prose">
+        <slot />
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .narrow { max-inline-size: calc(50rem + 2 * var(--gutter)); display: flex; flex-direction: column; gap: var(--space-5); }
+  .head { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); padding-block-start: var(--space-3); }
+  h1 { font-size: var(--step-4); max-inline-size: 22ch; }
+  .item h2 { font-size: var(--step-2); max-inline-size: 30ch; }
+  .head :global(.title-line) { inline-size: min(16rem, 70%); block-size: 1rem; --doodle-w: 5; }
+  .head :global(.title-star) { position: absolute; inset-block-start: 0; inset-inline-end: 0; inline-size: 3rem; block-size: 3rem; --doodle-w: 4; }
+  .lead { font-size: var(--step-1); color: var(--c-muted); }
+  .stamp {
+    padding: 0.05rem var(--space-3); border: 2px solid var(--c-highlight); border-radius: var(--radius-s);
+    color: var(--c-highlight); font-family: var(--font-display); font-size: var(--step--1); font-weight: 600; rotate: -4deg;
+  }
+  .item { scroll-margin-block-start: 150px; }
+  .item.section { padding-block: var(--space-6); }
+
+  /* The page itself: graph paper with a red margin line, taped to the notebook. */
+  .sheet {
+    position: relative; padding: var(--space-6) var(--space-6) var(--space-7); padding-inline-start: calc(var(--space-6) + 0.9rem);
+    background-color: var(--c-surface);
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, var(--c-line) 32%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, var(--c-line) 32%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+    box-shadow: var(--shadow-paper);
+  }
+  .sheet::before {
+    content: ""; position: absolute; inset-block: 0; inset-inline-start: 1.1rem; inline-size: 0;
+    border-inline-start: 2px solid var(--margin-line);
+  }
+  .tl { inset-inline: auto; inset-inline-start: -1.2rem; inset-block-start: -0.5rem; rotate: -38deg; --tape: var(--crayon-3); }
+  .tr { inset-inline: auto; inset-inline-end: -1.2rem; inset-block-start: -0.5rem; rotate: 38deg; --tape: var(--crayon-2); }
+  :global([dir="rtl"]) .tl { rotate: 38deg; }
+  :global([dir="rtl"]) .tr { rotate: -38deg; }
+  .item .tape { display: none; }
+  .item .sheet { padding-block: var(--space-5) var(--space-6); }
+
+  .prose { max-inline-size: 70ch; min-inline-size: 0; }
+  .prose :global(> * + *) { margin-block-start: var(--space-4); }
+  .prose :global(> :first-child) { margin-block-start: 0; }
+  .prose :global(h2) {
+    font-size: var(--step-3); margin-block-start: var(--space-8); color: var(--c-ink);
+    display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;
+  }
+  .prose :global(> h2:first-child) { margin-block-start: 0; }
+  /* A crayon squiggle under each section heading; the color moves through the crayon box. */
+  .prose :global(h2::after) {
+    content: ""; inline-size: min(11rem, 60%); block-size: 0.7rem; background: var(--crayon-2);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12' preserveAspectRatio='none'%3E%3Cpath d='M2 7 C12 2 18 11 28 6 S46 2 56 6 S76 11 98 5' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12' preserveAspectRatio='none'%3E%3Cpath d='M2 7 C12 2 18 11 28 6 S46 2 56 6 S76 11 98 5' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  }
+  .prose :global(h2:nth-of-type(5n+2)::after) { background: var(--crayon-3); }
+  .prose :global(h2:nth-of-type(5n+3)::after) { background: var(--crayon-1); }
+  .prose :global(h2:nth-of-type(5n+4)::after) { background: var(--crayon-5); }
+  .prose :global(h2:nth-of-type(5n+5)::after) { background: var(--crayon-4); }
+  .prose :global(h3) { font-size: var(--step-1); margin-block-start: var(--space-6); }
+  .prose :global(h4) { font-size: var(--step-0); margin-block-start: var(--space-5); }
+  .prose :global(strong) { font-weight: var(--weight-strong); }
+  .prose :global(a) { font-weight: 600; }
+
+  /* Lists: crayon stars instead of bullets. */
+  .prose :global(ul:not([class])) { list-style: none; padding-inline-start: var(--space-6); }
+  .prose :global(ul:not([class]) > li) { position: relative; }
+  .prose :global(ul:not([class]) > li::before) {
+    content: ""; position: absolute; inset-inline-start: calc(-1 * var(--space-5)); inset-block-start: 0.45em;
+    inline-size: 0.95em; block-size: 0.95em; background: var(--crayon-1);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 9 L60.5 37 L91 38.5 L67 57.5 L76 89 L50 71 L23.5 89.5 L33 57 L8.5 39 L39.5 37.5 Z' fill='black'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 9 L60.5 37 L91 38.5 L67 57.5 L76 89 L50 71 L23.5 89.5 L33 57 L8.5 39 L39.5 37.5 Z' fill='black'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .prose :global(ul:not([class]) > li:nth-child(4n+2)::before) { background: var(--crayon-2); }
+  .prose :global(ul:not([class]) > li:nth-child(4n+3)::before) { background: var(--crayon-3); }
+  .prose :global(ul:not([class]) > li:nth-child(4n+4)::before) { background: var(--crayon-5); }
+  .prose :global(ol) { padding-inline-start: var(--space-6); }
+  .prose :global(ol > li::marker) { font-family: var(--font-display); font-weight: 700; color: var(--c-highlight); }
+  .prose :global(li + li) { margin-block-start: var(--space-2); }
+
+  /* Photos are printed and taped in. */
+  .prose :global(img) { background: var(--c-sunk); }
+  .prose :global(> p:has(> img:only-child)) {
+    position: relative; inline-size: fit-content; max-inline-size: 100%;
+    padding: 0.5rem 0.5rem 1.6rem; background: var(--c-surface); box-shadow: var(--shadow-paper); rotate: -1deg;
+  }
+  .prose :global(video) {
+    inline-size: 100%; background: var(--c-sunk);
+    border: 0.5rem solid var(--c-surface); border-block-end-width: 1.8rem; box-shadow: var(--shadow-paper); rotate: 0.6deg;
+  }
+  .prose :global(.embed) {
+    inline-size: 100%; aspect-ratio: 16 / 9; border: 0.5rem solid var(--c-surface); box-shadow: var(--shadow-paper);
+    background: var(--c-sunk); rotate: -0.6deg;
+  }
+  .prose :global(.embed--map) { aspect-ratio: 4 / 3; }
+
+  .prose :global(.gallery) {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr)); gap: var(--space-6) var(--space-5);
+    padding-block: var(--space-4);
+  }
+  .prose :global(.gallery > p), .prose :global(.gallery > img) {
+    position: relative; margin: 0; padding: 0.5rem 0.5rem 1.6rem; background: var(--c-surface);
+    box-shadow: var(--shadow-paper); rotate: -2.5deg;
+    transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out);
+  }
+  .prose :global(.gallery > :nth-child(3n+2)) { rotate: 2deg; }
+  .prose :global(.gallery > :nth-child(3n+3)) { rotate: -1deg; }
+  .prose :global(.gallery > :hover) { rotate: 0deg; translate: 0 -4px; }
+  .prose :global(.gallery > p::before), .prose :global(.students figure::before) {
+    content: ""; position: absolute; z-index: 1; inset-block-start: -0.6rem; inset-inline: 0; margin-inline: auto;
+    inline-size: 3.6rem; block-size: 1.2rem; rotate: -5deg;
+    background: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.28) 0 6px, transparent 6px 12px), color-mix(in srgb, var(--crayon-6) 72%, transparent);
+  }
+  .prose :global(.gallery > p:nth-child(3n+2)::before) { background-color: color-mix(in srgb, var(--crayon-3) 55%, transparent); rotate: 4deg; }
+  .prose :global(.gallery > p:nth-child(3n+3)::before) { background-color: color-mix(in srgb, var(--crayon-2) 50%, transparent); }
+  .prose :global(.gallery img) { inline-size: 100%; block-size: auto; aspect-ratio: 4 / 5; object-fit: cover; }
+
+  .prose :global(.students) { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr)); gap: var(--space-6) var(--space-4); padding-block: var(--space-4); }
+  .prose :global(.students figure) {
+    position: relative; margin: 0; display: flex; flex-direction: column; gap: var(--space-1); text-align: center;
+    padding: 0.45rem 0.45rem 0.6rem; background: var(--c-surface); box-shadow: var(--shadow-paper); rotate: -2deg;
+    transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out);
+  }
+  .prose :global(.students figure:nth-child(4n+2)) { rotate: 1.6deg; }
+  .prose :global(.students figure:nth-child(4n+3)) { rotate: -0.8deg; }
+  .prose :global(.students figure:nth-child(4n+4)) { rotate: 2.4deg; }
+  .prose :global(.students figure:hover) { rotate: 0deg; translate: 0 -4px; }
+  .prose :global(.students figure > p) { margin: 0; }
+  .prose :global(.students img) { inline-size: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+  .prose :global(.students figcaption) { font-family: var(--font-display); font-size: var(--step--1); font-weight: 600; line-height: 1.35; color: var(--c-accent); }
+
+  /* Tables are graph paper, with the header row highlighted. */
+  .prose :global(table) { border-collapse: collapse; inline-size: 100%; display: block; overflow-x: auto; background: var(--c-surface); }
+  .prose :global(th), .prose :global(td) { border: 1.5px solid var(--c-line); padding: var(--space-2) var(--space-3); text-align: start; vertical-align: top; }
+  .prose :global(thead th) { background: var(--c-accent-soft); font-family: var(--font-display); }
+  .prose :global(tbody tr:nth-child(even)) { background: color-mix(in srgb, var(--c-line) 14%, transparent); }
+
+  .prose :global(blockquote) {
+    position: relative; margin-inline: 0; padding: var(--space-4) var(--space-5);
+    background: var(--c-surface); border: 2px solid var(--c-ink); border-radius: var(--radius-l); color: var(--c-ink);
+  }
+
+  .prose :global(.actions) { display: flex; flex-wrap: wrap; gap: var(--space-4); padding-block: var(--space-2); }
+
+  /* Downloads are a checklist. */
+  .prose :global(.downloads) { list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+  .prose :global(.downloads li) {
+    position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4);
+    padding: var(--space-3) var(--space-4); padding-inline-start: calc(var(--space-4) + 2rem);
+    background: var(--c-surface); border: 2px solid var(--c-ink); border-radius: var(--radius-m);
+  }
+  .prose :global(.downloads li + li) { margin-block-start: 0; }
+  .prose :global(.downloads li::before) {
+    content: ""; position: absolute; inset-inline-start: var(--space-4); inset-block-start: 50%; margin-block-start: -0.6rem;
+    inline-size: 1.2rem; block-size: 1.2rem; border: 2px solid var(--c-ink); border-radius: 3px 5px 2px 6px;
+  }
+  .prose :global(.downloads a) {
+    font-family: var(--font-display); text-decoration: none; padding: 0.1rem var(--space-3);
+    background: var(--c-accent); color: var(--c-accent-ink); border-radius: var(--wobble);
+  }
+
+  .prose :global(.note) {
+    position: relative; padding: var(--space-5) var(--space-5) var(--space-4);
+    background: color-mix(in oklab, var(--crayon-6) 62%, var(--c-surface)); box-shadow: var(--shadow-paper); rotate: -0.8deg;
+  }
+
+  /* Old-site forms, shown as a worksheet to fill in; sending is not wired up yet. */
+  .prose :global(.form) {
+    display: grid; gap: var(--space-4); padding: var(--space-5);
+    background: var(--c-surface); border: 2px dashed var(--c-line); border-radius: var(--radius-m);
+  }
+  .prose :global(.form input), .prose :global(.form select), .prose :global(.form textarea) {
+    inline-size: 100%; min-block-size: 46px; padding: var(--space-2) var(--space-1);
+    border: 0; border-block-end: 2px dotted var(--c-muted); border-radius: 0; background: transparent;
+  }
+  .prose :global(.form input:focus-visible), .prose :global(.form select:focus-visible), .prose :global(.form textarea:focus-visible) {
+    outline: none; border-block-end: 3px solid var(--c-accent); background: var(--c-accent-soft);
+  }
+  .prose :global(.form textarea) { min-block-size: 6rem; resize: vertical; }
+  .prose :global(.form button[disabled]) { justify-self: start; opacity: 0.6; cursor: not-allowed; }
+
+  @media (max-width: 600px) {
+    .sheet { padding: var(--space-5) var(--space-4) var(--space-6); padding-inline-start: calc(var(--space-4) + 0.9rem); }
+    .sheet::before { inset-inline-start: 0.75rem; }
+    .tl, .tr { inline-size: 3.6rem; }
+    .prose :global(.gallery) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5) var(--space-4); }
+    .prose :global(.students) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>

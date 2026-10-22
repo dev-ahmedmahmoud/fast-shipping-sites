@@ -1,0 +1,181 @@
+---
+import { Image } from 'astro:assets';
+import type { PageContext, NavItem } from '@engine/context';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const other = ctx.languages.find((l) => !l.current);
+const linkAttrs = (item: NavItem) => ({
+  href: item.href,
+  'aria-current': item.current ? 'page' : undefined,
+  target: item.external ? '_blank' : undefined,
+  rel: item.external ? 'noopener' : undefined,
+});
+---
+<header class="header">
+  <div class="container bar">
+    <a class="brand" href={ctx.site.homeHref} aria-label={ctx.site.name}>
+      <span class="sticker">
+        <span class="tape" aria-hidden="true"></span>
+        {ctx.site.logo
+          ? <Image src={ctx.site.logo} alt="" height={52} densities={[1, 2]} class="logo" loading="eager" />
+          : <span class="mark" aria-hidden="true">{ctx.site.shortName}</span>}
+      </span>
+      <span class="name">{ctx.site.name}</span>
+    </a>
+
+    <div class="actions">
+      {other && (
+        <a class="lang" href={other.href} hreflang={other.locale} lang={other.locale}>{other.name}</a>
+      )}
+      {ctx.cta && (
+        <a class="btn btn--primary cta" href={ctx.cta.href}
+           target={ctx.cta.external ? '_blank' : undefined} rel={ctx.cta.external ? 'noopener' : undefined}>
+          {ctx.cta.label}
+        </a>
+      )}
+      <details class="nav-mobile">
+        <summary class="btn btn--ghost">
+          <svg class="burger" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7c5-1 11-1 16 0M4 12.5c5-.8 11-.6 16 0M4 18c5-1 10-1 16-.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" /></svg>
+          {ctx.ui.menu}
+        </summary>
+        <nav aria-label={ctx.ui.menu}>
+          <ul role="list">
+            {ctx.nav.map((item) => (
+              <li>
+                <a {...linkAttrs(item)}>{item.label}</a>
+                {item.children.length > 0 && (
+                  <ul role="list" class="sub-mobile">
+                    {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+
+  <nav class="nav-desktop" aria-label={ctx.ui.menu}>
+    <ul role="list" class="container">
+      {ctx.nav.map((item) => (
+        <li class:list={[{ 'has-sub': item.children.length > 0 }]}>
+          <a {...linkAttrs(item)}>{item.label}</a>
+          {item.children.length > 0 && (
+            <ul role="list" class="sub">
+              {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .header {
+    position: sticky; inset-block-start: 0; z-index: 20;
+    background: var(--c-surface);
+    border-block-end: 2px dashed var(--c-line);
+    padding-block-start: calc(14px + env(safe-area-inset-top, 0px));
+  }
+  /* The spiral binding along the top of the notebook. */
+  .header::before {
+    content: ""; position: absolute; inset-inline: 0; inset-block-start: env(safe-area-inset-top, 0px); block-size: 16px;
+    background: radial-gradient(circle at 50% 0, transparent 5px, var(--c-muted) 5.5px 7.5px, transparent 8px) 0 0 / 26px 16px repeat-x;
+    opacity: 0.55;
+  }
+  .bar { display: flex; align-items: center; gap: var(--space-4); min-block-size: 72px; }
+  .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--c-ink); text-decoration: none; min-inline-size: 0; }
+  .sticker {
+    position: relative; display: grid; place-items: center; flex: none;
+    padding: 5px 7px; background: var(--c-surface); box-shadow: var(--shadow-paper);
+    rotate: -4deg; transition: rotate var(--dur-base) var(--ease-out);
+  }
+  .sticker .tape { inline-size: 2.6rem; block-size: 0.9rem; inset-block-start: -0.5rem; --tape: var(--crayon-3); }
+  .brand:hover .sticker { rotate: 3deg; }
+  .logo { block-size: 52px; inline-size: auto; }
+  .mark { font-family: var(--font-display); font-weight: 700; padding: var(--space-1) var(--space-2); color: var(--c-accent); }
+  .name {
+    font-family: var(--font-display); font-weight: 600; font-size: var(--step-0); line-height: 1.25;
+    max-inline-size: 22ch;
+  }
+  .actions { display: flex; align-items: center; gap: var(--space-3); margin-inline-start: auto; }
+  .lang {
+    display: grid; place-items: center; min-inline-size: 48px; min-block-size: 48px; padding: var(--space-1) var(--space-3);
+    border: 2px solid var(--c-ink); border-radius: 46% 54% 52% 48% / 55% 45% 55% 45%;
+    background: var(--crayon-6); color: var(--c-ink); text-decoration: none;
+    font-family: var(--font-display); font-weight: 600; font-size: var(--step--1);
+    rotate: 6deg; transition: rotate var(--dur-base) var(--ease-out);
+  }
+  .lang:hover { rotate: -6deg; text-decoration: none; }
+
+  .nav-desktop { position: relative; }
+  .nav-desktop > ul { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); padding-block: var(--space-1) var(--space-2); }
+  .nav-desktop > ul > li:nth-child(6n+1) { --u: var(--crayon-1); }
+  .nav-desktop > ul > li:nth-child(6n+2) { --u: var(--crayon-2); }
+  .nav-desktop > ul > li:nth-child(6n+3) { --u: var(--crayon-3); }
+  .nav-desktop > ul > li:nth-child(6n+4) { --u: var(--crayon-5); }
+  .nav-desktop > ul > li:nth-child(6n+5) { --u: var(--crayon-4); }
+  .nav-desktop > ul > li:nth-child(6n+6) { --u: var(--crayon-2); }
+  .nav-desktop a, .nav-mobile a {
+    position: relative; display: block; padding: var(--space-1) var(--space-3);
+    color: var(--c-ink); text-decoration: none; font-size: var(--step--1); font-weight: 600; white-space: nowrap;
+  }
+  /* A crayon squiggle under the hovered link. */
+  .nav-desktop > ul > li > a::after {
+    content: ""; position: absolute; inset-inline: var(--space-2); inset-block-end: 0; block-size: 8px;
+    background: var(--u, var(--crayon-1));
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 C20 1 30 9 50 5 S80 2 98 6' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 C20 1 30 9 50 5 S80 2 98 6' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    scale: 0 1; transition: scale var(--dur-base) var(--ease-out);
+  }
+  .nav-desktop > ul > li > a:hover::after, .nav-desktop > ul > li > a:focus-visible::after { scale: 1 1; }
+  /* The current page is circled in crayon, like a teacher marking the right answer. */
+  .nav-desktop > ul > li > a[aria-current="page"]::after {
+    inset-block: -3px; inset-inline: -2px; block-size: auto; scale: 1 1;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M80 6 C60 0 18 2 6 14 C-4 26 22 38 54 36 C84 34 100 24 92 12 C86 4 66 2 46 4' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M80 6 C60 0 18 2 6 14 C-4 26 22 38 54 36 C84 34 100 24 92 12 C86 4 66 2 46 4' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+  .has-sub { position: relative; }
+  .sub {
+    display: none; position: absolute; inset-inline-start: 0; inset-block-start: 100%; z-index: 5;
+    min-inline-size: 14rem; padding: var(--space-5) var(--space-3) var(--space-3);
+    background: color-mix(in oklab, var(--crayon-6) 70%, var(--c-surface));
+    box-shadow: var(--shadow-lift); rotate: -1.5deg;
+  }
+  .sub::before {
+    content: ""; position: absolute; inset-block-start: -0.6rem; inset-inline: 0; margin-inline: auto;
+    inline-size: 4.5rem; block-size: 1.3rem; rotate: 3deg;
+    background: color-mix(in srgb, var(--crayon-3) 55%, transparent);
+  }
+  .sub a:hover, .sub a:focus-visible { background: color-mix(in srgb, var(--c-surface) 60%, transparent); }
+  .has-sub:hover > .sub, .has-sub:focus-within > .sub { display: block; }
+
+  .nav-mobile { display: none; position: relative; }
+  .nav-mobile summary { list-style: none; gap: var(--space-2); }
+  .nav-mobile summary::-webkit-details-marker { display: none; }
+  .nav-mobile nav {
+    position: absolute; inset-inline-end: 0; inset-block-start: calc(100% + var(--space-3));
+    inline-size: min(19rem, calc(100vw - 2 * var(--gutter))); max-block-size: 72vh; overflow-y: auto;
+    padding: var(--space-3) var(--space-2) var(--space-3) var(--space-3);
+    background-color: var(--c-surface);
+    background-image: linear-gradient(to bottom, transparent calc(var(--rule-gap) - 1px), var(--rule) calc(var(--rule-gap) - 1px), var(--rule) var(--rule-gap));
+    background-size: 100% var(--rule-gap);
+    border: 2px solid var(--c-ink); border-radius: var(--radius-m); box-shadow: 4px 6px 0 var(--c-ink);
+  }
+  .nav-mobile a { padding-block: var(--space-2); white-space: normal; }
+  .nav-mobile a:hover, .nav-mobile a[aria-current="page"] { background: var(--c-accent-soft); }
+  .sub-mobile { padding-inline-start: var(--space-4); border-inline-start: 2px dotted var(--c-line); margin-inline-start: var(--space-3); }
+
+  @media (max-width: 1080px) {
+    .nav-desktop { display: none; }
+    .nav-mobile { display: block; }
+  }
+  @media (max-width: 600px) {
+    .name { display: none; }
+    .cta { display: none; }
+    .bar { min-block-size: 64px; }
+    .logo { block-size: 44px; }
+  }
+</style>

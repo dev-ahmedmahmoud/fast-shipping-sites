@@ -1,0 +1,206 @@
+---
+// Sketchbook motion: the notebook comes alive as you read it.
+// - Doodles ([data-draw]) draw themselves stroke by stroke when they scroll into view.
+// - Headings ([data-split-words]) bounce in word by word. Words only: Arabic letters join.
+// - Cards flip down like pages ([data-reveal="flip"]), photos drop and settle
+//   ([data-reveal="drop"]), notes pop ([data-reveal="pop"]), the rest fades up ([data-reveal]).
+// - Highlighter marks ([data-highlight]) sweep across.
+// - Ambient loops ([data-loop]: spin, twinkle, bob, float) run only while on screen.
+// - A paper plane flies down the margin line as you scroll (CSS scroll timeline, wide screens).
+// - On capable desktops: the photo pile ([data-tilt]) tilts toward the pointer, and Lenis
+//   smooths scrolling.
+// No GSAP: CSS animations plus one IntersectionObserver keep the script a few KB.
+// Under prefers-reduced-motion nothing moves and every doodle is shown fully drawn.
+---
+<div class="sb-plane-track" aria-hidden="true">
+  <svg class="sb-plane" viewBox="0 0 100 100" focusable="false">
+    <path d="M6 52 L94 12 L68 90 L52 62 Z" />
+    <path d="M52 62 L94 12 M52 62 L46 80 L58 68" />
+  </svg>
+</div>
+
+<script is:inline>
+  // Runs before first paint: arm the entrance states so nothing flashes. If the motion
+  // module never starts (blocked, failed), everything is shown again after 3 seconds.
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var root = document.documentElement;
+    root.classList.add('sb-motion');
+    setTimeout(function () { if (!root.classList.contains('sb-live')) root.classList.remove('sb-motion'); }, 3000);
+  })();
+</script>
+
+<script>
+  import { splitWords } from '@engine/split';
+
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Heavy extras (smooth scrolling, pointer tilt) need a capable desktop.
+  function capable(): boolean {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    return (nav.hardwareConcurrency ?? 4) >= 4 && (nav.deviceMemory ?? 4) >= 4 && !nav.connection?.saveData
+      && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  }
+
+  function stagger(el: Element, selector: string): number {
+    const parent = el.parentElement;
+    if (!parent) return 0;
+    const siblings = [...parent.children].filter((c) => c.matches(selector));
+    return Math.max(0, siblings.indexOf(el)) % 6;
+  }
+
+  function enter() {
+    document.querySelectorAll<HTMLElement>('[data-split-words]').forEach((el) => {
+      splitWords(el).forEach((w, i) => w.style.setProperty('--i', String(i)));
+      el.classList.add('sb-words');
+    });
+
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        e.target.classList.add('sb-in');
+        io.unobserve(e.target);
+      }
+    }, { rootMargin: '0px 0px -5% 0px', threshold: 0.1 });
+
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+      el.style.setProperty('--sd', `${stagger(el, '[data-reveal]') * 0.09}s`);
+      io.observe(el);
+    });
+    document.querySelectorAll('[data-draw], [data-highlight], .sb-words').forEach((el) => io.observe(el));
+
+    const loops = new IntersectionObserver((entries) => {
+      for (const e of entries) e.target.classList.toggle('sb-paused', !e.isIntersecting);
+    });
+    document.querySelectorAll('[data-loop]').forEach((el) => loops.observe(el));
+  }
+
+  function tilt() {
+    document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((el) => {
+      let frame = 0;
+      el.addEventListener('pointermove', (ev) => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          const r = el.getBoundingClientRect();
+          const x = (ev.clientX - r.left) / r.width - 0.5;
+          const y = (ev.clientY - r.top) / r.height - 0.5;
+          el.style.setProperty('--ry', `${(x * 12).toFixed(2)}deg`);
+          el.style.setProperty('--rx', `${(-y * 10).toFixed(2)}deg`);
+        });
+      });
+      el.addEventListener('pointerleave', () => {
+        el.style.setProperty('--ry', '0deg');
+        el.style.setProperty('--rx', '0deg');
+      });
+    });
+  }
+
+  async function smooth() {
+    const { default: Lenis } = await import('lenis');
+    new Lenis({ autoRaf: true, lerp: 0.12, anchors: true });
+  }
+
+  if (!reduce) {
+    root.classList.add('sb-motion', 'sb-live');
+    enter();
+    if (capable()) {
+      tilt();
+      const later = (window as Window & { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1200));
+      later(() => { smooth().catch(() => { /* smooth scrolling is a nicety */ }); });
+    }
+  }
+</script>
+
+<style is:global>
+  /* ---------- Entrances. Each "before" state applies only while motion is on and the
+     element has not entered yet; the entrance itself is a keyframe animation. ---------- */
+  .sb-motion [data-draw]:not(.sb-in) path:not(.doodle-fill) { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .sb-motion [data-draw]:not(.sb-in) .doodle-fill { opacity: 0; }
+  .sb-motion [data-draw].sb-in path:not(.doodle-fill) {
+    stroke-dasharray: 1;
+    animation: sb-draw 0.85s var(--ease-in-out) both;
+    animation-delay: calc(var(--d, 0s) + var(--sd, 0s) + var(--n, 0) * 0.24s);
+  }
+  .sb-motion [data-draw].sb-in .doodle-fill { animation: sb-fade 0.6s ease-out both; animation-delay: calc(var(--d, 0s) + 0.9s); }
+
+  .sb-motion [data-reveal]:not([data-reveal="drop"]):not(.sb-in) { opacity: 0; }
+  .sb-motion [data-reveal].sb-in {
+    animation: sb-rise var(--dur-slow) var(--ease-out) both;
+    animation-delay: calc(var(--d, 0s) + var(--sd, 0s));
+  }
+  .sb-motion [data-reveal="flip"]:not(.sb-in) { transform: perspective(800px) rotateX(-70deg); transform-origin: 50% 0; }
+  .sb-motion [data-reveal="flip"].sb-in { transform-origin: 50% 0; animation-name: sb-flip; }
+  .sb-motion [data-reveal="drop"]:not(.sb-in) { transform: translateY(-38px) rotate(9deg) scale(1.08); }
+  .sb-motion [data-reveal="drop"].sb-in { animation-name: sb-drop; animation-duration: 0.95s; }
+  .sb-motion [data-reveal="pop"]:not(.sb-in) { transform: scale(0.72) rotate(-4deg); }
+  .sb-motion [data-reveal="pop"].sb-in { animation-name: sb-pop; }
+
+  .sb-motion [data-highlight]:not(.sb-in) { background-size: 0% 100%; }
+  .sb-motion [data-highlight].sb-in { animation: sb-swipe 0.8s var(--ease-in-out) both; animation-delay: calc(var(--d, 0s) + 0.5s); }
+
+  .sb-motion .sb-words.sb-in [data-word] {
+    animation: sb-boing 0.75s var(--ease-out) both;
+    animation-delay: calc(var(--d, 0s) + var(--i, 0) * 0.06s);
+  }
+
+  @keyframes sb-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes sb-fade { from { opacity: 0; } }
+  @keyframes sb-rise { from { opacity: 0; transform: translateY(var(--reveal-distance)); } to { opacity: 1; transform: none; } }
+  @keyframes sb-flip { from { opacity: 0; transform: perspective(800px) rotateX(-70deg); } 60% { opacity: 1; } to { opacity: 1; transform: perspective(800px) rotateX(0deg); } }
+  @keyframes sb-drop { from { transform: translateY(-38px) rotate(9deg) scale(1.08); } 70% { transform: translateY(3px) rotate(-1deg) scale(0.99); } to { transform: none; } }
+  @keyframes sb-pop { from { opacity: 0; transform: scale(0.72) rotate(-4deg); } to { opacity: 1; transform: none; } }
+  @keyframes sb-swipe { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
+  @keyframes sb-boing {
+    0% { transform: none; }
+    30% { transform: translateY(-0.22em) rotate(-5deg) scale(1.12); }
+    62% { transform: translateY(0.04em) rotate(2.5deg) scale(0.97); }
+    100% { transform: none; }
+  }
+
+  /* ---------- Ambient loops: they start once the entrance is over, and pause off screen. ---------- */
+  .sb-motion [data-loop="spin"] { animation: sb-spin 48s linear 2s infinite; }
+  .sb-motion [data-loop="twinkle"] { animation: sb-twinkle 2.6s ease-in-out 2s infinite; }
+  .sb-motion [data-loop="bob"] { animation: sb-bob 3.2s ease-in-out 2s infinite alternate; }
+  .sb-motion [data-loop="float"] { animation: sb-float 4.5s ease-in-out 2s infinite alternate; }
+  .sb-motion [data-loop].sb-paused { animation-play-state: paused; }
+  @keyframes sb-spin { to { transform: rotate(1turn); } }
+  @keyframes sb-twinkle { 50% { scale: 0.78; } }
+  @keyframes sb-bob { to { translate: 0 -10px; } }
+  @keyframes sb-float { to { translate: 14px -12px; } }
+
+  /* ---------- The photo pile tilts toward the pointer. ---------- */
+  .sb-live [data-tilt] {
+    transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transform-style: preserve-3d; transition: transform 0.45s ease-out;
+  }
+
+  /* ---------- A paper plane flying down the margin as the page scrolls. ---------- */
+  .sb-plane-track { display: none; }
+  @supports (animation-timeline: scroll()) {
+    @media (min-width: 1100px) {
+      .sb-motion .sb-plane-track {
+        display: block; position: fixed; z-index: 1; pointer-events: none;
+        inset-block: 120px 40px; inset-inline-start: clamp(3px, 2.4vw - 6px, 40px); inline-size: 5px;
+      }
+      .sb-plane {
+        position: absolute; inset-block-start: 0; inset-inline-start: -17px; inline-size: 38px; block-size: 38px;
+        fill: none; stroke: var(--crayon-1, currentColor); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round;
+        animation: sb-fly linear both; animation-timeline: scroll(root);
+      }
+      @keyframes sb-fly {
+        0% { translate: 0 0; rotate: 110deg; }
+        20% { translate: 18px 18vh; rotate: 95deg; }
+        40% { translate: -10px 36vh; rotate: 130deg; }
+        60% { translate: 16px 54vh; rotate: 100deg; }
+        80% { translate: -8px 64vh; rotate: 125deg; }
+        100% { translate: 0 calc(100vh - 220px); rotate: 115deg; }
+      }
+    }
+  }
+
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-stopped { overflow: hidden; }
+</style>
