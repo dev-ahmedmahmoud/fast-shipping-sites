@@ -1,0 +1,296 @@
+{
+  "submittedAt": "2026-10-22T08:13:01.973Z",
+  "changed": [
+    "B02",
+    "B04",
+    "B06",
+    "B08",
+    "B09",
+    "B10",
+    "B12",
+    "B14",
+    "B15",
+    "B16",
+    "B20",
+    "B22",
+    "B23",
+    "B26",
+    "B28",
+    "B29",
+    "B30",
+    "B31",
+    "B33",
+    "B37",
+    "B39",
+    "B40",
+    "B42"
+  ],
+  "final": {
+    "B01": {
+      "a": "Leaders' Foundation International School (LFIS)\nمدارس تأسيس القادة العالمية",
+      "changed": false,
+      "q": "Official name in English and Arabic"
+    },
+    "B02": {
+      "a": "Take it from the old site and redraw it as SVG",
+      "changed": true,
+      "q": "Logo"
+    },
+    "B03": {
+      "a": "Derive them from the logo; each design system adapts them",
+      "changed": false,
+      "q": "Brand colors"
+    },
+    "B04": {
+      "a": "Think to bring about a difference.\n\nفلتكن سببا في إحداث فارق",
+      "changed": true,
+      "q": "Motto or tagline, in both languages"
+    },
+    "B05": {
+      "a": [
+        "Warm and nurturing",
+        "Modern and ambitious, in the spirit of Vision 2030"
+      ],
+      "changed": false,
+      "q": "Tone of voice"
+    },
+    "B06": {
+      "a": [
+        "Admissions enquiries and applications",
+        "Prestige and trust",
+        "Parent information: calendar, news, policies",
+        "Recruiting teachers and staff",
+        "A gateway to EduSync: parent and student login"
+      ],
+      "changed": true,
+      "q": "What must the site achieve?"
+    },
+    "B07": {
+      "a": "Arabic first, English one tap away",
+      "changed": false,
+      "q": "Default language"
+    },
+    "B08": {
+      "a": "Arabic-Indic digits (٠–٩)",
+      "changed": true,
+      "q": "Numerals in the Arabic version"
+    },
+    "B09": {
+      "a": "Gregorian only",
+      "changed": true,
+      "q": "Dates"
+    },
+    "B10": {
+      "a": [
+        "Home",
+        "About: message from the Superintendent, vision, mission",
+        "Academics, by stage",
+        "Admissions: steps, requirements, documents",
+        "News",
+        "Contact",
+        "Parent and student portal link (EduSync)",
+        "Careers",
+        "Policies"
+      ],
+      "changed": true,
+      "note": "Make sure old site pages are not missed",
+      "q": "Pages to include"
+    },
+    "B11": {
+      "a": "Pre-K to Grade 9?",
+      "changed": false,
+      "q": "Grade levels offered"
+    },
+    "B12": {
+      "a": "American curriculum? I think only national",
+      "changed": true,
+      "q": "Curriculum, accreditation and licences"
+    },
+    "B13": {
+      "a": "Don't show fees; offer a 'Request fees' button",
+      "changed": false,
+      "note": "Nothing at all ... if not already shown in the old site",
+      "q": "Fees on the website"
+    },
+    "B14": {
+      "a": "Keep them on the public site",
+      "changed": true,
+      "note": "Static for now until we build the CSM",
+      "q": "Weekly plans (PDFs on the old site)"
+    },
+    "B15": {
+      "a": "Keep them",
+      "changed": true,
+      "note": "If old site does it",
+      "q": "Pages that list children by name"
+    },
+    "B16": {
+      "a": "Use the old text as it is",
+      "changed": true,
+      "q": "Copy quality"
+    },
+    "B17": {
+      "a": [
+        "Start from the old site's Arabic and polish it",
+        "Translate from the English wherever Arabic is missing",
+        "A native speaker at the client proofreads before launch"
+      ],
+      "changed": false,
+      "note": "Do not polish arabic",
+      "q": "Arabic copy"
+    },
+    "B18": {
+      "a": "Founded in 2021.",
+      "changed": false,
+      "q": "Numbers and social proof to feature"
+    },
+    "B19": {
+      "a": "People without visible faces: from behind, hands at work, silhouettes, soft blur",
+      "changed": false,
+      "note": "Just make sure no woman without hijab and make sure that photos of the students reflect culture",
+      "q": "People in photos"
+    },
+    "B20": {
+      "a": "Mixed scenes are fine for the early years",
+      "changed": true,
+      "q": "Boys and girls in imagery"
+    },
+    "B21": {
+      "a": "Never shown",
+      "changed": false,
+      "q": "Women (teachers, staff, mothers) in imagery"
+    },
+    "B22": {
+      "a": "Allowed for everything, within the modesty rules",
+      "changed": true,
+      "q": "AI-generated images"
+    },
+    "B23": {
+      "a": "Geometric and abstract only",
+      "changed": true,
+      "note": "They do not have a mascot",
+      "q": "Illustrations and mascots"
+    },
+    "B24": {
+      "a": "No music. Video is silent or voice-only, and nothing autoplays with sound",
+      "changed": false,
+      "q": "Sound and video"
+    },
+    "B25": {
+      "a": "Yes, shown with care",
+      "changed": false,
+      "note": "Only and only if the pld site has it",
+      "q": "Quran verses, hadith, Bismillah"
+    },
+    "B26": {
+      "a": [
+        "None"
+      ],
+      "changed": true,
+      "note": "No sessonal themes",
+      "q": "Seasonal themes the site can switch to"
+    },
+    "B27": {
+      "a": [
+        "Crosses and other faiths' religious symbols",
+        "Christmas, Halloween, Valentine's Day and similar themes",
+        "Immodest, tight or revealing clothing",
+        "Mixed-gender adult scenes",
+        "Alcohol, pork, gambling, smoking",
+        "Dogs as pets or mascots",
+        "Musical instruments and music notes",
+        "Zodiac signs, astrology, horoscopes",
+        "The Kaaba or Mushaf pages used as decoration or background"
+      ],
+      "changed": false,
+      "q": "Always avoid"
+    },
+    "B28": {
+      "a": [],
+      "changed": true,
+      "q": "Heritage and identity motifs"
+    },
+    "B29": {
+      "a": "None: stock and generated art only",
+      "changed": true,
+      "note": "Use from old site too ",
+      "q": "Real photos of the school"
+    },
+    "B30": {
+      "a": "Stock footage",
+      "changed": true,
+      "note": "Old site footage or Generative heri video with actual humans if not so expensive",
+      "q": "Hero video"
+    },
+    "B31": {
+      "a": "Just copy paste as is",
+      "changed": true,
+      "q": "Campus, branches and school hours"
+    },
+    "B32": {
+      "a": "'Apply now' links to the EduSync admission form",
+      "changed": false,
+      "q": "Admissions"
+    },
+    "B33": {
+      "a": [
+        "Phone",
+        "Department emails: front desk, admissions, HR, accounts",
+        "Contact form",
+        "Map with directions",
+        "Social links: Instagram, X, Snapchat, Facebook"
+      ],
+      "changed": true,
+      "note": "Exact same means mentioned in the old site",
+      "q": "Contact channels"
+    },
+    "B34": {
+      "a": "Into EduSync (Odoo) as leads",
+      "changed": false,
+      "q": "Where do form submissions go?"
+    },
+    "B35": {
+      "a": "Job list on the site; applications go to your recruiting system",
+      "changed": false,
+      "note": "The careers link should lead to edusync public job list",
+      "q": "Careers"
+    },
+    "B36": {
+      "a": "Posts kept in the site's content files (we add them)",
+      "changed": false,
+      "note": "Static news section for now from old site until CMS i sos built in.phase 2",
+      "q": "News"
+    },
+    "B37": {
+      "a": "None",
+      "changed": true,
+      "q": "Analytics"
+    },
+    "B38": {
+      "a": "Redirect every old URL to its new page, keeping Google rankings",
+      "changed": false,
+      "note": "We will keep the same urls",
+      "q": "Old URLs"
+    },
+    "B39": {
+      "a": "We will hand it over to the person mannally",
+      "changed": true,
+      "q": "Who signs off at the client?"
+    },
+    "B40": {
+      "a": "3 days",
+      "changed": true,
+      "q": "Deadlines"
+    },
+    "B41": {
+      "a": "3",
+      "changed": false,
+      "q": "How many samples does this client see?"
+    },
+    "B42": {
+      "a": "CLASSIRA Edtech company",
+      "changed": true,
+      "q": "Websites they love or hate"
+    }
+  }
+}

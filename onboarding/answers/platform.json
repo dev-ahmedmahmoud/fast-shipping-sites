@@ -1,0 +1,140 @@
+{
+  "submittedAt": "2026-10-22T07:46:20.232Z",
+  "changed": [
+    "A01",
+    "A04",
+    "A05"
+  ],
+  "final": {
+    "A01": {
+      "a": "Schools and education groups only (EduSync customers)",
+      "changed": true,
+      "q": "Who will the future clients be?"
+    },
+    "A02": {
+      "a": "5 to 20",
+      "changed": false,
+      "q": "How many client sites do you expect in the next 12 months?"
+    },
+    "A03": {
+      "a": "One monorepo: engine, design systems and every client's content",
+      "changed": false,
+      "note": "I know that claude app has a system design feature ... research this and see how can we make use of it",
+      "q": "Repository layout"
+    },
+    "A04": {
+      "a": [
+        "Their current website URL (we import the text and images)"
+      ],
+      "changed": true,
+      "q": "What is the minimum a new client hands over?"
+    },
+    "A05": {
+      "a": "Non-technical staff through a web dashboard",
+      "changed": true,
+      "note": "I already created an onboarding console for our clients we can use it, another agent works on it ... you will coordinate together",
+      "q": "Who runs onboarding day to day?"
+    },
+    "A06": {
+      "a": "4",
+      "changed": false,
+      "q": "How many design systems in the first batch?"
+    },
+    "A07": {
+      "a": [
+        "Mashrabiya: light through lattice",
+        "Aurora: dark and luminous",
+        "Playground: for KG and primary",
+        "Tessellate: living geometry"
+      ],
+      "changed": false,
+      "q": "Which directions should the first batch cover?"
+    },
+    "A08": {
+      "a": "In code (tokens and components) and as Claude Design System artifacts",
+      "changed": false,
+      "q": "Where should the design systems live?"
+    },
+    "A09": {
+      "a": "Full themes whose palette, type, layout and motion can be mixed",
+      "changed": false,
+      "q": "How separable should a design system be?"
+    },
+    "A10": {
+      "a": "Bold but fast: one signature hero moment per system, scroll reveals, micro-interactions",
+      "changed": false,
+      "q": "Default animation intensity"
+    },
+    "A11": {
+      "a": "Lighthouse mobile performance of 90 or more; animations degrade gracefully",
+      "changed": false,
+      "q": "Performance floor on a mid-range Android phone"
+    },
+    "A12": {
+      "a": "Astro",
+      "changed": false,
+      "q": "Framework"
+    },
+    "A13": {
+      "a": [
+        "Only me and Claude"
+      ],
+      "changed": false,
+      "q": "Besides Claude, who will touch this code?"
+    },
+    "A14": {
+      "a": "We edit content files through Claude Code and the site rebuilds",
+      "changed": false,
+      "q": "How is content updated after launch?"
+    },
+    "A15": {
+      "a": "Cloudflare Pages, connected to this GitHub repo",
+      "changed": false,
+      "q": "Hosting"
+    },
+    "A16": {
+      "a": "One preview domain per client, with a path per design system",
+      "changed": false,
+      "q": "Preview URLs for design samples"
+    },
+    "A17": {
+      "a": "leadersfis.com: repoint its DNS to the new host",
+      "changed": false,
+      "q": "Final production domain for LFIS"
+    },
+    "A18": {
+      "a": "I'll tell the Infra Agent to create the Cloudflare Pages project and the preview DNS record",
+      "changed": false,
+      "q": "Go-ahead for deployment"
+    },
+    "A19": {
+      "a": "I'll switch this environment's network access to Full",
+      "changed": false,
+      "q": "This cloud environment blocks most of the internet. How do we fix that?"
+    },
+    "A20": {
+      "a": [
+        "Old-site images, upscaled with a free open-source model (Real-ESRGAN)",
+        "Free stock from Unsplash, Pexels and Pixabay, each image checked against the client's media rules",
+        "Art generated in code: geometric patterns, SVG illustrations, WebGL scenes"
+      ],
+      "changed": false,
+      "q": "Which image sources may I use?"
+    },
+    "A21": {
+      "a": "$0: free tools only",
+      "changed": false,
+      "q": "Monthly budget for paid APIs (image generation, upscaling, stock)"
+    },
+    "A22": {
+      "a": "A comparison gallery: live samples side by side, a 'choose this' button and comments",
+      "changed": false,
+      "q": "How does a client choose between samples?"
+    },
+    "A23": {
+      "a": "A full homepage plus one inner page, with real content in both languages",
+      "changed": false,
+      "q": "How complete is each sample?"
+    }
+  }
+}
