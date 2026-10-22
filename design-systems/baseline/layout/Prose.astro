@@ -1,12 +1,22 @@
 ---
 import type { PageContext } from '@engine/context';
-interface Props { ctx: PageContext; title: string; lead?: string; todo?: string[] }
-const { ctx, title, lead, todo = [] } = Astro.props;
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  todo?: string[];
+  /** 1 for a page's own title (default); 2 when several Prose blocks share a page, e.g. news items. */
+  headingLevel?: 1 | 2;
+  /** Anchor id, so other pages can link to this block. */
+  id?: string;
+}
+const { ctx, title, lead, todo = [], headingLevel = 1, id } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
 ---
-<article class="section">
+<article class:list={['section', { item: headingLevel === 2 }]} id={id}>
   <div class="container narrow">
     <header class="head">
-      <h1 data-split-words>{title}</h1>
+      <Heading data-split-words>{title}</Heading>
       {lead && <p class="lead">{lead}</p>}
     </header>
     {todo.length > 0 && (
@@ -25,15 +35,42 @@ const { ctx, title, lead, todo = [] } = Astro.props;
   .narrow { max-inline-size: calc(46rem + 2 * var(--gutter)); display: flex; flex-direction: column; gap: var(--space-5); }
   .head { display: flex; flex-direction: column; gap: var(--space-3); padding-block-start: var(--space-4); }
   h1 { font-size: var(--step-4); }
+  .item h2 { font-size: var(--step-2); }
+  .item { scroll-margin-block-start: 140px; border-block-start: 1px solid var(--c-line); }
   .lead { font-size: var(--step-1); color: var(--c-muted); }
-  .prose { max-inline-size: 68ch; }
+  .item .lead { font-size: var(--step--1); }
+  .prose { max-inline-size: 68ch; min-inline-size: 0; }
   .prose :global(> * + *) { margin-block-start: var(--space-4); }
   .prose :global(h2) { font-size: var(--step-2); margin-block-start: var(--space-7); }
   .prose :global(h3) { font-size: var(--step-1); margin-block-start: var(--space-6); }
+  .prose :global(h4) { font-size: var(--step-0); margin-block-start: var(--space-5); }
   .prose :global(ul), .prose :global(ol) { padding-inline-start: var(--space-5); }
   .prose :global(li + li) { margin-block-start: var(--space-2); }
   .prose :global(img) { border-radius: var(--radius-m); }
+  .prose :global(video) { inline-size: 100%; border-radius: var(--radius-m); background: var(--c-sunk); }
+  .prose :global(.embed) { inline-size: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: var(--radius-m); background: var(--c-sunk); }
+  .prose :global(.embed--map) { aspect-ratio: 4 / 3; }
   .prose :global(blockquote) { margin-inline: 0; padding-inline-start: var(--space-4); border-inline-start: 3px solid var(--c-accent); color: var(--c-muted); }
   .prose :global(table) { border-collapse: collapse; inline-size: 100%; display: block; overflow-x: auto; }
   .prose :global(th), .prose :global(td) { border: 1px solid var(--c-line); padding: var(--space-2) var(--space-3); text-align: start; }
+  .prose :global(.actions) { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .prose :global(.downloads) { list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+  .prose :global(.downloads li) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2) var(--space-4); padding: var(--space-2) var(--space-3); border: 1px solid var(--c-line); border-radius: var(--radius-s); }
+  .prose :global(.downloads li + li) { margin-block-start: 0; }
+  .prose :global(.gallery) { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr)); gap: var(--space-3); }
+  .prose :global(.gallery img) { inline-size: 100%; block-size: auto; }
+  .prose :global(.students) { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); gap: var(--space-4); }
+  .prose :global(.students figure) { margin: 0; display: flex; flex-direction: column; gap: var(--space-2); text-align: center; }
+  .prose :global(.students img) { inline-size: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+  .prose :global(.students figcaption) { font-size: var(--step--1); }
+  .prose :global(.note) { padding: var(--space-3) var(--space-4); border-radius: var(--radius-m); background: var(--c-accent-soft); }
+
+  /* Old-site forms, shown as they were; sending is not wired up yet. */
+  .prose :global(.form) { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--c-line); border-radius: var(--radius-m); background: var(--c-surface); }
+  .prose :global(.form input), .prose :global(.form select), .prose :global(.form textarea) {
+    inline-size: 100%; min-block-size: 44px; padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--c-line); border-radius: var(--radius-s); background: var(--c-bg);
+  }
+  .prose :global(.form textarea) { min-block-size: 6rem; resize: vertical; }
+  .prose :global(.form button[disabled]) { opacity: 0.6; cursor: not-allowed; justify-self: start; }
 </style>

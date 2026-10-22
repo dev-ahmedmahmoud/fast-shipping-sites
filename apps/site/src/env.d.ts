@@ -7,4 +7,5 @@ interface ImportMetaEnv {
   readonly FSS_MODE: 'site' | 'gallery-index';
   readonly FSS_SHOW_TODO: boolean;
   readonly FSS_NOINDEX: boolean;
+  readonly FSS_SHOW_DRAFTS: boolean;
 }

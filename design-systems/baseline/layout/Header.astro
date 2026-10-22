@@ -1,30 +1,24 @@
 ---
-import type { PageContext } from '@engine/context';
+import { Image } from 'astro:assets';
+import type { PageContext, NavItem } from '@engine/context';
 interface Props { ctx: PageContext }
 const { ctx } = Astro.props;
 const other = ctx.languages.find((l) => !l.current);
+const linkAttrs = (item: NavItem) => ({
+  href: item.href,
+  'aria-current': item.current ? 'page' : undefined,
+  target: item.external ? '_blank' : undefined,
+  rel: item.external ? 'noopener' : undefined,
+});
 ---
 <header class="header">
   <div class="container bar">
     <a class="brand" href={ctx.site.homeHref} aria-label={ctx.site.name}>
       {ctx.site.logo
-        ? <img src={ctx.site.logo} alt="" width="40" height="40" />
+        ? <Image src={ctx.site.logo} alt="" height={48} class="logo" loading="eager" />
         : <span class="mark" aria-hidden="true">{ctx.site.shortName}</span>}
       <span class="name">{ctx.site.name}</span>
     </a>
-
-    <nav class="nav-desktop" aria-label={ctx.ui.menu}>
-      <ul role="list">
-        {ctx.nav.map((item) => (
-          <li>
-            <a href={item.href} aria-current={item.current ? 'page' : undefined}
-               target={item.external ? '_blank' : undefined} rel={item.external ? 'noopener' : undefined}>
-              {item.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
 
     <div class="actions">
       {other && (
@@ -42,10 +36,12 @@ const other = ctx.languages.find((l) => !l.current);
           <ul role="list">
             {ctx.nav.map((item) => (
               <li>
-                <a href={item.href} aria-current={item.current ? 'page' : undefined}
-                   target={item.external ? '_blank' : undefined} rel={item.external ? 'noopener' : undefined}>
-                  {item.label}
-                </a>
+                <a {...linkAttrs(item)}>{item.label}</a>
+                {item.children.length > 0 && (
+                  <ul role="list" class="sub-mobile">
+                    {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>
@@ -53,49 +49,75 @@ const other = ctx.languages.find((l) => !l.current);
       </details>
     </div>
   </div>
+
+  <nav class="nav-desktop" aria-label={ctx.ui.menu}>
+    <ul role="list" class="container">
+      {ctx.nav.map((item) => (
+        <li class:list={[{ 'has-sub': item.children.length > 0 }]}>
+          <a {...linkAttrs(item)}>{item.label}</a>
+          {item.children.length > 0 && (
+            <ul role="list" class="sub">
+              {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  </nav>
 </header>
 
 <style>
   .header {
     position: sticky; inset-block-start: 0; z-index: 20;
-    background: color-mix(in srgb, var(--c-surface) 92%, transparent);
+    background: color-mix(in srgb, var(--c-surface) 94%, transparent);
     backdrop-filter: blur(8px);
     border-block-end: 1px solid var(--c-line);
     padding-block-start: env(safe-area-inset-top, 0px);
   }
   .bar { display: flex; align-items: center; gap: var(--space-5); min-block-size: 68px; }
   .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--c-ink); text-decoration: none; min-inline-size: 0; }
+  .logo { block-size: 48px; inline-size: auto; }
   .mark {
     font-family: var(--font-display); font-weight: 700; font-size: var(--step-0);
     padding: var(--space-1) var(--space-2); border-radius: var(--radius-s);
     background: var(--c-accent); color: var(--c-accent-ink);
   }
-  .name { font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--step--1); line-height: 1.3; max-inline-size: 22ch; }
-  .nav-desktop { margin-inline-start: auto; }
-  .nav-desktop ul { display: flex; gap: var(--space-1); }
+  .name { font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--step--1); line-height: 1.3; max-inline-size: 24ch; }
+  .actions { display: flex; align-items: center; gap: var(--space-3); margin-inline-start: auto; }
+  .lang { color: var(--c-ink); text-decoration: none; font-size: var(--step--1); font-weight: 500; padding: var(--space-2); }
+  .lang:hover { text-decoration: underline; }
+
+  .nav-desktop { border-block-start: 1px solid var(--c-line); }
+  .nav-desktop > ul { display: flex; flex-wrap: wrap; gap: var(--space-1); padding-block: var(--space-1); }
   .nav-desktop a, .nav-mobile a {
     display: block; padding: var(--space-2) var(--space-3); border-radius: var(--radius-s);
-    color: var(--c-ink); text-decoration: none; font-size: var(--step--1); font-weight: 500;
+    color: var(--c-ink); text-decoration: none; font-size: var(--step--1); font-weight: 500; white-space: nowrap;
   }
   .nav-desktop a:hover, .nav-mobile a:hover { background: var(--c-sunk); }
   a[aria-current="page"] { color: var(--c-accent); }
-  .actions { display: flex; align-items: center; gap: var(--space-3); }
-  .lang { color: var(--c-ink); text-decoration: none; font-size: var(--step--1); font-weight: 500; padding: var(--space-2); }
-  .lang:hover { text-decoration: underline; }
+  .has-sub { position: relative; }
+  .sub {
+    display: none; position: absolute; inset-inline-start: 0; inset-block-start: 100%; z-index: 5;
+    min-inline-size: 14rem; padding: var(--space-2);
+    background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius-m);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.12);
+  }
+  .has-sub:hover > .sub, .has-sub:focus-within > .sub { display: block; }
+
   .nav-mobile { display: none; position: relative; }
   .nav-mobile summary { list-style: none; cursor: pointer; }
   .nav-mobile summary::-webkit-details-marker { display: none; }
   .nav-mobile nav {
     position: absolute; inset-inline-end: 0; inset-block-start: calc(100% + var(--space-2));
-    min-inline-size: 15rem; padding: var(--space-2);
+    min-inline-size: 16rem; max-block-size: 75vh; overflow-y: auto; padding: var(--space-2);
     background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius-m);
     box-shadow: 0 12px 32px rgb(0 0 0 / 0.12);
   }
+  .sub-mobile { padding-inline-start: var(--space-4); }
 
   @media (max-width: 1080px) {
     .nav-desktop { display: none; }
     .nav-mobile { display: block; }
-    .actions { margin-inline-start: auto; }
   }
   @media (max-width: 560px) {
     .name { display: none; }

@@ -24,8 +24,11 @@ const external = ctx.nav.filter((n) => n.external);
       <h2 class="label">{ctx.ui.contact}</h2>
       <ul role="list">
         {ctx.contact.address && <li>{ctx.contact.address}</li>}
-        {ctx.contact.phones.map((p) => <li><a href={`tel:${p.replace(/\s+/g, '')}`} dir="ltr">{p}</a></li>)}
+        {ctx.contact.phones.map((p) => (
+          <li>{p.label && <>{p.label}: </>}<a href={`tel:${p.number.replace(/\s+/g, '')}`} dir="ltr">{p.number}</a></li>
+        ))}
         {ctx.contact.emails.map((e) => <li>{e.label}: <a href={`mailto:${e.address}`} dir="ltr">{e.address}</a></li>)}
+        {ctx.contact.hours && <li>{ctx.contact.hours}</li>}
         {ctx.contact.mapUrl && <li><a href={ctx.contact.mapUrl} target="_blank" rel="noopener">{ctx.ui.map}</a></li>}
       </ul>
     </div>
@@ -40,7 +43,10 @@ const external = ctx.nav.filter((n) => n.external);
     )}
   </div>
   <div class="container legal">
-    <p>© {ctx.year} {ctx.site.name}. {ctx.ui.rights}.</p>
+    <p>{ctx.legal.copyright ?? `© ${ctx.year} ${ctx.site.name}. ${ctx.ui.rights}.`}</p>
+    {ctx.legal.credit && (
+      <p>{ctx.legal.credit.href ? <a href={ctx.legal.credit.href} target="_blank" rel="noopener">{ctx.legal.credit.text}</a> : ctx.legal.credit.text}</p>
+    )}
   </div>
 </footer>
 
@@ -54,9 +60,11 @@ const external = ctx.nav.filter((n) => n.external);
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--space-6); }
   .col { display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; }
   .col ul { display: flex; flex-direction: column; gap: var(--space-2); }
+  .col li { overflow-wrap: anywhere; }
   .col a { color: var(--c-ink); text-decoration: none; }
   .col a:hover { color: var(--c-accent); text-decoration: underline; }
   .name { font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--step-1); line-height: var(--lh-heading); }
   .motto { color: var(--c-muted); }
-  .legal { margin-block-start: var(--space-6); padding-block-start: var(--space-4); border-block-start: 1px solid var(--c-line); color: var(--c-muted); }
+  .legal { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3); margin-block-start: var(--space-6); padding-block-start: var(--space-4); border-block-start: 1px solid var(--c-line); color: var(--c-muted); }
+  .legal a { color: inherit; }
 </style>

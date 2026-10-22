@@ -2,14 +2,14 @@
 // Every client page, at the exact URL path its content file declares.
 import Base from '../layouts/Base.astro';
 import { components } from '@layout/index';
-import { entries, newsFor, resolveAction, resolveHref, type Entry } from '@engine/content';
+import { pages, newsFor, resolveAction, resolveHref, type Entry } from '@engine/content';
 import { buildContext } from '@engine/context';
-import { url } from '@engine/links';
+import { mediaList } from '@engine/media';
 
 export function getStaticPaths() {
   // A gallery-index build renders only the comparison page (src/gallery/Index.astro).
   if (import.meta.env.FSS_MODE !== 'site') return [];
-  return entries.map((entry) => ({ params: { path: entry.slug || undefined }, props: { entry } }));
+  return pages.map((entry) => ({ params: { path: entry.slug || undefined }, props: { entry } }));
 }
 
 interface Props { entry: Entry }
@@ -20,11 +20,12 @@ const Content = entry.Content;
 const ctx = buildContext(entry);
 const fm = entry.fm as Record<string, any>;
 const todo = import.meta.env.FSS_SHOW_TODO ? entry.todo : [];
+const news = newsFor(ctx.locale);
 
 const newsItems = (limit?: number) =>
-  newsFor(ctx.locale).slice(0, limit ?? Infinity).map((n) => ({
+  news.slice(0, limit ?? Infinity).map((n) => ({
     title: n.title,
-    href: url(n.slug),
+    href: n.href,
     date: n.date ? ctx.fmt.date(n.date) : undefined,
     excerpt: n.description,
   }));
@@ -44,8 +45,10 @@ const linkItems = (items: any[] = []) =>
   <Base ctx={ctx} title={ctx.site.name} description={entry.description}>
     {fm.hero && (
       <Hero ctx={ctx} eyebrow={fm.hero.eyebrow} title={fm.hero.title} lead={fm.hero.lead}
+        images={mediaList(fm.hero.images)}
         actions={(fm.hero.actions ?? []).map((a: unknown) => resolveAction(a, ctx.locale)).filter(Boolean)} />
     )}
+    {fm.intro && <Prose ctx={ctx} title={fm.intro.title} headingLevel={2}><Content /></Prose>}
     {fm.features && <FeatureGrid ctx={ctx} title={fm.features.title} items={linkItems(fm.features.items)} />}
     {fm.stats && <Stats ctx={ctx} title={fm.stats.title} items={(fm.stats.items ?? []).map(formatStat)} />}
     {fm.news && (
@@ -57,14 +60,14 @@ const linkItems = (items: any[] = []) =>
 ) : entry.template === 'news' ? (
   <Base ctx={ctx} title={entry.title} description={entry.description}>
     <NewsList ctx={ctx} title={entry.title} items={newsItems()} headingLevel={1} />
-    {todo.length > 0 && (
-      <div class="container">
-        <aside class="todo-note">
-          <strong>{ctx.ui.pending}</strong>
-          <ul lang="en" dir="ltr">{todo.map((t) => <li>{t}</li>)}</ul>
-        </aside>
-      </div>
-    )}
+    {news.map((n) => {
+      const Item = n.Content;
+      return (
+        <Prose ctx={ctx} title={n.title} lead={n.date ? ctx.fmt.date(n.date) : undefined} headingLevel={2} id={n.id}>
+          <Item />
+        </Prose>
+      );
+    })}
   </Base>
 ) : (
   <Base ctx={ctx} title={entry.title} description={entry.description}>

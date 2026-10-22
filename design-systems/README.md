@@ -42,14 +42,21 @@ Copy `baseline/` to start a new system, then change it.
 
 ## What components receive
 
-Every component gets `ctx: PageContext`: locale, direction, UI strings, site name and motto, nav, footer links, the header call to action, language links, contact, social, and formatters for numbers, years and dates in the client's numerals. Section components also get their section data, with links already resolved:
+Every component gets `ctx: PageContext`: locale, direction, UI strings, site name, motto and logo, nav, footer links, the header call to action, language links, contact (address, phones, WhatsApp, department emails, hours, map), social, the footer's legal line and credit (`ctx.legal`), and formatters for numbers, years and dates in the client's numerals.
+
+- `ctx.site.logo` is image metadata (or null): render it with `<Image>` from `astro:assets` so it is resized and served as WebP.
+- `ctx.nav` items can have `children` (a sub-menu, e.g. Admission ▸ New registration). External items (portals, careers) come last with `external: true`.
+
+Section components also get their section data, with links already resolved:
 
 | Component | Props besides `ctx` |
 | --- | --- |
 | Header, Footer | none |
-| Hero | `eyebrow?`, `title`, `lead?`, `actions: {label, href, external}[]` |
+| Hero | `eyebrow?`, `title`, `lead?`, `actions: {label, href, external}[]`, `images?: ImageMetadata[]` (the client's hero photos; show any, all or none) |
 | FeatureGrid | `title?`, `items: {title, text?, href?, external?}[]` |
 | Stats | `title?`, `items: {value, label}[]` (values already formatted) |
 | NewsList | `title?`, `items: {title, href, date?, excerpt?}[]`, `more?`, `headingLevel?` |
 | CTA | `title`, `text?`, `action` |
-| Prose | `title`, `lead?`, `todo?`; the page body arrives in the default slot |
+| Prose | `title`, `lead?`, `todo?`, `headingLevel?` (1 for a page title, 2 when several share a page, e.g. news items), `id?` (anchor); the page body arrives in the default slot |
+
+Imported page bodies use a few class names that every layout should style inside `Prose`: `.gallery` (a grid of images, from old sliders), `.students` (captioned photo grid), `.downloads` (file list), `.actions` (buttons), `.embed` and `.embed--map` (video and map iframes), `.note`, and `.form` (old-site forms shown as they were).

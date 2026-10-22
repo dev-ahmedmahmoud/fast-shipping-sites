@@ -5,6 +5,8 @@ import { defineConfig } from 'astro/config';
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { satteri } from '@astrojs/markdown-satteri';
+import { siteLinks } from './src/lib/site-links.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const env = process.env;
@@ -32,11 +34,26 @@ const client = JSON.parse(readFileSync(path.join(clientDir, 'client.json'), 'utf
 const used = [...new Set(Object.values(parts))];
 const sampleId = env.SAMPLE_ID || (used.length === 1 ? used[0] : `mix-${parts.palette}-${parts.type}-${parts.layout}-${parts.motion}`);
 const ds = (system, file) => path.join(root, 'design-systems', system, file);
+const base = env.BASE || '/';
+const mode = env.FSS_MODE || 'site';
+// The site root sends visitors to the default language's home (Arabic first for LFIS).
+const rootRedirect = mode === 'site' ? { '/': `${base.replace(/\/+$/, '')}/${client.defaultLocale}/` } : {};
 
 export default defineConfig({
   root: fileURLToPath(new URL('.', import.meta.url)),
   site: env.SITE_URL || `https://${client.domains.production}`,
-  base: env.BASE || '/',
+  base,
+  // Client files (video, PDFs) belong to each sample; the comparison page gets none.
+  publicDir: mode === 'site' ? path.join(clientDir, 'public') : path.join(root, 'apps/site/.no-public'),
+  redirects: rootRedirect,
+  markdown: {
+    // Imported text stays exactly as written (no smart quotes); raw HTML in content
+    // becomes real elements so siteLinks can fix their links too.
+    processor: satteri({
+      features: { smartPunctuation: false, rawHtml: true },
+      hastPlugins: [siteLinks({ base, edusync: client.edusync })],
+    }),
+  },
   outDir: env.OUT_DIR ? path.resolve(root, env.OUT_DIR) : path.join(root, 'dist', CLIENT, sampleId),
   trailingSlash: 'ignore',
   build: { format: 'directory' },
@@ -57,7 +74,8 @@ export default defineConfig({
       'import.meta.env.FSS_CLIENT': JSON.stringify(CLIENT),
       'import.meta.env.FSS_SAMPLE': JSON.stringify(sampleId),
       'import.meta.env.FSS_PARTS': JSON.stringify(parts),
-      'import.meta.env.FSS_MODE': JSON.stringify(env.FSS_MODE || 'site'),
+      'import.meta.env.FSS_MODE': JSON.stringify(mode),
+      'import.meta.env.FSS_SHOW_DRAFTS': JSON.stringify(env.SHOW_DRAFTS === '1'),
       'import.meta.env.FSS_SHOW_TODO': JSON.stringify(env.SHOW_TODO !== '0'),
       'import.meta.env.FSS_NOINDEX': JSON.stringify(env.NOINDEX === '1'),
     },
