@@ -1,0 +1,126 @@
+/* Playground layout: page-wide styles. Components style themselves with scoped styles. */
+
+/* Toy colors. Derived from the palette's accent and highlight by turning the hue,
+   so any palette mixed into this layout still gets a full, matching rainbow.
+   They color shapes, borders and tints only; text stays on ink/surface tokens. */
+:root {
+  --pg-blue: var(--c-accent);
+  --pg-sun: var(--c-highlight);
+  --pg-red: var(--c-highlight);
+  --pg-green: var(--c-accent);
+  --pg-purple: var(--c-accent);
+  --pg-orange: var(--c-highlight);
+  --pg-border: 3px;
+  --pg-lift: 6px;
+}
+@supports (color: oklch(from red l c h)) {
+  :root {
+    --pg-red: oklch(from var(--c-accent) calc(l + 0.13) c calc(h + 125));
+    --pg-green: oklch(from var(--c-accent) calc(l + 0.2) c calc(h + 245));
+    --pg-purple: oklch(from var(--c-accent) calc(l + 0.05) c calc(h + 45));
+    --pg-orange: oklch(from var(--c-highlight) calc(l - 0.07) calc(c + 0.02) calc(h - 32));
+  }
+}
+
+body {
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: var(--weight-body);
+  line-height: var(--lh-body);
+  overflow-x: clip;
+}
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  line-height: var(--lh-heading);
+  text-wrap: balance;
+}
+a { color: var(--c-accent); text-underline-offset: 0.22em; text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--c-ink); outline-offset: 3px; border-radius: var(--radius-s); }
+::selection { background: var(--c-highlight); color: var(--c-ink); }
+
+.container {
+  inline-size: 100%;
+  max-inline-size: calc(var(--max-width) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+}
+.section { padding-block: var(--space-8); }
+.section + .section { padding-block-start: 0; }
+
+.label {
+  font-size: var(--step--1);
+  font-weight: var(--weight-strong);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+:lang(ar) .label { text-transform: none; }
+
+/* Squishy toy buttons: a solid "base" under the face gives them depth; pressing
+   squashes the face onto the base. */
+.btn {
+  --btn-face: var(--c-surface);
+  --btn-ink: var(--c-ink);
+  --btn-base: var(--c-ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-block-size: 48px; padding-inline: var(--space-5); padding-block: var(--space-2);
+  border-radius: var(--radius-pill); border: var(--pg-border) solid var(--c-ink);
+  background: var(--btn-face); color: var(--btn-ink);
+  box-shadow: 0 var(--pg-lift) 0 var(--btn-base);
+  font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--step-0);
+  line-height: 1.1; text-decoration: none; white-space: nowrap; cursor: pointer;
+  transform: translateY(0);
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background-color var(--dur-fast) ease;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 calc(var(--pg-lift) + 2px) 0 var(--btn-base); }
+.btn:active {
+  transform: translateY(calc(var(--pg-lift) - 1px)) scale(1.03, 0.94);
+  box-shadow: 0 1px 0 var(--btn-base);
+  transition-duration: 60ms;
+}
+.btn--primary { --btn-face: var(--c-accent); --btn-ink: var(--c-accent-ink); }
+.btn--ghost { --btn-face: var(--c-surface); }
+.btn--sun { --btn-face: var(--c-highlight); --btn-ink: var(--c-ink); }
+
+.skip-link { background: var(--c-highlight); color: var(--c-ink); font-weight: var(--weight-strong); }
+[dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+
+.todo-note {
+  border: 2px dashed var(--c-line); border-radius: var(--radius-m);
+  padding: var(--space-3) var(--space-4); background: var(--c-sunk);
+  font-size: var(--step--1); color: var(--c-muted);
+}
+.todo-note ul { margin: var(--space-2) 0 0; padding-inline-start: var(--space-5); }
+
+/* Toy shapes (see Toy.astro). Each draws itself in currentColor with a darker
+   extruded base and a soft shine, so it reads as a chunky plastic toy. */
+.toy { color: var(--toy, var(--pg-blue)); inline-size: var(--s, 72px); block-size: var(--s, 72px); }
+.toy svg { inline-size: 100%; block-size: 100%; overflow: visible; display: block; }
+.toy .face { fill: currentColor; stroke: currentColor; }
+.toy .base { fill: color-mix(in oklab, currentColor 62%, var(--c-ink)); stroke: color-mix(in oklab, currentColor 62%, var(--c-ink)); }
+.toy .shine { fill: var(--c-surface); opacity: 0.5; stroke: none; }
+.toy--blue { --toy: var(--pg-blue); }
+.toy--sun { --toy: var(--pg-sun); }
+.toy--red { --toy: var(--pg-red); }
+.toy--green { --toy: var(--pg-green); }
+.toy--purple { --toy: var(--pg-purple); }
+.toy--orange { --toy: var(--pg-orange); }
+
+/* Shared keyframes. Every one ends where the element rests, so with reduced
+   motion (the engine shortens animations to almost nothing) the end state shows. */
+@keyframes pg-wobble {
+  0% { transform: rotate(0deg) translateY(-4px); }
+  30% { transform: rotate(-2.5deg) translateY(-6px); }
+  60% { transform: rotate(1.8deg) translateY(-5px); }
+  100% { transform: rotate(0deg) translateY(-4px); }
+}
+@keyframes pg-draw { from { stroke-dashoffset: var(--len, 600); } to { stroke-dashoffset: 0; } }
+@keyframes pg-pop {
+  0% { transform: scale(0.6) rotate(-8deg); }
+  70% { transform: scale(1.06) rotate(2deg); }
+  100% { transform: scale(1) rotate(var(--tilt, 0deg)); }
+}

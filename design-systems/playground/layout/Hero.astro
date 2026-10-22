@@ -1,0 +1,171 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import Toy, { type ToyKind, type ToyColor } from './Toy.astro';
+interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[] }
+const { eyebrow, title, lead, actions, images = [] } = Astro.props;
+const photos = images.slice(0, 3);
+
+// The toy pile on the grass. With JavaScript off (or reduced motion) it stays exactly
+// like this; the motion island turns it into real physics on capable devices.
+// `x` is the inline-start position in %, `extra` toys are dropped on small screens.
+const toys: { kind: ToyKind; color: ToyColor; x: number; size: 'big' | 'mid' | 'small'; rot: number; extra?: boolean }[] = [
+  { kind: 'ball', color: 'red', x: 1, size: 'big', rot: 0 },
+  { kind: 'block', color: 'sun', x: 9, size: 'mid', rot: -8, extra: true },
+  { kind: 'tri', color: 'green', x: 18, size: 'big', rot: 6 },
+  { kind: 'star', color: 'purple', x: 27, size: 'mid', rot: -12, extra: true },
+  { kind: 'ring', color: 'blue', x: 36, size: 'mid', rot: 0 },
+  { kind: 'arch', color: 'orange', x: 45, size: 'big', rot: 0, extra: true },
+  { kind: 'block', color: 'red', x: 54, size: 'mid', rot: 10 },
+  { kind: 'ball', color: 'sun', x: 63, size: 'small', rot: 0, extra: true },
+  { kind: 'star', color: 'green', x: 71, size: 'big', rot: 8 },
+  { kind: 'tri', color: 'blue', x: 80, size: 'mid', rot: -6, extra: true },
+  { kind: 'ball', color: 'purple', x: 88, size: 'mid', rot: 0 },
+];
+---
+<section class="hero" data-playground>
+  <div class="sky" aria-hidden="true">
+    <span class="sun"></span>
+    <span class="cloud c1"></span>
+    <span class="cloud c2"></span>
+  </div>
+
+  <div class="container inner">
+    <div class="copy">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h1 data-split-words>{title}</h1>
+      <svg class="squiggle" viewBox="0 0 300 22" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path d="M5 13 Q 23 3 41 13 T 77 13 T 113 13 T 149 13 T 185 13 T 221 13 T 257 13 T 295 13" />
+      </svg>
+      {lead && <p class="lead">{lead}</p>}
+      {actions.length > 0 && (
+        <div class="actions">
+          {actions.map((a, i) => (
+            <a class:list={['btn', i === 0 ? 'btn--primary' : 'btn--ghost']} href={a.href}
+               target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>{a.label}</a>
+          ))}
+        </div>
+      )}
+    </div>
+
+    {photos.length > 0 && (
+      <div class="photos">
+        {photos.map((img, i) => (
+          <figure class:list={['photo', `p${i + 1}`]}>
+            <Image src={img} alt="" widths={[480, 760, 1024]} sizes="(max-width: 900px) 92vw, 36vw"
+                   loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />
+          </figure>
+        ))}
+      </div>
+    )}
+  </div>
+
+  <div class="play" aria-hidden="true">
+    {toys.map((t, i) => (
+      <Toy kind={t.kind} color={t.color} class:list={['piece', t.extra && 'extra']} data-toy
+           style={`--x:${t.x};--s:var(--${t.size});--rot:${t.rot}deg;--i:${i}`} />
+    ))}
+  </div>
+  <div class="ground" data-ground aria-hidden="true">
+    <svg viewBox="0 0 1200 40" preserveAspectRatio="none" focusable="false"><path d="M0 40 V22 C 150 0 300 0 450 18 S 750 36 900 16 S 1110 4 1200 20 V40 Z" /></svg>
+  </div>
+</section>
+
+<style>
+  .hero {
+    --ground: 54px;
+    --pile: clamp(92px, 12vw, 150px);
+    --big: clamp(56px, 8.5vw, 104px);
+    --mid: clamp(46px, 6.6vw, 82px);
+    --small: clamp(40px, 5vw, 62px);
+    position: relative; overflow: hidden; isolation: isolate;
+    padding-block: var(--space-8) calc(var(--ground) + var(--pile));
+    background: linear-gradient(to bottom, var(--c-accent-soft), var(--c-bg) 75%);
+  }
+
+  .sky { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+  .sun {
+    position: absolute; inset-block-start: -70px; inset-inline-end: -60px;
+    inline-size: 230px; block-size: 230px; border-radius: 50%;
+    background: radial-gradient(circle, var(--pg-sun) 0 52%, transparent 53%),
+      repeating-conic-gradient(from 0deg, color-mix(in oklab, var(--pg-sun) 45%, transparent) 0 8deg, transparent 8deg 24deg);
+    animation: pg-pop var(--dur-slow) var(--ease-out) both;
+  }
+  .cloud {
+    position: absolute; block-size: 34px; border-radius: 999px; background: var(--c-surface); opacity: 0.85;
+  }
+  .cloud::before, .cloud::after { content: ''; position: absolute; border-radius: 50%; background: inherit; }
+  .cloud::before { inline-size: 46px; block-size: 46px; inset-block-start: -22px; inset-inline-start: 18px; }
+  .cloud::after { inline-size: 34px; block-size: 34px; inset-block-start: -14px; inset-inline-start: 52px; }
+  .c1 { inline-size: 120px; inset-block-start: 18%; inset-inline-start: 4%; }
+  .c2 { inline-size: 96px; inset-block-start: 9%; inset-inline-start: 46%; opacity: 0.6; }
+
+  .inner {
+    position: relative; z-index: 2;
+    display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: center; gap: var(--space-7);
+  }
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; }
+  .eyebrow {
+    font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--step-0);
+    padding: var(--space-1) var(--space-4); border-radius: var(--radius-pill);
+    background: var(--c-highlight); color: var(--c-ink); border: var(--pg-border) solid var(--c-ink);
+    transform: rotate(-4deg); box-shadow: 0 4px 0 var(--c-ink);
+  }
+  h1 { font-size: var(--step-5); max-inline-size: 15ch; color: var(--c-ink); }
+  .squiggle {
+    inline-size: min(17rem, 70%); block-size: 22px; margin-block-start: calc(-1 * var(--space-3));
+    fill: none; stroke: var(--pg-sun); stroke-width: 7; stroke-linecap: round;
+    stroke-dasharray: 340; --len: 340;
+    animation: pg-draw 1.1s 0.3s var(--ease-in-out) both;
+  }
+  .lead { font-size: var(--step-2); font-family: var(--font-display); font-weight: 600; color: var(--c-accent); max-inline-size: 30ch; line-height: 1.35; }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-4); padding-block-start: var(--space-3); }
+
+  .photos { position: relative; aspect-ratio: 5 / 4; min-inline-size: 0; }
+  .photo {
+    position: absolute; inline-size: 74%; margin: 0;
+    padding: 10px 10px 30px; border-radius: var(--radius-m);
+    background: var(--c-surface); border: var(--pg-border) solid var(--c-ink);
+    box-shadow: 0 8px 0 var(--toy, var(--pg-blue));
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .photo::before {
+    content: ''; position: absolute; inset-block-start: -14px; inset-inline-start: 50%; translate: -50% 0;
+    inline-size: 76px; block-size: 24px; border-radius: 4px; rotate: -4deg;
+    background: color-mix(in oklab, var(--pg-sun) 70%, transparent);
+  }
+  .photo :global(img) { inline-size: 100%; block-size: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radius-s); }
+  .p1 { --toy: var(--pg-red); inset-block-start: 4%; inset-inline-start: 0; transform: rotate(-6deg); z-index: 3; }
+  .p2 { --toy: var(--pg-green); inset-block-start: 30%; inset-inline-end: 0; transform: rotate(5deg); z-index: 2; }
+  .p3 { --toy: var(--pg-purple); inset-block-end: 0; inset-inline-start: 12%; transform: rotate(-2deg); z-index: 1; }
+  @media (hover: hover) {
+    .photo:hover { transform: rotate(0deg) scale(1.04); z-index: 4; }
+  }
+
+  .play { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .play :global(.piece) {
+    position: absolute; inset-inline-start: calc(var(--x) * 1%); inset-block-end: calc(var(--ground) - 12px);
+    transform: rotate(var(--rot)); pointer-events: auto; touch-action: none; cursor: grab;
+    user-select: none; -webkit-user-select: none;
+  }
+  .play :global(.piece:active) { cursor: grabbing; }
+
+  .ground { position: absolute; inset-inline: 0; inset-block-end: 0; block-size: var(--ground); z-index: 0; color: color-mix(in oklab, var(--pg-green) 70%, var(--c-surface)); background: currentColor; }
+  .ground svg { position: absolute; inset-inline: 0; inset-block-end: 100%; inline-size: 100%; block-size: 26px; margin-block-end: -1px; fill: currentColor; }
+
+  @media (max-width: 900px) {
+    .inner { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+    .photos { aspect-ratio: auto; max-inline-size: 34rem; }
+    .photo { position: relative; inline-size: 100%; inset: auto; }
+    .p1 { transform: rotate(-2deg); }
+    .p2, .p3 { display: none; }
+    .sun { inline-size: 160px; block-size: 160px; inset-block-start: -60px; inset-inline-end: -50px; }
+    .c2 { display: none; }
+  }
+  @media (max-width: 640px) {
+    .play :global(.extra) { display: none; }
+    .hero { padding-block-start: var(--space-6); }
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+// One chunky toy shape: a face, a darker extruded base and a shine. Decorative only.
+// `data-r` tells the hero physics how big a circle stands in for the shape.
+export type ToyKind = 'ball' | 'tri' | 'star' | 'block' | 'ring' | 'arch';
+export type ToyColor = 'blue' | 'sun' | 'red' | 'green' | 'purple' | 'orange';
+interface Props {
+  kind: ToyKind;
+  color: ToyColor;
+  class?: string;
+  style?: string;
+  [attr: string]: unknown;
+}
+const { kind, color, class: className, style, ...rest } = Astro.props;
+
+const RADIUS: Record<ToyKind, number> = { ball: 0.5, tri: 0.43, star: 0.46, block: 0.49, ring: 0.5, arch: 0.42 };
+
+const star = Array.from({ length: 10 }, (_, i) => {
+  const r = i % 2 === 0 ? 44 : 20;
+  const a = (Math.PI / 5) * i - Math.PI / 2;
+  return `${(50 + r * Math.cos(a)).toFixed(1)},${(53 + r * Math.sin(a)).toFixed(1)}`;
+}).join(' ');
+---
+<span class:list={['toy', `toy--${color}`, className]} style={style} data-r={RADIUS[kind]} aria-hidden="true" {...rest}>
+  <svg viewBox="0 0 100 100" focusable="false">
+    {kind === 'ball' && (
+      <>
+        <circle class="base" cx="50" cy="57" r="42" />
+        <circle class="face" cx="50" cy="50" r="42" />
+        <ellipse class="shine" cx="35" cy="32" rx="13" ry="8" transform="rotate(-35 35 32)" />
+      </>
+    )}
+    {kind === 'tri' && (
+      <>
+        <path class="base" d="M50 21 L86 85 L14 85 Z" stroke-width="16" stroke-linejoin="round" />
+        <path class="face" d="M50 14 L86 78 L14 78 Z" stroke-width="16" stroke-linejoin="round" />
+        <ellipse class="shine" cx="42" cy="42" rx="7" ry="11" transform="rotate(28 42 42)" />
+      </>
+    )}
+    {kind === 'star' && (
+      <>
+        <polygon class="base" points={star} transform="translate(0 7)" stroke-width="9" stroke-linejoin="round" />
+        <polygon class="face" points={star} stroke-width="9" stroke-linejoin="round" />
+        <ellipse class="shine" cx="43" cy="37" rx="5" ry="8" transform="rotate(25 43 37)" />
+      </>
+    )}
+    {kind === 'block' && (
+      <>
+        <rect class="base" x="9" y="16" width="82" height="76" rx="18" />
+        <rect class="face" x="9" y="9" width="82" height="76" rx="18" />
+        <rect class="shine" x="20" y="18" width="34" height="9" rx="4.5" />
+      </>
+    )}
+    {kind === 'ring' && (
+      <>
+        <circle class="base" cx="50" cy="57" r="34" style="fill:none" stroke-width="20" />
+        <circle class="face" cx="50" cy="50" r="34" style="fill:none" stroke-width="20" />
+        <path class="shine" d="M27 33 A30 30 0 0 1 45 22" style="fill:none;stroke:var(--c-surface)" stroke-width="5" stroke-linecap="round" />
+      </>
+    )}
+    {kind === 'arch' && (
+      <>
+        <path class="base" d="M8 86 A42 42 0 0 1 92 86 L70 86 A20 20 0 0 0 30 86 Z" stroke-width="6" stroke-linejoin="round" />
+        <path class="face" d="M8 79 A42 42 0 0 1 92 79 L70 79 A20 20 0 0 0 30 79 Z" stroke-width="6" stroke-linejoin="round" />
+        <path class="shine" d="M20 66 A31 31 0 0 1 38 44" style="fill:none;stroke:var(--c-surface)" stroke-width="5" stroke-linecap="round" />
+      </>
+    )}
+  </svg>
+</span>

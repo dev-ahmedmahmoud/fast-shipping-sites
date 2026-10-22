@@ -1,0 +1,53 @@
+---
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; title?: string; items: { value: string; label: string }[] }
+const { title, items } = Astro.props;
+const TOYS = ['sun', 'green', 'red', 'purple', 'blue', 'orange'];
+
+// A scalloped "prize badge" outline, like a sticker from the teacher.
+const bumps = 14;
+const scallop = Array.from({ length: bumps * 2 }, (_, i) => {
+  const r = i % 2 === 0 ? 48 : 42;
+  const a = (Math.PI / bumps) * i - Math.PI / 2;
+  return `${(50 + r * Math.cos(a)).toFixed(2)} ${(50 + r * Math.sin(a)).toFixed(2)}`;
+});
+const badgePath = `M${scallop.join(' L')} Z`;
+---
+<section class="section">
+  <div class="container">
+    {title && <h2 data-reveal>{title}</h2>}
+    <dl class="stats">
+      {items.map((s, i) => (
+        <div class="stat" data-reveal style={`--toy: var(--pg-${TOYS[i % TOYS.length]}); --tilt: ${i % 2 ? 5 : -5}deg`}>
+          <svg class="shape" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path class="under" d={badgePath} transform="translate(0 4)" />
+            <path class="over" d={badgePath} />
+          </svg>
+          <dt>{s.label}</dt>
+          <dd>{s.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  h2 { font-size: var(--step-3); margin-block-end: var(--space-5); text-align: center; }
+  .stats { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-6); }
+  .stat {
+    position: relative; inline-size: min(15rem, 80vw); aspect-ratio: 1;
+    display: flex; flex-direction: column-reverse; align-items: center; justify-content: center; gap: var(--space-1);
+    text-align: center; padding: var(--space-6); transform: rotate(var(--tilt));
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .stat:hover { transform: rotate(0deg) scale(1.05); }
+  .shape { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; z-index: -1; overflow: visible; }
+  .stat { isolation: isolate; }
+  .under { fill: var(--c-ink); }
+  .over { fill: color-mix(in oklab, var(--toy) 55%, var(--c-surface)); stroke: var(--c-ink); stroke-width: 2.5; stroke-linejoin: round; }
+  dd {
+    margin: 0; font-family: var(--font-display); font-size: var(--step-5); font-weight: var(--weight-display);
+    font-variant-numeric: tabular-nums; line-height: 1; color: var(--c-ink);
+  }
+  dt { font-weight: var(--weight-strong); color: var(--c-ink); font-size: var(--step-1); max-inline-size: 12ch; line-height: 1.25; }
+</style>

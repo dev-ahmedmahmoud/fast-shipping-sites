@@ -1,0 +1,103 @@
+---
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const links = [...ctx.nav.filter((n) => !n.external), ...ctx.footerNav];
+const external = ctx.nav.filter((n) => n.external);
+const TOYS = ['red', 'sun', 'green', 'blue', 'purple', 'orange'];
+---
+<footer class="footer">
+  <svg class="hill" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <path d="M0 60 V34 C 120 6 260 4 400 26 S 680 58 820 30 S 1080 2 1200 28 V60 Z" />
+  </svg>
+  <div class="body">
+    <div class="container grid">
+      <div class="col brand">
+        <span class="badge">
+          {ctx.site.logo
+            ? <Image src={ctx.site.logo} alt="" height={88} class="logo" />
+            : <span aria-hidden="true">{ctx.site.shortName}</span>}
+        </span>
+        <p class="name">{ctx.site.name}</p>
+        {ctx.site.motto && <p class="motto">{ctx.site.motto}</p>}
+      </div>
+
+      <nav class="col" aria-label={ctx.ui.links}>
+        <h2 class="label">{ctx.ui.links}</h2>
+        <ul role="list" class="links">
+          {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+          {external.map((l) => <li><a href={l.href} target="_blank" rel="noopener">{l.label}<span class="sr-only"> {ctx.ui.newTab}</span></a></li>)}
+        </ul>
+      </nav>
+
+      <div class="col">
+        <h2 class="label">{ctx.ui.contact}</h2>
+        <ul role="list">
+          {ctx.contact.address && <li>{ctx.contact.address}</li>}
+          {ctx.contact.phones.map((p) => (
+            <li>{p.label && <>{p.label}: </>}<a href={`tel:${p.number.replace(/\s+/g, '')}`} dir="ltr">{p.number}</a></li>
+          ))}
+          {ctx.contact.emails.map((e) => <li>{e.label}: <a href={`mailto:${e.address}`} dir="ltr">{e.address}</a></li>)}
+          {ctx.contact.hours && <li>{ctx.contact.hours}</li>}
+          {ctx.contact.mapUrl && <li><a href={ctx.contact.mapUrl} target="_blank" rel="noopener">{ctx.ui.map}</a></li>}
+        </ul>
+      </div>
+
+      {ctx.social.length > 0 && (
+        <div class="col">
+          <h2 class="label">{ctx.ui.follow}</h2>
+          <ul role="list" class="social">
+            {ctx.social.map((s, i) => (
+              <li style={`--toy: var(--pg-${TOYS[i % TOYS.length]})`}>
+                <a href={s.href} target="_blank" rel="noopener" lang="en">{s.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+    <div class="container legal">
+      <p>{ctx.legal.copyright ?? `© ${ctx.year} ${ctx.site.name}. ${ctx.ui.rights}.`}</p>
+      {ctx.legal.credit && (
+        <p>{ctx.legal.credit.href ? <a href={ctx.legal.credit.href} target="_blank" rel="noopener">{ctx.legal.credit.text}</a> : ctx.legal.credit.text}</p>
+      )}
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer { margin-block-start: var(--space-6); color: var(--c-bg); font-size: var(--step--1); }
+  .hill { display: block; inline-size: 100%; block-size: 48px; fill: var(--c-ink); margin-block-end: -1px; }
+  .body { background: var(--c-ink); padding-block: var(--space-6) calc(var(--space-5) + env(safe-area-inset-bottom, 0px)); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--space-6); }
+  @media (min-width: 1000px) { .grid { grid-template-columns: 1fr 1.5fr 1.4fr 1fr; } }
+  .col { display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; }
+  .col ul { display: flex; flex-direction: column; gap: var(--space-2); }
+  .col li { overflow-wrap: anywhere; }
+  .col a { color: var(--c-bg); text-decoration: none; }
+  .col a:hover { color: var(--c-highlight); text-decoration: underline; }
+  .label { color: var(--c-highlight); font-family: var(--font-display); font-size: var(--step-1); text-transform: none; letter-spacing: 0; }
+  .badge {
+    display: grid; place-items: center; inline-size: 72px; block-size: 72px; border-radius: 50%;
+    background: var(--c-surface); border: var(--pg-border) solid var(--c-highlight);
+  }
+  .logo { block-size: 52px; inline-size: auto; }
+  .name { font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--step-1); line-height: var(--lh-heading); }
+  .motto { color: color-mix(in oklab, var(--c-bg) 80%, var(--c-ink)); }
+  .col .links { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: var(--space-2) var(--space-4); }
+  .col .social { flex-direction: row; flex-wrap: wrap; }
+  .social a {
+    display: inline-flex; align-items: center; min-block-size: 40px; padding-inline: var(--space-4);
+    border-radius: var(--radius-pill); border: 2px solid var(--toy);
+  }
+  .social a:hover { background: var(--toy); color: var(--c-ink); text-decoration: none; }
+  .legal {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3);
+    margin-block-start: var(--space-6); padding-block-start: var(--space-4);
+    border-block-start: 2px dashed color-mix(in oklab, var(--c-bg) 30%, var(--c-ink));
+    color: color-mix(in oklab, var(--c-bg) 80%, var(--c-ink));
+  }
+  .legal a { color: var(--c-highlight); }
+  .footer :focus-visible { outline-color: var(--c-highlight); }
+</style>

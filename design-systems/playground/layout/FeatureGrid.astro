@@ -1,0 +1,126 @@
+---
+import type { PageContext } from '@engine/context';
+interface Item { title: string; text?: string; href?: string; external?: boolean }
+interface Props { ctx: PageContext; title?: string; items: Item[] }
+const { title, items } = Astro.props;
+const TOYS = ['blue', 'red', 'green', 'purple', 'orange', 'sun'];
+// Each card is a piece of playground equipment: slide, swing, seesaw, ball pit.
+const ART = ['slide', 'swing', 'seesaw', 'pit'] as const;
+---
+<section class="section">
+  <div class="container stack">
+    {title && <h2 data-reveal>{title}</h2>}
+    <ul class="grid" role="list">
+      {items.map((item, i) => {
+        const art = ART[i % ART.length];
+        const Tag = item.href ? 'a' : 'div';
+        return (
+          <li data-reveal style={`--toy: var(--pg-${TOYS[i % TOYS.length]})`}>
+            <Tag class="card" href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noopener' : undefined}>
+              <span class="art" aria-hidden="true">
+                <svg viewBox="0 0 120 80" focusable="false">
+                  <path class="soil" d="M4 72 H116" />
+                  {art === 'slide' && (
+                    <>
+                      <path class="frame" d="M22 72 V20 M36 72 V20 M22 32 H36 M22 44 H36 M22 56 H36" />
+                      <path class="frame" d="M20 20 H54" />
+                      <path class="toyfill thick" d="M52 22 C 74 22 76 66 108 66" />
+                      <path class="frame" d="M52 22 C 74 22 76 66 108 66" />
+                    </>
+                  )}
+                  {art === 'swing' && (
+                    <>
+                      <path class="frame" d="M14 72 L28 14 L42 72 M78 72 L92 14 L106 72 M26 14 H94" />
+                      <path class="rope" d="M50 14 L46 50 M70 14 L74 50" />
+                      <rect class="toyfill" x="40" y="48" width="40" height="9" rx="4" />
+                      <rect class="frame nofill" x="40" y="48" width="40" height="9" rx="4" />
+                    </>
+                  )}
+                  {art === 'seesaw' && (
+                    <>
+                      <path class="toyfill" d="M60 50 L74 72 H46 Z" />
+                      <path class="frame nofill" d="M60 50 L74 72 H46 Z" />
+                      <rect class="toyfill" x="10" y="38" width="100" height="9" rx="4.5" transform="rotate(-12 60 46)" />
+                      <rect class="frame nofill" x="10" y="38" width="100" height="9" rx="4.5" transform="rotate(-12 60 46)" />
+                      <circle class="sunfill" cx="20" cy="47" r="8" />
+                      <circle class="frame nofill" cx="20" cy="47" r="8" />
+                    </>
+                  )}
+                  {art === 'pit' && (
+                    <>
+                      <rect class="toyfill" x="12" y="42" width="96" height="30" rx="12" />
+                      <circle class="ball b1" cx="34" cy="40" r="10" />
+                      <circle class="ball b2" cx="55" cy="36" r="11" />
+                      <circle class="ball b3" cx="78" cy="40" r="10" />
+                      <circle class="ball b4" cx="94" cy="34" r="8" />
+                      <rect class="frame nofill" x="12" y="42" width="96" height="30" rx="12" />
+                    </>
+                  )}
+                </svg>
+              </span>
+              <span class="body">
+                <h3>{item.title}</h3>
+                {item.text && <p>{item.text}</p>}
+              </span>
+              {item.href && (
+                <span class="go" aria-hidden="true">
+                  <svg class="flip-rtl" viewBox="0 0 24 24" width="22" height="22"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </span>
+              )}
+            </Tag>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  h2 { font-size: var(--step-3); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: var(--space-5); padding-block-end: var(--space-2); }
+  .grid > li { display: flex; }
+  .card {
+    position: relative; flex: 1; display: flex; flex-direction: column; gap: var(--space-3);
+    padding: var(--space-3) var(--space-3) var(--space-5); border-radius: var(--radius-l);
+    background: var(--c-surface); border: var(--pg-border) solid var(--c-ink);
+    box-shadow: 0 8px 0 var(--toy);
+    color: var(--c-ink); text-decoration: none;
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  a.card:hover { transform: perspective(700px) rotateX(7deg) translateY(-6px); box-shadow: 0 14px 0 var(--toy); }
+  a.card:hover .art svg { animation: pg-wobble 0.6s var(--ease-out); }
+  a.card:active { transform: translateY(6px) scale(1.02, 0.96); box-shadow: 0 2px 0 var(--toy); transition-duration: 60ms; }
+  .art {
+    display: block; border-radius: calc(var(--radius-l) - 8px); padding: var(--space-3) var(--space-4) var(--space-1);
+    background: color-mix(in oklab, var(--toy) 22%, var(--c-surface));
+  }
+  .art svg { inline-size: 100%; block-size: auto; aspect-ratio: 3 / 2; overflow: visible; }
+  .soil { stroke: var(--c-ink); stroke-width: 3.5; stroke-linecap: round; fill: none; opacity: 0.35; }
+  .frame { fill: none; stroke: var(--c-ink); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+  .rope { fill: none; stroke: var(--c-ink); stroke-width: 2.5; stroke-dasharray: 3 4; stroke-linecap: round; }
+  .toyfill { fill: var(--toy); stroke: none; }
+  .toyfill.thick { fill: none; stroke: var(--toy); stroke-width: 12; stroke-linecap: round; }
+  .sunfill { fill: var(--pg-sun); }
+  .ball { stroke: var(--c-ink); stroke-width: 3; }
+  .b1 { fill: var(--pg-red); } .b2 { fill: var(--pg-sun); } .b3 { fill: var(--pg-blue); } .b4 { fill: var(--pg-green); }
+  .body { display: flex; flex-direction: column; gap: var(--space-2); padding-inline: var(--space-3); }
+  h3 { font-size: var(--step-2); }
+  p { color: var(--c-muted); }
+  .go {
+    position: absolute; inset-inline-end: var(--space-4); inset-block-end: calc(-1 * var(--space-4));
+    display: grid; place-items: center; inline-size: 46px; block-size: 46px; border-radius: 50%;
+    background: var(--c-highlight); color: var(--c-ink); border: var(--pg-border) solid var(--c-ink);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  a.card:hover .go { transform: scale(1.12) rotate(-8deg); }
+  .grid > li { padding-block-end: var(--space-4); }
+  @media (max-width: 640px) {
+    .card { flex-direction: row; align-items: center; gap: var(--space-4); padding: var(--space-3); }
+    .art { flex: none; inline-size: 7.5rem; padding: var(--space-2); }
+    .body { padding-inline: 0; padding-inline-end: var(--space-6); }
+    .go { inset-block-end: 50%; translate: 0 50%; inline-size: 40px; block-size: 40px; inset-inline-end: calc(-1 * var(--space-2)); }
+    .grid { gap: var(--space-3); }
+    .grid > li { padding-block-end: var(--space-2); }
+  }
+</style>

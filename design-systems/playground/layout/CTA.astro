@@ -1,0 +1,64 @@
+---
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import Toy from './Toy.astro';
+interface Props { ctx: PageContext; title: string; text?: string; action: Action | null }
+const { title, text, action } = Astro.props;
+---
+<section class="section">
+  <div class="container">
+    <div class="band" data-reveal>
+      <div class="copy">
+        <h2>{title}</h2>
+        {text && <p>{text}</p>}
+        {action && (
+          <a class="btn btn--sun" href={action.href} target={action.external ? '_blank' : undefined} rel={action.external ? 'noopener' : undefined}>
+            {action.label}
+            <svg class="flip-rtl" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </a>
+        )}
+      </div>
+      <div class="deco" aria-hidden="true">
+        <svg class="slide" viewBox="0 0 160 120" focusable="false">
+          <path class="rail" d="M30 112 V26 M50 112 V26 M30 44 H50 M30 62 H50 M30 80 H50 M30 98 H50 M26 26 H78" />
+          <path class="chute" d="M76 28 C 104 28 108 104 152 104" />
+          <path class="rail" d="M76 28 C 104 28 108 104 152 104" />
+        </svg>
+        <Toy kind="ball" color="red" class="t1" style="--s: 58px" />
+        <Toy kind="star" color="sun" class="t2" style="--s: 46px" />
+        <Toy kind="block" color="green" class="t3" style="--s: 40px" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .band {
+    position: relative; overflow: hidden;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-5);
+    padding: var(--space-7) var(--space-7); border-radius: var(--radius-l);
+    background: var(--c-accent); color: var(--c-accent-ink);
+    border: var(--pg-border) solid var(--c-ink); box-shadow: 0 10px 0 var(--c-ink);
+  }
+  .band::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.18;
+    background: radial-gradient(circle at 20% 30%, var(--c-accent-ink) 0 3px, transparent 4px) 0 0 / 34px 34px;
+  }
+  .copy { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; }
+  h2 { font-size: var(--step-4); }
+  p { max-inline-size: 48ch; font-size: var(--step-1); line-height: 1.5; }
+  .deco { position: relative; inline-size: 220px; block-size: 170px; }
+  .slide { position: absolute; inset-inline-end: 0; inset-block-end: 0; inline-size: 200px; block-size: auto; overflow: visible; }
+  :global([dir="rtl"]) .slide { transform: scaleX(-1); }
+  .rail { fill: none; stroke: var(--c-accent-ink); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+  .chute { fill: none; stroke: var(--pg-sun); stroke-width: 16; stroke-linecap: round; }
+  .deco :global(.toy) { position: absolute; }
+  .deco :global(.t1) { inset-inline-end: 0; inset-block-end: -6px; }
+  .deco :global(.t2) { inset-inline-start: 0; inset-block-start: 0; transform: rotate(-14deg); }
+  .deco :global(.t3) { inset-inline-start: 26px; inset-block-end: 0; transform: rotate(10deg); }
+  @media (max-width: 720px) {
+    .band { grid-template-columns: minmax(0, 1fr); padding: var(--space-6) var(--space-5); }
+    .deco { inline-size: 100%; block-size: 120px; }
+    .slide { inline-size: 150px; }
+  }
+</style>

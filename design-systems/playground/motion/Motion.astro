@@ -1,0 +1,92 @@
+---
+// Playground motion: headline words bounce into place, sections pop up as they
+// scroll in, and the hero's toy pile becomes real physics on capable devices.
+// No animation library: the Web Animations API and a tiny physics module
+// (loaded only on pages with a playground hero) keep the JavaScript small.
+// With prefers-reduced-motion nothing here runs; the page is complete without it.
+---
+<script>
+  import { splitWords } from '@engine/split';
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function capable(): boolean {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    return (nav.hardwareConcurrency ?? 4) >= 4 && (nav.deviceMemory ?? 4) >= 4 && !nav.connection?.saveData;
+  }
+
+  function ms(name: string, fallback: number): number {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const n = parseFloat(v);
+    if (Number.isNaN(n)) return fallback;
+    return v.endsWith('ms') ? n : n * 1000;
+  }
+
+  function start() {
+    const root = getComputedStyle(document.documentElement);
+    const ease = root.getPropertyValue('--ease-out').trim() || 'ease-out';
+    const distance = parseFloat(root.getPropertyValue('--reveal-distance')) || 0;
+    const slow = ms('--dur-slow', 700);
+    const below = (el: Element) => el.getBoundingClientRect().top > window.innerHeight;
+
+    // Things that appear later pop up when they scroll into view. Only elements
+    // that start below the fold are hidden first, so nothing visible ever flashes.
+    const pending = new Set<HTMLElement>();
+    const io = new IntersectionObserver((entries) => {
+      let n = 0;
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const el = entry.target as HTMLElement;
+        io.unobserve(el);
+        pending.delete(el);
+        if (el.dataset.splitWords !== undefined) { bounceWords(el, n++ * 80); continue; }
+        el.style.opacity = '';
+        el.animate(
+          [{ opacity: 0, translate: `0 ${distance}px`, scale: '0.94' }, { opacity: 1, translate: '0 0', scale: '1' }],
+          { duration: slow, easing: ease, delay: n++ * 80, fill: 'backwards' },
+        );
+      }
+    }, { rootMargin: '0px 0px -6% 0px' });
+
+    // Headline words drop in one by one and land with a bounce. Only position
+    // changes (never opacity), so the text counts as painted straight away.
+    function bounceWords(el: HTMLElement, delay = 0) {
+      splitWords(el).forEach((word, i) => {
+        word.animate(
+          [{ translate: '0 -0.6em', scale: '0.9' }, { translate: '0 0', scale: '1' }],
+          { duration: slow, easing: ease, delay: delay + i * 70, fill: 'backwards' },
+        );
+      });
+    }
+
+    document.querySelectorAll<HTMLElement>('[data-split-words]').forEach((el) => {
+      if (below(el)) io.observe(el); else bounceWords(el);
+    });
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+      if (!below(el)) return;
+      el.style.opacity = '0';
+      pending.add(el);
+      io.observe(el);
+    });
+    // Printing or saving the page shows everything.
+    window.addEventListener('beforeprint', () => pending.forEach((el) => { el.style.opacity = ''; }));
+
+    // The hero's toy pile: real physics on capable devices, a one-off drop elsewhere.
+    const hero = document.querySelector<HTMLElement>('[data-playground]');
+    if (!hero) return;
+    if (capable()) {
+      import('./physics').then((m) => m.startPlayground(hero)).catch(() => { /* toys stay where CSS put them */ });
+    } else {
+      hero.querySelectorAll<HTMLElement>('[data-toy]').forEach((toy, i) => {
+        toy.animate(
+          [{ translate: '0 -160px' }, { translate: '0 0', offset: 0.55 }, { translate: '0 -18px', offset: 0.75 }, { translate: '0 0' }],
+          { duration: 900, delay: 150 + i * 60, easing: 'ease-in', fill: 'backwards' },
+        );
+      });
+    }
+  }
+
+  if (!reduce) {
+    try { start(); } catch { /* motion is decoration; the page works without it */ }
+  }
+</script>

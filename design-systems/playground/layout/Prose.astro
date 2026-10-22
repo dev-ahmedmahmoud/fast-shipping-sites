@@ -1,0 +1,284 @@
+---
+import type { PageContext } from '@engine/context';
+import Toy from './Toy.astro';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  todo?: string[];
+  /** 1 for a page's own title (default); 2 when several Prose blocks share a page, e.g. news items. */
+  headingLevel?: 1 | 2;
+  /** Anchor id, so other pages can link to this block. */
+  id?: string;
+}
+const { ctx, title, lead, todo = [], headingLevel = 1, id } = Astro.props;
+const page = headingLevel === 1;
+---
+<article class:list={['section', page ? 'page' : 'item']} id={id}>
+  <div class="container">
+    {page ? (
+      <header class="titlecard">
+        <div class="titlecopy">
+          <h1 data-split-words>{title}</h1>
+          <svg class="squiggle" viewBox="0 0 300 22" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path d="M5 13 Q 23 3 41 13 T 77 13 T 113 13 T 149 13 T 185 13 T 221 13 T 257 13 T 295 13" />
+          </svg>
+          {lead && <p class="lead">{lead}</p>}
+        </div>
+        <div class="titletoys" aria-hidden="true">
+          <Toy kind="ball" color="red" class="k1" style="--s: 70px" />
+          <Toy kind="tri" color="sun" class="k2" style="--s: 56px" />
+          <Toy kind="star" color="green" class="k3" style="--s: 48px" />
+        </div>
+      </header>
+    ) : (
+      <header class="itemhead">
+        {lead && <p class="date">{lead}</p>}
+        <h2>{title}</h2>
+      </header>
+    )}
+
+    <div class="narrow">
+      {todo.length > 0 && (
+        <aside class="todo-note">
+          <strong>{ctx.ui.pending}</strong>
+          <ul lang="en" dir="ltr">{todo.map((t) => <li>{t}</li>)}</ul>
+        </aside>
+      )}
+      <div class="prose">
+        <slot />
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .page { padding-block-start: var(--space-6); }
+
+  /* Page title card */
+  .titlecard {
+    position: relative; overflow: hidden; isolation: isolate;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-5);
+    padding: var(--space-7) var(--space-6); margin-block-end: var(--space-7);
+    border-radius: var(--radius-l); border: var(--pg-border) solid var(--c-ink); box-shadow: 0 10px 0 var(--pg-sun);
+    background:
+      radial-gradient(circle, color-mix(in oklab, var(--c-accent) 18%, transparent) 0 2.5px, transparent 3.5px) 0 0 / 26px 26px,
+      var(--c-accent-soft);
+  }
+  .titlecopy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); min-inline-size: 0; }
+  h1 { font-size: var(--step-5); color: var(--c-ink); max-inline-size: 18ch; }
+  .squiggle {
+    inline-size: min(14rem, 60%); block-size: 20px; margin-block-start: calc(-1 * var(--space-2));
+    fill: none; stroke: var(--pg-red); stroke-width: 7; stroke-linecap: round;
+    stroke-dasharray: 340; --len: 340; animation: pg-draw 1s 0.25s var(--ease-in-out) both;
+  }
+  .lead { font-size: var(--step-1); color: var(--c-muted); max-inline-size: 50ch; }
+  .titletoys { position: relative; flex: none; inline-size: 170px; block-size: 120px; }
+  .titletoys :global(.toy) { position: absolute; animation: pg-pop var(--dur-slow) var(--ease-out) both; }
+  .titletoys :global(.k1) { inset-inline-end: 6px; inset-block-end: 0; --tilt: 0deg; }
+  .titletoys :global(.k2) { inset-inline-start: 10px; inset-block-end: 4px; --tilt: -10deg; animation-delay: 0.12s; }
+  .titletoys :global(.k3) { inset-inline-end: 56px; inset-block-start: 0; --tilt: 14deg; animation-delay: 0.24s; }
+
+  /* News items and other blocks that share a page */
+  .item { padding-block: var(--space-5); scroll-margin-block-start: 150px; }
+  .item > .container {
+    max-inline-size: calc(52rem + 2 * var(--gutter));
+  }
+  .item .narrow, .itemhead {
+    padding-inline: var(--space-5);
+  }
+  .item > .container > * { background: var(--c-surface); }
+  .itemhead {
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);
+    padding-block: var(--space-5) var(--space-3);
+    border: 2px solid var(--c-ink); border-block-end: 0; border-radius: var(--radius-l) var(--radius-l) 0 0;
+  }
+  .item .narrow {
+    max-inline-size: none; padding-block: 0 var(--space-5);
+    border: 2px solid var(--c-ink); border-block-start: 0; border-radius: 0 0 var(--radius-l) var(--radius-l);
+    box-shadow: 0 6px 0 var(--c-line);
+  }
+  .itemhead h2 { font-size: var(--step-2); }
+  .date {
+    font-size: var(--step--1); font-weight: var(--weight-strong); font-variant-numeric: tabular-nums;
+    padding: 2px var(--space-3); border-radius: var(--radius-pill); background: var(--c-highlight); border: 2px solid var(--c-ink);
+  }
+
+  .narrow { display: flex; flex-direction: column; gap: var(--space-5); max-inline-size: 50rem; }
+  .page .narrow { margin-inline: auto; }
+
+  /* Body copy */
+  .prose { min-inline-size: 0; }
+  .prose :global(> * + *) { margin-block-start: var(--space-4); }
+  .prose :global(p), .prose :global(li) { max-inline-size: 70ch; }
+  .prose :global(h2) {
+    display: flex; align-items: center; gap: 0.55em;
+    font-size: var(--step-3); margin-block-start: var(--space-8);
+  }
+  .prose :global(> h2:first-child) { margin-block-start: 0; }
+  .prose :global(h2)::before {
+    content: ''; flex: none; inline-size: 0.72em; block-size: 0.72em;
+    background: var(--mk, var(--pg-red)); border: var(--pg-border) solid var(--c-ink); border-radius: 50%;
+    box-shadow: 0 3px 0 var(--c-ink); transform: rotate(-8deg);
+  }
+  .prose :global(h2:nth-of-type(6n+2)) { --mk: var(--pg-sun); }
+  .prose :global(h2:nth-of-type(6n+3)) { --mk: var(--pg-green); }
+  .prose :global(h2:nth-of-type(6n+4)) { --mk: var(--pg-blue); }
+  .prose :global(h2:nth-of-type(6n+5)) { --mk: var(--pg-purple); }
+  .prose :global(h2:nth-of-type(6n)) { --mk: var(--pg-orange); }
+  .prose :global(h2:nth-of-type(3n+2))::before { border-radius: 26%; transform: rotate(12deg); }
+  .prose :global(h2:nth-of-type(3n))::before { border-radius: 50% 50% 18% 18%; }
+  .prose :global(h3) { font-size: var(--step-2); color: var(--c-accent); margin-block-start: var(--space-6); }
+  .prose :global(h4) { font-size: var(--step-1); margin-block-start: var(--space-5); }
+  .prose :global(strong) { font-weight: var(--weight-strong); }
+  .prose :global(a:not(.btn)) { font-weight: 500; }
+  .prose :global(hr) { border: 0; block-size: 12px; margin-block: var(--space-6); background: radial-gradient(circle, var(--c-line) 0 3px, transparent 4px) 0 50% / 20px 12px repeat-x; }
+
+  /* Bulleted lists get colorful ball bullets; numbered lists become hopscotch squares. */
+  .prose :global(ul:not(.downloads):not([role])) { list-style: none; padding-inline-start: 0; }
+  .prose :global(ul:not(.downloads):not([role]) > li) { position: relative; padding-inline-start: 1.7em; }
+  .prose :global(ul:not(.downloads):not([role]) > li)::before {
+    content: ''; position: absolute; inset-inline-start: 0.2em; inset-block-start: 0.55em;
+    inline-size: 0.75em; block-size: 0.75em; border-radius: 50%;
+    background: var(--mk, var(--pg-blue)); box-shadow: 0 2px 0 var(--c-ink); border: 2px solid var(--c-ink);
+  }
+  .prose :global(li:nth-child(6n+2)) { --mk: var(--pg-red); }
+  .prose :global(li:nth-child(6n+3)) { --mk: var(--pg-green); }
+  .prose :global(li:nth-child(6n+4)) { --mk: var(--pg-sun); }
+  .prose :global(li:nth-child(6n+5)) { --mk: var(--pg-purple); }
+  .prose :global(li:nth-child(6n)) { --mk: var(--pg-orange); }
+  .prose :global(li + li) { margin-block-start: var(--space-2); }
+  .prose :global(ol) { list-style: none; padding-inline-start: 0; counter-reset: hop; display: grid; gap: var(--space-3); }
+  .prose :global(ol > li) { counter-increment: hop; position: relative; padding-inline-start: 3.2rem; min-block-size: 2.4rem; display: flex; align-items: center; }
+  .prose :global(ol > li + li) { margin-block-start: 0; }
+  .prose :global(ol > li:nth-child(even)) { margin-inline-start: var(--space-5); }
+  .prose :global(ol > li)::before {
+    content: counter(hop); position: absolute; inset-inline-start: 0; inset-block-start: 50%; translate: 0 -50%;
+    display: grid; place-items: center; inline-size: 2.4rem; block-size: 2.4rem; border-radius: 10px;
+    font-family: var(--font-display); font-weight: var(--weight-display);
+    background: color-mix(in oklab, var(--mk, var(--pg-blue)) 45%, var(--c-surface)); color: var(--c-ink);
+    border: var(--pg-border) solid var(--c-ink); box-shadow: 0 3px 0 var(--c-ink);
+  }
+
+  /* Tables: chunky cards. A one-column table (like a list of documents to bring)
+     becomes a hopscotch checklist. */
+  .prose :global(table) {
+    display: table; inline-size: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden;
+    border: var(--pg-border) solid var(--c-ink); border-radius: var(--radius-m); background: var(--c-surface);
+    box-shadow: 0 6px 0 var(--c-line);
+  }
+  .prose :global(th), .prose :global(td) { padding: var(--space-3) var(--space-4); text-align: start; vertical-align: top; border-block-end: 2px dashed var(--c-line); }
+  .prose :global(th) { background: var(--c-accent); color: var(--c-accent-ink); font-family: var(--font-display); border-block-end: 0; }
+  .prose :global(tr:last-child td) { border-block-end: 0; }
+  .prose :global(tbody tr:nth-child(even) td) { background: var(--c-sunk); }
+  .prose :global(td:first-child) { white-space: nowrap; }
+  .prose :global(table:has(th:only-child)) { display: block; border: 0; box-shadow: none; background: transparent; overflow: visible; counter-reset: hop; }
+  .prose :global(table:has(th:only-child) thead th) {
+    display: inline-block; border-radius: var(--radius-pill); padding: var(--space-1) var(--space-5); margin-block-end: var(--space-4);
+    border: var(--pg-border) solid var(--c-ink); box-shadow: 0 4px 0 var(--c-ink);
+  }
+  .prose :global(table:has(th:only-child) tbody) { display: grid; gap: var(--space-3); }
+  .prose :global(table:has(th:only-child) tr) { display: block; }
+  .prose :global(table:has(th:only-child) tbody tr) { counter-increment: hop; }
+  .prose :global(table:has(th:only-child) tr:nth-child(even)) { margin-inline-start: var(--space-5); }
+  .prose :global(table:has(th:only-child) td) {
+    position: relative; display: flex; align-items: center; min-block-size: 2.6rem; white-space: normal;
+    padding-block: var(--space-2); padding-inline: 3.4rem var(--space-4); border: 2px solid var(--c-ink); border-radius: var(--radius-m);
+    background: var(--c-surface);
+  }
+  .prose :global(table:has(th:only-child) tbody tr:nth-child(even) td) { background: var(--c-surface); }
+  .prose :global(table:has(th:only-child) td)::before {
+    content: counter(hop); position: absolute; inset-inline-start: -0.5rem; inset-block-start: 50%; translate: 0 -50%;
+    display: grid; place-items: center; inline-size: 2.6rem; block-size: 2.6rem; border-radius: 10px; rotate: -6deg;
+    font-family: var(--font-display); font-weight: var(--weight-display);
+    background: color-mix(in oklab, var(--mk, var(--pg-blue)) 50%, var(--c-surface)); color: var(--c-ink);
+    border: var(--pg-border) solid var(--c-ink); box-shadow: 0 3px 0 var(--c-ink);
+  }
+  .prose :global(table:has(th:only-child) tr:nth-child(6n+1)) { --mk: var(--pg-sun); }
+  .prose :global(table:has(th:only-child) tr:nth-child(6n+2)) { --mk: var(--pg-red); }
+  .prose :global(table:has(th:only-child) tr:nth-child(6n+3)) { --mk: var(--pg-green); }
+  .prose :global(table:has(th:only-child) tr:nth-child(6n+4)) { --mk: var(--pg-blue); }
+  .prose :global(table:has(th:only-child) tr:nth-child(6n+5)) { --mk: var(--pg-purple); }
+  .prose :global(table:has(th:only-child) tr:nth-child(6n)) { --mk: var(--pg-orange); }
+  .prose :global(table:has(th:only-child) tr:nth-child(even) td)::before { rotate: 6deg; }
+
+  /* Photos: polaroids taped to the wall. */
+  .prose :global(img) { border-radius: var(--radius-m); }
+  .prose :global(.gallery) {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-5); padding-block: var(--space-3);
+  }
+  .prose :global(.gallery > *) { margin: 0; flex: 0 1 clamp(8.5rem, 30%, 14rem); }
+  .prose :global(.gallery > *:nth-child(3n+1)) { rotate: -3deg; --mk: var(--pg-red); }
+  .prose :global(.gallery > *:nth-child(3n+2)) { rotate: 2deg; --mk: var(--pg-green); }
+  .prose :global(.gallery > *:nth-child(3n)) { rotate: -1deg; --mk: var(--pg-purple); }
+  .prose :global(.gallery img) {
+    inline-size: 100%; block-size: auto; aspect-ratio: 4 / 5; object-fit: cover;
+    padding: 8px 8px 26px; background: var(--c-surface); border: var(--pg-border) solid var(--c-ink); border-radius: var(--radius-m);
+    box-shadow: 0 6px 0 var(--mk, var(--pg-blue));
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .prose :global(.gallery img:hover) { transform: rotate(2deg) scale(1.05); }
+
+  .prose :global(.students) { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); gap: var(--space-5) var(--space-4); }
+  .prose :global(.students figure) { margin: 0; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); text-align: center; }
+  .prose :global(.students figure:nth-child(6n+1)) { --mk: var(--pg-red); }
+  .prose :global(.students figure:nth-child(6n+2)) { --mk: var(--pg-sun); }
+  .prose :global(.students figure:nth-child(6n+3)) { --mk: var(--pg-green); }
+  .prose :global(.students figure:nth-child(6n+4)) { --mk: var(--pg-blue); }
+  .prose :global(.students figure:nth-child(6n+5)) { --mk: var(--pg-purple); }
+  .prose :global(.students figure:nth-child(6n)) { --mk: var(--pg-orange); }
+  .prose :global(.students img) {
+    inline-size: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 24px;
+    border: 5px solid var(--mk, var(--pg-blue)); outline: 2px solid var(--c-ink); outline-offset: 0;
+  }
+  .prose :global(.students figcaption) {
+    font-size: var(--step--1); font-weight: 500; padding: 2px var(--space-3); border-radius: var(--radius-pill);
+    background: color-mix(in oklab, var(--mk, var(--pg-blue)) 22%, var(--c-surface));
+  }
+
+  .prose :global(video) { inline-size: 100%; border-radius: var(--radius-l); background: var(--c-sunk); border: var(--pg-border) solid var(--c-ink); box-shadow: 0 8px 0 var(--pg-sun); }
+  .prose :global(.embed) { inline-size: 100%; aspect-ratio: 16 / 9; border: var(--pg-border) solid var(--c-ink); border-radius: var(--radius-l); background: var(--c-sunk); }
+  .prose :global(.embed--map) { aspect-ratio: 4 / 3; }
+  .prose :global(blockquote) {
+    position: relative; margin-inline: 0; padding: var(--space-4) var(--space-5);
+    background: var(--c-surface); border: var(--pg-border) solid var(--c-ink); border-radius: var(--radius-l);
+  }
+  .prose :global(.actions) { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  .prose :global(.downloads) { list-style: none; padding: 0; display: grid; gap: var(--space-3); }
+  .prose :global(.downloads li) {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4);
+    padding: var(--space-3) var(--space-4); border: 2px solid var(--c-ink); border-radius: var(--radius-m); background: var(--c-surface);
+    box-shadow: 0 4px 0 var(--c-line); max-inline-size: none;
+  }
+  .prose :global(.downloads li + li) { margin-block-start: 0; }
+  .prose :global(.downloads a) {
+    flex: none; padding: 2px var(--space-4); border-radius: var(--radius-pill); text-decoration: none; font-weight: var(--weight-strong);
+    background: var(--c-highlight); color: var(--c-ink); border: 2px solid var(--c-ink); box-shadow: 0 3px 0 var(--c-ink);
+  }
+  .prose :global(.downloads a:hover) { translate: 0 -1px; }
+  .prose :global(.note) {
+    padding: var(--space-4) var(--space-5); border-radius: var(--radius-s) var(--radius-s) var(--radius-m) var(--radius-s);
+    background: color-mix(in oklab, var(--pg-sun) 35%, var(--c-surface)); border: 2px solid var(--c-ink); rotate: -0.6deg;
+  }
+
+  /* Old-site forms, shown as they were; sending is not wired up yet. */
+  .prose :global(.form) {
+    display: grid; gap: var(--space-3); padding: var(--space-5); border: var(--pg-border) solid var(--c-ink);
+    border-radius: var(--radius-l); background: var(--c-surface); box-shadow: 0 6px 0 var(--c-line);
+  }
+  .prose :global(.form label) { font-weight: 500; }
+  .prose :global(.form input), .prose :global(.form select), .prose :global(.form textarea) {
+    inline-size: 100%; min-block-size: 48px; padding: var(--space-2) var(--space-3);
+    border: 2px solid var(--c-line); border-radius: var(--radius-m); background: var(--c-bg);
+  }
+  .prose :global(.form input:focus), .prose :global(.form select:focus), .prose :global(.form textarea:focus) { border-color: var(--c-accent); outline: none; box-shadow: 0 0 0 3px var(--c-accent-soft); }
+  .prose :global(.form textarea) { min-block-size: 6rem; resize: vertical; }
+  .prose :global(.form button[disabled]) { opacity: 0.6; cursor: not-allowed; justify-self: start; }
+
+  @media (max-width: 640px) {
+    .titlecard { padding: var(--space-6) var(--space-5); }
+    .titletoys { display: none; }
+    .prose :global(h2) { font-size: var(--step-2); }
+    .prose :global(td:first-child) { white-space: normal; }
+  }
+</style>
