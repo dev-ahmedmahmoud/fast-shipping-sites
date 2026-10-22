@@ -1,0 +1,102 @@
+---
+// The back cover: ink background with a zigzag top edge, paper-colored text.
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+// A page can be both in the menu and in the footer list; show it once.
+const links = [...ctx.nav.filter((n) => !n.external), ...ctx.footerNav]
+  .filter((l, i, all) => all.findIndex((o) => o.href === l.href) === i);
+const external = ctx.nav.filter((n) => n.external);
+---
+<footer class="footer">
+  <div class="container grid">
+    <div class="col brand">
+      <p class="name">{ctx.site.name}</p>
+      {ctx.site.motto && <p class="motto">{ctx.site.motto}</p>}
+    </div>
+
+    <nav class="col" aria-label={ctx.ui.links}>
+      <h2 class="label">{ctx.ui.links}</h2>
+      <ul role="list">
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        {external.map((l) => <li><a href={l.href} target="_blank" rel="noopener">{l.label}<span class="sr-only"> {ctx.ui.newTab}</span></a></li>)}
+      </ul>
+    </nav>
+
+    <div class="col">
+      <h2 class="label">{ctx.ui.contact}</h2>
+      <ul role="list">
+        {ctx.contact.address && <li>{ctx.contact.address}</li>}
+        {ctx.contact.phones.map((p) => (
+          <li>{p.label && <>{p.label}: </>}<a href={`tel:${p.number.replace(/\s+/g, '')}`} dir="ltr">{p.number}</a></li>
+        ))}
+        {ctx.contact.emails.map((e) => <li>{e.label}: <a href={`mailto:${e.address}`} dir="ltr">{e.address}</a></li>)}
+        {ctx.contact.hours && <li>{ctx.contact.hours}</li>}
+        {ctx.contact.mapUrl && <li><a href={ctx.contact.mapUrl} target="_blank" rel="noopener">{ctx.ui.map}</a></li>}
+      </ul>
+    </div>
+
+    {ctx.social.length > 0 && (
+      <div class="col">
+        <h2 class="label">{ctx.ui.follow}</h2>
+        <ul role="list" class="social">
+          {ctx.social.map((s) => <li><a class="chip" href={s.href} target="_blank" rel="noopener" lang="en">{s.label}</a></li>)}
+        </ul>
+      </div>
+    )}
+  </div>
+  <div class="container legal">
+    <p>{ctx.legal.copyright ?? `© ${ctx.year} ${ctx.site.name}. ${ctx.ui.rights}.`}</p>
+    {ctx.legal.credit && (
+      <p>{ctx.legal.credit.href ? <a href={ctx.legal.credit.href} target="_blank" rel="noopener">{ctx.legal.credit.text}</a> : ctx.legal.credit.text}</p>
+    )}
+  </div>
+</footer>
+
+<style>
+  .footer {
+    --paper: var(--c-bg);
+    --paper-soft: color-mix(in srgb, var(--c-bg) 78%, var(--c-ink));
+    position: relative;
+    margin-block-start: var(--space-9);
+    background: var(--c-ink); color: var(--paper);
+    padding-block: var(--space-8) calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+    font-size: var(--step--1);
+  }
+  /* Zigzag top edge. */
+  .footer::before {
+    content: ""; position: absolute; inset-inline: 0; inset-block-end: 100%; block-size: 16px;
+    background: var(--c-ink);
+    -webkit-mask: conic-gradient(from 135deg at 50% 0, #000 90deg, #0000 0) 0 0 / 32px 100% repeat-x;
+    mask: conic-gradient(from 135deg at 50% 0, #000 90deg, #0000 0) 0 0 / 32px 100% repeat-x;
+  }
+  .footer :focus-visible { outline-color: var(--c-highlight); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--space-6); }
+  .col { display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; }
+  .col ul { display: flex; flex-direction: column; gap: var(--space-2); }
+  .col li { overflow-wrap: anywhere; color: var(--paper-soft); }
+  .col a { color: var(--paper); text-decoration: none; }
+  .col a:hover { color: var(--c-highlight); text-decoration: underline; }
+  /* Links that sit inside a line of text need more than color to stand out. */
+  .col li > a[dir="ltr"] { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--paper) 45%, transparent); }
+  .label { color: var(--c-highlight); font-size: var(--step-1); }
+  .name { font-family: var(--font-display); font-size: var(--step-2); line-height: 1.25; }
+  .motto {
+    align-self: flex-start; padding: var(--space-1) var(--space-3);
+    background: var(--c-highlight); color: var(--c-ink); font-weight: var(--weight-strong);
+    rotate: calc(var(--dir) * -2deg);
+  }
+  .social { flex-direction: row !important; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; min-block-size: 40px; padding-inline: var(--space-3);
+    border: var(--ink-w-thin) solid var(--paper); border-radius: var(--radius-pill);
+    transition: background-color var(--dur-fast) linear, color var(--dur-fast) linear;
+  }
+  .col .chip:hover { background: var(--c-highlight); color: var(--c-ink); border-color: var(--c-highlight); text-decoration: none; }
+  .legal {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3);
+    margin-block-start: var(--space-7); padding-block-start: var(--space-4);
+    border-block-start: var(--ink-w-thin) dashed var(--paper-soft); color: var(--paper-soft);
+  }
+  .legal a { color: inherit; }
+</style>

@@ -1,0 +1,116 @@
+/* Comic Class layout: page-wide styles. Components style themselves with scoped styles.
+   Everything is drawn with ink: thick outlines, offset "print" shadows and halftone dots.
+   The shadow falls toward the reading direction, so it flips on Arabic pages. */
+:root {
+  --ink-w: 3px;
+  --ink-w-thin: 2px;
+  --shadow-x: 5px;
+  --shadow-y: 5px;
+  --dir: 1;
+  --ink-shadow: var(--shadow-x) var(--shadow-y) 0 var(--c-ink);
+  --ink-shadow-big: calc(var(--shadow-x) * 1.8) calc(var(--shadow-y) * 1.8) 0 var(--c-ink);
+  --halftone: radial-gradient(circle, color-mix(in srgb, var(--c-ink) 20%, transparent) 1.15px, transparent 1.65px);
+  --halftone-faint: radial-gradient(circle, color-mix(in srgb, var(--c-ink) 6%, transparent) 1px, transparent 1.5px);
+  --halftone-light: radial-gradient(circle, color-mix(in srgb, var(--c-accent-ink) 26%, transparent) 1.3px, transparent 1.8px);
+}
+:root[dir="rtl"] { --shadow-x: -5px; --dir: -1; }
+
+body {
+  background-color: var(--c-bg);
+  background-image: var(--halftone-faint);
+  background-size: 12px 12px;
+  color: var(--c-ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: var(--weight-body);
+  line-height: var(--lh-body);
+}
+/* Tilted panels, page-turn entrances and offset shadows must never widen the page.
+   Clipping on <main> (not <body>, whose overflow the browser hands to the viewport)
+   also stops right-to-left pages from scrolling sideways while panels turn in,
+   which would count as a layout shift. */
+main { overflow-x: clip; }
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  line-height: var(--lh-heading);
+  letter-spacing: 0.015em;
+  text-wrap: balance;
+}
+/* Arabic: no letter-spacing, and room for the tall Lalezar letterforms. */
+:lang(ar) :is(h1, h2, h3, h4) { letter-spacing: 0; line-height: 1.45; }
+strong, b { font-weight: var(--weight-strong); }
+
+a { color: var(--c-accent); text-decoration-thickness: 2px; text-underline-offset: 0.22em; }
+a:hover { text-decoration-color: var(--c-highlight); }
+:focus-visible {
+  outline: 3px solid var(--c-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 7px var(--c-highlight);
+}
+::selection { background: var(--c-highlight); color: var(--c-ink); }
+
+.container {
+  inline-size: 100%;
+  max-inline-size: calc(var(--max-width) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+}
+.section { padding-block: var(--space-8); }
+.section + .section { padding-block-start: 0; }
+
+.label {
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--c-ink);
+}
+:lang(ar) .label { text-transform: none; }
+
+/* A section title with a yellow marker stroke behind it. */
+.comic-title {
+  display: inline;
+  font-size: var(--step-3);
+  padding-inline: 0.15em;
+  background: linear-gradient(transparent 58%, var(--c-highlight) 58%, var(--c-highlight) 88%, transparent 88%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Chunky comic buttons: ink outline, offset shadow, and a press that "prints" the button. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-block-size: 48px; padding-inline: var(--space-5); padding-block: var(--space-1);
+  border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-m);
+  background: var(--c-surface); color: var(--c-ink);
+  box-shadow: var(--ink-shadow);
+  font-family: var(--font-display); font-size: var(--step-1); font-weight: var(--weight-display);
+  letter-spacing: 0.03em; line-height: 1.2;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background-color var(--dur-fast) linear;
+}
+:lang(ar) .btn { letter-spacing: 0; }
+.btn:hover {
+  transform: translate(calc(var(--shadow-x) * -0.4), calc(var(--shadow-y) * -0.4)) rotate(calc(var(--dir) * -1.5deg));
+  box-shadow: var(--ink-shadow-big);
+}
+.btn:active { transform: translate(var(--shadow-x), var(--shadow-y)); box-shadow: 0 0 0 var(--c-ink); }
+.btn--primary { background: var(--c-accent); color: var(--c-accent-ink); }
+.btn--ghost { background: var(--c-surface); color: var(--c-ink); }
+.btn--pop { background: var(--c-highlight); color: var(--c-ink); }
+
+.skip-link { background: var(--c-highlight); color: var(--c-ink); border: var(--ink-w) solid var(--c-ink); font-weight: var(--weight-strong); }
+[dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+
+.todo-note {
+  border: var(--ink-w-thin) dashed var(--c-ink); border-radius: var(--radius-m);
+  padding: var(--space-3) var(--space-4); background: var(--c-sunk);
+  font-size: var(--step--1); color: var(--c-muted);
+}
+.todo-note ul { margin: var(--space-2) 0 0; padding-inline-start: var(--space-5); }
+
+@media print {
+  body { background-image: none; }
+}

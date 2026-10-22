@@ -1,0 +1,89 @@
+---
+// Feature links as comic panels. Each panel gets a doodle (star, light bulb,
+// pencil, book) drawn in code, and the panel colors take turns. The doodles are
+// decoration only, so they cycle by position and never claim meaning.
+import type { PageContext } from '@engine/context';
+interface Item { title: string; text?: string; href?: string; external?: boolean }
+interface Props { ctx: PageContext; title?: string; items: Item[] }
+const { title, items } = Astro.props;
+
+const doodles = [
+  'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z',
+  'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z',
+  'M4 20l4-1 11-11-3-3L5 16l-1 4zM14 6l3 3',
+  'M3 5c3-1 6-1 9 1v14c-3-2-6-2-9-1zM21 5c-3-1-6-1-9 1v14c3-2 6-2 9-1z',
+];
+---
+<section class="section">
+  <div class="container stack">
+    {title && <h2 data-reveal><span class="comic-title">{title}</span></h2>}
+    <ul class="grid" role="list">
+      {items.map((item, i) => {
+        const Tag = item.href ? 'a' : 'div';
+        return (
+          <li data-reveal style={`--k:${i}`}>
+            <Tag class="card" data-tilt href={item.href}
+                 target={item.href && item.external ? '_blank' : undefined} rel={item.href && item.external ? 'noopener' : undefined}>
+              <svg class="doodle" viewBox="0 0 24 24" aria-hidden="true"><path d={doodles[i % doodles.length]} /></svg>
+              <h3>{item.title}</h3>
+              {item.text && <p>{item.text}</p>}
+              {item.href && (
+                <span class="go" aria-hidden="true">
+                  <svg class="flip-rtl" viewBox="0 0 24 24" width="22" height="22"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </span>
+              )}
+            </Tag>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+    gap: clamp(var(--space-4), 2vw, var(--space-5)); perspective: 1200px;
+  }
+  .grid > li { display: flex; min-inline-size: 0; }
+  .card {
+    --tone: var(--c-accent); --tone-ink: var(--c-accent-ink);
+    position: relative; flex: 1; overflow: hidden;
+    display: flex; flex-direction: column; gap: var(--space-3);
+    min-block-size: clamp(9rem, 22vw, 11rem); padding: clamp(var(--space-4), 2vw, var(--space-5));
+    background: var(--tone); color: var(--tone-ink);
+    border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-s);
+    box-shadow: var(--ink-shadow);
+    text-decoration: none;
+    transform: rotate(calc(var(--dir) * var(--tilt, -1deg))) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  li:nth-child(4n + 2) .card { --tone: var(--c-highlight); --tone-ink: var(--c-ink); --tilt: 1.2deg; }
+  li:nth-child(4n + 3) .card { --tone: var(--c-surface); --tone-ink: var(--c-ink); --tilt: -0.6deg; }
+  li:nth-child(4n + 4) .card { --tone: var(--c-accent-soft); --tone-ink: var(--c-ink); --tilt: 0.8deg; }
+  /* A halftone corner, like cheap comic print. */
+  .card::before {
+    content: ""; position: absolute; inset-block-end: 0; inset-inline-end: 0; inline-size: 70%; block-size: 70%;
+    background-image: var(--halftone); background-size: 9px 9px; pointer-events: none;
+    mask-image: radial-gradient(circle at 100% 100%, #000, transparent 70%);
+  }
+  :global(:root[dir="rtl"]) .card::before { mask-image: radial-gradient(circle at 0 100%, #000, transparent 70%); }
+  a.card:hover { --tilt: 0deg; box-shadow: var(--ink-shadow-big); transform: translate(calc(var(--shadow-x) * -0.5), calc(var(--shadow-y) * -0.5)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+  a.card:active { transform: translate(var(--shadow-x), var(--shadow-y)); box-shadow: 0 0 0 var(--c-ink); }
+  .doodle {
+    position: relative; inline-size: 52px; block-size: 52px;
+    fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    transition: rotate var(--dur-base) var(--ease-out), scale var(--dur-base) var(--ease-out);
+  }
+  a.card:hover .doodle { rotate: calc(var(--dir) * -12deg); scale: 1.15; }
+  h3 { position: relative; font-size: var(--step-2); }
+  p { position: relative; }
+  .go {
+    position: relative; margin-block-start: auto; align-self: flex-end;
+    display: grid; place-items: center; inline-size: 44px; block-size: 44px; border-radius: 50%;
+    background: var(--c-surface); color: var(--c-ink); border: var(--ink-w) solid var(--c-ink);
+  }
+  .go svg { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  a.card:hover .go { background: var(--c-highlight); }
+</style>

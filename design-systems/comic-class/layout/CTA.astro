@@ -1,0 +1,69 @@
+---
+// The closing call to action: a full comic panel with speed lines and a big "!" burst.
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+interface Props { ctx: PageContext; title: string; text?: string; action: Action | null }
+const { title, text, action } = Astro.props;
+
+const burst = Array.from({ length: 28 }, (_, k) => {
+  const a = (Math.PI * 2 * k) / 28 - Math.PI / 2;
+  const r = k % 2 ? 30 : 49;
+  return `${(50 + r * Math.cos(a)).toFixed(2)},${(50 + r * Math.sin(a)).toFixed(2)}`;
+}).join(' ');
+---
+<section class="section">
+  <div class="container">
+    <div class="panel" data-reveal data-loop>
+      <span class="lines" aria-hidden="true"></span>
+      <span class="burst" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><polygon points={burst} /></svg>
+        <span>!</span>
+      </span>
+      <div class="copy">
+        <h2>{title}</h2>
+        {text && <p>{text}</p>}
+      </div>
+      {action && (
+        <a class="btn btn--pop go" href={action.href} target={action.external ? '_blank' : undefined} rel={action.external ? 'noopener' : undefined}>{action.label}</a>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .panel {
+    position: relative; overflow: hidden;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-5);
+    padding: var(--space-7) clamp(var(--space-5), 5vw, var(--space-8));
+    padding-inline-start: clamp(var(--space-5), 12vw, 9rem);
+    background: var(--c-accent); color: var(--c-accent-ink);
+    border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-s);
+    box-shadow: var(--ink-shadow-big);
+  }
+  .lines {
+    position: absolute; inset: -80% -20%; pointer-events: none;
+    background: repeating-conic-gradient(from 0deg at 10% 50%,
+      color-mix(in srgb, var(--c-accent-ink) 14%, transparent) 0deg 3deg, transparent 3deg 9deg);
+  }
+  :global(:root[dir="rtl"]) .lines { background: repeating-conic-gradient(from 0deg at 90% 50%,
+      color-mix(in srgb, var(--c-accent-ink) 14%, transparent) 0deg 3deg, transparent 3deg 9deg); }
+  .burst {
+    position: absolute; inset-inline-start: clamp(-1rem, 1vw, 1rem); inset-block-start: 50%;
+    inline-size: clamp(5rem, 11vw, 7.5rem); aspect-ratio: 1; translate: 0 -50%;
+    display: grid; place-items: center; rotate: calc(var(--dir) * 10deg);
+  }
+  .burst svg { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; overflow: visible; }
+  .burst polygon { fill: var(--c-highlight); stroke: var(--c-ink); stroke-width: 3; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .burst span { position: relative; font-family: var(--font-display); font-size: var(--step-4); color: var(--c-ink); line-height: 1; }
+  .copy { position: relative; display: flex; flex-direction: column; gap: var(--space-2); min-inline-size: 0; flex: 1 1 18rem; }
+  h2 { font-size: var(--step-4); }
+  p { font-size: var(--step-1); max-inline-size: 46ch; }
+  .go { position: relative; font-size: var(--step-2); min-block-size: 56px; }
+
+  @media (max-width: 560px) {
+    .panel { padding-inline-start: var(--space-5); padding-block-start: var(--space-8); }
+    .burst { inset-block-start: var(--space-2); translate: none; inline-size: 4.5rem; }
+  }
+  :global(.cc-rich) .burst { animation: throb 2.4s ease-in-out infinite; }
+  @keyframes throb { 0%, 100% { scale: 1; } 50% { scale: 1.1; } }
+</style>

@@ -1,0 +1,218 @@
+---
+// Every inner page. A page title sits in a speech bubble on a blue cover panel;
+// the body is a white comic "sheet" with ink edges. When several blocks share a
+// page (news items, headingLevel 2), each becomes a smaller panel with its date
+// in a caption box.
+import type { PageContext } from '@engine/context';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  todo?: string[];
+  /** 1 for a page's own title (default); 2 when several Prose blocks share a page, e.g. news items. */
+  headingLevel?: 1 | 2;
+  /** Anchor id, so other pages can link to this block. */
+  id?: string;
+}
+const { ctx, title, lead, todo = [], headingLevel = 1, id } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+---
+<article class:list={['section', 'block', headingLevel === 1 ? 'page' : 'item']} id={id}>
+  <div class="container narrow">
+    {headingLevel === 1 ? (
+      <header class="cover" data-loop>
+        <span class="dots" aria-hidden="true"></span>
+        <div class="bubble"><Heading data-split-words>{title}</Heading></div>
+        {lead && <p class="lead">{lead}</p>}
+      </header>
+    ) : (
+      <header class="item-head">
+        {lead && <p class="caption">{lead}</p>}
+        <Heading>{title}</Heading>
+      </header>
+    )}
+    {todo.length > 0 && (
+      <aside class="todo-note">
+        <strong>{ctx.ui.pending}</strong>
+        <ul lang="en" dir="ltr">{todo.map((t) => <li>{t}</li>)}</ul>
+      </aside>
+    )}
+    <div class="sheet">
+      <div class="prose">
+        <slot />
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .narrow { max-inline-size: calc(52rem + 2 * var(--gutter)); display: flex; flex-direction: column; gap: var(--space-5); }
+  .page { padding-block-start: var(--space-6); }
+
+  /* ---- Page cover: blue panel, halftone, title in a bubble ---- */
+  .cover {
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4);
+    padding: var(--space-6) clamp(var(--space-4), 4vw, var(--space-7)) var(--space-7);
+    background: var(--c-accent); color: var(--c-accent-ink);
+    border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-s);
+    box-shadow: var(--ink-shadow-big);
+    rotate: calc(var(--dir) * -0.6deg);
+  }
+  .dots {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: var(--halftone-light); background-size: 11px 11px;
+    mask-image: linear-gradient(calc(var(--dir) * 120deg), transparent 35%, #000);
+  }
+  .bubble {
+    position: relative; max-inline-size: 100%;
+    padding: var(--space-4) var(--space-5);
+    background: var(--c-surface); color: var(--c-ink);
+    border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-l) calc(var(--radius-l) * 1.5) var(--radius-l) calc(var(--radius-l) * 1.2);
+    box-shadow: var(--ink-shadow);
+  }
+  .bubble::before, .bubble::after {
+    content: ""; position: absolute; inset-block-start: 100%; inset-inline-start: 14%;
+    inline-size: 40px; block-size: 28px;
+    clip-path: polygon(0 0, 100% 0, calc(50% - 50% * var(--dir)) 100%);
+  }
+  .bubble::before { background: var(--c-ink); }
+  .bubble::after {
+    background: var(--c-surface);
+    inline-size: calc(40px - 2.5 * var(--ink-w)); block-size: calc(28px - 2 * var(--ink-w));
+    margin-block-start: calc(-1 * var(--ink-w)); margin-inline-start: var(--ink-w);
+  }
+  h1 { font-size: var(--step-4); }
+  .lead {
+    position: relative; margin-block-start: var(--space-3); margin-inline-start: auto;
+    padding: var(--space-1) var(--space-4);
+    background: var(--c-highlight); color: var(--c-ink);
+    border: var(--ink-w-thin) solid var(--c-ink);
+    font-weight: var(--weight-strong);
+    rotate: calc(var(--dir) * 1.5deg);
+  }
+
+  /* ---- News items and other blocks sharing a page ---- */
+  .item { scroll-margin-block-start: 140px; }
+  .item-head { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+  .item h2 { font-size: var(--step-3); }
+  .caption {
+    padding: 0.1em var(--space-3);
+    background: var(--c-highlight); border: var(--ink-w-thin) solid var(--c-ink);
+    font-size: var(--step--1); font-weight: var(--weight-strong);
+    rotate: calc(var(--dir) * -2deg);
+  }
+
+  /* ---- The sheet ---- */
+  .sheet {
+    padding: clamp(var(--space-4), 4vw, var(--space-7));
+    background: var(--c-surface);
+    border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-s);
+    box-shadow: var(--ink-shadow);
+    min-inline-size: 0;
+  }
+  .sheet:has(.prose:empty) { display: none; }
+  .prose { max-inline-size: 70ch; min-inline-size: 0; }
+  .prose :global(> * + *) { margin-block-start: var(--space-4); }
+  .prose :global(> :first-child) { margin-block-start: 0; }
+
+  /* Headings become caption boxes and marker strokes. */
+  .prose :global(h2) {
+    display: table; margin-block-start: var(--space-7);
+    padding: 0.05em 0.45em;
+    font-size: var(--step-2);
+    background: var(--c-highlight); color: var(--c-ink);
+    border: var(--ink-w) solid var(--c-ink); box-shadow: var(--ink-shadow);
+    rotate: calc(var(--dir) * -1deg);
+  }
+  .prose :global(> h2:first-child) { margin-block-start: 0; }
+  .prose :global(h3) { font-size: var(--step-1); margin-block-start: var(--space-6); color: var(--c-accent); }
+  .prose :global(h4) { font-size: var(--step-0); margin-block-start: var(--space-5); }
+  .prose :global(ul), .prose :global(ol) { padding-inline-start: var(--space-5); }
+  .prose :global(li + li) { margin-block-start: var(--space-2); }
+  .prose :global(li::marker) { color: var(--c-accent); }
+  .prose :global(hr) { border: 0; border-block-start: var(--ink-w-thin) dashed var(--c-ink); }
+  .prose :global(img) { border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-s); background: var(--c-sunk); }
+  .prose :global(video) { inline-size: 100%; border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-s); background: var(--c-ink); }
+  .prose :global(.embed) { inline-size: 100%; aspect-ratio: 16 / 9; border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-s); background: var(--c-sunk); }
+  .prose :global(.embed--map) { aspect-ratio: 4 / 3; }
+  .prose :global(blockquote) {
+    position: relative; margin-inline: 0; padding: var(--space-4) var(--space-5);
+    background: var(--c-accent-soft); border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-l);
+  }
+
+  /* Tables: ink grid with a blue header. */
+  /* The table hugs its columns and scrolls inside itself when wider than the sheet. */
+  .prose :global(table) {
+    display: block; inline-size: max-content; max-inline-size: 100%; overflow-x: auto;
+    border-collapse: collapse; border: var(--ink-w) solid var(--c-ink);
+  }
+  .prose :global(th), .prose :global(td) { border: var(--ink-w-thin) solid var(--c-ink); padding: var(--space-2) var(--space-3); text-align: start; }
+  .prose :global(th) { background: var(--c-accent); color: var(--c-accent-ink); font-weight: 800; }
+  .prose :global(tr:nth-child(even) td) { background: var(--c-sunk); }
+
+  .prose :global(.actions) { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+
+  /* Downloads: a stack of tickets. */
+  .prose :global(.downloads) { list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+  .prose :global(.downloads li) {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4);
+    padding: var(--space-2) var(--space-4);
+    background: var(--c-bg); border: var(--ink-w-thin) solid var(--c-ink); border-radius: var(--radius-s);
+    box-shadow: calc(var(--shadow-x) * 0.6) calc(var(--shadow-y) * 0.6) 0 var(--c-ink);
+  }
+  .prose :global(.downloads li + li) { margin-block-start: 0; }
+  .prose :global(.downloads li:nth-child(3n + 2)) { background: var(--c-accent-soft); }
+  .prose :global(.downloads a) { font-weight: var(--weight-strong); overflow-wrap: anywhere; }
+
+  /* Image galleries: comic panels in a loose grid. */
+  .prose :global(.gallery) { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)); gap: var(--space-4); }
+  .prose :global(.gallery > *) { margin: 0; }
+  .prose :global(.gallery img) {
+    inline-size: 100%; block-size: auto; aspect-ratio: 4 / 3; object-fit: cover;
+    box-shadow: var(--ink-shadow);
+    transition: rotate var(--dur-base) var(--ease-out), scale var(--dur-base) var(--ease-out);
+  }
+  .prose :global(.gallery > :nth-child(odd) img) { rotate: calc(var(--dir) * -1.2deg); }
+  .prose :global(.gallery > :nth-child(even) img) { rotate: calc(var(--dir) * 1.2deg); }
+  .prose :global(.gallery img:hover) { rotate: 0deg; scale: 1.04; }
+
+  /* Student photos: trading cards with the name in a caption. */
+  .prose :global(.students) { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr)); gap: var(--space-5) var(--space-4); }
+  .prose :global(.students figure) {
+    margin: 0; display: flex; flex-direction: column; gap: var(--space-2); text-align: center;
+    padding: var(--space-2); background: var(--c-bg);
+    border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-m);
+    box-shadow: calc(var(--shadow-x) * 0.7) calc(var(--shadow-y) * 0.7) 0 var(--c-ink);
+  }
+  .prose :global(.students figure:nth-child(4n + 2)) { background: var(--c-accent-soft); }
+  .prose :global(.students figure:nth-child(4n + 3)) { background: color-mix(in srgb, var(--c-highlight) 35%, var(--c-surface)); }
+  .prose :global(.students img) { inline-size: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-width: var(--ink-w-thin); }
+  .prose :global(.students figcaption) { font-size: var(--step--1); font-weight: var(--weight-strong); line-height: 1.3; }
+  .prose :global(.students + h2), .prose :global(h2 + .students) { margin-block-start: var(--space-5); }
+
+  .prose :global(.note) {
+    padding: var(--space-3) var(--space-5);
+    background: var(--c-accent-soft); border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-l);
+  }
+
+  /* Old-site forms, shown as they were; sending is not wired up yet. */
+  .prose :global(.form) {
+    display: grid; gap: var(--space-3); padding: var(--space-5);
+    background: var(--c-bg); border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-m);
+    box-shadow: var(--ink-shadow);
+  }
+  .prose :global(.form label) { font-weight: var(--weight-strong); }
+  .prose :global(.form input), .prose :global(.form select), .prose :global(.form textarea) {
+    inline-size: 100%; min-block-size: 46px; padding: var(--space-2) var(--space-3);
+    border: var(--ink-w-thin) solid var(--c-ink); border-radius: var(--radius-s); background: var(--c-surface);
+  }
+  .prose :global(.form input:focus-visible), .prose :global(.form select:focus-visible), .prose :global(.form textarea:focus-visible) { background: color-mix(in srgb, var(--c-highlight) 22%, var(--c-surface)); }
+  .prose :global(.form textarea) { min-block-size: 6rem; resize: vertical; }
+  .prose :global(.form button[disabled]) { opacity: 0.6; cursor: not-allowed; justify-self: start; }
+
+  @media (max-width: 560px) {
+    .sheet { padding: var(--space-4); }
+    .prose :global(.students) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>

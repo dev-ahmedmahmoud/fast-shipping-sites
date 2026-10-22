@@ -1,0 +1,138 @@
+---
+// Comic Class motion. About 2 KB of script and no libraries: panels pop in as
+// they scroll into view, stickers stamp down, headline words jiggle, and on
+// capable devices panels tilt toward the pointer. Every effect starts from the
+// visible state, so nothing depends on this script to be readable.
+//
+// Hooks any layout can use:
+//   data-reveal            pop in when scrolled into view
+//   data-reveal="stamp"    slam down like a sticker
+//   data-reveal="slide"    slide in from the reading direction
+//   data-split-words       words jiggle once, one after another (whole words only)
+//   data-tilt              tilts toward the pointer (sets --rx and --ry)
+//   data-loop              looping decoration; paused while off screen
+// The script also marks <html> with `cc-motion` (motion allowed) and `cc-rich`
+// (a capable device), which layouts use to switch on heavier effects.
+---
+<script>
+  import { splitWords } from '@engine/split';
+
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function capable(): boolean {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    return (nav.hardwareConcurrency ?? 4) >= 4 && (nav.deviceMemory ?? 4) >= 4 && !nav.connection?.saveData;
+  }
+
+  function words() {
+    document.querySelectorAll<HTMLElement>('[data-split-words]').forEach((el) => {
+      splitWords(el).forEach((w, i) => w.style.setProperty('--w', String(i)));
+    });
+  }
+
+  // Only elements below the fold get hidden for a reveal; what is already on
+  // screen stays put, so first paint never flickers.
+  function reveals() {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        e.target.classList.add('cc-in');
+        io.unobserve(e.target);
+      }
+    }, { rootMargin: '0px 0px -6% 0px' });
+    const fold = window.innerHeight * 0.94;
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+      if (el.getBoundingClientRect().top < fold) return;
+      const sibs = el.parentElement ? [...el.parentElement.children].filter((c) => c.hasAttribute('data-reveal')) : [];
+      el.style.setProperty('--cc-delay', `${Math.min(Math.max(sibs.indexOf(el), 0), 5) * 90}ms`);
+      el.classList.add('cc-pre');
+      io.observe(el);
+    });
+  }
+
+  function loops() {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) e.target.toggleAttribute('data-paused', !e.isIntersecting);
+    });
+    document.querySelectorAll('[data-loop]').forEach((el) => io.observe(el));
+  }
+
+  function tilt() {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((el) => {
+      let box: DOMRect | null = null;
+      let frame = 0;
+      el.addEventListener('pointerenter', () => { box = el.getBoundingClientRect(); });
+      el.addEventListener('pointermove', (ev) => {
+        if (!box) return;
+        const x = (ev.clientX - box.left) / box.width - 0.5;
+        const y = (ev.clientY - box.top) / box.height - 0.5;
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          el.style.setProperty('--ry', `${(x * 9).toFixed(2)}deg`);
+          el.style.setProperty('--rx', `${(y * -9).toFixed(2)}deg`);
+        });
+      });
+      el.addEventListener('pointerleave', () => {
+        cancelAnimationFrame(frame);
+        box = null;
+        el.style.removeProperty('--rx');
+        el.style.removeProperty('--ry');
+      });
+    });
+  }
+
+  if (!reduce) {
+    root.classList.add('cc-motion');
+    const rich = capable();
+    if (rich) root.classList.add('cc-rich');
+    words();
+    reveals();
+    loops();
+    if (rich) tilt();
+  }
+</script>
+
+<style is:global>
+  :root { --cc-dir: 1; }
+  :root[dir="rtl"] { --cc-dir: -1; }
+
+  /* Reveals: hidden only after the script marked them, then animated back to
+     each element's own resting transform (no `to` keyframe), so tilted panels
+     and rotated stickers land exactly where the layout put them. */
+  .cc-motion .cc-pre { opacity: 0; }
+  .cc-motion .cc-pre.cc-in {
+    opacity: 1;
+    animation: cc-pop var(--dur-slow) var(--ease-out) var(--cc-delay, 0ms) both;
+  }
+  .cc-motion [data-reveal="stamp"].cc-pre.cc-in { animation-name: cc-stamp; animation-duration: 560ms; }
+  .cc-motion [data-reveal="slide"].cc-pre.cc-in { animation-name: cc-slide; }
+  @keyframes cc-pop {
+    from { opacity: 0; translate: 0 var(--reveal-distance); scale: 0.9; rotate: calc(var(--cc-dir) * -3deg); }
+  }
+  @keyframes cc-stamp {
+    from { opacity: 0; scale: 2.3; rotate: calc(var(--cc-dir) * -24deg); }
+    55% { opacity: 1; scale: 0.88; }
+    75% { scale: 1.06; }
+  }
+  @keyframes cc-slide {
+    from { opacity: 0; translate: calc(var(--cc-dir) * -48px) 0; }
+  }
+
+  /* Headline words: a one-time jiggle from the visible state. */
+  .cc-motion [data-word] {
+    animation: cc-word 620ms var(--ease-out) both;
+    animation-delay: calc(var(--w, 0) * 70ms + 260ms);
+  }
+  @keyframes cc-word {
+    40% { translate: 0 -0.14em; scale: 1.12; rotate: calc(var(--cc-dir) * -4deg); }
+  }
+
+  /* Looping decoration rests while off screen. */
+  [data-loop][data-paused], [data-loop][data-paused] * { animation-play-state: paused !important; }
+
+  @media print {
+    .cc-motion .cc-pre { opacity: 1 !important; animation: none !important; }
+  }
+</style>

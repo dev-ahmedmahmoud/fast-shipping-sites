@@ -1,0 +1,166 @@
+---
+import { Image } from 'astro:assets';
+import type { PageContext, NavItem } from '@engine/context';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const other = ctx.languages.find((l) => !l.current);
+const linkAttrs = (item: NavItem) => ({
+  href: item.href,
+  'aria-current': item.current ? 'page' : undefined,
+  target: item.external ? '_blank' : undefined,
+  rel: item.external ? 'noopener' : undefined,
+});
+---
+<header class="header">
+  <div class="container bar">
+    <a class="brand" href={ctx.site.homeHref} aria-label={ctx.site.name}>
+      <span class="badge" aria-hidden="true">
+        {ctx.site.logo
+          ? <Image src={ctx.site.logo} alt="" height={88} class="logo" loading="eager" />
+          : <span class="mark">{ctx.site.shortName}</span>}
+      </span>
+      <span class="name">{ctx.site.name}</span>
+    </a>
+
+    <div class="actions">
+      {other && (
+        <a class="lang" href={other.href} hreflang={other.locale} lang={other.locale}>{other.name}</a>
+      )}
+      {ctx.cta && (
+        <a class="btn btn--pop cta" href={ctx.cta.href}
+           target={ctx.cta.external ? '_blank' : undefined} rel={ctx.cta.external ? 'noopener' : undefined}>
+          {ctx.cta.label}
+        </a>
+      )}
+      <details class="nav-mobile">
+        <summary class="btn btn--ghost">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" /></svg>
+          {ctx.ui.menu}
+        </summary>
+        <nav class="bubble-menu" aria-label={ctx.ui.menu}>
+          <ul role="list">
+            {ctx.nav.map((item) => (
+              <li>
+                <a {...linkAttrs(item)}>{item.label}</a>
+                {item.children.length > 0 && (
+                  <ul role="list" class="sub-mobile">
+                    {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+
+  <nav class="nav-desktop" aria-label={ctx.ui.menu}>
+    <ul role="list" class="container">
+      {ctx.nav.map((item) => (
+        <li class:list={[{ 'has-sub': item.children.length > 0 }]}>
+          <a {...linkAttrs(item)}>{item.label}</a>
+          {item.children.length > 0 && (
+            <ul role="list" class="sub">
+              {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .header {
+    position: sticky; inset-block-start: 0; z-index: 20;
+    background: var(--c-bg);
+    border-block-end: var(--ink-w) solid var(--c-ink);
+    padding-block-start: env(safe-area-inset-top, 0px);
+  }
+  .bar { display: flex; align-items: center; gap: var(--space-4); min-block-size: 72px; }
+  .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--c-ink); text-decoration: none; min-inline-size: 0; }
+  .badge {
+    display: grid; place-items: center; flex: none;
+    inline-size: 56px; block-size: 56px; border-radius: 50%;
+    background: var(--c-surface); border: var(--ink-w) solid var(--c-ink);
+    box-shadow: calc(var(--shadow-x) * 0.6) calc(var(--shadow-y) * 0.6) 0 var(--c-ink);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .brand:hover .badge { transform: rotate(calc(var(--dir) * -10deg)) scale(1.06); }
+  .logo { block-size: 44px; inline-size: auto; }
+  .mark { font-family: var(--font-display); font-size: var(--step-0); color: var(--c-accent); }
+  .name { font-family: var(--font-display); font-size: var(--step-0); line-height: 1.2; max-inline-size: 22ch; }
+  .actions { display: flex; align-items: center; gap: var(--space-3); margin-inline-start: auto; }
+
+  /* The language switch is a round sticker. */
+  .lang {
+    display: grid; place-items: center; min-block-size: 44px; min-inline-size: 44px;
+    padding-inline: var(--space-3); border-radius: var(--radius-pill);
+    background: var(--c-accent); color: var(--c-accent-ink);
+    border: var(--ink-w) solid var(--c-ink);
+    font-family: var(--font-display); font-size: var(--step--1); text-decoration: none;
+    rotate: calc(var(--dir) * 4deg);
+    transition: rotate var(--dur-base) var(--ease-out), scale var(--dur-base) var(--ease-out);
+  }
+  .lang:hover { rotate: calc(var(--dir) * -6deg); scale: 1.08; }
+  /* On English pages this one Arabic word would pull in a whole Arabic display font; a system face is enough. */
+  .lang[lang="ar"] { font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", "Geeza Pro", system-ui, sans-serif; font-weight: 700; }
+  .cta { font-size: var(--step-0); min-block-size: 44px; }
+
+  .nav-desktop { border-block-start: var(--ink-w-thin) solid var(--c-ink); background: var(--c-surface); }
+  .nav-desktop > ul { display: flex; flex-wrap: wrap; gap: 0; padding-block: var(--space-1); }
+  .nav-desktop a, .nav-mobile a {
+    display: block; padding: var(--space-1) var(--space-2); border-radius: var(--radius-s);
+    color: var(--c-ink); text-decoration: none; font-size: var(--step--1); font-weight: var(--weight-strong); white-space: nowrap;
+  }
+  .nav-desktop a:hover, .nav-mobile a:hover { background: var(--c-highlight); }
+  /* The current page gets a yellow marker stroke. */
+  a[aria-current="page"] {
+    background: linear-gradient(transparent 55%, var(--c-highlight) 55%, var(--c-highlight) 90%, transparent 90%);
+  }
+  .has-sub { position: relative; }
+  .has-sub > a::after { content: ""; display: inline-block; margin-inline-start: 0.4em; border: 0.3em solid transparent; border-block-start-color: currentColor; vertical-align: -0.1em; }
+
+  /* Sub-menus open as speech bubbles. */
+  .sub, .bubble-menu {
+    padding: var(--space-2);
+    background: var(--c-surface); border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-m);
+    box-shadow: var(--ink-shadow);
+  }
+  .sub::before, .bubble-menu::before {
+    content: ""; position: absolute; inset-block-start: -11px; inline-size: 18px; block-size: 18px;
+    background: var(--c-surface); border-block-start: var(--ink-w) solid var(--c-ink); border-inline-start: var(--ink-w) solid var(--c-ink);
+    rotate: calc(var(--dir) * 45deg);
+  }
+  .sub {
+    display: none; position: absolute; inset-inline-start: 0; inset-block-start: calc(100% + 10px); z-index: 5;
+    min-inline-size: 14rem;
+  }
+  .sub::before { inset-inline-start: 22px; }
+  .has-sub:hover > .sub, .has-sub:focus-within > .sub { display: block; }
+  /* A bridge so the pointer can travel from the link into the bubble. */
+  .has-sub:hover::after { content: ""; position: absolute; inset-inline: 0; inset-block-start: 100%; block-size: 12px; }
+
+  .nav-mobile { display: none; position: relative; }
+  .nav-mobile summary { list-style: none; font-size: var(--step-0); min-block-size: 44px; padding-inline: var(--space-3); }
+  .nav-mobile summary::-webkit-details-marker { display: none; }
+  .bubble-menu {
+    position: absolute; inset-inline-end: 0; inset-block-start: calc(100% + 14px);
+    inline-size: min(18rem, calc(100vw - 2 * var(--gutter))); max-block-size: 72vh; overflow-y: auto;
+  }
+  .bubble-menu::before { inset-inline-end: 26px; rotate: calc(var(--dir) * -45deg); border-inline-start: 0; border-inline-end: var(--ink-w) solid var(--c-ink); }
+  .bubble-menu a { font-size: var(--step-0); padding-block: var(--space-2); white-space: normal; }
+  .sub-mobile { padding-inline-start: var(--space-4); border-inline-start: var(--ink-w-thin) dashed var(--c-ink); margin-inline-start: var(--space-3); }
+
+  @media (max-width: 1080px) {
+    .nav-desktop { display: none; }
+    .nav-mobile { display: block; }
+  }
+  @media (max-width: 560px) {
+    .name { display: none; }
+    .cta { display: none; }
+    .badge { inline-size: 50px; block-size: 50px; }
+    .logo { block-size: 38px; }
+  }
+</style>

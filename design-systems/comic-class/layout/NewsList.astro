@@ -1,0 +1,79 @@
+---
+// News as a comic strip: each item is a panel, its date in a yellow caption box.
+import type { PageContext } from '@engine/context';
+interface NewsItem { title: string; href: string; date?: string; excerpt?: string }
+interface Props { ctx: PageContext; title?: string; items: NewsItem[]; more?: { label: string; href: string } | null; headingLevel?: 1 | 2 }
+const { ctx, title, items, more, headingLevel = 2 } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+---
+<section class:list={['section', { top: headingLevel === 1 }]}>
+  <div class="container stack">
+    <div class="head">
+      {title && (
+        <Heading class:list={['title', { big: headingLevel === 1 }]} data-reveal>
+          <span class="comic-title" data-split-words={headingLevel === 1 ? '' : undefined}>{title}</span>
+        </Heading>
+      )}
+      {more && items.length > 0 && <a class="btn btn--ghost more" href={more.href}>{more.label}</a>}
+    </div>
+    {items.length === 0 ? (
+      <p class="empty">{ctx.ui.noNews}</p>
+    ) : (
+      <ul class="strip" role="list">
+        {items.map((n, i) => (
+          <li data-reveal style={`--k:${i}`}>
+            <a class="item" href={n.href} data-tilt>
+              {n.date && <time class="date">{n.date}</time>}
+              <h3>{n.title}</h3>
+              {n.excerpt && <p>{n.excerpt}</p>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</section>
+
+<style>
+  .top { padding-block-start: var(--space-7); }
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  .head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }
+  .title.big .comic-title { font-size: var(--step-5); }
+  .more { font-size: var(--step-0); min-block-size: 44px; }
+  .empty {
+    padding: var(--space-5); background: var(--c-surface);
+    border: var(--ink-w) dashed var(--c-ink); border-radius: var(--radius-m); color: var(--c-muted);
+  }
+  .strip {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: var(--space-5); perspective: 1200px;
+  }
+  .strip > li { display: flex; min-inline-size: 0; }
+  .item {
+    position: relative; flex: 1; overflow: hidden;
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3);
+    padding: var(--space-5); padding-block-start: var(--space-4);
+    background: var(--c-surface); color: var(--c-ink); text-decoration: none;
+    border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-s);
+    box-shadow: var(--ink-shadow);
+    transform: rotate(calc(var(--dir) * var(--tilt, 0.6deg))) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  li:nth-child(even) .item { --tilt: -0.8deg; }
+  .item::after {
+    content: ""; position: absolute; inset-block-start: 0; inset-inline-end: 0; inline-size: 45%; block-size: 55%;
+    background-image: var(--halftone); background-size: 8px 8px; pointer-events: none; opacity: 0.8;
+    mask-image: linear-gradient(to bottom, #000, transparent);
+  }
+  .item:hover { --tilt: 0deg; box-shadow: var(--ink-shadow-big); transform: translate(calc(var(--shadow-x) * -0.4), calc(var(--shadow-y) * -0.4)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+  .item:hover h3 { text-decoration: underline; text-decoration-color: var(--c-highlight); text-decoration-thickness: 4px; }
+  .date {
+    position: relative; z-index: 1;
+    padding: 0.1em var(--space-3);
+    background: var(--c-highlight); border: var(--ink-w-thin) solid var(--c-ink);
+    font-size: var(--step--1); font-weight: var(--weight-strong); font-variant-numeric: tabular-nums;
+    rotate: calc(var(--dir) * -2deg);
+  }
+  h3 { position: relative; font-size: var(--step-2); }
+  p { position: relative; color: var(--c-muted); }
+</style>

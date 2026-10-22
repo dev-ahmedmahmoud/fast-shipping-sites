@@ -1,0 +1,56 @@
+---
+// Figures as starburst stickers slapped onto a halftone panel. The motion part
+// "stamps" them in (data-reveal="stamp"); without it they are simply there.
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; title?: string; items: { value: string; label: string }[] }
+const { title, items } = Astro.props;
+
+const burst = Array.from({ length: 40 }, (_, k) => {
+  const a = (Math.PI * 2 * k) / 40 - Math.PI / 2;
+  const r = k % 2 ? 42 : 49;
+  return `${(50 + r * Math.cos(a)).toFixed(2)},${(50 + r * Math.sin(a)).toFixed(2)}`;
+}).join(' ');
+---
+<section class="section">
+  <div class="container">
+    <div class:list={['board', { few: items.length <= 2 }]} data-reveal>
+      {title && <h2><span class="comic-title">{title}</span></h2>}
+      <dl class="stickers">
+        {items.map((s, i) => (
+          <div class="sticker" data-reveal="stamp" style={`--k:${i}`}>
+            <svg viewBox="0 0 100 100" aria-hidden="true"><polygon points={burst} /></svg>
+            <dt>{s.label}</dt>
+            <dd>{s.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .board {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--space-5);
+    padding: var(--space-7) var(--space-5);
+    background-color: var(--c-accent-soft);
+    background-image: var(--halftone); background-size: 10px 10px;
+    border: var(--ink-w) solid var(--c-ink); border-radius: var(--radius-s);
+    box-shadow: var(--ink-shadow);
+  }
+  /* One or two figures get a compact panel instead of a full-width band. */
+  .board.few { inline-size: fit-content; min-inline-size: min(100%, 26rem); margin-inline: auto; rotate: calc(var(--dir) * 1deg); }
+  h2 { text-align: center; }
+  .stickers { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-5) var(--space-7); }
+  .sticker {
+    position: relative; display: flex; flex-direction: column-reverse; align-items: center; justify-content: center;
+    inline-size: clamp(11rem, 30vw, 14rem); aspect-ratio: 1; padding: 18%;
+    text-align: center; color: var(--c-ink);
+    rotate: calc(var(--dir) * (var(--k) * 7deg - 6deg));
+  }
+  .sticker:nth-child(even) svg polygon { fill: var(--c-surface); }
+  .sticker svg { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; overflow: visible; filter: drop-shadow(var(--shadow-x) var(--shadow-y) 0 var(--c-ink)); }
+  polygon { fill: var(--c-highlight); stroke: var(--c-ink); stroke-width: 3; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  dd, dt { position: relative; }
+  dd { margin: 0; font-family: var(--font-display); font-size: var(--step-4); line-height: 1; font-variant-numeric: tabular-nums; }
+  dt { font-weight: var(--weight-strong); font-size: var(--step-0); line-height: 1.2; }
+</style>
