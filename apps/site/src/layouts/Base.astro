@@ -1,0 +1,50 @@
+---
+// The HTML shell every page shares. Design-system parts arrive through the
+// @palette, @type, @layout and @motion aliases set in astro.config.mjs.
+import '../styles/base.css';
+import '@layout/global.css';
+import { palette } from '@palette';
+import { typography } from '@type';
+import { components, layoutTokens } from '@layout/index';
+import { motionTokens } from '@motion/tokens';
+import Motion from '@motion/Motion.astro';
+import { tokensCss } from '@engine/tokens';
+import type { PageContext } from '@engine/context';
+
+interface Props { ctx: PageContext; title: string; description?: string }
+const { ctx, title, description } = Astro.props;
+const { Header, Footer } = components;
+
+const css = tokensCss(palette, typography, layoutTokens, motionTokens);
+const pageTitle = title === ctx.site.name ? title : `${title} | ${ctx.site.name}`;
+const site = Astro.site ?? new URL('https://example.com');
+const abs = (href: string) => new URL(href, site).href;
+const xDefault = ctx.languages.find((l) => l.locale === 'ar') ?? ctx.languages[0];
+---
+<!doctype html>
+<html lang={ctx.locale} dir={ctx.dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+    {import.meta.env.FSS_NOINDEX && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={abs(Astro.url.pathname)} />
+    {ctx.languages.map((l) => <link rel="alternate" hreflang={l.locale} href={abs(l.href)} />)}
+    {xDefault && <link rel="alternate" hreflang="x-default" href={abs(xDefault.href)} />}
+    <meta name="generator" content={`fast-shipping-sites ${import.meta.env.FSS_SAMPLE}`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={typography.fontsHref} />
+    <style is:inline set:html={css}></style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{ctx.ui.skip}</a>
+    <Header ctx={ctx} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer ctx={ctx} />
+    <Motion />
+  </body>
+</html>

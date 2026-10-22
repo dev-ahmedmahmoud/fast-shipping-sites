@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import { components } from '@layout/index';
+import { homeOf } from '@engine/content';
+import { buildContext } from '@engine/context';
+
+const { Prose } = components;
+const home = homeOf('ar');
+const ctx = buildContext({ ...home, id: '__404' });
+const enHome = buildContext({ ...homeOf('en'), id: '__404' }).site.homeHref;
+---
+<Base ctx={ctx} title={ctx.ui.notFound}>
+  <Prose ctx={ctx} title={ctx.ui.notFound}>
+    <p><a href={ctx.site.homeHref}>{ctx.ui.backHome}</a></p>
+    <p lang="en" dir="ltr"><a href={enHome}>Page not found. Back to the English home page.</a></p>
+  </Prose>
+</Base>

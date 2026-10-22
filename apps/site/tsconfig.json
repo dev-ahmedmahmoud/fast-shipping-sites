@@ -1,0 +1,16 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "src/**/*", "../../design-systems/**/*", "../../clients/**/*.json"],
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "paths": {
+      "@engine/*": ["./src/lib/*"],
+      "@client/*": ["../../clients/lfis/*"],
+      "@systems/*": ["../../design-systems/*"],
+      "@palette": ["../../design-systems/baseline/palette.ts"],
+      "@type": ["../../design-systems/baseline/type.ts"],
+      "@layout/*": ["../../design-systems/baseline/layout/*"],
+      "@motion/*": ["../../design-systems/baseline/motion/*"]
+    }
+  }
+}

@@ -1,0 +1,73 @@
+---
+// Every client page, at the exact URL path its content file declares.
+import Base from '../layouts/Base.astro';
+import { components } from '@layout/index';
+import { entries, newsFor, resolveAction, resolveHref, type Entry } from '@engine/content';
+import { buildContext } from '@engine/context';
+import { url } from '@engine/links';
+
+export function getStaticPaths() {
+  // A gallery-index build renders only the comparison page (src/gallery/Index.astro).
+  if (import.meta.env.FSS_MODE !== 'site') return [];
+  return entries.map((entry) => ({ params: { path: entry.slug || undefined }, props: { entry } }));
+}
+
+interface Props { entry: Entry }
+const { entry } = Astro.props;
+
+const { Hero, FeatureGrid, Stats, NewsList, CTA, Prose } = components;
+const Content = entry.Content;
+const ctx = buildContext(entry);
+const fm = entry.fm as Record<string, any>;
+const todo = import.meta.env.FSS_SHOW_TODO ? entry.todo : [];
+
+const newsItems = (limit?: number) =>
+  newsFor(ctx.locale).slice(0, limit ?? Infinity).map((n) => ({
+    title: n.title,
+    href: url(n.slug),
+    date: n.date ? ctx.fmt.date(n.date) : undefined,
+    excerpt: n.description,
+  }));
+
+const formatStat = (s: { value: number | string; format?: string; label: string }) => ({
+  label: s.label,
+  value: typeof s.value === 'number' ? (s.format === 'year' ? ctx.fmt.year(s.value) : ctx.fmt.number(s.value)) : s.value,
+});
+
+const linkItems = (items: any[] = []) =>
+  items.map((it) => {
+    const target = it.href ? resolveHref(it.href, ctx.locale) : null;
+    return { title: it.title, text: it.text, href: target?.href, external: target?.external };
+  });
+---
+{entry.template === 'home' ? (
+  <Base ctx={ctx} title={ctx.site.name} description={entry.description}>
+    {fm.hero && (
+      <Hero ctx={ctx} eyebrow={fm.hero.eyebrow} title={fm.hero.title} lead={fm.hero.lead}
+        actions={(fm.hero.actions ?? []).map((a: unknown) => resolveAction(a, ctx.locale)).filter(Boolean)} />
+    )}
+    {fm.features && <FeatureGrid ctx={ctx} title={fm.features.title} items={linkItems(fm.features.items)} />}
+    {fm.stats && <Stats ctx={ctx} title={fm.stats.title} items={(fm.stats.items ?? []).map(formatStat)} />}
+    {fm.news && (
+      <NewsList ctx={ctx} title={fm.news.title} items={newsItems(fm.news.limit)}
+        more={fm.news.more ? { label: ctx.ui.allNews, href: resolveHref(fm.news.more, ctx.locale)!.href } : null} />
+    )}
+    {fm.cta && <CTA ctx={ctx} title={fm.cta.title} text={fm.cta.text} action={resolveAction(fm.cta.action, ctx.locale)} />}
+  </Base>
+) : entry.template === 'news' ? (
+  <Base ctx={ctx} title={entry.title} description={entry.description}>
+    <NewsList ctx={ctx} title={entry.title} items={newsItems()} headingLevel={1} />
+    {todo.length > 0 && (
+      <div class="container">
+        <aside class="todo-note">
+          <strong>{ctx.ui.pending}</strong>
+          <ul lang="en" dir="ltr">{todo.map((t) => <li>{t}</li>)}</ul>
+        </aside>
+      </div>
+    )}
+  </Base>
+) : (
+  <Base ctx={ctx} title={entry.title} description={entry.description}>
+    <Prose ctx={ctx} title={entry.title} lead={fm.lead} todo={todo}>{Content && <Content />}</Prose>
+  </Base>
+)}
