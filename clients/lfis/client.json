@@ -1,0 +1,66 @@
+{
+  "slug": "lfis",
+  "name": {
+    "en": "Leaders' Foundation International School (LFIS)",
+    "ar": "مدارس تأسيس القادة العالمية"
+  },
+  "shortName": { "en": "LFIS", "ar": "LFIS" },
+  "motto": {
+    "en": "Think to bring about a difference.",
+    "ar": "فلتكن سببا في إحداث فارق"
+  },
+  "founded": 2021,
+  "logo": null,
+  "defaultLocale": "ar",
+  "numerals": { "ar": "arab", "en": "latn" },
+  "calendar": "gregory",
+  "domains": {
+    "production": "leadersfis.com",
+    "preview": "lfis-preview.syncology.tech"
+  },
+  "edusync": {
+    "base": "https://lfis.syncology.tech",
+    "portal": "https://lfis.syncology.tech",
+    "admission": null,
+    "careers": null,
+    "fallbacks": { "admission": "page:admission" }
+  },
+  "headerCta": {
+    "label": { "en": "Apply now", "ar": "قدّم الآن" },
+    "href": "edusync:admission"
+  },
+  "navExternal": [
+    { "label": { "en": "Careers", "ar": "الوظائف" }, "href": "edusync:careers" },
+    { "label": { "en": "Portal login", "ar": "دخول البوابة" }, "href": "edusync:portal" }
+  ],
+  "contact": {
+    "address": { "en": "Ar Rashidiyyah, Mecca 24273, Saudi Arabia", "ar": null },
+    "phones": [],
+    "emails": {
+      "frontDesk": { "label": { "en": "Front desk", "ar": "الاستقبال" }, "address": null },
+      "admissions": { "label": { "en": "Admissions", "ar": "القبول" }, "address": null },
+      "hr": { "label": { "en": "HR", "ar": "الموارد البشرية" }, "address": null },
+      "accounts": { "label": { "en": "Accounts", "ar": "الحسابات" }, "address": null }
+    },
+    "mapUrl": null,
+    "hours": ["8:00am to 2:00pm", "4:30pm to 9:30pm"]
+  },
+  "social": {
+    "instagram": { "label": "Instagram", "href": "https://www.instagram.com/leadersfis/" },
+    "x": { "label": "X", "href": "https://twitter.com/lfischool" },
+    "snapchat": { "label": "Snapchat", "href": "https://www.snapchat.com/add/leadersfis" },
+    "facebook": { "label": "Facebook", "href": "https://www.facebook.com/leadersfis/" }
+  },
+  "samples": [
+    { "id": "baseline", "palette": "baseline", "type": "baseline", "layout": "baseline", "motion": "baseline" }
+  ],
+  "todo": [
+    "logo: redraw the old site's logo as SVG (intake B02)",
+    "contact: phones, department email addresses, Arabic address and map link, copied as-is from the old contact page (B31, B33)",
+    "contact.hours: confirm both shifts as written on the old site",
+    "edusync.admission: exact EduSync admission form URL (B32); until then 'Apply now' opens the Admission page",
+    "edusync.careers: exact EduSync public job list URL (B35); Careers stays out of the menu until set",
+    "shortName.ar: Arabic short name, if the school uses one",
+    "samples: the three design systems LFIS will see (B41), once chosen"
+  ]
+}
