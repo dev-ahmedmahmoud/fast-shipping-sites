@@ -1,6 +1,8 @@
 // Builds a client's preview gallery: the comparison page at the root and one
 // full site per sample under /<sample-id>/. Output: dist/<client>/gallery
 //   CLIENT=lfis pnpm build:gallery
+// build-previews.mjs calls this once per client with GALLERY_BASE=/<client> and
+// GALLERY_OUT=dist/previews/<client>, so every client shares one preview site.
 import { spawnSync } from 'node:child_process';
 import { readFileSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -9,8 +11,9 @@ import path from 'node:path';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const CLIENT = process.env.CLIENT || 'lfis';
 const client = JSON.parse(readFileSync(path.join(root, 'clients', CLIENT, 'client.json'), 'utf8'));
-const out = path.join('dist', CLIENT, 'gallery');
-const siteUrl = `https://${client.domains.preview}`;
+const galleryBase = (process.env.GALLERY_BASE || '').replace(/\/+$/, '');
+const out = process.env.GALLERY_OUT || path.join('dist', CLIENT, 'gallery');
+const siteUrl = process.env.PREVIEW_ORIGIN || `https://${client.domains.preview.split('/')[0]}`;
 
 function astroBuild(label, env) {
   console.log(`\n▸ ${label}`);
@@ -25,7 +28,7 @@ function astroBuild(label, env) {
 rmSync(path.join(root, out), { recursive: true, force: true });
 
 // The index first: an Astro build empties its own output folder.
-astroBuild('comparison page', { FSS_MODE: 'gallery-index', OUT_DIR: out });
+astroBuild('comparison page', { FSS_MODE: 'gallery-index', BASE: galleryBase || '/', OUT_DIR: out });
 
 for (const s of client.samples) {
   astroBuild(`sample ${s.id}`, {
@@ -36,7 +39,7 @@ for (const s of client.samples) {
     DS_TYPE: s.type,
     DS_LAYOUT: s.layout,
     DS_MOTION: s.motion,
-    BASE: `/${s.id}`,
+    BASE: `${galleryBase}/${s.id}`,
     OUT_DIR: path.join(out, s.id),
     // Previews stay out of search results.
     NOINDEX: '1',

@@ -133,7 +133,7 @@ source: "https://leadersfis.com/ar/academics-ar"
 
 ### Assessment
 
-<video controls preload="metadata" playsinline src="/media/WhoWeAre.mp4"></video>
+<video controls preload="none" playsinline poster="/media/WhoWeAre-poster.jpg" src="/media/WhoWeAre.mp4"></video>
 
 ## الاسئلة المتداولة
 

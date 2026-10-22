@@ -10,7 +10,8 @@ const metas = import.meta.glob<{ meta: { name: string; label: { en: string; ar: 
 const metaOf = (name: string) => Object.values(metas).find((m) => m.meta.name === name)?.meta;
 const enHome = homeOf('en').slug;
 const arHome = homeOf('ar').slug;
-const href = (id: string, slug: string) => `/${id}/${slug ? slug + '/' : ''}`;
+const prefix = import.meta.env.BASE_URL.replace(/\/+$/, '');
+const href = (id: string, slug: string) => `${prefix}/${id}/${slug ? slug + '/' : ''}`;
 
 const samples = (client.samples as { id: string; palette: string; type: string; layout: string; motion: string }[]).map((s) => {
   const parts = [s.palette, s.type, s.layout, s.motion];

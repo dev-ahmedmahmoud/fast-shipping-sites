@@ -114,7 +114,7 @@ The emphasis of the activities program is to develop each individual in the foll
 
 ## Assessment
 
-<video controls preload="metadata" playsinline src="/media/WhoWeAre.mp4"></video>
+<video controls preload="none" playsinline poster="/media/WhoWeAre-poster.jpg" src="/media/WhoWeAre.mp4"></video>
 
 ## FAQ
 

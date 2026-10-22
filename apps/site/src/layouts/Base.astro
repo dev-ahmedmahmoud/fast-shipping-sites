@@ -20,6 +20,9 @@ const pageTitle = title === ctx.site.name ? title : `${title} | ${ctx.site.name}
 const site = Astro.site ?? new URL('https://example.com');
 const abs = (href: string) => new URL(href, site).href;
 const xDefault = ctx.languages.find((l) => l.locale === 'ar') ?? ctx.languages[0];
+// Google Fonts load without blocking first paint (display=swap shows fallback text at once).
+// Any other fontsHref, such as a system's inline data: stylesheet for self-hosted fonts, loads as is.
+const googleFonts = typography.fontsHref.startsWith('https://fonts.googleapis.com/');
 ---
 <!doctype html>
 <html lang={ctx.locale} dir={ctx.dir}>
@@ -33,9 +36,16 @@ const xDefault = ctx.languages.find((l) => l.locale === 'ar') ?? ctx.languages[0
     {ctx.languages.map((l) => <link rel="alternate" hreflang={l.locale} href={abs(l.href)} />)}
     {xDefault && <link rel="alternate" hreflang="x-default" href={abs(xDefault.href)} />}
     <meta name="generator" content={`fast-shipping-sites ${import.meta.env.FSS_SAMPLE}`} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href={typography.fontsHref} />
+    {ctx.site.favicon && <link rel="icon" type="image/png" href={ctx.site.favicon} />}
+    {ctx.site.favicon && <link rel="apple-touch-icon" href={ctx.site.favicon} />}
+    {googleFonts ? (
+      <>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="stylesheet" href={typography.fontsHref} media="print" onload="this.media='all'" />
+        <noscript><link rel="stylesheet" href={typography.fontsHref} /></noscript>
+      </>
+    ) : typography.fontsHref && <link rel="stylesheet" href={typography.fontsHref} />}
     <style is:inline set:html={css}></style>
   </head>
   <body>

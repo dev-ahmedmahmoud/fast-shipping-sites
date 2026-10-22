@@ -10,6 +10,7 @@
     "dev": "pnpm --filter site dev",
     "build": "pnpm --filter site build",
     "build:gallery": "node scripts/build-gallery.mjs",
-    "preview": "pnpm --filter site preview"
+    "preview": "pnpm --filter site preview",
+    "build:previews": "node scripts/build-previews.mjs"
   }
 }

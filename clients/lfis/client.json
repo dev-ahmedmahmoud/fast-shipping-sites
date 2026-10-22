@@ -20,6 +20,7 @@
     "en": "lfis_Name_Only.png",
     "ar": "lfis_Name_Only_AR-1.png"
   },
+  "favicon": "favicon.png",
   "defaultLocale": "ar",
   "numerals": {
     "ar": "arab",
@@ -28,7 +29,7 @@
   "calendar": "gregory",
   "domains": {
     "production": "leadersfis.com",
-    "preview": "lfis-preview.syncology.tech"
+    "preview": "websites-preview.syncology.tech/lfis"
   },
   "edusync": {
     "base": "https://lfis.syncology.tech",
@@ -91,6 +92,22 @@
       },
       "href": "edusync:portal",
       "enabled": true
+    }
+  ],
+  "navGroups": [
+    {
+      "label": {
+        "en": "My Account",
+        "ar": "حسابي"
+      },
+      "items": [
+        "portal:classera",
+        "portal:ealpha",
+        "portal:edusync",
+        "page:weekly-plans",
+        "page:student",
+        "page:schedules"
+      ]
     }
   ],
   "contact": {
@@ -192,25 +209,37 @@
     "href": "https://syncology.tech"
   },
   "weeklyPlans": {
-    "host": "https://leadersfis.com",
-    "files": 674,
-    "totalMB": 289.9,
+    "host": "https://websites-files.syncology.tech/lfis",
+    "files": 670,
+    "copied": 660,
     "missingOnOldSite": 10
   },
   "samples": [
     {
-      "id": "baseline",
-      "palette": "baseline",
-      "type": "baseline",
-      "layout": "baseline",
-      "motion": "baseline"
+      "id": "playground",
+      "palette": "playground",
+      "type": "playground",
+      "layout": "playground",
+      "motion": "playground"
+    },
+    {
+      "id": "sketchbook",
+      "palette": "sketchbook",
+      "type": "sketchbook",
+      "layout": "sketchbook",
+      "motion": "sketchbook"
+    },
+    {
+      "id": "comic-class",
+      "palette": "comic-class",
+      "type": "comic-class",
+      "layout": "comic-class",
+      "motion": "comic-class"
     }
   ],
   "todo": [
-    "weeklyPlans: the 674 weekly-plan PDFs (290 MB) are still linked from https://leadersfis.com/wp-content/uploads/. They stop working when leadersfis.com points to the new site. Move them to file storage (e.g. Cloudflare R2 or a files.leadersfis.com subdomain) and update weeklyPlans.host. 10 of them are already missing on the old site.",
     "motto: the old home page says 'Think to make the difference.' / 'فكر لتصنع الفرق'; the intake gave 'Think to bring about a difference.' / 'فلتكن سببا في إحداث فارق' (used in the header and footer).",
     "contact forms: the Admission, HR and School Counselor forms on the contact page do not send yet; they need the EduSync lead endpoint.",
-    "logo: redraw lfis_Only.png as SVG (intake B02).",
-    "samples: the three design systems LFIS will see (B41), once chosen"
+    "logo: redraw lfis_Only.png as SVG (intake B02)."
   ]
 }

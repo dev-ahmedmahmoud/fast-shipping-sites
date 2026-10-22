@@ -12,9 +12,9 @@ hero:
   title: "Welcome to Leaders’ foundation international school"
   lead: "Think to make the difference."
   images:
-    - ban01.jpeg
-    - PAN03.jpg
+    - 20210803-04.jpeg
     - PAN02.jpg
+    - Car03.jpeg
     - PAN01.jpg
   actions:
     - label: "Apply now"
@@ -55,4 +55,4 @@ We offer an American curriculum that serves a diverse group of students with a h
 
 Distinguished education and learning are provided to all in line with international trends of the vision of the Kingdom of Saudi Arabia and with community participation in an attractive and safe educational environment that raises skills and capabilities, enriches scientific research and encourages innovation and creativity, led by Ms. Maha Abdullah Al-Dughayshim (General School Superintendent).
 
-<video controls preload="metadata" playsinline src="/media/WhoWeAre.mp4"></video>
+<video controls preload="none" playsinline poster="/media/WhoWeAre-poster.jpg" src="/media/WhoWeAre.mp4"></video>
