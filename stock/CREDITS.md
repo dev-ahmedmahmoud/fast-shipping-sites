@@ -26,3 +26,10 @@ are the posters here. Stills are single frames from the 720p sources.
 | `school-supplies.jpg` | https://mixkit.co/free-stock-video/school-backpack-and-supplies-101328/ | pool |
 | `girl-drawing.jpg` | https://mixkit.co/free-stock-video/little-girl-drawing-with-colored-pens-43352/ | pool |
 | `boy-trampoline.jpg` | https://mixkit.co/free-stock-video/a-little-boy-jumping-on-the-trampoline-at-the-playground-13723/ | pool |
+| `hero-coding-workshop.jpg` + `.mp4`/`.webm` | https://mixkit.co/free-stock-video/young-engineer-programming-in-his-workshop-seen-up-close-29991/ | Genesis (Blueprint) hero |
+| `hero-vr-explorer.jpg` + `.mp4`/`.webm` | https://mixkit.co/free-stock-video/little-boy-experiencing-vr-101255/ | Genesis (Orbit) hero |
+| `hero-basketball.jpg` + `.mp4`/`.webm` | https://mixkit.co/free-stock-video/two-boys-playing-basketball-at-an-outdoor-court-750/ | Genesis (Paper Layers) hero |
+| `football-training.jpg` | https://mixkit.co/free-stock-video/soccer-ball-in-mid-air-during-training-drill-101276/ | pool |
+| `lab-pipette.jpg` | https://mixkit.co/free-stock-video/drops-filling-a-lab-tube-17456/ | pool |
+| `teen-studying.jpg` | https://mixkit.co/free-stock-video/concentrated-boy-studying-at-home-4761/ | pool |
+| `teen-reading-lamp.jpg` | https://mixkit.co/free-stock-video/a-young-student-wearing-a-hoodie-hilight-texts-on-a-50126/ | pool |
