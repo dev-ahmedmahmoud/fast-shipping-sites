@@ -1,0 +1,202 @@
+{
+  "slug": "genesis",
+  "name": {
+    "en": "Genesis International Schools",
+    "ar": "مدارس جينيسيس الدولية"
+  },
+  "shortName": {
+    "en": "Genesis",
+    "ar": "Genesis"
+  },
+  "motto": {
+    "en": "Uniquely Defined Individuals",
+    "ar": "أفراد متميزون بتفرّدهم"
+  },
+  "founded": 1990,
+  "logo": "Genesis-International-Schools-Fav.svg",
+  "logoWordmark": {
+    "en": "Genesis-International-Schools-Logo.svg",
+    "ar": "Genesis-International-Schools-Logo.svg"
+  },
+  "favicon": "favicon.png",
+  "brandColor": "#0061FF",
+  "defaultLocale": "en",
+  "numerals": {
+    "ar": "latn",
+    "en": "latn"
+  },
+  "calendar": "gregory",
+  "domains": {
+    "production": "genesis.edu.eg",
+    "preview": "websites-preview.syncology.tech/genesis"
+  },
+  "edusync": {
+    "base": "https://genesis.syncology.tech",
+    "portal": {
+      "en": "https://genesis.syncology.tech/web/login",
+      "ar": "https://genesis.syncology.tech/ar/web/login"
+    },
+    "admission": {
+      "en": "https://genesis.syncology.tech/admission",
+      "ar": "https://genesis.syncology.tech/ar/admission"
+    },
+    "careers": {
+      "en": "https://genesis.syncology.tech/jobs",
+      "ar": "https://genesis.syncology.tech/ar/jobs"
+    },
+    "fallbacks": {
+      "admission": "page:admissions"
+    }
+  },
+  "headerCta": {
+    "label": {
+      "en": "Apply Now",
+      "ar": "قدّم الآن"
+    },
+    "href": "edusync:admission"
+  },
+  "navExternal": [],
+  "portals": [
+    {
+      "id": "edusync",
+      "label": {
+        "en": "Portal",
+        "ar": "البوابة"
+      },
+      "href": "edusync:portal",
+      "enabled": false
+    }
+  ],
+  "navGroups": [
+    {
+      "label": {
+        "en": "About",
+        "ar": "عن المدرسة"
+      },
+      "nav": 1,
+      "items": [
+        "page:about",
+        "page:history",
+        "page:drsaeed",
+        "page:schoolboard",
+        "page:accreditations"
+      ]
+    },
+    {
+      "label": {
+        "en": "Life at Genesis",
+        "ar": "الحياة في جينيسيس"
+      },
+      "nav": 6,
+      "items": [
+        "page:teaching",
+        "page:facilities",
+        "page:stem",
+        "page:extra-curricular",
+        "page:activities"
+      ]
+    }
+  ],
+  "contact": {
+    "address": {
+      "en": "29 KM. Misr Ismailia Road, Cairo, Egypt.",
+      "ar": "الكيلو 29 طريق مصر الإسماعيلية، القاهرة، مصر."
+    },
+    "phones": [
+      {
+        "label": {
+          "en": "British School",
+          "ar": "المدرسة البريطانية"
+        },
+        "number": "(+2) 01211402252"
+      },
+      {
+        "label": {
+          "en": "American School",
+          "ar": "المدرسة الأمريكية"
+        },
+        "number": "(+2) 01273596599"
+      },
+      {
+        "label": {
+          "en": "Semi International School",
+          "ar": "مدرسة اللغات (Semi-International)"
+        },
+        "number": "(+2) 01099616600"
+      },
+      {
+        "label": {
+          "en": "Semi International School",
+          "ar": "مدرسة اللغات (Semi-International)"
+        },
+        "number": "(+2) 01026483900"
+      },
+      {
+        "label": {
+          "en": "Accounting office",
+          "ar": "مكتب الحسابات"
+        },
+        "number": "+20 112 855 8829"
+      }
+    ],
+    "whatsapp": [],
+    "emails": {
+      "info": {
+        "label": {
+          "en": "E-mail",
+          "ar": "البريد الإلكتروني"
+        },
+        "address": "info@genesis.edu.eg"
+      }
+    },
+    "mapUrl": "https://www.google.com/maps/d/viewer?mid=10LHlW73sJdtrMQagg4KVepTJ5XYPgxo8",
+    "hours": null
+  },
+  "social": {
+    "facebook": {
+      "label": "Facebook",
+      "href": "https://www.facebook.com/GenesisSchoolsEG"
+    },
+    "instagram": {
+      "label": "Instagram",
+      "href": "https://www.instagram.com/genesisschoolseg/"
+    },
+    "linkedin": {
+      "label": "LinkedIn",
+      "href": "https://www.linkedin.com/company/genesisinternationalschools/"
+    },
+    "youtube": {
+      "label": "YouTube",
+      "href": "https://www.youtube.com/@genesisinternationalschool9161"
+    },
+    "tiktok": {
+      "label": "TikTok",
+      "href": "https://www.tiktok.com/@genesisschoolseg"
+    }
+  },
+  "footerCredit": {
+    "show": true,
+    "text": {
+      "en": "by Syncology",
+      "ar": "بواسطة سينكولوجي"
+    },
+    "href": "https://syncology.tech"
+  },
+  "samples": [
+    {
+      "id": "baseline",
+      "palette": "baseline",
+      "type": "baseline",
+      "layout": "baseline",
+      "motion": "baseline"
+    }
+  ],
+  "todo": [
+    "EduSync tenant: genesis.syncology.tech is not live yet. Apply Now, the portal and careers links point there.",
+    "Arabic: every Arabic page is a new translation (marked translated: true). The school should proofread it before launch.",
+    "Privacy policy: the old page was WordPress's sample text; the school needs to supply its real policy.",
+    "Portal page: the old page had placeholder text only; decide which links it should list.",
+    "FAQs: the old page had placeholder text only; /faqs/ now redirects to Admissions. Add real questions if the school wants the page back.",
+    "History says Menese was founded in 1992; the home and About pages say 1990. Confirm which year is right."
+  ]
+}
