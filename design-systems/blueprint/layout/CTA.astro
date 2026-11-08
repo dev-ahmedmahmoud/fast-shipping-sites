@@ -1,0 +1,82 @@
+---
+// The closing call to action: a blueprint sheet with an "approved" stamp. The stamp
+// thunks down when the panel scrolls in, then its lettered ring turns slowly
+// (paused while off screen). Without motion it is simply stamped.
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import { no, words } from './sheet';
+interface Props { ctx: PageContext; title: string; text?: string; action: Action | null }
+const { ctx, title, text, action } = Astro.props;
+const w = words(ctx);
+// Lettering on a curved path only lays out left-to-right scripts reliably (Arabic
+// letters come out reversed and unjoined), so the ring carries Latin text only:
+// "APPROVED · LFIS" on English pages, the Latin short name on others, and plain
+// tick marks when the short name is not in Latin letters.
+const latin = (t: string) => /^[\x20-\x7E]+$/.test(t);
+const short = ctx.site.shortName;
+const ring = latin(short)
+  ? (latin(w.approved) ? Array.from({ length: 3 }, () => `${w.approved} · ${short} · `) : Array.from({ length: 5 }, () => `${short} · `)).join('')
+  : '';
+---
+<section class="section">
+  <div class="container">
+    <div class="panel band crop" data-reveal data-loop>
+      <div class="copy">
+        <p class="label meta">{w.sheet} {no(ctx, 5)} · {w.approved}</p>
+        <h2>{title}</h2>
+        {text && <p class="text">{text}</p>}
+      </div>
+      <div class="side">
+        <span class="stamp" aria-hidden="true">
+          <svg viewBox="0 0 160 160" focusable="false">
+            <defs><path id="bp-stamp-ring" d="M80 80m-58 0a58 58 0 1 1 116 0a58 58 0 1 1-116 0" /></defs>
+            <g class="ring">
+              <circle cx="80" cy="80" r="74" />
+              <circle cx="80" cy="80" r="44" />
+              {ring
+                ? <text direction="ltr"><textPath href="#bp-stamp-ring" textLength="364" lengthAdjust="spacing">{ring}</textPath></text>
+                : <circle class="ticks" cx="80" cy="80" r="58" />}
+            </g>
+            <path class="tick" d="M60 81l13 13 28-30" />
+          </svg>
+        </span>
+        {action && (
+          <a class="btn btn--primary go" href={action.href} target={action.external ? '_blank' : undefined} rel={action.external ? 'noopener' : undefined}>{action.label}</a>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .panel {
+    --crop-color: var(--c-accent);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-6);
+    padding: var(--space-7) clamp(var(--space-5), 5vw, var(--space-8));
+  }
+  .copy { display: flex; flex-direction: column; gap: var(--space-3); flex: 1 1 22rem; min-inline-size: 0; }
+  .meta { color: var(--band-muted); }
+  h2 { font-size: var(--step-4); max-inline-size: 20ch; }
+  .text { font-size: var(--step-1); color: var(--band-muted); max-inline-size: 48ch; }
+  .side { display: flex; align-items: center; gap: var(--space-5); flex-wrap: wrap; }
+  .go { font-size: var(--step-1); min-block-size: 56px; }
+
+  .stamp { display: block; inline-size: clamp(7rem, 12vw, 9.5rem); aspect-ratio: 1; color: var(--c-highlight); rotate: -12deg; }
+  .stamp svg { inline-size: 100%; block-size: 100%; overflow: visible; }
+  .stamp circle { fill: none; stroke: currentColor; stroke-width: 2.5; }
+  .stamp circle + circle { stroke-width: 1.5; stroke-dasharray: 4 3; }
+  .stamp text { fill: currentColor; font-family: var(--font-mono); font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+  .tick { fill: none; stroke: currentColor; stroke-width: 5; stroke-linecap: square; }
+  .stamp .ticks { stroke-width: 7; stroke-dasharray: 1.5 7; }
+  .ring { transform-origin: 80px 80px; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ring { animation: bp-turn 40s linear infinite; }
+  }
+  @keyframes bp-turn { to { rotate: 360deg; } }
+  :global(.bp-motion) .panel:global(.bp-pre) .stamp { opacity: 0; scale: 1.7; rotate: -30deg; }
+  :global(.bp-motion) .panel:global(.bp-pre.bp-in) .stamp {
+    opacity: 1; scale: 1; rotate: -12deg;
+    transition: opacity 120ms linear 500ms, scale 320ms cubic-bezier(0.55, 0, 1, 0.45) 500ms, rotate 320ms cubic-bezier(0.55, 0, 1, 0.45) 500ms;
+  }
+</style>

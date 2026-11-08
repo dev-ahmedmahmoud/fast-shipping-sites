@@ -1,0 +1,201 @@
+---
+// The hero is the cover sheet of a blueprint. Copy on one side, with a small
+// title block (sheet, scale, date); on the other, the main photo (or silent clip)
+// mounted like a drawing view with dimension lines, round detail callouts for the
+// next photos, a compass and a gear plotted in white line, and an isometric model
+// of the school that assembles on load. On capable pointer devices a drafting
+// crosshair follows the pointer with a coordinate readout (Motion.astro).
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action, HeroVideo } from '@engine/content';
+import HeroMedia from '@engine/HeroMedia.astro';
+import Drawing from './Drawing.astro';
+import IsoModel from './IsoModel.astro';
+import { letters, no, scale, words } from './sheet';
+interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[]; video?: HeroVideo | null }
+const { ctx, eyebrow, title, lead, actions, images = [], video } = Astro.props;
+const w = words(ctx);
+const L = letters(ctx);
+const [main, ...details] = images;
+const callouts = details.slice(0, 2);
+---
+<section class="hero band" data-hero data-loop data-num-sample={ctx.fmt.number(0)}>
+  <div class="container inner">
+    <div class="copy">
+      <p class="label project">
+        <span class="tag">{w.project}</span>
+        <span>{eyebrow || ctx.site.shortName}</span>
+      </p>
+      <h1 data-split-words>{title}</h1>
+      {lead && (
+        <p class="lead"><span class="leader" aria-hidden="true"></span><span>{lead}</span></p>
+      )}
+      {actions.length > 0 && (
+        <div class="actions">
+          {actions.map((a, i) => (
+            <a class:list={['btn', i === 0 ? 'btn--primary' : 'btn--ghost']} href={a.href}
+               target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>{a.label}</a>
+          ))}
+        </div>
+      )}
+      <dl class="tblock">
+        <div><dt class="label">{w.sheet}</dt><dd>{no(ctx, 1)}</dd></div>
+        <div><dt class="label">{w.scale}</dt><dd>{scale(ctx)}</dd></div>
+        <div><dt class="label">{w.date}</dt><dd>{ctx.year}</dd></div>
+      </dl>
+    </div>
+
+    <div class:list={['plan', { 'no-photo': !main }]}>
+      <Drawing name="compass" class="deco compass" plotNow />
+      {main && (
+        <figure class="view">
+          <span class="dim dim-top" aria-hidden="true"><i></i><b class="label">{w.view} {L[0]}</b></span>
+          <span class="dim dim-side" aria-hidden="true"><i></i></span>
+          <div class="frame crop">
+            <HeroMedia image={main} video={video} widths={[480, 760, 1024]} sizes="(max-width: 900px) 92vw, 36rem" fetchpriority="high" />
+          </div>
+          <figcaption class="label cap">{w.fig} {no(ctx, 1)} · {ctx.site.shortName}</figcaption>
+        </figure>
+      )}
+      {callouts.map((img, i) => (
+        <figure class:list={['detail', `d${i + 1}`]}>
+          <span class="disc"><Image src={img} alt="" widths={[160, 260]} sizes="8.5rem" loading="lazy" /></span>
+          <figcaption class="label">{w.detail} {L[i + 1]}</figcaption>
+        </figure>
+      ))}
+      <Drawing name="gear" class="deco gear" plotNow />
+      <IsoModel class="model" />
+    </div>
+  </div>
+  <div class="xhair" aria-hidden="true"><span class="xh"></span><span class="xv"></span><span class="xr"></span></div>
+</section>
+
+<style>
+  .hero { position: relative; overflow: clip; padding-block: var(--space-8) var(--space-9); }
+  .inner {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); align-items: center; gap: var(--space-8);
+  }
+
+  /* ---- Copy ---- */
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-5); min-inline-size: 0; }
+  .project { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); color: var(--band-muted); }
+  .tag { padding: 0.15em 0.6em; border: var(--hair) solid var(--band-ink); color: var(--band-ink); }
+  h1 { font-size: var(--step-5); max-inline-size: 17ch; }
+  .lead {
+    display: flex; align-items: flex-start; gap: var(--space-3);
+    font-size: var(--step-1); color: var(--band-muted); max-inline-size: 40ch;
+  }
+  /* A callout leader: a dot and a line, pointing at the motto. */
+  .leader { position: relative; flex: none; inline-size: 44px; block-size: 2px; margin-block-start: 0.85em; background: var(--c-highlight); }
+  .leader::before { content: ""; position: absolute; inset-inline-start: -4px; inset-block-start: -3px; inline-size: 8px; block-size: 8px; border-radius: 50%; background: var(--c-highlight); }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .tblock {
+    display: grid; grid-template-columns: repeat(3, auto); margin: var(--space-2) 0 0;
+    border: var(--hair) solid var(--band-line-strong);
+  }
+  .tblock > div { padding: var(--space-2) var(--space-4); border-inline-end: var(--hair) solid var(--band-line-strong); }
+  .tblock > div:last-child { border-inline-end: 0; }
+  .tblock dt { color: var(--band-muted); font-size: 0.72rem; }
+  .tblock dd { margin: 0; font-family: var(--font-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  /* ---- The drawing ---- */
+  .plan { position: relative; min-inline-size: 0; padding-block: var(--space-6) var(--space-8); padding-inline-end: var(--space-6); }
+  .view { position: relative; margin: 0; }
+  .frame {
+    --crop-color: var(--band-ink);
+    padding: 6px; border: var(--rule) solid var(--band-ink);
+    background: var(--band-deep);
+  }
+  .frame :global(img) { inline-size: 100%; block-size: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+  .cap { margin-block-start: var(--space-2); color: var(--band-muted); text-align: end; }
+
+  /* Dimension lines around the view: |<—— VIEW A ——>| and a vertical one. */
+  .dim { position: absolute; color: var(--band-ink); }
+  .dim i { position: absolute; background: currentColor; }
+  .dim i::before, .dim i::after { content: ""; position: absolute; inline-size: 8px; block-size: 8px; border: 0 solid currentColor; }
+  .dim-top {
+    inset-inline: 0; inset-block-start: -30px; block-size: 14px;
+    border-inline: var(--rule) solid currentColor;
+  }
+  .dim-top i { inset-inline: 2px; inset-block-start: 6px; block-size: var(--rule); }
+  .dim-top i::before { inset-inline-start: 0; inset-block-start: -3.5px; border-block-end-width: var(--rule); border-inline-start-width: var(--rule); rotate: calc(var(--dir) * 45deg); }
+  .dim-top i::after { inset-inline-end: 0; inset-block-start: -3.5px; border-block-start-width: var(--rule); border-inline-end-width: var(--rule); rotate: calc(var(--dir) * 45deg); }
+  .dim-top b {
+    position: absolute; inset-block-start: -2px; inset-inline-start: 50%; translate: calc(var(--dir) * -50%) -50%;
+    padding-inline: var(--space-2); background: var(--band); color: var(--band-ink); white-space: nowrap; font-size: 0.72rem;
+  }
+  .dim-side {
+    inset-block: 0; inset-inline-end: -30px; inline-size: 14px;
+    border-block: var(--rule) solid currentColor;
+  }
+  .dim-side i { inset-block: 2px; inset-inline-start: 6px; inline-size: var(--rule); }
+  .dim-side i::before { inset-block-start: 0; inset-inline-start: -3.5px; border-block-start-width: var(--rule); border-inline-start-width: var(--rule); rotate: 45deg; }
+  .dim-side i::after { inset-block-end: 0; inset-inline-start: -3.5px; border-block-end-width: var(--rule); border-inline-end-width: var(--rule); rotate: 45deg; }
+
+  /* Detail callouts: round crops of the next photos, with a leader to the view. */
+  .detail { position: absolute; z-index: 2; margin: 0; display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
+  .disc {
+    display: block; inline-size: clamp(5.5rem, 9vw, 8.5rem); aspect-ratio: 1; border-radius: 50%; overflow: hidden;
+    border: var(--rule) solid var(--band-ink); background: var(--band-deep);
+    box-shadow: 0 0 0 5px var(--band), 0 0 0 6px var(--band-line-strong);
+  }
+  .disc :global(img) { inline-size: 100%; block-size: 100%; object-fit: cover; }
+  .detail figcaption { color: var(--band-ink); font-size: 0.72rem; background: var(--band); padding-inline: var(--space-1); }
+  .d1 { inset-block-start: 0; inset-inline-end: -1.5rem; }
+  .d2 { inset-block-start: 46%; inset-inline-end: -1.5rem; }
+
+  /* Plotted decoration. */
+  .plan :global(.deco) { position: absolute; color: var(--band-ink); pointer-events: none; }
+  .plan :global(.compass) { inline-size: 120px; inset-block-start: -18px; inset-inline-start: -64px; opacity: 0.55; }
+  .plan :global(.gear) { inline-size: 92px; inset-block-end: -10px; inset-inline-end: -12px; opacity: 0.7; }
+
+  /* The 3D model stands on the drawing's lower start corner, in front of the view. */
+  .plan :global(.model) { position: absolute; z-index: 3; inset-block-end: -18px; inset-inline-start: -52px; color: var(--band-ink); }
+  .plan :global(.model)::before {
+    content: ""; position: absolute; inset: 18% 10% 10%; border-radius: 50%;
+    background: radial-gradient(closest-side, var(--band-deep), transparent);
+  }
+
+  /* Drafting crosshair, shown by Motion.astro on capable pointer devices. */
+  .xhair { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity var(--dur-base) linear; }
+  .xhair.on { opacity: 1; }
+  .xh, .xv { position: absolute; background: var(--band-line-strong); }
+  .xh { inset-inline: 0; inset-block-start: 0; block-size: 1px; translate: 0 var(--cy, 0px); }
+  /* --cx is measured from the inline start (negative on right-to-left pages, set by Motion.astro). */
+  .xv { inset-block: 0; inset-inline-start: 0; inline-size: 1px; translate: var(--cx, 0px) 0; }
+  .xr {
+    position: absolute; inset-block-start: 0; inset-inline-start: 0;
+    translate: calc(var(--cx, 0px) + 12px) calc(var(--cy, 0px) + 12px);
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--band-muted); white-space: nowrap; direction: ltr;
+  }
+
+  /* Opening: dimension lines extend, drawings plot, the model assembles (IsoModel). */
+  @media (prefers-reduced-motion: no-preference) {
+    .dim-top i, .dim-top b { animation: bp-extend 900ms var(--ease-in-out) 600ms both; }
+    .dim-side i { animation: bp-extend-v 900ms var(--ease-in-out) 800ms both; }
+    .detail { animation: bp-fade 600ms var(--ease-out) both; animation-delay: calc(1400ms + var(--k, 0) * 150ms); }
+    .d2 { --k: 1; }
+    .plan :global(.gear) { animation: bp-spin 26s linear infinite; }
+    .lead .leader { animation: bp-extend 700ms var(--ease-in-out) 500ms both; transform-origin: center; }
+  }
+  @keyframes bp-extend { from { scale: 0 1; } }
+  @keyframes bp-extend-v { from { scale: 1 0; } }
+  @keyframes bp-fade { from { opacity: 0; translate: 0 var(--reveal-distance); } }
+  @keyframes bp-spin { to { rotate: 360deg; } }
+
+  @media (max-width: 960px) {
+    .inner { grid-template-columns: minmax(0, 1fr); gap: var(--space-7); }
+    .plan { padding-inline-end: var(--space-5); padding-block-start: var(--space-6); }
+    .plan :global(.compass) { inset-inline-start: -30px; }
+  }
+  @media (max-width: 640px) {
+    .hero { padding-block: var(--space-7) var(--space-8); }
+    .d2 { display: none; }
+    .d1 { inset-block-start: -1.5rem; inset-inline-end: -0.5rem; }
+    .disc { inline-size: 5rem; }
+    .plan :global(.model) { inset-inline-start: -30px; inset-block-end: -36px; }
+    .tblock > div { padding-inline: var(--space-3); }
+  }
+</style>

@@ -1,0 +1,117 @@
+---
+// The footer is the drawing's title block: links, contact and social in ruled
+// columns on deep blueprint blue, closed by a title-block row (drawing, sheet,
+// date, drawn by) and the legal line.
+import type { PageContext } from '@engine/context';
+import { no, words } from './sheet';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const w = words(ctx);
+// A page can be both in the menu and in the footer list; show it once.
+const links = [...ctx.nav.filter((n) => !n.external), ...ctx.footerNav]
+  .filter((l, i, all) => all.findIndex((o) => o.href === l.href) === i);
+const external = ctx.nav.filter((n) => n.external);
+const credit = ctx.legal.credit;
+// The cell is already labelled "Drawn by", so a credit written "by …" drops its "by".
+const creditText = credit ? credit.text.replace(/^(by|بواسطة)\s+/i, '') : ctx.site.shortName;
+---
+<footer class="footer band">
+  <div class="container grid">
+    <div class="col brand">
+      <p class="name">{ctx.site.name}</p>
+      {ctx.site.motto && <p class="motto"><span class="leader" aria-hidden="true"></span>{ctx.site.motto}</p>}
+    </div>
+
+    <nav class="col" aria-label={ctx.ui.links}>
+      <h2 class="label">{ctx.ui.links}</h2>
+      <ul role="list">
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        {external.map((l) => <li><a href={l.href} target="_blank" rel="noopener">{l.label}<span class="sr-only"> {ctx.ui.newTab}</span></a></li>)}
+      </ul>
+    </nav>
+
+    <div class="col">
+      <h2 class="label">{ctx.ui.contact}</h2>
+      <ul role="list">
+        {ctx.contact.address && <li>{ctx.contact.address}</li>}
+        {ctx.contact.phones.map((p) => (
+          <li>{p.label && <>{p.label}: </>}<a href={`tel:${p.number.replace(/\s+/g, '')}`} dir="ltr">{p.number}</a></li>
+        ))}
+        {ctx.contact.emails.map((e) => <li>{e.label}: <a href={`mailto:${e.address}`} dir="ltr">{e.address}</a></li>)}
+        {ctx.contact.hours && <li>{ctx.contact.hours}</li>}
+        {ctx.contact.mapUrl && <li><a href={ctx.contact.mapUrl} target="_blank" rel="noopener">{ctx.ui.map}</a></li>}
+      </ul>
+    </div>
+
+    {ctx.social.length > 0 && (
+      <div class="col">
+        <h2 class="label">{ctx.ui.follow}</h2>
+        <ul role="list" class="social">
+          {ctx.social.map((s) => <li><a class="chip" href={s.href} target="_blank" rel="noopener" lang="en">{s.label}</a></li>)}
+        </ul>
+      </div>
+    )}
+  </div>
+
+  <div class="container">
+    <dl class="tblock">
+      <div class="cell wide"><dt class="label">{w.drawing}</dt><dd>{w.website} · {ctx.site.name}</dd></div>
+      <div class="cell"><dt class="label">{w.sheet}</dt><dd>{no(ctx, 6)} {w.of} {no(ctx, 6)}</dd></div>
+      <div class="cell"><dt class="label">{w.date}</dt><dd>{ctx.year}</dd></div>
+      <div class="cell">
+        <dt class="label">{w.drawn}</dt>
+        <dd>{credit?.href ? <a href={credit.href} target="_blank" rel="noopener">{creditText}</a> : creditText}</dd>
+      </div>
+    </dl>
+    <p class="legal">{ctx.legal.copyright ?? `© ${ctx.year} ${ctx.site.name}. ${ctx.ui.rights}.`}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-block-start: var(--space-9);
+    background: var(--grid-band), var(--band-deep);
+    padding-block: var(--space-8) calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+    font-size: var(--step--1);
+    border-block-start: 4px double var(--band-line-strong);
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--space-6); }
+  .col { display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; }
+  .col ul { display: flex; flex-direction: column; gap: var(--space-2); }
+  .col li { overflow-wrap: anywhere; color: var(--band-muted); }
+  .col a { color: var(--band-ink); text-decoration: none; }
+  .col a:hover { text-decoration: underline; text-decoration-color: var(--c-highlight); }
+  /* Links inside a line of text need more than color to stand out. */
+  .col li > a[dir="ltr"] { text-decoration: underline; text-decoration-color: var(--band-line-strong); }
+  .label { color: var(--band-muted); }
+  .name { font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--step-2); line-height: 1.2; }
+  .motto { display: flex; align-items: center; gap: var(--space-3); color: var(--band-muted); }
+  .leader { position: relative; flex: none; inline-size: 32px; block-size: 2px; background: var(--c-highlight); }
+  .leader::before { content: ""; position: absolute; inset-inline-start: -3px; inset-block-start: -3px; inline-size: 8px; block-size: 8px; border-radius: 50%; background: var(--c-highlight); }
+  .social { flex-direction: row !important; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; min-block-size: 40px; padding-inline: var(--space-3);
+    border: var(--hair) solid var(--band-line-strong);
+    transition: background-color var(--dur-fast) linear, border-color var(--dur-fast) linear;
+  }
+  .col .chip:hover { background: color-mix(in srgb, var(--band-ink) 12%, transparent); border-color: var(--band-ink); text-decoration: none; }
+
+  .tblock {
+    display: grid; grid-template-columns: minmax(0, 2.2fr) repeat(3, minmax(0, 1fr));
+    margin: var(--space-8) 0 0; border: var(--rule) solid var(--band-line-strong);
+  }
+  .cell { padding: var(--space-3) var(--space-4); border-inline-end: var(--hair) solid var(--band-line-strong); min-inline-size: 0; }
+  .cell:last-child { border-inline-end: 0; }
+  .cell dt { font-size: 0.7rem; }
+  .cell dd { margin: var(--space-1) 0 0; font-family: var(--font-mono); font-weight: 500; overflow-wrap: anywhere; color: var(--band-ink); }
+  :lang(ar) .cell dd { font-family: var(--font-body); font-weight: var(--weight-strong); }
+  .cell a { color: inherit; }
+  .legal { margin-block-start: var(--space-4); color: var(--band-muted); }
+
+  @media (max-width: 700px) {
+    .tblock { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .wide { grid-column: 1 / -1; border-inline-end: 0; border-block-end: var(--hair) solid var(--band-line-strong); }
+    .cell:nth-child(3) { border-inline-end: 0; }
+    .cell:nth-child(n + 4) { border-block-start: var(--hair) solid var(--band-line-strong); }
+  }
+</style>

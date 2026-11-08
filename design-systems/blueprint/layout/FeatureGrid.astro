@@ -1,0 +1,80 @@
+---
+// Feature links as figure sheets: "FIG. 01", a technical drawing that plots itself
+// when the card scrolls in (and re-plots on hover), the title, and a dimension-line
+// arrow. Drawings cycle by position and carry no meaning of their own.
+import type { PageContext } from '@engine/context';
+import Drawing, { type DrawingName } from './Drawing.astro';
+import SheetHead from './SheetHead.astro';
+import { no, words } from './sheet';
+interface Item { title: string; text?: string; href?: string; external?: boolean }
+interface Props { ctx: PageContext; title?: string; items: Item[] }
+const { ctx, title, items } = Astro.props;
+const w = words(ctx);
+const icons: DrawingName[] = ['compass', 'flask', 'gear', 'book', 'atom', 'rocket', 'protractor', 'bridge', 'ruler'];
+---
+<section class="section">
+  <div class="container stack">
+    {title && <SheetHead ctx={ctx} title={title} sheet={2} />}
+    <ul class="grid" role="list">
+      {items.map((item, i) => {
+        const Tag = item.href ? 'a' : 'div';
+        return (
+          <li data-reveal>
+            <Tag class="card crop" href={item.href}
+                 target={item.href && item.external ? '_blank' : undefined} rel={item.href && item.external ? 'noopener' : undefined}>
+              <span class="top">
+                <span class="label fig">{w.fig} {no(ctx, i + 1)}</span>
+                <Drawing name={icons[i % icons.length]} class="icon" />
+              </span>
+              <h3>{item.title}</h3>
+              {item.text && <p>{item.text}</p>}
+              {item.href && (
+                <span class="go" aria-hidden="true">
+                  <i></i>
+                  <svg class="flip-rtl" viewBox="0 0 24 24" width="22" height="22"><path d="M4 12h15M13 6l6 6-6 6" /></svg>
+                </span>
+              )}
+            </Tag>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--space-5); }
+  /* No lone card on a last row: five sheets lay out two and three, six as three and three. */
+  @media (min-width: 900px) {
+    .grid:has(> li:nth-child(5):last-child) { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .grid:has(> li:nth-child(5):last-child) > li { grid-column: span 2; }
+    .grid:has(> li:nth-child(5):last-child) > li:nth-child(-n + 2) { grid-column: span 3; }
+    .grid:has(> li:nth-child(6):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  .grid > li { display: flex; min-inline-size: 0; }
+  .card {
+    --crop-color: var(--c-accent);
+    flex: 1; display: flex; flex-direction: column; gap: var(--space-3);
+    min-block-size: 13rem; padding: var(--space-5);
+    background: var(--c-surface); color: var(--c-ink); text-decoration: none;
+    border: var(--hair) solid var(--c-line);
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-fast) linear;
+  }
+  .top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+  .fig { color: var(--c-accent); }
+  .top :global(.icon) { inline-size: 72px; block-size: 72px; color: var(--c-accent); margin-block-start: calc(-1 * var(--space-2)); }
+  h3 { font-size: var(--step-2); }
+  p { color: var(--c-muted); }
+  .go { margin-block-start: auto; display: flex; align-items: center; color: var(--c-accent); }
+  .go i { flex: 1; block-size: var(--rule); background: currentColor; transform-origin: 0 50%; scale: 0.25 1; transition: scale var(--dur-base) var(--ease-in-out); }
+  :global(:root[dir="rtl"]) .go i { transform-origin: 100% 50%; }
+  .go svg { flex: none; margin-inline-start: -4px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: square; }
+
+  a.card:hover { border-color: var(--c-accent); transform: translate(calc(var(--dir) * -3px), -3px); box-shadow: calc(var(--dir) * 6px) 6px 0 var(--c-accent-soft); }
+  a.card:hover .go i { scale: 1 1; }
+  a.card:hover h3 { color: var(--c-accent); }
+  @media (prefers-reduced-motion: no-preference) {
+    a.card:hover :global(.icon .ln) { animation: bp-plot 900ms var(--ease-in-out) both; animation-delay: calc(var(--p, 0) * 80ms); }
+  }
+</style>

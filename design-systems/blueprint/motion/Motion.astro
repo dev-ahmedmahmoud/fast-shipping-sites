@@ -1,0 +1,144 @@
+---
+// Blueprint motion. About 2 KB of script and no libraries. Everything starts from
+// the finished drawing, so the page reads fully with no script or reduced motion.
+//
+// Hooks any layout can use:
+//   data-reveal        slides in a little when scrolled into view (sets .bp-pre/.bp-in,
+//                      which layouts also use to extend dimension lines and stamps)
+//   data-draw          an SVG drawing below the fold is retracted, then plotted stroke
+//                      by stroke when it scrolls in (strokes need pathLength="1", class "ln", --p order)
+//   data-split-words   a plotter pen underlines each word in turn, once (whole words only)
+//   data-loop          looping decoration; paused while off screen
+//   data-hero          on capable pointer devices: a drafting crosshair with a coordinate
+//                      readout follows the pointer, and the 3D model turns a little
+// The script marks <html> with `bp-motion` (motion allowed) and `bp-rich` (capable device).
+---
+<script>
+  import { splitWords } from '@engine/split';
+
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function capable(): boolean {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    return (nav.hardwareConcurrency ?? 4) >= 4 && (nav.deviceMemory ?? 4) >= 4 && !nav.connection?.saveData;
+  }
+
+  function words() {
+    document.querySelectorAll<HTMLElement>('[data-split-words]').forEach((el) => {
+      splitWords(el).forEach((w, i) => w.style.setProperty('--w', String(i)));
+    });
+  }
+
+  // Only what starts below the fold is retracted; what is on screen stays put, so
+  // the first paint never flickers.
+  function reveals() {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        e.target.classList.add('bp-in');
+        io.unobserve(e.target);
+      }
+    }, { rootMargin: '0px 0px -8% 0px' });
+    const fold = window.innerHeight * 0.92;
+    document.querySelectorAll<HTMLElement>('[data-reveal], [data-draw]').forEach((el) => {
+      if (el.getBoundingClientRect().top < fold) return;
+      const sibs = el.parentElement ? [...el.parentElement.children].filter((c) => c.hasAttribute('data-reveal')) : [];
+      el.style.setProperty('--bp-delay', `${Math.min(Math.max(sibs.indexOf(el), 0), 5) * 80}ms`);
+      el.classList.add('bp-pre');
+      io.observe(el);
+    });
+  }
+
+  function loops() {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) e.target.toggleAttribute('data-paused', !e.isIntersecting);
+    });
+    document.querySelectorAll('[data-loop]').forEach((el) => io.observe(el));
+  }
+
+  // The crosshair readout uses the client's numerals: the hero carries a sample zero.
+  function crosshair() {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    document.querySelectorAll<HTMLElement>('[data-hero]').forEach((hero) => {
+      const hair = hero.querySelector<HTMLElement>('.xhair');
+      const read = hero.querySelector<HTMLElement>('.xr');
+      const iso = hero.querySelector<HTMLElement>('.iso');
+      if (!hair || !read) return;
+      const arabicDigits = hero.dataset.numSample === '٠';
+      const fmt = new Intl.NumberFormat(arabicDigits ? 'ar-SA-u-nu-arab' : 'en', { minimumIntegerDigits: 4, useGrouping: false });
+      const rtl = root.dir === 'rtl';
+      let box: DOMRect | null = null;
+      let frame = 0;
+      hero.addEventListener('pointerenter', () => { box = hero.getBoundingClientRect(); hair.classList.add('on'); });
+      hero.addEventListener('pointerleave', () => {
+        box = null; hair.classList.remove('on');
+        iso?.style.removeProperty('--spin');
+      });
+      hero.addEventListener('pointermove', (ev) => {
+        if (!box) box = hero.getBoundingClientRect();
+        const x = ev.clientX - box.left;
+        const y = ev.clientY - box.top;
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          hair.style.setProperty('--cx', `${(rtl ? x - box!.width : x).toFixed(0)}px`);
+          hair.style.setProperty('--cy', `${y.toFixed(0)}px`);
+          read.textContent = `X ${fmt.format(Math.round(x))}  Y ${fmt.format(Math.round(y))}`;
+          iso?.style.setProperty('--spin', `${((x / box!.width - 0.5) * 16).toFixed(1)}deg`);
+        });
+      });
+    });
+  }
+
+  if (!reduce) {
+    root.classList.add('bp-motion');
+    const rich = capable();
+    if (rich) root.classList.add('bp-rich');
+    words();
+    reveals();
+    loops();
+    if (rich) crosshair();
+  }
+</script>
+
+<style is:global>
+  /* Reveals: hidden only once the script has marked them, then settled back onto
+     each element's own resting place. Precise, no overshoot. */
+  .bp-motion [data-reveal].bp-pre { opacity: 0; translate: 0 var(--reveal-distance); }
+  .bp-motion [data-reveal].bp-pre.bp-in {
+    opacity: 1; translate: 0 0;
+    transition: opacity var(--dur-slow) var(--ease-out) var(--bp-delay, 0ms), translate var(--dur-slow) var(--ease-out) var(--bp-delay, 0ms);
+  }
+
+  /* Plotting: strokes are retracted, then drawn in order. */
+  .bp-motion .drawing.bp-pre .ln,
+  .bp-motion .bp-pre .drawing .ln { stroke-dashoffset: 1; }
+  .bp-motion .drawing.bp-pre.bp-in .ln,
+  .bp-motion .bp-pre.bp-in .drawing .ln {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s var(--ease-in-out) calc(var(--p, 0) * 110ms + var(--bp-delay, 0ms) + 150ms);
+  }
+
+  /* A plotter pen underlines each headline word in turn, from the visible state. */
+  .bp-motion [data-word] { position: relative; }
+  .bp-motion [data-word]::after {
+    content: ""; position: absolute; inset-inline: 0; inset-block-end: 0.02em; block-size: 2px;
+    background: var(--c-highlight); transform-origin: 0 50%; scale: 0 1; opacity: 0;
+    animation: bp-pen 900ms var(--ease-in-out) both;
+    animation-delay: calc(var(--w, 0) * 110ms + 350ms);
+  }
+  :root[dir="rtl"].bp-motion [data-word]::after { transform-origin: 100% 50%; }
+  @keyframes bp-pen {
+    0% { scale: 0 1; opacity: 1; }
+    45% { scale: 1 1; opacity: 1; }
+    100% { scale: 1 1; opacity: 0; }
+  }
+
+  /* Looping decoration rests while off screen. */
+  [data-loop][data-paused], [data-loop][data-paused] * { animation-play-state: paused !important; }
+
+  @media print {
+    .bp-motion [data-reveal].bp-pre { opacity: 1 !important; translate: none !important; }
+    .bp-motion .bp-pre .ln { stroke-dashoffset: 0 !important; }
+  }
+</style>

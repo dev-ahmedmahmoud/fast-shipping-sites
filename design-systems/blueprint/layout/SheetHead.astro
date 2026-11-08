@@ -1,0 +1,50 @@
+---
+// A section heading in drawing-sheet style: "SHEET 02 · SCALE 1:1" in mono above
+// the title, and a dimension rule (end ticks, arrowheads) that draws across under it.
+import type { PageContext } from '@engine/context';
+import { no, scale, words } from './sheet';
+interface Props { ctx: PageContext; title?: string; sheet: number; level?: 1 | 2; split?: boolean; onBand?: boolean }
+const { ctx, title, sheet, level = 2, split = false, onBand = false } = Astro.props;
+const w = words(ctx);
+const Heading = level === 1 ? 'h1' : 'h2';
+---
+<div class:list={['sh', { 'on-band': onBand }]} data-reveal>
+  <div class="row">
+    <p class="label meta"><span>{w.sheet} {no(ctx, sheet)}</span><span class="dot" aria-hidden="true"></span><span>{w.scale} {scale(ctx)}</span></p>
+    <slot />
+  </div>
+  {title && <Heading class:list={['title', { big: level === 1 }]} data-split-words={split ? '' : undefined}>{title}</Heading>}
+  <span class="rule" aria-hidden="true"><i></i></span>
+</div>
+
+<style>
+  .sh { display: flex; flex-direction: column; gap: var(--space-3); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .meta { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--c-accent); }
+  .on-band .meta { color: var(--band-muted); }
+  .dot { inline-size: 5px; block-size: 5px; border-radius: 50%; background: currentColor; }
+  .title { font-size: var(--step-4); max-inline-size: 22ch; }
+  .title.big { font-size: var(--step-5); }
+
+  /* Dimension rule: |<———————>| */
+  .rule { position: relative; display: block; block-size: 14px; margin-block-start: var(--space-1); color: var(--c-accent); }
+  .on-band .rule { color: var(--band-ink); }
+  .rule::before, .rule::after {
+    content: ""; position: absolute; inset-block: 0; inline-size: var(--rule); background: currentColor;
+  }
+  .rule::before { inset-inline-start: 0; }
+  .rule::after { inset-inline-end: 0; }
+  .rule i {
+    position: absolute; inset-inline: 2px; inset-block-start: 50%; block-size: var(--rule); margin-block-start: -0.75px;
+    background: currentColor; transform-origin: center;
+    transition: scale var(--dur-slow) var(--ease-in-out) 200ms;
+  }
+  .rule i::before, .rule i::after {
+    content: ""; position: absolute; inset-block-start: 50%; inline-size: 9px; block-size: 9px; margin-block-start: -4.5px;
+    border: 0 solid currentColor;
+  }
+  .rule i::before { inset-inline-start: 0; border-block-end-width: var(--rule); border-inline-start-width: var(--rule); rotate: calc(var(--dir) * 45deg); }
+  .rule i::after { inset-inline-end: 0; border-block-start-width: var(--rule); border-inline-end-width: var(--rule); rotate: calc(var(--dir) * 45deg); }
+  :global(.bp-motion) .sh:global(.bp-pre) .rule i { scale: 0 1; }
+  :global(.bp-motion) .sh:global(.bp-pre.bp-in) .rule i { scale: 1 1; }
+</style>

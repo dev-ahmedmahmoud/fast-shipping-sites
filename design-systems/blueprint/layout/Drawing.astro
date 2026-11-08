@@ -1,0 +1,137 @@
+---
+// Technical line drawings, plotted in code (no image files). Every stroke carries
+// pathLength="1" and an order (--p), so the motion part can retract a drawing and
+// plot it back stroke by stroke. Centre lines (.axis) are dash-dotted and stay put.
+// Decoration only: always aria-hidden.
+export type DrawingName = 'gear' | 'compass' | 'ruler' | 'rocket' | 'bridge' | 'atom' | 'flask' | 'book' | 'protractor';
+interface Props { name: DrawingName; class?: string; plotNow?: boolean }
+const { name, class: cls, plotNow = false } = Astro.props;
+
+const f = (n: number) => n.toFixed(2);
+const polar = (cx: number, cy: number, r: number, t: number) => `${f(cx + r * Math.cos(t))},${f(cy + r * Math.sin(t))}`;
+
+function gear(cx: number, cy: number, teeth: number, outer: number, root: number): string {
+  const pitch = (Math.PI * 2) / teeth;
+  const pts: string[] = [];
+  for (let i = 0; i < teeth; i++) {
+    const a = i * pitch;
+    pts.push(polar(cx, cy, root, a - pitch * 0.27), polar(cx, cy, outer, a - pitch * 0.14),
+             polar(cx, cy, outer, a + pitch * 0.14), polar(cx, cy, root, a + pitch * 0.27));
+  }
+  return `M${pts.join('L')}Z`;
+}
+
+// A shallow arch truss: deck, curved top chord, verticals and diagonals.
+function truss(): string[] {
+  const xs = [10, 27, 43.5, 60, 76.5, 93, 110];
+  const top = (x: number) => 84 - 46 * (1 - ((x - 60) / 50) ** 2);
+  const lines: string[] = [];
+  lines.push(`M${xs.map((x) => `${f(x)},${f(Math.min(84, top(x)))}`).join('L')}`);
+  for (let i = 1; i < xs.length - 1; i++) lines.push(`M${f(xs[i])},84L${f(xs[i])},${f(top(xs[i]))}`);
+  for (let i = 0; i < xs.length - 1; i++) {
+    const a = i < 3 ? xs[i] : xs[i + 1];
+    const b = i < 3 ? xs[i + 1] : xs[i];
+    lines.push(`M${f(a)},84L${f(b)},${f(Math.min(84, top(b)))}`);
+  }
+  return lines;
+}
+
+const rulerTicks = Array.from({ length: 21 }, (_, i) => {
+  const x = 12 + i * 4.8;
+  const h = i % 5 === 0 ? 12 : 6;
+  return `M${f(x)},44L${f(x)},${44 + h}`;
+}).join('');
+
+const protractorTicks = Array.from({ length: 19 }, (_, i) => {
+  const t = Math.PI + (i * Math.PI) / 18;
+  const inner = i % 3 === 0 ? 36 : 40;
+  return `M${polar(60, 90, inner, t)}L${polar(60, 90, 46, t)}`;
+}).join('');
+
+type El = { tag: 'path' | 'circle' | 'ellipse'; attrs: Record<string, string | number>; axis?: boolean; thin?: boolean };
+const P = (d: string, extra: Partial<El> = {}): El => ({ tag: 'path', attrs: { d }, ...extra });
+const C = (cx: number, cy: number, r: number, extra: Partial<El> = {}): El => ({ tag: 'circle', attrs: { cx, cy, r }, ...extra });
+
+const drawings: Record<DrawingName, El[]> = {
+  gear: [
+    P(gear(60, 60, 12, 46, 38)),
+    C(60, 60, 16),
+    C(60, 60, 6),
+    P('M57 44h6v4h-6z', { thin: true }),
+    P('M6 60H114', { axis: true }),
+    P('M60 6V114', { axis: true }),
+  ],
+  compass: [
+    C(60, 20, 6),
+    P('M60 6V14'),
+    P('M56 25L34 100'),
+    P('M64 25L86 100'),
+    P('M43 70L77 70', { thin: true }),
+    P('M86 100A52 52 0 0 0 73.8 66.6'),
+    P('M34 100L72 76', { thin: true }),
+    P('M20 100H100', { axis: true }),
+  ],
+  ruler: [
+    P('M8 36H112V72H8Z'),
+    P(rulerTicks, { thin: true }),
+    C(98, 62, 3.5, { thin: true }),
+  ],
+  rocket: [
+    P('M60 10C72 24 74 40 74 64V92H46V64C46 40 48 24 60 10Z'),
+    C(60, 48, 7),
+    P('M46 74L34 96L46 92'),
+    P('M74 74L86 96L74 92'),
+    P('M52 92L50 100H70L68 92'),
+    P('M55 104L53 114M60 104V117M65 104L67 114', { thin: true }),
+    P('M60 2V120', { axis: true }),
+  ],
+  bridge: [
+    P('M6 84H114'),
+    ...truss().map((d) => P(d, { thin: true })),
+    P('M10 84L4 96H16Z'),
+    P('M110 84L104 96H116Z'),
+    P('M0 96H120', { axis: true }),
+  ],
+  atom: [
+    C(60, 60, 6),
+    { tag: 'ellipse', attrs: { cx: 60, cy: 60, rx: 50, ry: 17 } },
+    { tag: 'ellipse', attrs: { cx: 60, cy: 60, rx: 50, ry: 17, transform: 'rotate(60 60 60)' } },
+    { tag: 'ellipse', attrs: { cx: 60, cy: 60, rx: 50, ry: 17, transform: 'rotate(120 60 60)' } },
+    C(110, 60, 3, { thin: true }),
+    C(35, 16.7, 3, { thin: true }),
+  ],
+  flask: [
+    P('M46 12H74'),
+    P('M52 12V46L24 100Q22 106 28 106H92Q98 106 96 100L68 46V12'),
+    P('M35 80H85', { thin: true }),
+    C(54, 92, 3, { thin: true }),
+    C(66, 88, 2, { thin: true }),
+    C(61, 98, 2.5, { thin: true }),
+    P('M70 24H64M70 32H66M70 40H64', { thin: true }),
+  ],
+  book: [
+    P('M60 30C48 22 30 20 14 24V96C30 92 48 94 60 102C72 94 90 92 106 96V24C90 20 72 22 60 30Z'),
+    P('M60 30V102'),
+    P('M24 40C34 38 42 38 50 42M24 52C34 50 42 50 50 54M24 64C34 62 42 62 50 66M70 42C78 38 86 38 96 40M70 54C78 50 86 50 96 52', { thin: true }),
+  ],
+  protractor: [
+    P('M14 90A46 46 0 0 1 106 90Z'),
+    P('M30 90A30 30 0 0 1 90 90', { thin: true }),
+    P(protractorTicks, { thin: true }),
+    C(60, 90, 2.5),
+    P('M60 90L88 58', { thin: true }),
+  ],
+};
+
+let order = 0;
+const els = drawings[name].map((el) => ({ ...el, order: el.axis ? 0 : order++ }));
+---
+<svg class:list={['drawing', cls, { 'plot-now': plotNow }]} viewBox="0 0 120 120" aria-hidden="true" focusable="false" data-draw={plotNow ? undefined : ''}>
+  {els.map((el) => {
+    const Tag = el.tag;
+    const attrs = el.axis
+      ? { ...el.attrs, class: 'axis' }
+      : { ...el.attrs, class: el.thin ? 'ln thin' : 'ln', pathLength: 1, style: `--p:${el.order}` };
+    return <Tag {...attrs} />;
+  })}
+</svg>

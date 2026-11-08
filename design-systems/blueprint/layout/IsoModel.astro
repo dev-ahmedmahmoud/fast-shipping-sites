@@ -1,0 +1,115 @@
+---
+// A small isometric model of a school campus, built from CSS 3D blocks (no WebGL,
+// no images). Each block is three faces: top, front (along its far edge) and side.
+// On load the blocks drop into place one by one like a model being assembled;
+// with reduced motion the model is simply there. Geometry is in grid units (--u)
+// and fixed left-to-right inside the model (it is an object, not text), so it reads
+// the same on Arabic pages; the wrapper is placed by the page's own direction.
+// Decoration only.
+interface Props { class?: string }
+const { class: cls } = Astro.props;
+
+// x, y: position on the base plate; w, d: footprint; h: height; z: sits on top of.
+const blocks = [
+  { id: 'base', x: 0, y: 0, w: 14, d: 10, h: 0.35, z: 0 },
+  { id: 'tower', x: 2, y: 1, w: 3.5, d: 3.5, h: 5.5, z: 0.35 },
+  { id: 'main', x: 1, y: 5.5, w: 8, d: 3.5, h: 3, z: 0.35 },
+  { id: 'wing', x: 9.5, y: 2, w: 3.5, d: 7, h: 2, z: 0.35 },
+  { id: 'cap', x: 2.75, y: 1.75, w: 2, d: 2, h: 1, z: 5.85 },
+  { id: 'porch', x: 4, y: 9, w: 2.5, d: 0.8, h: 1.2, z: 0.35 },
+];
+---
+<div class:list={['iso-wrap', cls]} aria-hidden="true">
+  <div class="iso">
+    {blocks.map((b, k) => (
+      <span class:list={['blk', b.id]} style={`--x:${b.x};--y:${b.y};--w:${b.w};--d:${b.d};--h:${b.h};--z:${b.z};--k:${k}`}>
+        <i class="top"></i><i class="fr"></i><i class="sd"></i>
+      </span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .iso-wrap {
+    --u: clamp(8px, 1.15vw, 14px);
+    --edge: color-mix(in srgb, currentColor 88%, transparent);
+    --edge-faint: color-mix(in srgb, currentColor 30%, transparent);
+    position: relative;
+    inline-size: calc(var(--u) * 22); block-size: calc(var(--u) * 17);
+    perspective: 1600px;
+    pointer-events: none;
+  }
+  /* The model's own geometry is fixed left-to-right; the wrapper still follows the page's direction. */
+  .iso {
+    direction: ltr;
+    position: absolute; inset-block-start: 47%; inset-inline-start: 50%;
+    inline-size: calc(var(--u) * 14); block-size: calc(var(--u) * 10);
+    margin-inline-start: calc(var(--u) * -7); margin-block-start: calc(var(--u) * -5);
+    transform-style: preserve-3d;
+    transform: rotateX(58deg) rotateZ(calc(-40deg + var(--spin, 0deg)));
+    transition: transform 600ms var(--ease-out);
+  }
+  .blk {
+    position: absolute;
+    inset-inline-start: calc(var(--x) * var(--u)); inset-block-start: calc(var(--y) * var(--u));
+    inline-size: calc(var(--w) * var(--u)); block-size: calc(var(--d) * var(--u));
+    transform-style: preserve-3d;
+    transform: translateZ(calc(var(--z) * var(--u)));
+  }
+  .blk i { position: absolute; display: block; border: 1.4px solid var(--edge); }
+  .top {
+    inset: 0;
+    transform: translateZ(calc(var(--h) * var(--u)));
+    background: color-mix(in srgb, currentColor 16%, transparent);
+  }
+  /* Front face stands up along the block's far edge; side face along its start edge. */
+  .fr {
+    inset-inline: 0; inset-block-start: 100%;
+    block-size: calc(var(--h) * var(--u));
+    transform-origin: top; transform: rotateX(90deg);
+    background:
+      repeating-linear-gradient(90deg, transparent 0 calc(var(--u) * 0.55), var(--edge-faint) calc(var(--u) * 0.55) calc(var(--u) * 0.62), transparent calc(var(--u) * 0.62) calc(var(--u) * 1.1)),
+      color-mix(in srgb, currentColor 9%, transparent);
+  }
+  .sd {
+    inset-block: 0; inset-inline-end: 100%;
+    inline-size: calc(var(--h) * var(--u));
+    transform-origin: right; transform: rotateY(90deg);
+    background: color-mix(in srgb, currentColor 5%, transparent);
+  }
+  /* The base plate is a gridded site plan. */
+  .base .top {
+    background:
+      linear-gradient(var(--edge-faint) 1px, transparent 1px) 0 0 / var(--u) var(--u),
+      linear-gradient(90deg, var(--edge-faint) 1px, transparent 1px) 0 0 / var(--u) var(--u),
+      color-mix(in srgb, currentColor 8%, transparent);
+  }
+  .base .fr { background: color-mix(in srgb, currentColor 14%, transparent); }
+  .cap .top { border-radius: 50%; }
+  .tower .fr { background:
+      repeating-linear-gradient(0deg, transparent 0 calc(var(--u) * 0.8), var(--edge-faint) calc(var(--u) * 0.8) calc(var(--u) * 0.86)),
+      color-mix(in srgb, currentColor 10%, transparent); }
+
+  /* Assembly: each block lowers onto its place, precise and without bounce. The fade
+     runs on the faces, not the block: opacity on a block would flatten its 3D faces. */
+  @media (prefers-reduced-motion: no-preference) {
+    .blk {
+      animation: bp-drop 760ms var(--ease-in-out) both;
+      animation-delay: calc(var(--k) * 170ms + 450ms);
+    }
+    .blk i {
+      animation: bp-face 300ms linear both;
+      animation-delay: calc(var(--k) * 170ms + 450ms);
+    }
+    .base { animation-name: bp-plate; animation-duration: 600ms; }
+  }
+  @keyframes bp-drop {
+    from { transform: translateZ(calc((var(--z) + 8) * var(--u))); }
+  }
+  @keyframes bp-plate {
+    from { scale: 0.82; }
+  }
+  @keyframes bp-face {
+    from { opacity: 0; }
+  }
+</style>

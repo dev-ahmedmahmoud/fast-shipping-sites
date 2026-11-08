@@ -1,0 +1,149 @@
+/* Blueprint layout: page-wide styles. Components style themselves with scoped styles.
+   The page is a drafting sheet: cool paper with a fine grid, navy ink, blue linework.
+   Deep "blueprint" bands (hero, call to action, footer) are mixed from accent and ink,
+   so any palette mixed in still produces its own blueprint. */
+:root {
+  --dir: 1;
+  --hair: 1px;
+  --rule: 1.5px;
+  --grid-minor: color-mix(in srgb, var(--c-line) 32%, transparent);
+  --grid-major: color-mix(in srgb, var(--c-line) 62%, transparent);
+  --band: color-mix(in oklab, var(--c-accent) 42%, var(--c-ink));
+  --band-deep: color-mix(in oklab, var(--c-accent) 26%, var(--c-ink));
+  --band-ink: var(--c-accent-ink);
+  --band-line: color-mix(in srgb, var(--c-accent-ink) 14%, transparent);
+  --band-line-strong: color-mix(in srgb, var(--c-accent-ink) 30%, transparent);
+  --band-muted: color-mix(in srgb, var(--c-accent-ink) 78%, transparent);
+  /* A drafting grid: minor squares every 24px, a heavier line every fifth. */
+  --grid:
+    linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(var(--grid-minor) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px) 0 0 / 24px 24px;
+  --grid-band:
+    linear-gradient(var(--band-line-strong) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(90deg, var(--band-line-strong) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(var(--band-line) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, var(--band-line) 1px, transparent 1px) 0 0 / 24px 24px;
+}
+:root[dir="rtl"] { --dir: -1; }
+
+body {
+  background: var(--grid), var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: var(--weight-body);
+  line-height: var(--lh-body);
+}
+/* Drawings, dimension lines and the 3D model may reach past their boxes; the page never scrolls sideways. */
+main { overflow-x: clip; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  line-height: var(--lh-heading);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+:lang(ar) :is(h1, h2, h3, h4) { letter-spacing: 0; line-height: 1.4; }
+strong, b { font-weight: var(--weight-strong); }
+
+a { color: var(--c-accent); text-decoration-thickness: 1.5px; text-underline-offset: 0.24em; }
+a:hover { text-decoration-color: var(--c-highlight); }
+:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 3px; }
+.band :focus-visible { outline-color: var(--band-ink); }
+::selection { background: var(--c-accent); color: var(--c-accent-ink); }
+
+.container {
+  inline-size: 100%;
+  max-inline-size: calc(var(--max-width) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+}
+.section { padding-block: var(--space-8); }
+
+/* A deep blueprint band: white linework on blue, with its own grid. */
+.band {
+  background: var(--grid-band), var(--band);
+  color: var(--band-ink);
+}
+
+/* Mono labels: sheet numbers, scales, figure captions. */
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 500;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--c-muted);
+}
+:lang(ar) .label { text-transform: none; font-family: var(--font-body); font-weight: var(--weight-strong); }
+
+/* Crop marks at the four corners of a sheet (add class "crop" to a positioned box). */
+.crop { position: relative; }
+.crop::before, .crop::after {
+  content: ""; position: absolute; pointer-events: none;
+  inline-size: 14px; block-size: 14px;
+  border: 0 solid var(--crop-color, var(--c-accent));
+}
+.crop::before { inset-block-start: -7px; inset-inline-start: -7px; border-block-start-width: var(--rule); border-inline-start-width: var(--rule); }
+.crop::after { inset-block-end: -7px; inset-inline-end: -7px; border-block-end-width: var(--rule); border-inline-end-width: var(--rule); }
+
+/* Stamped plates: square buttons with an engraved inner line and four rivets. */
+.btn {
+  --plate: var(--c-surface); --plate-ink: var(--c-ink); --plate-edge: var(--c-ink);
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-block-size: 48px; padding-inline: var(--space-5); padding-block: var(--space-1);
+  border: var(--rule) solid var(--plate-edge); border-radius: var(--radius-s);
+  background:
+    radial-gradient(circle at 7px 7px, var(--plate-edge) 1.4px, transparent 1.9px),
+    radial-gradient(circle at calc(100% - 7px) 7px, var(--plate-edge) 1.4px, transparent 1.9px),
+    radial-gradient(circle at 7px calc(100% - 7px), var(--plate-edge) 1.4px, transparent 1.9px),
+    radial-gradient(circle at calc(100% - 7px) calc(100% - 7px), var(--plate-edge) 1.4px, transparent 1.9px),
+    var(--plate);
+  box-shadow: inset 0 0 0 3px var(--plate), inset 0 0 0 4px color-mix(in srgb, var(--plate-edge) 45%, transparent), 3px 3px 0 color-mix(in srgb, var(--c-ink) 18%, transparent);
+  color: var(--plate-ink);
+  font-family: var(--font-body); font-size: var(--step-0); font-weight: var(--weight-strong);
+  line-height: 1.2; text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background-color var(--dur-fast) linear;
+}
+:root[dir="rtl"] .btn { box-shadow: inset 0 0 0 3px var(--plate), inset 0 0 0 4px color-mix(in srgb, var(--plate-edge) 45%, transparent), -3px 3px 0 color-mix(in srgb, var(--c-ink) 18%, transparent); }
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(1px); box-shadow: inset 0 0 0 3px var(--plate), inset 0 0 0 4px color-mix(in srgb, var(--plate-edge) 45%, transparent); }
+.btn--primary { --plate: var(--c-accent); --plate-ink: var(--c-accent-ink); --plate-edge: var(--c-accent-ink); border-color: var(--c-accent); }
+.btn--ghost { --plate: var(--c-surface); }
+/* On a blueprint band, ghost plates are outlined in the band's own ink. */
+.band .btn--ghost { --plate: transparent; --plate-ink: var(--band-ink); --plate-edge: var(--band-ink); box-shadow: none; }
+.band .btn--primary { --plate: var(--c-surface); --plate-ink: var(--c-accent); --plate-edge: var(--c-accent); border-color: var(--c-surface); }
+
+.skip-link { background: var(--c-accent); color: var(--c-accent-ink); font-weight: var(--weight-strong); }
+[dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+
+.todo-note {
+  border: var(--hair) dashed var(--c-accent); border-radius: var(--radius-s);
+  padding: var(--space-3) var(--space-4); background: var(--c-surface);
+  font-size: var(--step--1); color: var(--c-muted);
+}
+.todo-note ul { margin: var(--space-2) 0 0; padding-inline-start: var(--space-5); }
+
+/* Technical line drawings (layout/Drawing.astro). Drawn complete by default; the
+   motion part retracts them below the fold and plots them back in. Strokes are
+   matched by class (.ln), not by [pathLength]: Chrome does not restyle SVG
+   descendants matched by a camelCase attribute when an ancestor's class changes. */
+.drawing { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+.drawing .thin { stroke-width: 1; opacity: 0.7; }
+.drawing .axis { stroke-width: 0.9; stroke-dasharray: 6 3 1 3; opacity: 0.65; }
+.drawing .ln { stroke-dasharray: 1; stroke-dashoffset: 0; }
+/* Drawings above the fold plot themselves on load, with no script. */
+@media (prefers-reduced-motion: no-preference) {
+  .drawing.plot-now .ln { animation: bp-plot 1.4s var(--ease-in-out) both; animation-delay: calc(var(--p, 0) * 140ms + 300ms); }
+}
+@keyframes bp-plot { from { stroke-dashoffset: 1; } }
+
+@media print {
+  body { background: var(--c-bg); }
+}

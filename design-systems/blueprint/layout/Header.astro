@@ -1,0 +1,165 @@
+---
+// The header is the top strip of a drawing sheet: the logo in a square plate,
+// the school name as the drawing title, and the menu as a row of ruled cells.
+// The current page is marked with a dimension line (|———|) under its label.
+import { Image } from 'astro:assets';
+import type { PageContext, NavItem } from '@engine/context';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const other = ctx.languages.find((l) => !l.current);
+const linkAttrs = (item: NavItem) => ({
+  href: item.href,
+  'aria-current': item.current ? 'page' : undefined,
+  target: item.external ? '_blank' : undefined,
+  rel: item.external ? 'noopener' : undefined,
+});
+---
+<header class="header">
+  <div class="container bar">
+    <a class="brand" href={ctx.site.homeHref} aria-label={ctx.site.name}>
+      <span class="plate" aria-hidden="true">
+        {ctx.site.logo
+          ? <Image src={ctx.site.logo} alt="" height={88} class="logo" loading="eager" />
+          : <span class="mark">{ctx.site.shortName}</span>}
+      </span>
+      <span class="name">{ctx.site.name}</span>
+    </a>
+
+    <div class="actions">
+      {other && (
+        <a class="lang" href={other.href} hreflang={other.locale} lang={other.locale}>{other.name}</a>
+      )}
+      {ctx.cta && (
+        <a class="btn btn--primary cta" href={ctx.cta.href}
+           target={ctx.cta.external ? '_blank' : undefined} rel={ctx.cta.external ? 'noopener' : undefined}>
+          {ctx.cta.label}
+        </a>
+      )}
+      <details class="nav-mobile">
+        <summary class="btn btn--ghost">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" /></svg>
+          {ctx.ui.menu}
+        </summary>
+        <nav class="drawer crop" aria-label={ctx.ui.menu}>
+          <ul role="list">
+            {ctx.nav.map((item) => (
+              <li>
+                <a {...linkAttrs(item)}>{item.label}</a>
+                {item.children.length > 0 && (
+                  <ul role="list" class="sub-mobile">
+                    {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+
+  <nav class="nav-desktop" aria-label={ctx.ui.menu}>
+    <ul role="list" class="container">
+      {ctx.nav.map((item) => (
+        <li class:list={[{ 'has-sub': item.children.length > 0 }]}>
+          <a {...linkAttrs(item)}>{item.label}</a>
+          {item.children.length > 0 && (
+            <ul role="list" class="sub crop">
+              {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .header {
+    position: sticky; inset-block-start: 0; z-index: 20;
+    background: var(--c-surface);
+    border-block-end: var(--rule) solid var(--c-ink);
+    box-shadow: 0 3px 0 -1.5px var(--c-surface), 0 4px 0 -1.5px var(--c-line);
+    padding-block-start: env(safe-area-inset-top, 0px);
+  }
+  .bar { display: flex; align-items: center; gap: var(--space-4); min-block-size: 72px; }
+  .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--c-ink); text-decoration: none; min-inline-size: 0; }
+  .plate {
+    position: relative; display: grid; place-items: center; flex: none;
+    inline-size: 56px; block-size: 56px;
+    background: var(--c-surface); border: var(--rule) solid var(--c-ink);
+    box-shadow: inset 0 0 0 3px var(--c-surface), inset 0 0 0 4px var(--c-line);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .brand:hover .plate { transform: rotate(calc(var(--dir) * -90deg)); }
+  .logo { block-size: 40px; inline-size: auto; max-inline-size: 46px; object-fit: contain; }
+  .mark { font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--step--1); color: var(--c-accent); }
+  .name { font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--step-1); line-height: 1.15; max-inline-size: 24ch; }
+  .actions { display: flex; align-items: center; gap: var(--space-3); margin-inline-start: auto; }
+
+  /* Language switch: a mono tag with a corner fold. */
+  .lang {
+    display: inline-grid; place-items: center; min-block-size: 44px; min-inline-size: 44px; padding-inline: var(--space-3);
+    border: var(--hair) solid var(--c-accent); color: var(--c-accent);
+    font-family: var(--font-mono); font-size: var(--step--1); font-weight: 500; text-decoration: none;
+    background: linear-gradient(225deg, var(--c-accent) 0 7px, transparent 7px);
+    transition: background-color var(--dur-fast) linear, color var(--dur-fast) linear;
+  }
+  :global(:root[dir="rtl"]) .lang { background: linear-gradient(135deg, var(--c-accent) 0 7px, transparent 7px); }
+  .lang:hover { background-color: var(--c-accent-soft); }
+  /* One Arabic word on an English page should not pull in an Arabic font file. */
+  .lang[lang="ar"] { font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", "Geeza Pro", system-ui, sans-serif; font-weight: 700; }
+  .cta { min-block-size: 44px; }
+
+  .nav-desktop { border-block-start: var(--hair) solid var(--c-line); }
+  .nav-desktop > ul { display: flex; flex-wrap: wrap; }
+  .nav-desktop > ul > li { position: relative; border-inline-end: var(--hair) solid var(--c-line); }
+  .nav-desktop > ul > li:first-child { border-inline-start: var(--hair) solid var(--c-line); }
+  .nav-desktop a, .nav-mobile a {
+    position: relative; display: block; padding: var(--space-2) var(--space-3);
+    color: var(--c-ink); text-decoration: none; font-size: var(--step--1); font-weight: var(--weight-strong); white-space: nowrap;
+  }
+  .nav-desktop > ul > li > a { padding-block: var(--space-3); }
+  .nav-desktop a:hover, .nav-mobile a:hover { color: var(--c-accent); background: var(--c-accent-soft); }
+  /* Current page: a dimension line with end ticks under the label (::before, since ::after is the sub-menu caret). */
+  .nav-desktop > ul > li > a[aria-current="page"] { color: var(--c-accent); }
+  .nav-desktop > ul > li > a[aria-current="page"]::before {
+    content: ""; position: absolute; inset-inline: var(--space-3); inset-block-end: 6px; block-size: 7px;
+    border-inline: var(--rule) solid var(--c-highlight);
+    background: linear-gradient(var(--c-highlight), var(--c-highlight)) center / 100% var(--rule) no-repeat;
+  }
+  .has-sub > a::after { content: ""; display: inline-block; margin-inline-start: 0.45em; inline-size: 0.4em; block-size: 0.4em; border-block-end: var(--rule) solid currentColor; border-inline-end: var(--rule) solid currentColor; rotate: calc(var(--dir) * 45deg); translate: 0 -0.2em; }
+
+  .sub, .drawer {
+    --crop-color: var(--c-accent);
+    padding: var(--space-2);
+    background: var(--c-surface); border: var(--hair) solid var(--c-ink);
+    box-shadow: 6px 6px 0 var(--c-accent-soft);
+  }
+  .sub {
+    display: none; position: absolute; inset-inline-start: 0; inset-block-start: 100%; z-index: 5;
+    min-inline-size: 15rem;
+  }
+  .has-sub:hover > .sub, .has-sub:focus-within > .sub { display: block; }
+
+  .nav-mobile { display: none; position: relative; }
+  .nav-mobile summary { list-style: none; min-block-size: 44px; padding-inline: var(--space-3); }
+  .nav-mobile summary::-webkit-details-marker { display: none; }
+  .drawer {
+    position: absolute; inset-inline-end: 0; inset-block-start: calc(100% + 12px);
+    inline-size: min(19rem, calc(100vw - 2 * var(--gutter))); max-block-size: 72vh; overflow-y: auto;
+  }
+  .drawer a { font-size: var(--step-0); padding-block: var(--space-2); white-space: normal; }
+  .drawer a[aria-current="page"] { color: var(--c-accent); box-shadow: inset calc(var(--dir) * 3px) 0 0 var(--c-highlight); }
+  .sub-mobile { padding-inline-start: var(--space-4); border-inline-start: var(--hair) dashed var(--c-line); margin-inline-start: var(--space-3); }
+
+  @media (max-width: 1080px) {
+    .nav-desktop { display: none; }
+    .nav-mobile { display: block; }
+  }
+  @media (max-width: 560px) {
+    .name { display: none; }
+    .cta { display: none; }
+    .plate { inline-size: 50px; block-size: 50px; }
+  }
+</style>
