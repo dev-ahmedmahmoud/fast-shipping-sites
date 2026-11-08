@@ -29,6 +29,8 @@ The gallery build writes a comparison page at the root and one full site per sam
 
 Shared client files that are too big for the repository (such as LFIS's 660 weekly-plan PDFs) live in the R2 bucket served at `https://websites-files.syncology.tech/<client>/`.
 
+Free stock pictures and silent hero clips any client may use live in `stock/` (see `stock/CREDITS.md`): pictures as `stock/<file>`, clips as `/media/stock/<file>` in a client's `heroVideos`. A build copies in only the clips it uses.
+
 Other environment variables: `SHOW_TODO=0` hides the "content waiting to be imported" notes, `SITE_URL` overrides the canonical domain, and `BASE` and `OUT_DIR` are set by the gallery script.
 
 ## Layout
@@ -36,6 +38,7 @@ Other environment variables: `SHOW_TODO=0` hides the "content waiting to be impo
 - `apps/site/`: the Astro engine (routing, i18n, content loading, page assembly).
 - `design-systems/<name>/`: one folder per look. `design-systems/README.md` describes the contract.
 - `clients/<slug>/`: `client.json` (names, motto, logo, contacts, EduSync links, portals, footer, samples), `content/{ar,en}/**.md` (one file per page, each declaring its exact old-site URL in `slug`; news items in `content/<locale>/news/`), `media/` (images, optimized at build time), `public/` (files served as they are: video, PDFs), plus research, intake answers and the import report.
+- `stock/`: the shared library of free stock pictures (`media/`) and hero clips (`clips/`), with credits.
 - `onboarding/intake.html`: the intake questionnaire, published as a Claude artifact. Answers are saved in `onboarding/answers/` and `clients/<slug>/intake.json`.
 - `scripts/build-gallery.mjs`: the gallery build.
 

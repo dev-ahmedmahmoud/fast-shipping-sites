@@ -1,14 +1,20 @@
-# Stock media credits
+# Stock library
+
+Free pictures and hero clips any client may use. Pictures in `media/` are referenced as
+`stock/<file>` (e.g. a `heroVideos` poster); clips in `clips/` as `/media/stock/<file>` in a
+client's `heroVideos`, and each site build copies in only the clips its client uses.
+
+## Credits
 
 All clips and stills below come from Mixkit under the **Mixkit Stock Video Free License**
 (https://mixkit.co/license/#videoFree): free for commercial and personal use, no attribution
-required. None of the source clips has an audio track. Each was checked against the client's
-media rules (no women without hijab, modest dress, no excluded themes).
+required. None of the source clips has an audio track. Each was checked against the strictest
+client media rules so far (LFIS: no women without hijab, modest dress, no excluded themes).
 
-Hero clips are trimmed, silent, 960 px wide, in H.264 (`.mp4`) and VP9 (`.webm`) in `public/media/stock/`; their first frames
+Hero clips are trimmed, silent, 960 px wide, in H.264 (`.mp4`) and VP9 (`.webm`) in `clips/`; their first frames
 are the posters here. Stills are single frames from the 720p sources.
 
-| File | Source | Used for |
+| File | Source | First used for |
 | --- | --- | --- |
 | `hero-paper-plane.jpg` + `.mp4`/`.webm` | https://mixkit.co/free-stock-video/little-boy-playing-with-a-paper-plane-at-the-park-49484/ | Playground hero |
 | `hero-class-drawing.jpg` + `.mp4`/`.webm` | https://mixkit.co/free-stock-video/young-man-drawing-at-his-desk-14956/ | Sketchbook hero |

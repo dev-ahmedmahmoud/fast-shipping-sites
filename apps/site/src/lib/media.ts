@@ -4,8 +4,9 @@ import type { ImageMetadata } from 'astro';
 import type { HeroVideo } from './content';
 
 const files = import.meta.glob<ImageMetadata>('@client/media/*.{png,jpg,jpeg,webp,avif,svg}', { eager: true, import: 'default' });
-// Stock pictures (and hero-clip posters) keep their own folder and are named "stock/<file>".
-const stock = import.meta.glob<ImageMetadata>('@client/media/stock/*.{png,jpg,jpeg,webp,avif}', { eager: true, import: 'default' });
+// The shared stock library (stock/media at the repository root: free pictures and hero-clip
+// posters any client may use) is addressed as "stock/<file>".
+const stock = import.meta.glob<ImageMetadata>('@stock/media/*.{png,jpg,jpeg,webp,avif}', { eager: true, import: 'default' });
 
 const byName = new Map<string, ImageMetadata>([
   ...Object.entries(files).map(([path, meta]) => [path.split('/').pop()!, meta] as const),

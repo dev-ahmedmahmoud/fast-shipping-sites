@@ -2,7 +2,7 @@
 // The combination is chosen by environment variables and wired in through
 // Vite aliases, so only the chosen parts enter the bundle.
 import { defineConfig } from 'astro/config';
-import { existsSync, readFileSync } from 'node:fs';
+import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { satteri } from '@astrojs/markdown-satteri';
@@ -36,6 +36,14 @@ const sampleId = env.SAMPLE_ID || (used.length === 1 ? used[0] : `mix-${parts.pa
 const ds = (system, file) => path.join(root, 'design-systems', system, file);
 const base = env.BASE || '/';
 const mode = env.FSS_MODE || 'site';
+const stockClips = path.join(root, 'stock', 'clips');
+// Files the hero clips use from the shared library ("/media/stock/<file>" in client.json):
+// only the sample's own clip when one is chosen (HERO_VIDEO), else every clip the client lists.
+const heroVideos = client.heroVideos ?? {};
+const heroClipFiles = [...new Set((env.HERO_VIDEO && heroVideos[env.HERO_VIDEO] ? [heroVideos[env.HERO_VIDEO]] : Object.values(heroVideos))
+  .flatMap((v) => [v.src, v.webm])
+  .filter((src) => typeof src === 'string' && src.startsWith('/media/stock/'))
+  .map((src) => src.slice('/media/stock/'.length)))];
 // The site root sends visitors to the default language's home (Arabic first for LFIS).
 const rootRedirect = mode === 'site' ? { '/': `${base.replace(/\/+$/, '')}/${client.defaultLocale}/` } : {};
 
@@ -58,6 +66,33 @@ export default defineConfig({
   trailingSlash: 'ignore',
   build: { format: 'directory' },
   integrations: [
+    {
+      // Hero clips live once in the shared stock library (stock/clips). A site build gets
+      // only the clips its client.json "heroVideos" names, at /media/stock/<file>; the dev
+      // server serves them from the library.
+      name: 'fss-stock-clips',
+      hooks: {
+        'astro:server:setup': ({ server }) => {
+          server.middlewares.use((req, res, next) => {
+            const m = /\/media\/stock\/([\w.-]+\.(?:mp4|webm))$/.exec((req.url || '').split('?')[0]);
+            const file = m && path.join(stockClips, m[1]);
+            if (!file || !existsSync(file)) return next();
+            res.setHeader('Content-Type', file.endsWith('.webm') ? 'video/webm' : 'video/mp4');
+            createReadStream(file).pipe(res);
+          });
+        },
+        'astro:build:done': ({ dir }) => {
+          if (mode !== 'site') return;
+          const target = path.join(fileURLToPath(dir), 'media', 'stock');
+          for (const name of heroClipFiles) {
+            const from = path.join(stockClips, name);
+            if (!existsSync(from)) throw new Error(`Hero clip "${name}" not found in stock/clips`);
+            mkdirSync(target, { recursive: true });
+            copyFileSync(from, path.join(target, name));
+          }
+        },
+      },
+    },
     {
       name: 'fss-gallery-index',
       hooks: {
@@ -84,6 +119,7 @@ export default defineConfig({
       alias: {
         '@engine': fileURLToPath(new URL('./src/lib', import.meta.url)),
         '@client': clientDir,
+        '@stock': path.join(root, 'stock'),
         '@systems': path.join(root, 'design-systems'),
         '@palette': ds(parts.palette, 'palette.ts'),
         '@type': ds(parts.type, 'type.ts'),
