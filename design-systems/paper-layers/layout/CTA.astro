@@ -1,0 +1,77 @@
+---
+// An invitation card: a marigold sheet with the call to action, and a paper
+// sunburst at its edge that pops up from the fold as the card scrolls in.
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+interface Props { ctx: PageContext; title: string; text?: string; action: Action | null }
+const { title, text, action } = Astro.props;
+const RAYS = [-62, -36, -12, 12, 36, 62];
+---
+<section class="section">
+  <div class="container">
+    <div class="card pl-sheet" data-reveal>
+      <div class="copy">
+        <h2>{title}</h2>
+        {text && <p>{text}</p>}
+        {action && (
+          <a class="btn btn--primary" href={action.href} target={action.external ? '_blank' : undefined} rel={action.external ? 'noopener' : undefined}>
+            {action.label}
+            <svg class="flip-rtl" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </a>
+        )}
+      </div>
+      <div class="popup" aria-hidden="true">
+        <span class="burst">
+          {RAYS.map((deg, i) => <span class="ray" style={`--a: ${deg}deg; --i: ${i}`}></span>)}
+          <span class="core"></span>
+        </span>
+        <span class="base"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .card {
+    --sheet: var(--pl-sun); --under: var(--pl-blue); --under-2: var(--pl-coral);
+    --fan-x: 10px; --fan-y: 12px; --fan-r: -1.2deg; --fan2-x: -18px; --fan2-y: 10px;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-6);
+    padding: var(--space-7) clamp(var(--space-5), 5vw, var(--space-8));
+    color: var(--c-ink);
+  }
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; }
+  h2 { font-size: var(--step-4); max-inline-size: 20ch; }
+  p { max-inline-size: 52ch; font-size: var(--step-1); line-height: 1.55; }
+
+  .popup { position: relative; inline-size: 15rem; block-size: 10rem; }
+  .base {
+    position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 10px; border-radius: 4px;
+    background: color-mix(in oklab, var(--pl-sun) 70%, var(--c-ink)); opacity: 0.35;
+  }
+  .burst {
+    position: absolute; inset-inline: 0; inset-block-end: 4px; block-size: 100%;
+    transform-origin: 50% 100%;
+  }
+  .ray {
+    position: absolute; inset-block-end: 0; inset-inline-start: calc(50% - 1.1rem); inline-size: 2.2rem; block-size: 88%;
+    border-radius: 1.1rem 1.1rem 4px 4px; transform-origin: 50% 100%; rotate: var(--a);
+    background: var(--c-surface); box-shadow: var(--pl-s2);
+  }
+  .ray:nth-child(even) { background: var(--pl-coral); block-size: 74%; }
+  .core {
+    position: absolute; inset-block-end: -2.6rem; inset-inline-start: calc(50% - 2.8rem); inline-size: 5.6rem; aspect-ratio: 1;
+    border-radius: 50%; background: var(--pl-blue); box-shadow: var(--pl-s2);
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .burst { animation: pl-popup linear both; animation-timeline: view(); animation-range: entry 20% cover 45%; }
+    }
+  }
+  @media (max-width: 720px) {
+    .card { grid-template-columns: minmax(0, 1fr); padding: var(--space-6) var(--space-5); }
+    .popup { inline-size: 11rem; block-size: 7rem; justify-self: end; }
+    .ray { inline-size: 1.7rem; inset-inline-start: calc(50% - 0.85rem); }
+    .core { inline-size: 4.4rem; inset-inline-start: calc(50% - 2.2rem); inset-block-end: -2rem; }
+  }
+</style>

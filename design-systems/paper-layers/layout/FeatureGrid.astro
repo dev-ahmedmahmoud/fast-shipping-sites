@@ -1,0 +1,125 @@
+---
+// Each feature is a greeting card lying open: a coloured cover with a paper-cut icon
+// on one side of the fold, the inside page with the title on the other. As a card
+// scrolls into view its cover swings open from standing up; on hover it lifts.
+// At rest, and wherever scroll-linked animation is unavailable, cards lie open.
+import type { PageContext } from '@engine/context';
+interface Item { title: string; text?: string; href?: string; external?: boolean }
+interface Props { ctx: PageContext; title?: string; items: Item[] }
+const { title, items } = Astro.props;
+const CARDS = ['blue', 'sun', 'mint', 'coral'];
+const ICONS = ['book', 'school', 'globe', 'atom', 'pencil', 'star'] as const;
+---
+<section class="section">
+  <div class="container">
+    <div class="board pl-sheet">
+      {title && <h2 data-reveal>{title}</h2>}
+      <ul class="grid" role="list">
+        {items.map((item, i) => {
+          const icon = ICONS[i % ICONS.length];
+          const Tag = item.href ? 'a' : 'div';
+          return (
+            <li style={`--card: var(--pl-${CARDS[i % CARDS.length]})`}>
+              <Tag class="fold" href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noopener' : undefined}>
+                <span class="cover" aria-hidden="true">
+                  <svg class="icon pl-cut-shadow" viewBox="0 0 48 48" focusable="false">
+                    {icon === 'book' && <path d="M5 11c7-2.5 13-1.5 19 2.5 6-4 12-5 19-2.5v26c-7-2.5-13-1.5-19 2.5-6-4-12-5-19-2.5Zm19 2.5V40" />}
+                    {icon === 'school' && <path d="M24 5 43 16v4H5v-4Zm-15 17h5v16H9Zm9 0h5v16h-5Zm9 0h5v16h-5Zm9 0h5v16h-5ZM5 40h38v4H5Z" />}
+                    {icon === 'globe' && <path d="M24 4a20 20 0 1 0 0 40 20 20 0 0 0 0-40Zm0 3.5c3 3 5 9 5 16.5s-2 13.5-5 16.5c-3-3-5-9-5-16.5s2-13.5 5-16.5ZM6.8 22h34.4v4H6.8Z" />}
+                    {icon === 'atom' && <path d="M24 20a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0-14c-5 0-8 8-8 18s3 18 8 18 8-8 8-18-3-18-8-18Zm0 3.6c2.2 0 4.4 6.2 4.4 14.4S26.2 38.4 24 38.4 19.6 32.2 19.6 24 21.8 9.6 24 9.6ZM8.4 15c-2.5 4.3 3 11 11.6 16s17.6 5.3 20 1-3-11-11.6-16S10.9 10.7 8.4 15Zm3.1 1.8c1.1-1.9 7.6-.7 14.6 3.3s11.3 9 10.2 10.9-7.6.7-14.6-3.3-11.3-9-10.2-10.9Z" />}
+                    {icon === 'pencil' && <path d="M33 5l10 10-24 24-12 3 3-12Zm-3.5 6.5 7 7-3 3-7-7ZM6 44h36v-4H6Z" />}
+                    {icon === 'star' && <path d="m24 4 5.9 12.6 13.6 1.7-10 9.4 2.6 13.5L24 34.5 11.9 41.2l2.6-13.5-10-9.4 13.6-1.7Z" />}
+                  </svg>
+                  <span class="num">{String(i + 1).padStart(2, '0')}</span>
+                </span>
+                <span class="inside">
+                  <h3>{item.title}</h3>
+                  {item.text && <p>{item.text}</p>}
+                  {item.href && (
+                    <span class="go" aria-hidden="true">
+                      <svg class="flip-rtl" viewBox="0 0 24 24" width="20" height="20"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    </span>
+                  )}
+                </span>
+              </Tag>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .board {
+    --under: var(--pl-blue); --under-2: var(--pl-sun);
+    --fan-x: 12px; --fan-y: 14px; --fan-r: -1deg; --fan2-x: -22px; --fan2-y: 8px;
+    display: flex; flex-direction: column; gap: var(--space-6);
+    padding: var(--space-7) clamp(var(--space-4), 4vw, var(--space-7));
+  }
+  h2 { font-size: var(--step-3); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: var(--space-5); }
+  .grid > li { display: flex; perspective: 1000px; }
+
+  .fold {
+    flex: 1; display: grid; grid-template-columns: minmax(5.5rem, 0.42fr) minmax(0, 1fr);
+    min-block-size: 9.5rem; color: var(--c-ink); text-decoration: none;
+    border-radius: var(--radius-m);
+  }
+  .cover {
+    --lift: 9deg;
+    position: relative; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
+    padding: var(--space-4); border-radius: var(--radius-m) 0 0 var(--radius-m);
+    background: var(--card); box-shadow: var(--pl-s2);
+    transform-origin: 100% 50%;
+    transform: perspective(900px) rotateY(var(--lift));
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+    z-index: 1;
+  }
+  :global([dir="rtl"]) .cover { transform-origin: 0 50%; border-radius: 0 var(--radius-m) var(--radius-m) 0; --lift: -9deg; }
+  .icon { inline-size: 2.6rem; block-size: auto; fill: var(--c-surface); overflow: visible; }
+  .num { font-family: var(--font-display); font-weight: 600; font-size: var(--step--1); color: var(--c-surface); opacity: 0.9; font-variant-numeric: tabular-nums; }
+  /* light text on the light cards stays legible: darken the cover's ink there */
+  li:nth-child(4n+2) .num, li:nth-child(4n+3) .num { color: var(--c-ink); opacity: 0.7; }
+  li:nth-child(4n+2) .icon, li:nth-child(4n+3) .icon { fill: var(--c-surface); }
+
+  .inside {
+    position: relative; display: flex; flex-direction: column; gap: var(--space-2); justify-content: center;
+    padding: var(--space-4) var(--space-5) var(--space-6);
+    border-radius: 0 var(--radius-m) var(--radius-m) 0;
+    /* the fold: a soft crease shadow along the spine */
+    background: linear-gradient(to right, color-mix(in oklab, var(--c-ink) 10%, var(--c-surface)), var(--c-surface) 14%);
+    box-shadow: var(--pl-s1);
+  }
+  :global([dir="rtl"]) .inside {
+    border-radius: var(--radius-m) 0 0 var(--radius-m);
+    background: linear-gradient(to left, color-mix(in oklab, var(--c-ink) 10%, var(--c-surface)), var(--c-surface) 14%);
+  }
+  h3 { font-size: var(--step-1); }
+  .inside p { color: var(--c-muted); font-size: var(--step--1); }
+  .go {
+    position: absolute; inset-inline-end: var(--space-4); inset-block-end: var(--space-3);
+    display: grid; place-items: center; inline-size: 36px; block-size: 36px; border-radius: 50%;
+    color: var(--c-accent); background: var(--c-accent-soft);
+    transition: transform var(--dur-base) var(--ease-out), background-color var(--dur-fast) ease, color var(--dur-fast) ease;
+  }
+  a.fold:hover .cover, a.fold:focus-visible .cover { --lift: 26deg; box-shadow: var(--pl-s3); }
+  :global([dir="rtl"]) a.fold:hover .cover, :global([dir="rtl"]) a.fold:focus-visible .cover { --lift: -26deg; }
+  a.fold:hover .go { transform: translateX(4px); background: var(--c-accent); color: var(--c-accent-ink); }
+  :global([dir="rtl"]) a.fold:hover .go { transform: translateX(-4px); }
+
+  /* The cover opens as the card scrolls in (compositor-only transform). */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .cover { animation: pl-unfold linear both; animation-timeline: view(); animation-range: entry 5% cover 40%; --unfold: 80deg; }
+      :global([dir="rtl"]) .cover { --unfold: -80deg; }
+    }
+  }
+
+  @media (max-width: 640px) {
+    .board { padding: var(--space-6) var(--space-4); }
+    .fold { grid-template-columns: 5rem minmax(0, 1fr); min-block-size: 7.5rem; }
+    .cover { padding: var(--space-3); }
+    .icon { inline-size: 2.1rem; }
+  }
+</style>

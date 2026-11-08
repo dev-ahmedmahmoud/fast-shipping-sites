@@ -1,0 +1,244 @@
+---
+// The hero is a pop-up page: a paper sky with a layered sun and cut clouds, four
+// hill layers with a paper-cut school on the middle one, and the main photo (or
+// silent clip) set into an arched window cut into a card. On load the layers rise
+// into place one after another; as the page scrolls, browsers that can tie
+// animation to scrolling let the layers drift apart in depth (pure CSS, on the
+// compositor). Everything is at rest and complete without JavaScript or motion.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action, HeroVideo } from '@engine/content';
+import HeroMedia from '@engine/HeroMedia.astro';
+interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[]; video?: HeroVideo | null }
+const { eyebrow, title, lead, actions, images = [], video } = Astro.props;
+const [main, second] = images;
+---
+<section class:list={['hero', { solo: !main }]} data-pl-hero>
+  <div class="sky" aria-hidden="true">
+    <span class="sun" data-depth><span class="ray"></span><span class="ring"></span><span class="disc"></span></span>
+    <svg class="cloud c1 pl-cut-shadow" data-depth viewBox="0 0 170 64" focusable="false"><path d="M20 58 H150 a18 18 0 0 0 2-36 a26 26 0 0 0-48-12 a30 30 0 0 0-52 10 a20 20 0 0 0-32 38 Z" /></svg>
+    <svg class="cloud c2 pl-cut-shadow" data-depth viewBox="0 0 170 64" focusable="false"><path d="M20 58 H150 a18 18 0 0 0 2-36 a26 26 0 0 0-48-12 a30 30 0 0 0-52 10 a20 20 0 0 0-32 38 Z" /></svg>
+  </div>
+
+  <div class="container inner">
+    <div class="copy">
+      {eyebrow && <p class="tag"><span>{eyebrow}</span></p>}
+      <h1 data-split-words>{title}</h1>
+      {lead && <p class:list={['lead', { long: lead.length > 110 }]}>{lead}</p>}
+      {actions.length > 0 && (
+        <div class="actions">
+          {actions.map((a, i) => (
+            <a class:list={['btn', i === 0 ? 'btn--primary' : 'btn--ghost']} href={a.href}
+               target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>
+              {a.label}
+              {i === 0 && <svg class="flip-rtl" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+
+    {main && (
+      <div class="stage">
+        {second && (
+          <figure class="peek" data-depth>
+            <Image src={second} alt="" widths={[320, 480, 640]} sizes="(max-width: 900px) 0px, 18rem" loading="lazy" />
+          </figure>
+        )}
+        <figure class="mat" data-depth>
+          <span class="clip" aria-hidden="true"></span>
+          <span class="window">
+            <HeroMedia image={main} video={video} widths={[420, 640, 900]} sizes="(max-width: 900px) 86vw, 27rem" fetchpriority="high" />
+          </span>
+        </figure>
+      </div>
+    )}
+  </div>
+
+  <div class="land" aria-hidden="true">
+    <svg class="layer l1" data-depth viewBox="0 0 1440 220" preserveAspectRatio="none" focusable="false">
+      <path d="M0 220 V104 C 170 44 320 46 480 86 S 790 150 960 98 S 1270 34 1440 76 V220 Z" />
+    </svg>
+    <div class="layer l2" data-depth>
+      <svg class="school" viewBox="0 0 280 130" focusable="false">
+        <g class="trees">
+          <rect x="16" y="86" width="5" height="40" /><circle cx="18.5" cy="78" r="17" />
+          <rect x="250" y="92" width="5" height="34" /><circle cx="252.5" cy="84" r="14" />
+        </g>
+        <g class="building">
+          <rect x="48" y="58" width="184" height="72" rx="3" />
+          <rect x="116" y="24" width="48" height="106" rx="3" />
+          <path d="M110 26 L140 4 L170 26 Z" />
+          <rect x="40" y="54" width="200" height="8" rx="2" />
+        </g>
+        <g class="lit">
+          <circle cx="140" cy="44" r="10" />
+          <rect x="62" y="74" width="16" height="18" rx="2" /><rect x="88" y="74" width="16" height="18" rx="2" />
+          <rect x="176" y="74" width="16" height="18" rx="2" /><rect x="202" y="74" width="16" height="18" rx="2" />
+          <rect x="62" y="100" width="16" height="18" rx="2" /><rect x="88" y="100" width="16" height="18" rx="2" />
+          <rect x="176" y="100" width="16" height="18" rx="2" /><rect x="202" y="100" width="16" height="18" rx="2" />
+          <path d="M128 130 V108 a12 12 0 0 1 24 0 V130 Z" />
+        </g>
+        <path class="hands" d="M140 44 V37 M140 44 L145 47" />
+      </svg>
+      <svg class="hill" viewBox="0 0 1440 220" preserveAspectRatio="none" focusable="false">
+        <path d="M0 220 V140 C 200 92 370 96 540 126 S 880 178 1060 134 S 1310 96 1440 118 V220 Z" />
+      </svg>
+    </div>
+    <svg class="layer l3" data-depth viewBox="0 0 1440 220" preserveAspectRatio="none" focusable="false">
+      <path d="M0 220 V170 C 210 128 430 136 610 162 S 990 204 1190 168 S 1390 150 1440 158 V220 Z" />
+    </svg>
+    <svg class="layer l4" data-depth viewBox="0 0 1440 220" preserveAspectRatio="none" focusable="false">
+      <path d="M0 220 V196 C 260 176 520 184 760 198 S 1210 208 1440 190 V220 Z" />
+    </svg>
+  </div>
+</section>
+
+<style>
+  .hero {
+    --land: clamp(150px, 18vw, 230px);
+    position: relative; overflow: clip; isolation: isolate;
+    padding-block: var(--space-8) calc(var(--land) * 0.62);
+    background: linear-gradient(to bottom, color-mix(in oklab, var(--c-accent-soft) 70%, var(--c-surface)), var(--c-accent-soft) 70%);
+  }
+
+  /* ---- Sky ---- */
+  .sky { position: absolute; inset: 0; z-index: -2; pointer-events: none; }
+  .sun {
+    position: absolute; inset-block-start: 9%; inset-inline-end: 6%;
+    inline-size: clamp(110px, 13vw, 180px); aspect-ratio: 1;
+    animation: pl-sun-in var(--dur-slow) var(--ease-out) 0.35s both;
+  }
+  .sun > span { position: absolute; border-radius: 50%; box-shadow: var(--pl-s2); }
+  .ray { inset: 0; background: color-mix(in oklab, var(--pl-sun) 40%, var(--c-surface)); }
+  .ring { inset: 13%; background: color-mix(in oklab, var(--pl-sun) 72%, var(--c-surface)); }
+  .disc { inset: 27%; background: var(--pl-sun); }
+  .cloud { position: absolute; block-size: auto; fill: var(--c-surface); animation: pl-rise var(--dur-slow) var(--ease-out) 0.45s both; --rise: 24px; }
+  .c1 { inline-size: clamp(110px, 12vw, 170px); inset-block-start: 15%; inset-inline-start: 42%; }
+  .c2 { inline-size: clamp(70px, 7vw, 110px); inset-block-start: 3%; inset-inline-start: 26%; opacity: 0.9; }
+
+  /* ---- Copy ---- */
+  .inner {
+    /* the window card stands between the mid hill (z 2) and the front hills (z 4) */
+    position: relative; z-index: 3;
+    display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); align-items: center; gap: var(--space-7);
+  }
+  .solo .inner { grid-template-columns: minmax(0, 1fr); }
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; padding-block-end: var(--space-6); }
+  .tag {
+    position: relative; display: inline-flex; padding: var(--space-1) var(--space-4) var(--space-1) var(--space-3);
+    background: var(--c-surface); color: var(--c-accent); border-radius: var(--radius-s);
+    font-family: var(--font-display); font-weight: 600; font-size: var(--step--1); letter-spacing: var(--label-tracking); text-transform: uppercase;
+    box-shadow: var(--pl-s1);
+  }
+  :global(:lang(ar)) .tag { text-transform: none; }
+  /* a folded corner on the label */
+  .tag::after {
+    content: ''; position: absolute; inset-block-start: 0; inset-inline-end: 0; inline-size: 12px; block-size: 12px;
+    background: linear-gradient(to bottom left, var(--c-accent-soft) 50%, color-mix(in oklab, var(--c-ink) 14%, var(--c-surface)) 50%);
+    border-start-end-radius: var(--radius-s);
+  }
+  :global([dir="rtl"]) .tag::after { background: linear-gradient(to bottom right, var(--c-accent-soft) 50%, color-mix(in oklab, var(--c-ink) 14%, var(--c-surface)) 50%); }
+  h1 { font-size: var(--step-5); max-inline-size: 16ch; color: var(--c-ink); }
+  .lead { font-size: var(--step-1); color: var(--c-muted); max-inline-size: 36ch; line-height: 1.55; }
+  /* a long welcome paragraph reads as body text rather than a tagline */
+  .lead.long { font-size: var(--step-0); max-inline-size: 52ch; line-height: 1.7; }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); padding-block-start: var(--space-3); }
+
+  /* ---- The window card ---- */
+  .stage { position: relative; justify-self: center; inline-size: min(100%, 27rem); }
+  .mat {
+    position: relative; z-index: 2; margin: 0;
+    padding: clamp(10px, 1.4vw, 16px); border-radius: var(--radius-l);
+    background: var(--c-surface); box-shadow: var(--pl-s3);
+    rotate: 1.2deg;
+    animation: pl-rise var(--dur-slow) var(--ease-out) 0.2s both; --rise: 70px;
+  }
+  .window {
+    position: relative; display: block; overflow: hidden; aspect-ratio: 4 / 5;
+    border-radius: 999px 999px var(--radius-m) var(--radius-m) / 46% 46% var(--radius-m) var(--radius-m);
+    background: var(--c-sunk);
+  }
+  .window :global(.fss-hero-media) { position: absolute; inset: 0; }
+  .window :global(img) { inline-size: 100%; block-size: 100%; object-fit: cover; }
+  /* the cut edge: the photo sits behind the card, so the edge casts a shadow onto it */
+  .window::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: var(--pl-cut); pointer-events: none; z-index: 1; }
+  .clip {
+    position: absolute; z-index: 2; inset-block-start: -12px; inset-inline-start: 50%; translate: -50% 0;
+    inline-size: 64px; block-size: 22px; border-radius: 4px;
+    background: color-mix(in oklab, var(--pl-sun) 80%, var(--c-surface)); box-shadow: var(--pl-s1);
+  }
+  :global([dir="rtl"]) .clip { translate: 50% 0; }
+  .peek {
+    /* on the outer side, away from the headline, low enough for the front hill to tuck it in */
+    position: absolute; z-index: 1; margin: 0; inline-size: 52%;
+    inset-block-end: 6%; inset-inline-end: -9%; rotate: 7deg;
+    padding: 8px 8px 24px; background: var(--c-surface); border-radius: var(--radius-m); box-shadow: var(--pl-s2);
+    animation: pl-rise var(--dur-slow) var(--ease-out) 0.4s both; --rise: 40px;
+  }
+  .peek :global(img) { inline-size: 100%; block-size: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-s); }
+
+  /* ---- Land ---- */
+  .land { position: absolute; inset-inline: 0; inset-block-end: 0; block-size: var(--land); pointer-events: none; }
+  /* Arabic pages mirror the hills; each layer flips on its own so the land stays out
+     of one stacking context and the front hills can still overlap the window card. */
+  :global([dir="rtl"]) :is(.l1, .l3, .l4), :global([dir="rtl"]) .l2 .hill { scale: -1 1; }
+  .layer { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; animation: pl-rise var(--dur-slow) var(--ease-out) both; }
+  .l1 { z-index: 1; fill: color-mix(in oklab, var(--c-accent) 26%, var(--c-accent-soft)); --rise: 90px; animation-delay: 0s; filter: drop-shadow(0 -3px 6px color-mix(in oklab, var(--c-ink) 12%, transparent)); }
+  .l2 { z-index: 2; --rise: 80px; animation-delay: 0.08s; }
+  .l2 .hill { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; fill: var(--pl-mint); filter: drop-shadow(0 -4px 8px color-mix(in oklab, var(--c-ink) 14%, transparent)); }
+  .school { position: absolute; z-index: 1; inset-inline-start: 43%; inset-block-end: 38%; inline-size: clamp(120px, 14vw, 210px); block-size: auto; overflow: visible; }
+  .building { fill: var(--pl-deep); }
+  .trees { fill: color-mix(in oklab, var(--pl-mint) 45%, var(--pl-deep)); }
+  .lit { fill: var(--pl-sun); }
+  .hands { fill: none; stroke: var(--pl-deep); stroke-width: 2.4; stroke-linecap: round; }
+  .l3 { z-index: 4; fill: var(--c-accent); --rise: 60px; animation-delay: 0.16s; filter: drop-shadow(0 -4px 9px color-mix(in oklab, var(--c-ink) 18%, transparent)); }
+  .l4 { z-index: 5; fill: var(--c-bg); --rise: 40px; animation-delay: 0.24s; filter: drop-shadow(0 -3px 7px color-mix(in oklab, var(--c-ink) 12%, transparent)); }
+
+  /* How far each layer drifts while the hero scrolls away: far layers more, near
+     ones less, so the sheets seem to separate. (The motion part reads these too, for
+     browsers without scroll-linked animation.) */
+  .sun { --sink: 150px; } .c1 { --sink: 120px; } .c2 { --sink: 170px; }
+  .l1 { --sink: 110px; } .l2 { --sink: 70px; } .l3 { --sink: 30px; } .l4 { --sink: 0px; }
+  .mat { --sink: 50px; } .peek { --sink: 90px; }
+
+  /* Depth on scroll, compositor-only translate tied to the hero leaving the screen. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .hero { view-timeline: --pl-hero block; }
+      .sun, .cloud, .layer, .mat, .peek {
+        animation-name: pl-rise, pl-sink;
+        animation-duration: var(--dur-slow), auto;
+        animation-timing-function: var(--ease-out), linear;
+        animation-fill-mode: both, both;
+        animation-timeline: auto, --pl-hero;
+        animation-range: normal, exit 0% exit 100%;
+      }
+      .sun { animation-name: pl-sun-in, pl-sink; animation-delay: 0.35s, 0s; }
+      .cloud { animation-delay: 0.45s, 0s; }
+      .l1 { animation-delay: 0s, 0s; }
+      .l2 { animation-delay: 0.08s, 0s; }
+      .l3 { animation-delay: 0.16s, 0s; }
+      .l4 { animation-delay: 0.24s, 0s; }
+      .mat { animation-delay: 0.2s, 0s; }
+      .peek { animation-delay: 0.4s, 0s; }
+    }
+  }
+
+  @media (max-width: 900px) {
+    .hero { padding-block: var(--space-7) calc(var(--land) * 0.5); --land: 130px; }
+    .inner { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+    .copy { padding-block-end: 0; }
+    .stage { inline-size: min(100%, 24rem); justify-self: start; margin-inline-start: var(--space-2); }
+    .window { aspect-ratio: 5 / 4; border-radius: 999px 999px var(--radius-m) var(--radius-m) / 60% 60% var(--radius-m) var(--radius-m); }
+    .peek { display: none; }
+    .school { inset-inline-start: auto; inset-inline-end: 4%; inline-size: 110px; }
+    .c1 { inset-inline-start: auto; inset-inline-end: 34%; inset-block-start: 4%; }
+    .c2 { display: none; }
+    .sun { inset-block-start: 3%; inline-size: 92px; }
+  }
+  @media (max-width: 640px) {
+    .school { display: none; }
+  }
+</style>

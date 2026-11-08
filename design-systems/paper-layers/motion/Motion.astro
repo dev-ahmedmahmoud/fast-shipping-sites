@@ -1,0 +1,101 @@
+---
+// Paper Layers motion. Most of the movement is CSS: the hero's layers rise on load,
+// and where browsers can tie animation to scrolling the layers drift apart, sheets
+// fan out and covers unfold, all on the compositor. This island adds three small
+// things: headline words settle in one by one, later sections lift off the page as
+// they arrive, and, on capable devices whose browser lacks scroll-linked animation,
+// a light scroll listener gives the hero the same depth.
+// With prefers-reduced-motion nothing here runs; the page is complete without it.
+---
+<script>
+  import { splitWords } from '@engine/split';
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function capable(): boolean {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    return (nav.hardwareConcurrency ?? 4) >= 4 && (nav.deviceMemory ?? 4) >= 4 && !nav.connection?.saveData;
+  }
+
+  function ms(name: string, fallback: number): number {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const n = parseFloat(v);
+    if (Number.isNaN(n)) return fallback;
+    return v.endsWith('ms') ? n : n * 1000;
+  }
+
+  function start() {
+    const root = getComputedStyle(document.documentElement);
+    const ease = root.getPropertyValue('--ease-out').trim() || 'ease-out';
+    const distance = parseFloat(root.getPropertyValue('--reveal-distance')) || 0;
+    const slow = ms('--dur-slow', 950);
+    const below = (el: Element) => el.getBoundingClientRect().top > window.innerHeight;
+
+    // Headline words settle into place one after another. Position only (never
+    // opacity), so the text counts as painted straight away.
+    function settleWords(el: HTMLElement, delay = 0) {
+      splitWords(el).forEach((word, i) => {
+        word.animate(
+          [{ translate: '0 0.45em' }, { translate: '0 0' }],
+          { duration: slow, easing: ease, delay: delay + i * 55, fill: 'backwards' },
+        );
+      });
+    }
+
+    // Later sections lift off the page as they scroll in: a short rise with a slight
+    // tilt back, like a sheet being laid down. Only elements that start below the
+    // fold are hidden first, so nothing on screen ever flashes.
+    const pending = new Set<HTMLElement>();
+    const io = new IntersectionObserver((entries) => {
+      let n = 0;
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const el = entry.target as HTMLElement;
+        io.unobserve(el);
+        pending.delete(el);
+        if (el.dataset.splitWords !== undefined) { settleWords(el, n++ * 70); continue; }
+        el.style.opacity = '';
+        el.animate(
+          [{ opacity: 0, transform: `perspective(900px) translateY(${distance}px) rotateX(10deg)` }, { opacity: 1, transform: 'none' }],
+          { duration: slow, easing: ease, delay: n++ * 80, fill: 'backwards' },
+        );
+      }
+    }, { rootMargin: '0px 0px -6% 0px' });
+
+    document.querySelectorAll<HTMLElement>('[data-split-words]').forEach((el) => {
+      if (below(el)) io.observe(el); else settleWords(el, 120);
+    });
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+      if (!below(el)) return;
+      el.style.opacity = '0';
+      pending.add(el);
+      io.observe(el);
+    });
+    window.addEventListener('beforeprint', () => pending.forEach((el) => { el.style.opacity = ''; }));
+
+    // Hero depth for browsers without scroll-linked CSS animation.
+    const hero = document.querySelector<HTMLElement>('[data-pl-hero]');
+    if (!hero || CSS.supports('animation-timeline: view()') || !capable()) return;
+    const layers = [...hero.querySelectorAll<HTMLElement>('[data-depth]')].map((el) => ({
+      el, sink: parseFloat(getComputedStyle(el).getPropertyValue('--sink')) || 0,
+    }));
+    let ticking = false;
+    let visible = true;
+    const apply = () => {
+      ticking = false;
+      const rect = hero.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height)));
+      for (const l of layers) l.el.style.translate = `0 ${(p * l.sink).toFixed(1)}px`;
+    };
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(hero);
+    window.addEventListener('scroll', () => {
+      if (!visible || ticking) return;
+      ticking = true;
+      requestAnimationFrame(apply);
+    }, { passive: true });
+  }
+
+  if (!reduce) {
+    try { start(); } catch { /* motion is decoration; the page works without it */ }
+  }
+</script>

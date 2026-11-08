@@ -1,0 +1,257 @@
+---
+import type { PageContext } from '@engine/context';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  todo?: string[];
+  /** 1 for a page's own title (default); 2 when several Prose blocks share a page, e.g. news items. */
+  headingLevel?: 1 | 2;
+  /** Anchor id, so other pages can link to this block. */
+  id?: string;
+}
+const { ctx, title, lead, todo = [], headingLevel = 1, id } = Astro.props;
+const page = headingLevel === 1;
+---
+<article class:list={['section', page ? 'page' : 'item']} id={id}>
+  <div class="container">
+    {page ? (
+      <header class="titlecard">
+        <div class="titlecopy">
+          <h1 data-split-words>{title}</h1>
+          {lead && <p class="lead">{lead}</p>}
+        </div>
+        <span class="sun" aria-hidden="true"></span>
+        <svg class="strip" viewBox="0 0 1200 80" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <path class="s1" d="M0 80 V36 C 160 6 320 8 480 30 S 820 66 980 34 S 1140 14 1200 24 V80 Z" />
+          <path class="s2" d="M0 80 V58 C 200 30 420 36 620 54 S 1000 76 1200 50 V80 Z" />
+        </svg>
+      </header>
+    ) : (
+      <header class="itemhead">
+        {lead && <p class="date">{lead}</p>}
+        <h2>{title}</h2>
+      </header>
+    )}
+
+    <div class:list={['sheet', { 'pl-sheet': page }]}>
+      <div class="narrow">
+        {todo.length > 0 && (
+          <aside class="todo-note">
+            <strong>{ctx.ui.pending}</strong>
+            <ul lang="en" dir="ltr">{todo.map((t) => <li>{t}</li>)}</ul>
+          </aside>
+        )}
+        <div class="prose">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .page { padding-block-start: var(--space-6); }
+
+  /* ---- Page title card: a soft blue sheet with its own little paper landscape ---- */
+  .titlecard {
+    position: relative; overflow: hidden; isolation: isolate;
+    display: flex; align-items: flex-end; min-block-size: 15rem;
+    padding: var(--space-7) clamp(var(--space-5), 5vw, var(--space-8)) calc(var(--space-7) + 2rem);
+    margin-block-end: calc(-1 * var(--space-6));
+    border-radius: var(--radius-l) var(--radius-l) 0 0;
+    background: var(--c-accent-soft);
+  }
+  .titlecopy { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); min-inline-size: 0; }
+  h1 { font-size: var(--step-5); color: var(--c-ink); max-inline-size: 20ch; }
+  .lead { font-size: var(--step-1); color: var(--c-muted); max-inline-size: 52ch; }
+  .sun {
+    position: absolute; z-index: 0; inset-block-start: -3rem; inset-inline-end: 6%; inline-size: 9rem; aspect-ratio: 1; border-radius: 50%;
+    background: var(--pl-sun);
+    box-shadow: 0 0 0 1.1rem color-mix(in oklab, var(--pl-sun) 45%, var(--c-accent-soft)), var(--pl-s2);
+    animation: pl-sun-in var(--dur-slow) var(--ease-out) 0.2s both;
+  }
+  .strip { position: absolute; z-index: 1; inset-inline: 0; inset-block-end: 0; inline-size: 100%; block-size: 4.5rem; animation: pl-rise var(--dur-slow) var(--ease-out) both; --rise: 30px; }
+  .s1 { fill: color-mix(in oklab, var(--c-accent) 30%, var(--c-accent-soft)); }
+  .s2 { fill: var(--pl-mint); }
+  :global([dir="rtl"]) .strip { scale: -1 1; }
+
+  /* ---- Body sheet ---- */
+  .sheet { position: relative; z-index: 1; }
+  .page .sheet {
+    --under: var(--pl-mint); --under-2: var(--pl-sun);
+    /* no tilt: on a page-long sheet even half a degree swings the bottom far sideways */
+    --fan-x: 10px; --fan-y: 12px; --fan-r: 0deg; --fan2-x: -14px; --fan2-y: 10px;
+    padding: var(--space-7) clamp(var(--space-4), 5vw, var(--space-8));
+  }
+
+  /* News items and other blocks that share a page */
+  .item { padding-block: var(--space-4); scroll-margin-block-start: 150px; }
+  .item > .container { max-inline-size: calc(52rem + 2 * var(--gutter)); }
+  .itemhead {
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);
+    padding: var(--space-5) var(--space-5) var(--space-3);
+    background: var(--c-surface); border-radius: var(--radius-l) var(--radius-l) 0 0;
+  }
+  .item .sheet { background: var(--c-surface); border-radius: 0 0 var(--radius-l) var(--radius-l); padding: 0 var(--space-5) var(--space-5); box-shadow: var(--pl-s2); }
+  .item .itemhead { box-shadow: var(--pl-s1); }
+  .itemhead h2 { font-size: var(--step-2); }
+  .date {
+    font-size: var(--step--1); font-weight: var(--weight-strong); font-variant-numeric: tabular-nums;
+    padding: 2px var(--space-3); border-radius: var(--radius-s); background: color-mix(in oklab, var(--pl-sun) 45%, var(--c-surface));
+  }
+
+  .narrow { display: flex; flex-direction: column; gap: var(--space-5); max-inline-size: 50rem; }
+  .page .narrow { margin-inline: auto; }
+
+  /* ---- Body copy ---- */
+  .prose { min-inline-size: 0; }
+  .prose :global(> * + *) { margin-block-start: var(--space-4); }
+  .prose :global(p), .prose :global(li) { max-inline-size: 70ch; }
+  .prose :global(h2) {
+    position: relative; font-size: var(--step-3); margin-block-start: var(--space-8); padding-block-start: var(--space-4);
+  }
+  .prose :global(> h2:first-child) { margin-block-start: 0; }
+  /* a short strip of folded card above each section heading */
+  .prose :global(h2)::before {
+    content: ''; position: absolute; inset-block-start: 0; inset-inline-start: 0; inline-size: 3.2rem; block-size: 6px; border-radius: 3px;
+    background: linear-gradient(90deg, var(--pl-blue) 0 50%, var(--mk, var(--pl-sun)) 50%);
+    box-shadow: var(--pl-s1);
+  }
+  .prose :global(h2:nth-of-type(4n+2)) { --mk: var(--pl-mint); }
+  .prose :global(h2:nth-of-type(4n+3)) { --mk: var(--pl-coral); }
+  .prose :global(h2:nth-of-type(4n)) { --mk: var(--pl-deep); }
+  .prose :global(h3) { font-size: var(--step-2); color: var(--c-accent); margin-block-start: var(--space-6); }
+  .prose :global(h4) { font-size: var(--step-1); margin-block-start: var(--space-5); }
+  .prose :global(strong) { font-weight: var(--weight-strong); }
+  .prose :global(a:not(.btn)) { font-weight: 500; }
+  .prose :global(hr) { border: 0; block-size: 1px; margin-block: var(--space-6); background: var(--c-line); }
+
+  /* Bullets are small squares of card; numbered lists are folded number tabs. */
+  .prose :global(ul:not(.downloads):not([role])) { list-style: none; padding-inline-start: 0; }
+  .prose :global(ul:not(.downloads):not([role]) > li) { position: relative; padding-inline-start: 1.6em; }
+  .prose :global(ul:not(.downloads):not([role]) > li)::before {
+    content: ''; position: absolute; inset-inline-start: 0.15em; inset-block-start: 0.62em;
+    inline-size: 0.6em; block-size: 0.6em; border-radius: 2px; rotate: 12deg;
+    background: var(--mk, var(--pl-blue)); box-shadow: var(--pl-s1);
+  }
+  .prose :global(li:nth-child(4n+2)) { --mk: var(--pl-sun); }
+  .prose :global(li:nth-child(4n+3)) { --mk: var(--pl-mint); }
+  .prose :global(li:nth-child(4n)) { --mk: var(--pl-coral); }
+  .prose :global(li + li) { margin-block-start: var(--space-2); }
+  .prose :global(ol) { list-style: none; padding-inline-start: 0; counter-reset: step; display: grid; gap: var(--space-3); }
+  .prose :global(ol > li) { counter-increment: step; position: relative; padding-inline-start: 3rem; min-block-size: 2.2rem; display: flex; align-items: center; }
+  .prose :global(ol > li + li) { margin-block-start: 0; }
+  .prose :global(ol > li)::before {
+    content: counter(step); position: absolute; inset-inline-start: 0; inset-block-start: 50%; translate: 0 -50%;
+    display: grid; place-items: center; inline-size: 2.2rem; block-size: 2.2rem; border-radius: var(--radius-s);
+    font-family: var(--font-display); font-weight: 600; font-size: var(--step--1);
+    background: var(--c-accent-soft); color: var(--c-accent); box-shadow: var(--pl-s1);
+  }
+
+  /* Tables: a clean sheet with a blue header strip. A one-column table (a list of
+     documents to bring) becomes a stack of numbered cards. */
+  .prose :global(table) {
+    display: table; inline-size: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden;
+    border-radius: var(--radius-m); background: var(--c-surface); box-shadow: var(--pl-s2);
+  }
+  .prose :global(th), .prose :global(td) { padding: var(--space-3) var(--space-4); text-align: start; vertical-align: top; border-block-end: 1px solid var(--c-line); }
+  .prose :global(th) { background: var(--c-accent); color: var(--c-accent-ink); font-family: var(--font-display); font-weight: 600; border-block-end: 0; }
+  .prose :global(tr:last-child td) { border-block-end: 0; }
+  .prose :global(tbody tr:nth-child(even) td) { background: color-mix(in oklab, var(--c-sunk) 55%, var(--c-surface)); }
+  .prose :global(td:first-child) { white-space: nowrap; }
+  .prose :global(table:has(th:only-child)) { display: block; box-shadow: none; background: transparent; overflow: visible; counter-reset: doc; }
+  .prose :global(table:has(th:only-child) thead th) { display: inline-block; border-radius: var(--radius-s); padding: var(--space-1) var(--space-4); margin-block-end: var(--space-4); box-shadow: var(--pl-s1); }
+  .prose :global(table:has(th:only-child) tbody) { display: grid; gap: var(--space-2); }
+  .prose :global(table:has(th:only-child) tr) { display: block; }
+  .prose :global(table:has(th:only-child) tbody tr) { counter-increment: doc; }
+  .prose :global(table:has(th:only-child) td) {
+    position: relative; display: flex; align-items: center; min-block-size: 2.8rem; white-space: normal;
+    padding-block: var(--space-2); padding-inline: 3.4rem var(--space-4); border: 0; border-radius: var(--radius-m);
+    background: var(--c-surface); box-shadow: var(--pl-s1);
+  }
+  .prose :global(table:has(th:only-child) tbody tr:nth-child(even) td) { background: var(--c-surface); }
+  .prose :global(table:has(th:only-child) td)::before {
+    content: counter(doc); position: absolute; inset-inline-start: var(--space-2); inset-block-start: 50%; translate: 0 -50%;
+    display: grid; place-items: center; inline-size: 2.1rem; block-size: 2.1rem; border-radius: var(--radius-s);
+    font-family: var(--font-display); font-weight: 600; font-size: var(--step--1);
+    background: var(--c-accent-soft); color: var(--c-accent);
+  }
+
+  /* Photos: mounted prints on card, tucked at slight angles; they straighten on hover. */
+  .prose :global(img) { border-radius: var(--radius-s); }
+  .prose :global(.gallery) { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-5); padding-block: var(--space-3); }
+  .prose :global(.gallery > *) { margin: 0; flex: 0 1 clamp(8.5rem, 30%, 14rem); }
+  .prose :global(.gallery > *:nth-child(3n+1)) { rotate: -2deg; }
+  .prose :global(.gallery > *:nth-child(3n+2)) { rotate: 1.5deg; }
+  .prose :global(.gallery > *:nth-child(3n)) { rotate: -0.8deg; }
+  .prose :global(.gallery img) {
+    inline-size: 100%; block-size: auto; aspect-ratio: 4 / 5; object-fit: cover;
+    padding: 8px; background: var(--c-surface); border-radius: var(--radius-m); box-shadow: var(--pl-s2);
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  .prose :global(.gallery img:hover) { transform: rotate(var(--straighten, 2deg)) translateY(-4px); box-shadow: var(--pl-s3); }
+
+  .prose :global(.students) { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); gap: var(--space-5) var(--space-4); }
+  .prose :global(.students figure) { margin: 0; display: flex; flex-direction: column; align-items: stretch; gap: 0; text-align: center; background: var(--c-surface); border-radius: var(--radius-m); box-shadow: var(--pl-s2); overflow: hidden; }
+  .prose :global(.students img) { inline-size: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 0; }
+  .prose :global(.students figcaption) { font-size: var(--step--1); font-weight: 500; padding: var(--space-2) var(--space-2) var(--space-3); border-block-start: 4px solid var(--mk, var(--pl-blue)); }
+  .prose :global(.students figure:nth-child(4n+2) figcaption) { --mk: var(--pl-sun); }
+  .prose :global(.students figure:nth-child(4n+3) figcaption) { --mk: var(--pl-mint); }
+  .prose :global(.students figure:nth-child(4n) figcaption) { --mk: var(--pl-coral); }
+
+  .prose :global(video) { inline-size: 100%; border-radius: var(--radius-l); background: var(--c-sunk); box-shadow: var(--pl-s3); }
+  .prose :global(.embed) { inline-size: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: var(--radius-l); background: var(--c-sunk); box-shadow: var(--pl-s2); }
+  .prose :global(.embed--map) { aspect-ratio: 4 / 3; }
+  .prose :global(blockquote) {
+    position: relative; margin-inline: 0; padding: var(--space-4) var(--space-5);
+    background: color-mix(in oklab, var(--c-accent-soft) 60%, var(--c-surface)); border-radius: var(--radius-m);
+    border-inline-start: 5px solid var(--c-accent);
+  }
+  .prose :global(.actions) { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+
+  /* Downloads: tickets with a perforated stub. */
+  .prose :global(.downloads) { list-style: none; padding: 0; display: grid; gap: var(--space-2); }
+  .prose :global(.downloads li) {
+    position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4);
+    padding: var(--space-3) var(--space-4); border-radius: var(--radius-m); background: var(--c-surface); box-shadow: var(--pl-s1);
+    max-inline-size: none;
+  }
+  .prose :global(.downloads li + li) { margin-block-start: 0; }
+  .prose :global(.downloads a) {
+    flex: none; padding: var(--space-1) var(--space-4); border-radius: var(--radius-s); text-decoration: none; font-weight: var(--weight-strong);
+    background: var(--c-accent-soft); color: var(--c-accent);
+    border-inline-start: 2px dashed color-mix(in oklab, var(--c-accent) 40%, var(--c-surface));
+    transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease;
+  }
+  .prose :global(.downloads a:hover) { background: var(--c-accent); color: var(--c-accent-ink); }
+  .prose :global(.downloads em) { flex: none; color: var(--c-muted); font-size: var(--step--1); }
+
+  /* A note: a marigold slip with a folded corner. */
+  .prose :global(.note) {
+    position: relative; padding: var(--space-4) var(--space-5); border-radius: var(--radius-m);
+    background: color-mix(in oklab, var(--pl-sun) 30%, var(--c-surface)); box-shadow: var(--pl-s1);
+  }
+
+  /* Old-site forms, shown as they were; sending is not wired up yet. */
+  .prose :global(.form) {
+    display: grid; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-l);
+    background: var(--c-surface); box-shadow: var(--pl-s2);
+  }
+  .prose :global(.form label) { font-weight: 500; }
+  .prose :global(.form input), .prose :global(.form select), .prose :global(.form textarea) {
+    inline-size: 100%; min-block-size: 48px; padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--c-line); border-radius: var(--radius-m); background: var(--c-bg); box-shadow: var(--pl-cut);
+  }
+  .prose :global(.form input:focus), .prose :global(.form select:focus), .prose :global(.form textarea:focus) { border-color: var(--c-accent); outline: none; box-shadow: 0 0 0 3px var(--c-accent-soft); }
+  .prose :global(.form textarea) { min-block-size: 6rem; resize: vertical; }
+  .prose :global(.form button[disabled]) { opacity: 0.6; cursor: not-allowed; justify-self: start; }
+
+  @media (max-width: 640px) {
+    .titlecard { padding: var(--space-6) var(--space-5) calc(var(--space-6) + 2rem); min-block-size: 12rem; }
+    .sun { inline-size: 6rem; }
+    .page .sheet { padding: var(--space-6) var(--space-4); }
+    .prose :global(h2) { font-size: var(--step-2); }
+    .prose :global(td:first-child) { white-space: normal; }
+  }
+</style>

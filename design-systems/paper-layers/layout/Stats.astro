@@ -1,0 +1,64 @@
+---
+// Figures on a blue sheet. Each one sits on a stack of three paper discs that pops
+// up from its fold line as it scrolls into view, like a page in a pop-up book.
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; title?: string; items: { value: string; label: string }[] }
+const { title, items } = Astro.props;
+const DISCS = [['sun', 'coral'], ['mint', 'sun'], ['coral', 'mint']];
+---
+<section class="section">
+  <div class="container">
+    <div class="band pl-sheet">
+      {title && <h2 data-reveal>{title}</h2>}
+      <dl class:list={['stats', { single: items.length === 1 }]}>
+        {items.map((s, i) => (
+          <div class="stat" style={`--d1: var(--pl-${DISCS[i % 3][0]}); --d2: var(--pl-${DISCS[i % 3][1]})`}>
+            <dt>{s.label}</dt>
+            <dd>
+              <span class="disc" aria-hidden="true"><span></span><span></span><span></span></span>
+              <span class="val">{s.value}</span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .band {
+    --sheet: var(--c-accent); --under: var(--pl-sun); --under-2: var(--pl-mint);
+    --fan-x: -10px; --fan-y: 12px; --fan-r: 0.8deg; --fan2-x: 18px; --fan2-y: 10px;
+    display: flex; flex-direction: column; gap: var(--space-6);
+    padding: var(--space-7) clamp(var(--space-4), 4vw, var(--space-7));
+    color: var(--c-accent-ink);
+  }
+  h2 { font-size: var(--step-3); text-align: center; }
+  .stats { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-6) var(--space-8); }
+  .stat {
+    position: relative; display: flex; flex-direction: column-reverse; align-items: center; gap: var(--space-2);
+    min-inline-size: 11rem; text-align: center;
+  }
+  .disc { position: absolute; inset: 0; display: block; transform-origin: 50% 100%; }
+  .disc span { position: absolute; inset: 0; border-radius: 50%; box-shadow: var(--pl-s2); z-index: -1; }
+  .disc span:nth-child(1) { background: var(--d2); translate: 9px 7px; }
+  .disc span:nth-child(2) { background: var(--d1); translate: -6px 4px; }
+  .disc span:nth-child(3) { background: var(--c-surface); }
+  dd {
+    position: relative; isolation: isolate; margin: 0; display: grid; place-items: center; inline-size: 9.5rem; aspect-ratio: 1;
+    font-family: var(--font-display); font-size: var(--step-4); font-weight: var(--weight-display);
+    font-variant-numeric: tabular-nums; line-height: 1; color: var(--c-ink);
+  }
+  .val { position: relative; }
+  dt { position: relative; font-weight: var(--weight-strong); font-size: var(--step-1); max-inline-size: 14ch; line-height: 1.3; padding-block-start: var(--space-2); }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      dd { animation: pl-popup linear both; animation-timeline: view(); animation-range: entry 10% cover 40%; transform-origin: 50% 100%; }
+    }
+  }
+  @media (max-width: 640px) {
+    .band { padding: var(--space-6) var(--space-4); }
+    dd { inline-size: 8rem; }
+  }
+</style>
