@@ -201,11 +201,28 @@
   },
   "samples": [
     {
-      "id": "baseline",
-      "palette": "baseline",
-      "type": "baseline",
-      "layout": "baseline",
-      "motion": "baseline"
+      "id": "blueprint",
+      "palette": "blueprint",
+      "type": "blueprint",
+      "layout": "blueprint",
+      "motion": "blueprint",
+      "heroVideo": "coding-workshop"
+    },
+    {
+      "id": "orbit",
+      "palette": "orbit",
+      "type": "orbit",
+      "layout": "orbit",
+      "motion": "orbit",
+      "heroVideo": "vr-explorer"
+    },
+    {
+      "id": "paper-layers",
+      "palette": "paper-layers",
+      "type": "paper-layers",
+      "layout": "paper-layers",
+      "motion": "paper-layers",
+      "heroVideo": "basketball"
     }
   ],
   "todo": [

@@ -1,34 +1,15 @@
 import type { Typography } from '@engine/contract';
-import alexArabic from './type-fonts/alexandria-arabic.woff2?url';
-import alexLatin from './type-fonts/alexandria-latin.woff2?url';
-import plex400Arabic from './type-fonts/plex-arabic-400-arabic.woff2?url';
-import plex400Latin from './type-fonts/plex-arabic-400-latin.woff2?url';
-import plex600Arabic from './type-fonts/plex-arabic-600-arabic.woff2?url';
-import plex600Latin from './type-fonts/plex-arabic-600-latin.woff2?url';
+// The @font-face rules live in a real stylesheet so their URLs follow the build's base path.
+import './type-fonts/fonts.css';
 
 // Alexandria (display) is a geometric face drawn for Arabic and Latin together,
 // named after the Egyptian city; it reads confident without shouting. IBM Plex
 // Sans Arabic (body) is calm and very readable in both scripts. Both are OFL and
-// self-hosted: `fontsHref` is a tiny inline stylesheet, so no cross-origin request
-// holds up the first paint, and unicode-range means a page only downloads the
-// script it uses.
-const ARABIC = 'U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC';
-const LATIN = 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD';
-
-const face = (family: string, weights: string, url: string, range: string) =>
-  `@font-face{font-family:"${family}";font-style:normal;font-weight:${weights};font-display:swap;src:url(${url}) format("woff2");unicode-range:${range}}`;
-
-const css = [
-  face('Alexandria', '400 800', alexArabic, ARABIC),
-  face('Alexandria', '400 800', alexLatin, LATIN),
-  face('IBM Plex Sans Arabic', '400', plex400Arabic, ARABIC),
-  face('IBM Plex Sans Arabic', '400', plex400Latin, LATIN),
-  face('IBM Plex Sans Arabic', '600', plex600Arabic, ARABIC),
-  face('IBM Plex Sans Arabic', '600', plex600Latin, LATIN),
-].join('');
-
+// self-hosted: the @font-face rules ship in the page CSS, so no cross-origin request holds
+// up the first paint, and unicode-range means a page only downloads the script it uses.
 export const typography: Typography = {
-  fontsHref: `data:text/css;charset=utf-8,${encodeURIComponent(css)}`,
+  // Nothing to fetch: the faces arrive with the page CSS (type-fonts/fonts.css).
+  fontsHref: 'data:text/css,',
   families: {
     display: '"Alexandria", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif',
     body: '"IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, -apple-system, sans-serif',

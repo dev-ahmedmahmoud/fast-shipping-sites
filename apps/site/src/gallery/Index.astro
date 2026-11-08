@@ -8,8 +8,15 @@ import { homeOf } from '@engine/content';
 const metas = import.meta.glob<{ meta: { name: string; label: { en: string; ar: string }; summary: { en: string; ar: string } } }>(
   '@systems/*/meta.ts', { eager: true });
 const metaOf = (name: string) => Object.values(metas).find((m) => m.meta.name === name)?.meta;
-const enHome = homeOf('en').slug;
-const arHome = homeOf('ar').slug;
+// The page speaks the client's default language first (LFIS: Arabic, Genesis: English).
+const primary: 'ar' | 'en' = client.defaultLocale === 'en' ? 'en' : 'ar';
+const secondary: 'ar' | 'en' = primary === 'en' ? 'ar' : 'en';
+const homeSlug = { en: homeOf('en').slug, ar: homeOf('ar').slug };
+const T = {
+  ar: { pick: 'اختيار التصميم', sub: 'اختر التصميم الذي يناسبكم. كل نموذج يعمل بالعربية والإنجليزية.', view: 'عرض بالعربية', choose: 'اختر هذا التصميم', mix: 'مزيج' },
+  en: { pick: 'Pick a design', sub: 'Pick the design you like. Every sample works in Arabic and English.', view: 'View in English', choose: 'Choose this design', mix: 'Mix' },
+};
+const dir = (l: 'ar' | 'en') => (l === 'ar' ? 'rtl' : 'ltr');
 const prefix = import.meta.env.BASE_URL.replace(/\/+$/, '');
 const href = (id: string, slug: string) => `${prefix}/${id}/${slug ? slug + '/' : ''}`;
 
@@ -19,21 +26,19 @@ const samples = (client.samples as { id: string; palette: string; type: string; 
   const m = metaOf(s.layout);
   return {
     ...s,
-    labelEn: single ? m?.label.en ?? s.id : `Mix: ${s.id}`,
-    labelAr: single ? m?.label.ar ?? s.id : `مزيج: ${s.id}`,
-    summaryEn: m?.summary.en ?? '',
-    summaryAr: m?.summary.ar ?? '',
+    label: { en: single ? m?.label.en ?? s.id : `${T.en.mix}: ${s.id}`, ar: single ? m?.label.ar ?? s.id : `${T.ar.mix}: ${s.id}` },
+    summary: { en: m?.summary.en ?? '', ar: m?.summary.ar ?? '' },
     parts: single ? null : s,
   };
 });
 ---
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang={primary} dir={dir(primary)}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex" />
-    <title>{client.name.ar} · اختيار التصميم</title>
+    <title>{client.name[primary]} · {T[primary].pick}</title>
     {(client as { favicon?: string }).favicon && samples[0] && (
       <link rel="icon" type="image/png" href={`${prefix}/${samples[0].id}/${(client as { favicon?: string }).favicon}`} />
     )}
@@ -45,9 +50,9 @@ const samples = (client.samples as { id: string; palette: string; type: string; 
     <header class="top">
       <div class="wrap">
         <p class="eyebrow">Syncology · <span lang="en" dir="ltr">Design samples</span></p>
-        <h1>{client.name.ar}</h1>
-        <p class="sub">اختر التصميم الذي يناسبكم. كل نموذج يعمل بالعربية والإنجليزية.</p>
-        <p class="sub" lang="en" dir="ltr">Pick the design you like. Every sample works in Arabic and English.</p>
+        <h1>{client.name[primary]}</h1>
+        <p class="sub">{T[primary].sub}</p>
+        <p class="sub" lang={secondary} dir={dir(secondary)}>{T[secondary].sub}</p>
       </div>
     </header>
     <main class="wrap">
@@ -55,18 +60,18 @@ const samples = (client.samples as { id: string; palette: string; type: string; 
         {samples.map((s) => (
           <li class="card">
             <div class="frame" aria-hidden="true">
-              <iframe src={href(s.id, arHome)} title="" loading="lazy" tabindex="-1" scrolling="no"></iframe>
+              <iframe src={href(s.id, homeSlug[primary])} title="" loading="lazy" tabindex="-1" scrolling="no"></iframe>
             </div>
             <div class="body">
-              <h2>{s.labelAr} <span lang="en" dir="ltr">· {s.labelEn}</span></h2>
-              {s.summaryAr && <p>{s.summaryAr}</p>}
+              <h2>{s.label[primary]} <span lang={secondary} dir={dir(secondary)}>· {s.label[secondary]}</span></h2>
+              {s.summary[primary] && <p>{s.summary[primary]}</p>}
               {s.parts && (
                 <p class="parts" lang="en" dir="ltr">palette {s.parts.palette} · type {s.parts.type} · layout {s.parts.layout} · motion {s.parts.motion}</p>
               )}
               <div class="row">
-                <a class="btn" href={href(s.id, arHome)}>عرض بالعربية</a>
-                <a class="btn" href={href(s.id, enHome)} lang="en" dir="ltr">View in English</a>
-                <button class="btn primary" type="button" disabled title="Approval flow coming soon">اختر هذا التصميم</button>
+                <a class="btn" href={href(s.id, homeSlug[primary])}>{T[primary].view}</a>
+                <a class="btn" href={href(s.id, homeSlug[secondary])} lang={secondary} dir={dir(secondary)}>{T[secondary].view}</a>
+                <button class="btn primary" type="button" disabled title="Approval flow coming soon">{T[primary].choose}</button>
               </div>
             </div>
           </li>
@@ -93,7 +98,8 @@ const samples = (client.samples as { id: string; palette: string; type: string; 
       .cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 20px; }
       .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
       .frame { position: relative; aspect-ratio: 16 / 10; max-width: 100%; overflow: hidden; border-block-end: 1px solid var(--line); background: var(--bg); }
-      .frame iframe { position: absolute; inset-block-start: 0; inset-inline-start: 0; width: 400%; height: 400%; border: 0; transform: scale(0.25); transform-origin: top right; pointer-events: none; }
+      .frame iframe { position: absolute; inset-block-start: 0; inset-inline-start: 0; width: 400%; height: 400%; border: 0; transform: scale(0.25); transform-origin: top left; pointer-events: none; }
+      [dir="rtl"] .frame iframe { transform-origin: top right; }
       .body { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
       h2 { margin: 0; font-size: 20px; }
       h2 span { color: var(--muted); font-weight: 500; }
