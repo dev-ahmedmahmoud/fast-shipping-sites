@@ -182,6 +182,23 @@
     },
     "href": "https://syncology.tech"
   },
+  "heroVideos": {
+    "coding-workshop": {
+      "src": "/media/stock/hero-coding-workshop.mp4",
+      "webm": "/media/stock/hero-coding-workshop.webm",
+      "poster": "stock/hero-coding-workshop.jpg"
+    },
+    "vr-explorer": {
+      "src": "/media/stock/hero-vr-explorer.mp4",
+      "webm": "/media/stock/hero-vr-explorer.webm",
+      "poster": "stock/hero-vr-explorer.jpg"
+    },
+    "basketball": {
+      "src": "/media/stock/hero-basketball.mp4",
+      "webm": "/media/stock/hero-basketball.webm",
+      "poster": "stock/hero-basketball.jpg"
+    }
+  },
   "samples": [
     {
       "id": "baseline",
