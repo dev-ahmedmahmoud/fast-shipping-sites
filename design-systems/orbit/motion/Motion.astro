@@ -1,0 +1,147 @@
+---
+// Orbit motion. About 2 KB of script and no libraries. Continuous loops (orbits,
+// twinkles, pulses) are plain CSS animations in the layout; this part adds what
+// needs to know about scrolling and the pointer:
+//   data-reveal            zoom in from a deeper layer when scrolled into view
+//   data-reveal="align"    a list whose items swing in from a wide arc into a row
+//   data-reveal="draw"     SVG lines inside draw themselves
+//   data-split-words       words lift into place one after another (whole words only)
+//   data-loop              looping decoration; paused while off screen
+//   data-orrery            the hero system; drifts toward the pointer on capable devices
+// It marks <html> with `ob-motion` (motion allowed) and `ob-rich` (a capable
+// device). Everything starts from the visible state: below-the-fold elements are
+// set back only after the script has run, and what is already on screen stays put.
+---
+<script>
+  import { splitWords } from '@engine/split';
+
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function capable(): boolean {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    return (nav.hardwareConcurrency ?? 4) >= 4 && (nav.deviceMemory ?? 4) >= 4 && !nav.connection?.saveData;
+  }
+
+  function words() {
+    document.querySelectorAll<HTMLElement>('[data-split-words]').forEach((el) => {
+      splitWords(el).forEach((w, i) => w.style.setProperty('--w', String(i)));
+    });
+  }
+
+  function reveals() {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        e.target.classList.add('ob-in');
+        io.unobserve(e.target);
+      }
+    }, { rootMargin: '0px 0px -8% 0px' });
+    const fold = window.innerHeight * 0.92;
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+      if (el.getBoundingClientRect().top < fold) return;
+      const sibs = el.parentElement ? [...el.parentElement.children].filter((c) => c.hasAttribute('data-reveal')) : [];
+      el.style.setProperty('--ob-delay', `${Math.min(Math.max(sibs.indexOf(el), 0), 5) * 110}ms`);
+      el.classList.add('ob-pre');
+      io.observe(el);
+    });
+  }
+
+  function loops() {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) e.target.toggleAttribute('data-paused', !e.isIntersecting);
+    });
+    document.querySelectorAll('[data-loop]').forEach((el) => io.observe(el));
+  }
+
+  // The hero system drifts toward the pointer, a few pixels at most.
+  function tilt() {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    document.querySelectorAll<HTMLElement>('[data-orrery]').forEach((stage) => {
+      const system = stage.firstElementChild as HTMLElement | null;
+      const area = stage.closest('section') ?? stage;
+      if (!system) return;
+      let frame = 0;
+      area.addEventListener('pointermove', (ev) => {
+        const box = stage.getBoundingClientRect();
+        const x = (ev.clientX - (box.left + box.width / 2)) / window.innerWidth;
+        const y = (ev.clientY - (box.top + box.height / 2)) / window.innerHeight;
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          system.style.setProperty('--px', `${(x * 36).toFixed(1)}px`);
+          system.style.setProperty('--py', `${(y * 28).toFixed(1)}px`);
+        });
+      });
+      area.addEventListener('pointerleave', () => {
+        cancelAnimationFrame(frame);
+        system.style.removeProperty('--px');
+        system.style.removeProperty('--py');
+      });
+    });
+  }
+
+  if (!reduce) {
+    root.classList.add('ob-motion');
+    const rich = capable();
+    if (rich) root.classList.add('ob-rich');
+    words();
+    reveals();
+    loops();
+    if (rich) tilt();
+  }
+</script>
+
+<style is:global>
+  :root { --ob-dir: 1; }
+  :root[dir="rtl"] { --ob-dir: -1; }
+
+  /* Zoom in from a deeper layer: smaller, lower and faint, then settle. */
+  .ob-motion .ob-pre:not([data-reveal="align"]):not([data-reveal="draw"]) { opacity: 0; }
+  .ob-motion .ob-pre.ob-in:not([data-reveal="align"]):not([data-reveal="draw"]) {
+    opacity: 1;
+    animation: ob-zoom var(--dur-slow) var(--ease-out) var(--ob-delay, 0ms) both;
+  }
+  @keyframes ob-zoom {
+    from { opacity: 0; scale: 0.94; translate: 0 var(--reveal-distance); }
+  }
+
+  /* A row of planets swings in from a wide arc below the row. */
+  .ob-motion [data-reveal="align"].ob-pre > * {
+    opacity: 0;
+    transform-origin: 50% 420%;
+    rotate: calc(var(--off, 0) * var(--ob-dir) * 13deg);
+  }
+  .ob-motion [data-reveal="align"].ob-pre.ob-in > * {
+    opacity: 1; rotate: 0deg;
+    transition: rotate 1.2s var(--ease-out), opacity 0.6s linear;
+    transition-delay: calc(var(--k, 0) * 90ms);
+  }
+
+  /* Constellation lines draw themselves; stars appear first. */
+  .ob-motion [data-reveal="draw"].ob-pre polyline { stroke-dashoffset: 1; }
+  .ob-motion [data-reveal="draw"].ob-pre.ob-in polyline {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1.6s var(--ease-in-out) calc(300ms + var(--ob-delay, 0ms));
+  }
+  .ob-motion [data-reveal="draw"].ob-pre :is(dd, dt) { opacity: 0; translate: 0 10px; }
+  .ob-motion [data-reveal="draw"].ob-pre.ob-in :is(dd, dt) {
+    opacity: 1; translate: 0 0;
+    transition: opacity 0.6s linear 0.9s, translate 0.9s var(--ease-out) 0.9s;
+  }
+
+  /* Headline words lift into place, one after another, from the visible state. */
+  .ob-motion [data-word] {
+    animation: ob-word 900ms var(--ease-out) both;
+    animation-delay: calc(var(--w, 0) * 55ms + 120ms);
+  }
+  @keyframes ob-word {
+    from { translate: 0 0.42em; }
+  }
+
+  /* Looping decoration rests while off screen. */
+  [data-loop][data-paused], [data-loop][data-paused] * { animation-play-state: paused !important; }
+
+  @media print {
+    .ob-motion .ob-pre, .ob-motion .ob-pre > * { opacity: 1 !important; animation: none !important; rotate: none !important; }
+  }
+</style>

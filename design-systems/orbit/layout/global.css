@@ -1,0 +1,161 @@
+/* Orbit layout: page-wide styles. Components style themselves with scoped styles.
+   The page opens on a dawn sky (bg) and sinks into deep space further down: any
+   section marked `.night` is painted with ink and written on with bg, starting
+   with a horizon that fades the day into the night. Consecutive night sections
+   and the footer continue the same sky without a new horizon. */
+:root {
+  --dir: 1;
+  --night-bg: var(--c-ink);
+  --night-ink: var(--c-bg);
+  --night-muted: color-mix(in oklab, var(--c-bg) 74%, var(--c-ink));
+  --night-accent: color-mix(in oklab, var(--c-accent) 42%, var(--c-bg));
+  --night-line: color-mix(in oklab, var(--c-bg) 16%, var(--c-ink));
+  --night-surface: color-mix(in oklab, var(--c-bg) 7%, var(--c-ink));
+  --horizon: clamp(110px, 15vw, 220px);
+  --glow: 0 18px 44px -18px color-mix(in oklab, var(--c-accent) 70%, transparent);
+  --star: color-mix(in oklab, var(--c-bg) 85%, transparent);
+  --star-dim: color-mix(in oklab, var(--c-bg) 45%, transparent);
+  /* A tiled starfield: three layers of dots at prime-ish offsets so the tile never reads as a grid. */
+  --stars:
+    radial-gradient(1.4px 1.4px at 23px 41px, var(--star) 50%, transparent 52%),
+    radial-gradient(1px 1px at 141px 17px, var(--star-dim) 50%, transparent 52%),
+    radial-gradient(1.2px 1.2px at 197px 133px, var(--star) 50%, transparent 52%),
+    radial-gradient(1px 1px at 67px 167px, var(--star-dim) 50%, transparent 52%),
+    radial-gradient(1.8px 1.8px at 109px 97px, var(--star) 50%, transparent 52%),
+    radial-gradient(1px 1px at 229px 59px, var(--star-dim) 50%, transparent 52%);
+  --stars-size: 251px 199px;
+}
+:root[dir="rtl"] { --dir: -1; }
+
+html { background: var(--c-ink); }
+body {
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: var(--weight-body);
+  line-height: var(--lh-body);
+}
+/* Orbits, planets and zoom-in reveals must never widen the page. Clipping on
+   <main> (not <body>, whose overflow the browser hands to the viewport) keeps
+   right-to-left pages from scrolling sideways too. */
+main { overflow-x: clip; }
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  line-height: var(--lh-heading);
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+/* Arabic: no letter-spacing, and room for the taller letterforms. */
+:lang(ar) :is(h1, h2, h3, h4) { letter-spacing: 0; line-height: 1.38; }
+strong, b { font-weight: var(--weight-strong); }
+
+a { color: var(--c-accent); text-decoration-thickness: 1.5px; text-underline-offset: 0.24em; }
+a:hover { text-decoration-thickness: 2.5px; }
+:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px color-mix(in oklab, var(--c-accent) 22%, transparent);
+  border-radius: var(--radius-s);
+}
+::selection { background: var(--c-accent); color: var(--c-accent-ink); }
+
+.container {
+  inline-size: 100%;
+  max-inline-size: calc(var(--max-width) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+}
+.section { position: relative; padding-block: var(--space-8); }
+.section + .section:not(.night) { padding-block-start: 0; }
+
+/* ---- Night sky ---- */
+.night {
+  position: relative; isolation: isolate;
+  color: var(--night-ink);
+  background: linear-gradient(to bottom, var(--c-bg), color-mix(in oklab, var(--c-bg) 40%, var(--night-bg)) calc(var(--horizon) * 0.55), var(--night-bg) var(--horizon));
+  padding-block-start: calc(var(--horizon) + var(--space-5));
+}
+.night::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: var(--stars); background-size: var(--stars-size);
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--horizon) * 0.5), #000 calc(var(--horizon) * 1.4));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--horizon) * 0.5), #000 calc(var(--horizon) * 1.4));
+}
+.night + .night { background: var(--night-bg); padding-block-start: var(--space-7); }
+.night + .night::before { -webkit-mask-image: none; mask-image: none; }
+.night a:not(.btn) { color: var(--night-accent); }
+.night :focus-visible { outline-color: var(--night-accent); box-shadow: 0 0 0 6px color-mix(in oklab, var(--night-accent) 25%, transparent); }
+
+/* ---- Labels and the mission patch ---- */
+.label {
+  font-family: var(--font-display);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--c-accent);
+}
+:lang(ar) .label { text-transform: none; font-size: var(--step-0); }
+.night .label { color: var(--c-highlight); }
+
+/* A section title with a small planet on its orbit line before it. */
+.orbit-title {
+  display: flex; align-items: center; gap: var(--space-3);
+  font-size: var(--step-3);
+}
+.orbit-title::before {
+  content: ""; flex: none; inline-size: 0.62em; block-size: 0.62em; border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, color-mix(in oklab, var(--c-accent) 35%, var(--c-surface)), var(--c-accent) 62%);
+  box-shadow: 0 0 0 0.16em var(--c-bg), 0 0 0 0.24em color-mix(in oklab, var(--c-accent) 35%, transparent);
+}
+.night .orbit-title::before {
+  background: radial-gradient(circle at 32% 30%, var(--c-surface), var(--c-highlight) 60%);
+  box-shadow: 0 0 0 0.16em var(--night-bg), 0 0 0 0.24em color-mix(in oklab, var(--c-highlight) 45%, transparent);
+}
+
+/* ---- Buttons: capsules with a soft glow; the arrow leans forward on hover ---- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-block-size: 48px; padding-inline: var(--space-5); padding-block: var(--space-1);
+  border: 1.5px solid transparent; border-radius: var(--radius-pill);
+  font-family: var(--font-display); font-size: var(--step-0); font-weight: 600; line-height: 1.2;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), background-color var(--dur-fast) linear, color var(--dur-fast) linear, border-color var(--dur-fast) linear;
+}
+.btn::after {
+  content: ""; inline-size: 0.9em; block-size: 0.9em; flex: none;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+  scale: var(--dir) 1;
+  transition: translate var(--dur-base) var(--ease-out);
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:hover::after { translate: calc(var(--dir) * 4px) 0; }
+.btn:active { transform: translateY(0); }
+.btn--primary { background: var(--c-accent); color: var(--c-accent-ink); box-shadow: var(--glow); }
+.btn--primary:hover { box-shadow: 0 22px 50px -16px color-mix(in oklab, var(--c-accent) 85%, transparent); }
+.btn--ghost { background: color-mix(in oklab, var(--c-surface) 70%, transparent); color: var(--c-ink); border-color: var(--c-line); }
+.btn--ghost:hover { border-color: var(--c-accent); color: var(--c-accent); }
+.btn--star { background: var(--c-highlight); color: var(--c-ink); box-shadow: 0 18px 44px -18px color-mix(in oklab, var(--c-highlight) 80%, transparent); }
+.night .btn--ghost { background: transparent; color: var(--night-ink); border-color: var(--night-line); }
+.night .btn--ghost:hover { border-color: var(--night-accent); color: var(--night-accent); }
+.btn--plain::after { display: none; }
+
+.skip-link { background: var(--c-accent); color: var(--c-accent-ink); font-weight: var(--weight-strong); }
+[dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+
+.todo-note {
+  border: 1.5px dashed var(--c-line); border-radius: var(--radius-m);
+  padding: var(--space-3) var(--space-4); background: var(--c-surface);
+  font-size: var(--step--1); color: var(--c-muted);
+}
+.todo-note ul { margin: var(--space-2) 0 0; padding-inline-start: var(--space-5); }
+
+@media print {
+  .night, footer { background: var(--c-surface) !important; color: var(--c-ink) !important; }
+  .night::before { display: none; }
+}

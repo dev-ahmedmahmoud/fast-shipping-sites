@@ -1,0 +1,236 @@
+---
+// The school at the centre of its own small solar system. The first hero picture
+// (or silent clip) is the planet in the middle; the next photos are moons on a
+// tilted elliptical orbit that pass behind and in front of it; a second, tighter
+// orbit carries small decorative planets.
+//
+// The orbits are plain 2D, which keeps every frame on the compositor and avoids
+// 3D render surfaces: each orbiter combines two eased back-and-forth motions, one
+// across (sheared, which tilts the ellipse) and one up-and-down (which also scales
+// it, for depth), a quarter turn apart; it steps behind the planet for the far half
+// of the turn. With reduced motion every orbiter rests at its own place on its
+// orbit (static positions computed here); on capable devices the system leans
+// toward the pointer (Motion.astro sets --px and --py).
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action, HeroVideo } from '@engine/content';
+import HeroMedia from '@engine/HeroMedia.astro';
+interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[]; video?: HeroVideo | null }
+const { eyebrow, title, lead, actions, images = [], video } = Astro.props;
+const center = images[0];
+const moons = images.slice(1, 4);
+
+// An orbit: half-axes (cqi of the stage), shear (tilt), seconds per turn.
+interface Lane { rx: number; ry: number; k: number; period: number }
+const outer: Lane = { rx: 42, ry: 12, k: 0.22, period: 34 };
+const inner: Lane = { rx: 31, ry: 8, k: -0.2, period: 22 };
+const skew = (l: Lane) => `${(-Math.atan(l.k) * 180 / Math.PI).toFixed(2)}deg`;
+
+// Where an orbiter at `phase` (0–1 of a turn) sits, for the CSS custom properties.
+function orbiter(phase: number, lane: Lane) {
+  const a = 2 * Math.PI * phase;
+  const x = -lane.rx * Math.cos(a);
+  const s = Math.sin(a);
+  return [
+    `--Rx:${lane.rx}cqi`, `--Ry:${lane.ry}cqi`, `--k:${lane.k}`, `--T:${lane.period}s`,
+    `--d:${(-phase * lane.period).toFixed(2)}s`,
+    `--sx:${x.toFixed(2)}cqi`, `--sy:${(lane.ry * s - lane.k * x).toFixed(2)}cqi`,
+    `--ss:${(0.78 + 0.28 * (s + 1) / 2).toFixed(3)}`, `--sz:${s >= 0 ? 3 : 1}`,
+  ].join(';');
+}
+// Moons stay evenly spaced round the orbit (they all move at one speed), placed so
+// that none rests over the planet's face: with three, two sit beside it and the
+// third is behind it (the orbit keeps moving them round).
+const moonPhases = [[0.06], [0.06, 0.56], [0.083, 0.417, 0.75]][Math.max(moons.length, 1) - 1];
+const moonStyles = moons.map((_, i) => orbiter(moonPhases[i], outer));
+const bodies = [
+  { tone: 'star', size: 7, phase: 0.04, ringed: false },
+  { tone: 'soft', size: 9.5, phase: 0.47, ringed: true },
+  { tone: 'accent', size: 5, phase: 0.74, ringed: false },
+];
+---
+<section class:list={['hero', { 'no-photo': !center }]}>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="container grid">
+    <div class="copy">
+      {eyebrow && (
+        <p class="patch"><span class="patch-planet" aria-hidden="true"><span></span></span>{eyebrow}</p>
+      )}
+      <h1 data-split-words>{title}</h1>
+      {lead && <p class="lead">{lead}</p>}
+      {actions.length > 0 && (
+        <div class="actions">
+          {actions.map((a, i) => (
+            <a class:list={['btn', i === 0 ? 'btn--primary' : 'btn--ghost']} href={a.href}
+               target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>{a.label}</a>
+          ))}
+        </div>
+      )}
+    </div>
+
+    {center && (
+      <div class="stage" data-loop data-orrery aria-hidden="true">
+        <div class="system">
+          <span class="track" style={`--Rx:${outer.rx}cqi;--Ry:${outer.ry}cqi;--skew:${skew(outer)}`}></span>
+          <span class="track track--thin" style={`--Rx:${inner.rx}cqi;--Ry:${inner.ry}cqi;--skew:${skew(inner)}`}></span>
+
+          <div class="core">
+            <div class="core-photo">
+              <HeroMedia image={center} video={video} widths={[360, 560, 760]} sizes="(max-width: 900px) 60vw, 19rem" fetchpriority="high" />
+            </div>
+          </div>
+
+          {moons.map((img, i) => (
+            <div class="orb" style={moonStyles[i]}>
+              <div class="orb-x"><div class="orb-y">
+                <div class="moon">
+                  <Image src={img} alt="" widths={[160, 280]} sizes="(max-width: 900px) 22vw, 8.5rem" loading="lazy" />
+                </div>
+              </div></div>
+            </div>
+          ))}
+
+          {bodies.map((b) => (
+            <div class="orb" style={orbiter(b.phase, inner)}>
+              <div class="orb-x"><div class="orb-y">
+                <div class:list={['body', `body--${b.tone}`, { ringed: b.ringed }]} style={`--size:${b.size}cqi`}></div>
+              </div></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative; overflow: clip; isolation: isolate;
+    padding-block: var(--space-7) var(--space-8);
+    background: linear-gradient(to bottom, var(--c-accent-soft), var(--c-bg) 78%);
+  }
+  .glow {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(42% 46% at calc(50% + var(--dir) * 26%) 42%, color-mix(in oklab, var(--c-highlight) 24%, transparent), transparent 70%),
+      radial-gradient(30% 30% at calc(50% + var(--dir) * 30%) 46%, color-mix(in oklab, var(--c-accent) 12%, transparent), transparent 70%);
+  }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr); align-items: center; gap: var(--space-7); }
+  .no-photo .grid { grid-template-columns: minmax(0, 1fr); }
+
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-5); min-inline-size: 0; }
+  .patch {
+    display: inline-flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-1) var(--space-4) var(--space-1) var(--space-2);
+    background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius-pill);
+    font-family: var(--font-display); font-size: var(--step--1); font-weight: 600;
+    letter-spacing: var(--label-tracking); text-transform: uppercase; color: var(--c-accent);
+    box-shadow: 0 10px 26px -18px color-mix(in oklab, var(--c-ink) 60%, transparent);
+  }
+  :lang(ar) .patch { text-transform: none; }
+  /* A tiny planet whose moon circles it. */
+  .patch-planet {
+    position: relative; inline-size: 1.5em; block-size: 1.5em; border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, color-mix(in oklab, var(--c-accent) 30%, var(--c-surface)), var(--c-accent) 64%);
+  }
+  .patch-planet span {
+    position: absolute; inset: -0.32em; border-radius: 50%;
+    border: 1px solid color-mix(in oklab, var(--c-accent) 40%, transparent);
+  }
+  .patch-planet span::after {
+    content: ""; position: absolute; inset-block-start: -0.18em; inset-inline-start: 50%; inline-size: 0.36em; block-size: 0.36em; margin-inline-start: -0.18em;
+    border-radius: 50%; background: var(--c-highlight);
+  }
+  h1 { font-size: var(--step-5); color: var(--c-ink); }
+  .lead { font-size: var(--step-1); color: var(--c-muted); max-inline-size: 36ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+
+  /* ---- The orrery ---- */
+  .stage {
+    position: relative; container-type: inline-size;
+    inline-size: min(100%, 34rem); aspect-ratio: 1; margin-inline: auto;
+  }
+  .system {
+    position: absolute; inset: 0;
+    translate: var(--px, 0px) var(--py, 0px);
+    transition: translate 1.2s var(--ease-out);
+  }
+  .track {
+    position: absolute; inset-block-start: 50%; inset-inline-start: 50%;
+    inline-size: calc(2 * var(--Rx)); block-size: calc(2 * var(--Ry));
+    margin-block-start: calc(-1 * var(--Ry)); margin-inline-start: calc(-1 * var(--Rx));
+    border-radius: 50%; border: 1.5px dashed color-mix(in oklab, var(--c-accent) 42%, transparent);
+    transform: skewY(calc(var(--dir) * var(--skew)));
+  }
+  .track--thin { border-style: solid; border-width: 1px; border-color: color-mix(in oklab, var(--c-ink) 16%, transparent); }
+
+  .core { position: absolute; inset: 22%; z-index: 2; border-radius: 50%; }
+  .core::before {
+    content: ""; position: absolute; inset: -9%; border-radius: 50%; z-index: -1;
+    background: radial-gradient(circle, color-mix(in oklab, var(--c-accent) 26%, transparent) 58%, transparent 72%);
+  }
+  .core-photo {
+    position: relative; inline-size: 100%; block-size: 100%; border-radius: 50%; overflow: hidden;
+    background: var(--c-sunk);
+    box-shadow: 0 0 0 6px var(--c-surface), 0 0 0 7px var(--c-line), 0 30px 60px -24px color-mix(in oklab, var(--c-ink) 55%, transparent);
+  }
+  .core-photo :global(.fss-hero-media) { block-size: 100%; }
+  .core-photo :global(img) { inline-size: 100%; block-size: 100%; object-fit: cover; border-radius: 50%; }
+  .core-photo :global(video) { object-position: 50% 40%; border-radius: 50%; }
+
+  /* An orbiter: a zero-size anchor at the centre (depth via z-index), the sheared
+     across-motion, then the up-and-down motion with its depth scale. The resting
+     values here are the reduced-motion positions. */
+  .orb {
+    position: absolute; inset-block-start: 50%; inset-inline-start: 50%; inline-size: 0; block-size: 0;
+    z-index: var(--sz);
+  }
+  .orb-x { translate: calc(var(--dir) * var(--sx)) var(--sy); }
+  .orb-y { scale: var(--ss); }
+  .moon, .body {
+    position: absolute; inline-size: var(--size); aspect-ratio: 1; border-radius: 50%;
+    inset-block-start: calc(var(--size) / -2); inset-inline-start: calc(var(--size) / -2);
+  }
+  .moon { --size: 17cqi; }
+  .moon :global(img) {
+    inline-size: 100%; block-size: 100%; object-fit: cover; border-radius: 50%;
+    border: 3px solid var(--c-surface);
+    box-shadow: 0 14px 28px -12px color-mix(in oklab, var(--c-ink) 55%, transparent);
+  }
+  .body--star { background: radial-gradient(circle at 34% 30%, var(--c-surface), var(--c-highlight) 58%, color-mix(in oklab, var(--c-highlight) 70%, var(--c-ink))); box-shadow: 0 0 22px color-mix(in oklab, var(--c-highlight) 60%, transparent); }
+  .body--soft { background: radial-gradient(circle at 34% 30%, var(--c-surface), var(--c-accent-soft) 50%, color-mix(in oklab, var(--c-accent) 45%, var(--c-accent-soft))); }
+  .body--accent { background: radial-gradient(circle at 34% 30%, color-mix(in oklab, var(--c-accent) 35%, var(--c-surface)), var(--c-accent) 60%, color-mix(in oklab, var(--c-accent) 60%, var(--c-ink))); }
+  .ringed::after {
+    content: ""; position: absolute; inset: 38% -42%; border-radius: 50%;
+    border: 2px solid color-mix(in oklab, var(--c-accent) 55%, transparent);
+    rotate: -18deg;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .orb { animation: ob-depth var(--T) linear var(--d) infinite; }
+    .orb-x { animation: ob-across calc(var(--T) / 2) cubic-bezier(0.37, 0, 0.63, 1) var(--d) infinite alternate; }
+    .orb-y { animation: ob-updown calc(var(--T) / 2) cubic-bezier(0.37, 0, 0.63, 1) calc(var(--d) - var(--T) / 4) infinite alternate; }
+    .patch-planet span { animation: ob-turn 6s linear infinite; }
+    :global(.ob-motion) .system { animation: arrive 1.6s var(--ease-out) both; }
+    [data-paused] :is(.orb, .orb-x, .orb-y) { animation-play-state: paused; }
+  }
+  @keyframes ob-depth { 0%, 49.9% { z-index: 3; } 50%, 100% { z-index: 1; } }
+  @keyframes ob-across {
+    from { translate: calc(var(--dir) * -1 * var(--Rx)) calc(var(--k) * var(--Rx)); }
+    to { translate: calc(var(--dir) * var(--Rx)) calc(-1 * var(--k) * var(--Rx)); }
+  }
+  @keyframes ob-updown {
+    from { translate: 0 calc(-1 * var(--Ry)); scale: 0.78; }
+    to { translate: 0 var(--Ry); scale: 1.06; }
+  }
+  @keyframes ob-turn { to { rotate: 360deg; } }
+  @keyframes arrive { from { scale: 0.84; } }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+    .hero { padding-block-start: var(--space-6); }
+    .stage { inline-size: min(100%, 24rem); }
+    .glow { background: radial-gradient(60% 40% at 50% 72%, color-mix(in oklab, var(--c-highlight) 24%, transparent), transparent 70%); }
+  }
+</style>

@@ -1,0 +1,86 @@
+---
+// Milestones as constellations on the night sky. Each figure gets its own small
+// star pattern (abstract, generated at build time from its position, never a
+// zodiac sign); the lines between the stars draw themselves when the section
+// scrolls into view (data-reveal="draw", see Motion.astro) and the stars twinkle
+// while on screen. At rest the constellations are simply drawn.
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; title?: string; items: { value: string; label: string }[] }
+const { title, items } = Astro.props;
+
+// A small seeded generator, so every build draws the same sky.
+function sky(seed: number) {
+  let s = (seed + 1) * 9301 + 49297;
+  const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  const n = 5 + (seed % 2);
+  const pts = Array.from({ length: n }, (_, k) => {
+    // Stars sit around an oval that leaves the middle free for the figure.
+    const a = (Math.PI * 2 * k) / n + rnd() * 0.7;
+    const rx = 82 + rnd() * 12, ry = 50 + rnd() * 10;
+    return [100 + Math.cos(a) * rx, 70 + Math.sin(a) * ry, 1.6 + rnd() * 2.2] as const;
+  });
+  // An open chain through the stars, plus one branch, like a real constellation.
+  const chain = pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  const branch = `${pts[1][0].toFixed(1)},${pts[1][1].toFixed(1)} ${(100 + (rnd() - 0.5) * 60).toFixed(1)},${(70 + (rnd() - 0.5) * 30).toFixed(1)}`;
+  return { pts, chain, branch };
+}
+const skies = items.map((_, i) => sky(i + 3));
+---
+<section class="section night stats">
+  <div class="container stack">
+    {title && <h2 class="orbit-title" data-reveal>{title}</h2>}
+    <dl class:list={['map', { single: items.length === 1 }]} data-loop>
+      {items.map((s, i) => (
+        <div class="constellation" data-reveal="draw" style={`--k:${i}`}>
+          <svg viewBox="0 0 200 140" aria-hidden="true" focusable="false">
+            <polyline class="line" points={skies[i].chain} pathLength="1" />
+            <polyline class="line line--branch" points={skies[i].branch} pathLength="1" />
+            {skies[i].pts.map(([x, y, r], k) => (
+              <circle class="star" cx={x.toFixed(1)} cy={y.toFixed(1)} r={r.toFixed(1)} style={`--t:${k}`} />
+            ))}
+          </svg>
+          <dt>{s.label}</dt>
+          <dd>{s.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  .map {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-6) var(--space-5);
+  }
+  .map.single { grid-template-columns: minmax(0, 30rem); justify-content: center; }
+  .constellation {
+    position: relative; display: grid; grid-template-areas: "sky" "label"; justify-items: center; gap: var(--space-2);
+    text-align: center;
+  }
+  svg { grid-area: sky; inline-size: 100%; max-inline-size: 22rem; overflow: visible; }
+  .single svg { max-inline-size: 30rem; }
+  .line {
+    fill: none; stroke: color-mix(in oklab, var(--night-accent) 70%, transparent); stroke-width: 1;
+    stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1; stroke-dashoffset: 0;
+  }
+  .line--branch { stroke-dasharray: 0.04 0.035; }
+  .star { fill: var(--night-ink); }
+  .star:nth-of-type(3n + 1) { fill: var(--c-highlight); }
+  /* The figure sits in the middle of its constellation. */
+  dd {
+    grid-area: sky; align-self: center; margin: 0;
+    font-family: var(--font-display); font-weight: 700; font-size: var(--step-5); line-height: 1;
+    color: var(--c-highlight); font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 32px color-mix(in oklab, var(--c-highlight) 45%, transparent);
+  }
+  dt { grid-area: label; color: var(--night-muted); font-weight: var(--weight-strong); letter-spacing: var(--label-tracking); text-transform: uppercase; font-size: var(--step--1); }
+  :lang(ar) dt { text-transform: none; font-size: var(--step-0); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .star { animation: twinkle 3.6s ease-in-out infinite; animation-delay: calc(var(--t) * -0.7s); transform-box: fill-box; transform-origin: center; }
+    [data-paused] .star { animation-play-state: paused; }
+  }
+  @keyframes twinkle { 50% { opacity: 0.45; scale: 0.7; } }
+</style>

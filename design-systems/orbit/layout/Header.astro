@@ -1,0 +1,198 @@
+---
+// A light, sky-tinted bar. The logo sits inside a thin orbit ring with a small
+// moon on it; the current page is marked by a planet dot; sub-menus drop down as
+// cards. On small screens the menu opens as a night-sky panel.
+import { Image } from 'astro:assets';
+import type { PageContext, NavItem } from '@engine/context';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const other = ctx.languages.find((l) => !l.current);
+const linkAttrs = (item: NavItem) => ({
+  href: item.href,
+  'aria-current': item.current ? 'page' : undefined,
+  target: item.external ? '_blank' : undefined,
+  rel: item.external ? 'noopener' : undefined,
+});
+---
+<header class="header">
+  <div class="container bar">
+    <a class="brand" href={ctx.site.homeHref} aria-label={ctx.site.name}>
+      <span class="emblem" aria-hidden="true">
+        <span class="ring"><span class="moon"></span></span>
+        {ctx.site.logo
+          ? <Image src={ctx.site.logo} alt="" height={80} class="logo" loading="eager" />
+          : <span class="mark">{ctx.site.shortName}</span>}
+      </span>
+      <span class="name">{ctx.site.name}</span>
+    </a>
+
+    <div class="actions">
+      {other && (
+        <a class="lang" href={other.href} hreflang={other.locale} lang={other.locale}>
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z" /></svg>
+          {other.name}
+        </a>
+      )}
+      {ctx.cta && (
+        <a class="btn btn--primary cta" href={ctx.cta.href}
+           target={ctx.cta.external ? '_blank' : undefined} rel={ctx.cta.external ? 'noopener' : undefined}>
+          {ctx.cta.label}
+        </a>
+      )}
+      <details class="nav-mobile">
+        <summary class="menu-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 8h16M4 16h10" /></svg>
+          {ctx.ui.menu}
+        </summary>
+        <nav class="panel" aria-label={ctx.ui.menu}>
+          <ul role="list">
+            {ctx.nav.map((item) => (
+              <li>
+                <a {...linkAttrs(item)}>{item.label}</a>
+                {item.children.length > 0 && (
+                  <ul role="list" class="sub-mobile">
+                    {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+
+  <nav class="nav-desktop" aria-label={ctx.ui.menu}>
+    <ul role="list" class="container">
+      {ctx.nav.map((item) => (
+        <li class:list={[{ 'has-sub': item.children.length > 0 }]}>
+          <a {...linkAttrs(item)}>{item.label}</a>
+          {item.children.length > 0 && (
+            <ul role="list" class="sub">
+              {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .header {
+    position: sticky; inset-block-start: 0; z-index: 20;
+    background: color-mix(in oklab, var(--c-bg) 92%, transparent);
+    border-block-end: 1px solid var(--c-line);
+    padding-block-start: env(safe-area-inset-top, 0px);
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    .header { background: color-mix(in oklab, var(--c-bg) 80%, transparent); backdrop-filter: saturate(1.4) blur(14px); }
+  }
+  .bar { display: flex; align-items: center; gap: var(--space-4); min-block-size: 72px; }
+  .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--c-ink); text-decoration: none; min-inline-size: 0; }
+
+  /* The emblem: logo inside a tilted orbit ring with one small moon. */
+  .emblem { position: relative; display: grid; place-items: center; flex: none; inline-size: 54px; block-size: 54px; }
+  .ring {
+    position: absolute; inset: -4px; border-radius: 50%;
+    border: 1.5px solid color-mix(in oklab, var(--c-accent) 45%, transparent);
+    transform: rotateX(62deg) rotateZ(0deg);
+    transition: transform 1.6s var(--ease-out);
+  }
+  .moon {
+    position: absolute; inset-block-start: 50%; inset-inline-start: -4px; inline-size: 8px; block-size: 8px; margin-block-start: -4px;
+    border-radius: 50%; background: var(--c-highlight);
+  }
+  .brand:hover .ring { transform: rotateX(62deg) rotateZ(calc(var(--dir) * 200deg)); }
+  .logo { position: relative; block-size: 44px; inline-size: auto; max-inline-size: 54px; object-fit: contain; }
+  .mark {
+    position: relative; display: grid; place-items: center; inline-size: 46px; block-size: 46px; border-radius: 50%;
+    background: var(--c-accent); color: var(--c-accent-ink); font-family: var(--font-display); font-size: var(--step--1); font-weight: 700;
+  }
+  .name { font-family: var(--font-display); font-weight: 600; font-size: var(--step-0); line-height: 1.25; max-inline-size: 24ch; }
+
+  .actions { display: flex; align-items: center; gap: var(--space-3); margin-inline-start: auto; }
+  .lang {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    min-block-size: 44px; padding-inline: var(--space-4); border-radius: var(--radius-pill);
+    border: 1.5px solid var(--c-line); color: var(--c-ink); text-decoration: none;
+    font-size: var(--step--1); font-weight: var(--weight-strong);
+    transition: border-color var(--dur-fast) linear, color var(--dur-fast) linear;
+  }
+  .lang svg { fill: none; stroke: currentColor; stroke-width: 1.6; }
+  .lang:hover { border-color: var(--c-accent); color: var(--c-accent); }
+  /* On English pages this one Arabic word would pull in a whole Arabic font; a system face is enough. */
+  .lang[lang="ar"] { font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", "Geeza Pro", system-ui, sans-serif; font-weight: 700; }
+  .cta { min-block-size: 44px; font-size: var(--step--1); padding-inline: var(--space-4); }
+
+  .nav-desktop { border-block-start: 1px solid color-mix(in oklab, var(--c-line) 60%, transparent); }
+  .nav-desktop > ul { display: flex; flex-wrap: wrap; gap: var(--space-1); padding-block: var(--space-2); }
+  .nav-desktop a {
+    position: relative; display: block; padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill);
+    color: var(--c-ink); text-decoration: none; font-size: var(--step--1); font-weight: var(--weight-strong); white-space: nowrap;
+    transition: background-color var(--dur-fast) linear, color var(--dur-fast) linear;
+  }
+  .nav-desktop a:hover { background: var(--c-accent-soft); color: var(--c-accent); }
+  /* The current page: a planet dot under the label. */
+  .nav-desktop a[aria-current="page"] { color: var(--c-accent); }
+  .nav-desktop a[aria-current="page"]::after {
+    content: ""; position: absolute; inset-block-end: -2px; inset-inline-start: 50%; inline-size: 6px; block-size: 6px; margin-inline-start: -3px;
+    border-radius: 50%; background: var(--c-accent); box-shadow: 0 0 0 3px var(--c-accent-soft);
+  }
+  .has-sub { position: relative; }
+  .has-sub > a { padding-inline-end: calc(var(--space-3) + 0.9em); }
+  .has-sub > a::before {
+    content: ""; position: absolute; inset-inline-end: var(--space-3); inset-block-start: 50%;
+    inline-size: 0.42em; block-size: 0.42em; margin-block-start: -0.32em;
+    border-inline-end: 1.6px solid currentColor; border-block-end: 1.6px solid currentColor; rotate: 45deg;
+  }
+  .sub {
+    display: none; position: absolute; inset-inline-start: 0; inset-block-start: calc(100% + 8px); z-index: 5;
+    min-inline-size: 15rem; padding: var(--space-2);
+    background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius-m);
+    box-shadow: 0 24px 50px -24px color-mix(in oklab, var(--c-ink) 45%, transparent);
+  }
+  .sub a { border-radius: var(--radius-s); }
+  .has-sub:hover > .sub, .has-sub:focus-within > .sub { display: block; animation: drop var(--dur-base) var(--ease-out); }
+  .has-sub:hover::after { content: ""; position: absolute; inset-inline: 0; inset-block-start: 100%; block-size: 10px; }
+  @keyframes drop { from { opacity: 0; translate: 0 -6px; } }
+
+  /* Small screens: a night-sky panel. */
+  .nav-mobile { display: none; position: relative; }
+  .menu-btn {
+    display: inline-flex; align-items: center; gap: var(--space-2); list-style: none; cursor: pointer;
+    min-block-size: 44px; padding-inline: var(--space-4); border-radius: var(--radius-pill);
+    background: var(--c-ink); color: var(--c-bg); font-weight: var(--weight-strong); font-size: var(--step--1);
+  }
+  .menu-btn::-webkit-details-marker { display: none; }
+  .menu-btn svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+  .panel {
+    position: absolute; inset-inline-end: 0; inset-block-start: calc(100% + 12px);
+    inline-size: min(20rem, calc(100vw - 2 * var(--gutter))); max-block-size: 74vh; overflow-y: auto;
+    padding: var(--space-3);
+    background-color: var(--night-bg); background-image: var(--stars); background-size: var(--stars-size);
+    color: var(--night-ink); border-radius: var(--radius-l);
+    box-shadow: 0 30px 60px -24px color-mix(in oklab, var(--c-ink) 70%, transparent);
+  }
+  .panel a {
+    display: block; padding: var(--space-2) var(--space-3); border-radius: var(--radius-m);
+    color: var(--night-ink); text-decoration: none; font-weight: var(--weight-strong);
+  }
+  .panel a:hover, .panel a[aria-current="page"] { background: var(--night-surface); color: var(--c-highlight); }
+  .panel :focus-visible { outline-color: var(--c-highlight); }
+  .sub-mobile { margin-inline-start: var(--space-4); padding-inline-start: var(--space-3); border-inline-start: 1px dashed var(--night-line); }
+  .sub-mobile a { font-weight: var(--weight-body); font-size: var(--step--1); }
+
+  @media (max-width: 1080px) {
+    .nav-desktop { display: none; }
+    .nav-mobile { display: block; }
+  }
+  @media (max-width: 600px) {
+    .name { display: none; }
+    .cta { display: none; }
+    .lang { padding-inline: var(--space-3); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brand:hover .ring { transform: rotateX(62deg); }
+  }
+</style>

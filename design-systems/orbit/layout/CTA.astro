@@ -1,0 +1,74 @@
+---
+// The closing call to action: a launch window. A glowing planet rises at the
+// panel's inline end with concentric orbits around it; two satellites travel
+// those orbits while the panel is on screen.
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+interface Props { ctx: PageContext; title: string; text?: string; action: Action | null }
+const { title, text, action } = Astro.props;
+---
+<section class="section night cta">
+  <div class="container">
+    <div class="window" data-reveal data-loop>
+      <div class="rings" aria-hidden="true">
+        <span class="r r1"></span>
+        <span class="r r2"><span class="sat"></span></span>
+        <span class="r r3"><span class="sat sat--b"></span></span>
+        <span class="planet"></span>
+      </div>
+      <div class="copy">
+        <h2>{title}</h2>
+        {text && <p>{text}</p>}
+        {action && (
+          <a class="btn btn--star go" href={action.href} target={action.external ? '_blank' : undefined} rel={action.external ? 'noopener' : undefined}>{action.label}</a>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .window {
+    position: relative; overflow: hidden; isolation: isolate;
+    padding: clamp(var(--space-6), 6vw, var(--space-8)) clamp(var(--space-5), 5vw, var(--space-8));
+    border-radius: var(--radius-l);
+    background: radial-gradient(70% 120% at calc(100% * (1 + var(--dir)) / 2) 50%, color-mix(in oklab, var(--c-accent) 55%, var(--night-bg)), var(--night-surface) 62%);
+    border: 1px solid var(--night-line);
+  }
+  .copy { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); max-inline-size: 34rem; }
+  h2 { font-size: var(--step-4); }
+  p { font-size: var(--step-1); color: var(--night-muted); }
+  .go { margin-block-start: var(--space-2); font-size: var(--step-1); min-block-size: 56px; padding-inline: var(--space-6); }
+
+  /* Orbits centred on the panel's inline-end edge. */
+  .rings {
+    position: absolute; z-index: -1; inset-block: 50%; inset-inline-end: 0; inline-size: 0; block-size: 0;
+  }
+  .r, .planet { position: absolute; inset-block-start: 0; inset-inline-start: 0; border-radius: 50%; translate: calc(var(--dir) * -50%) -50%; }
+  .r { border: 1px solid color-mix(in oklab, var(--night-ink) 18%, transparent); }
+  .r1 { inline-size: 22rem; block-size: 22rem; }
+  .r2 { inline-size: 34rem; block-size: 34rem; border-style: dashed; }
+  .r3 { inline-size: 48rem; block-size: 48rem; }
+  .planet {
+    inline-size: 12rem; block-size: 12rem;
+    background: radial-gradient(circle at 36% 30%, color-mix(in oklab, var(--c-accent) 30%, var(--c-surface)), var(--c-accent) 55%, color-mix(in oklab, var(--c-accent) 50%, var(--night-bg)));
+    box-shadow: 0 0 80px color-mix(in oklab, var(--c-accent) 70%, transparent);
+  }
+  .sat {
+    position: absolute; inset-block-start: 50%; inset-inline-start: -6px; inline-size: 12px; block-size: 12px; margin-block-start: -6px;
+    border-radius: 50%; background: var(--c-highlight); box-shadow: 0 0 16px var(--c-highlight);
+  }
+  .sat--b { inline-size: 8px; block-size: 8px; margin-block-start: -4px; inset-inline-start: -4px; background: var(--night-ink); box-shadow: none; }
+  @media (prefers-reduced-motion: no-preference) {
+    .r2 { animation: turn 26s linear infinite; }
+    .r3 { animation: turn 48s linear infinite reverse; }
+    [data-paused] .r2, [data-paused] .r3 { animation-play-state: paused; }
+  }
+  @keyframes turn { to { rotate: 360deg; } }
+
+  @media (max-width: 720px) {
+    .rings { inset-block: auto 0; }
+    .copy { padding-block-end: 8rem; }
+    .planet { inline-size: 9rem; block-size: 9rem; }
+  }
+</style>

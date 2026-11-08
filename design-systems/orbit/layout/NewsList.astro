@@ -1,0 +1,102 @@
+---
+// News as a mission log on the night sky: a trajectory line runs through one node
+// per entry (across on wide screens, down on phones), and each entry carries its
+// log number and date like a timestamp. On the news page (headingLevel 1) the
+// log opens the page.
+import type { PageContext } from '@engine/context';
+interface NewsItem { title: string; href: string; date?: string; excerpt?: string }
+interface Props { ctx: PageContext; title?: string; items: NewsItem[]; more?: { label: string; href: string } | null; headingLevel?: 1 | 2 }
+const { ctx, title, items, more, headingLevel = 2 } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+---
+<section class:list={['section', 'night', 'news', { top: headingLevel === 1 }]}>
+  <div class="container stack">
+    <div class="head">
+      {title && (
+        <Heading class:list={['orbit-title', { big: headingLevel === 1 }]} data-reveal data-split-words={headingLevel === 1 ? '' : undefined}>{title}</Heading>
+      )}
+      {more && items.length > 0 && <a class="btn btn--ghost more" href={more.href}>{more.label}</a>}
+    </div>
+    {items.length === 0 ? (
+      <p class="empty">{ctx.ui.noNews}</p>
+    ) : (
+      <ol class="log" role="list" data-loop>
+        {items.map((n, i) => (
+          <li data-reveal style={`--k:${i}`}>
+            <span class="node" aria-hidden="true"></span>
+            <a class="entry" href={n.href}>
+              <span class="stamp">
+                <span class="no" aria-hidden="true">{ctx.fmt.number(i + 1)}</span>
+                {n.date && <time>{n.date}</time>}
+              </span>
+              <h3>{n.title}</h3>
+              {n.excerpt && <p>{n.excerpt}</p>}
+            </a>
+          </li>
+        ))}
+      </ol>
+    )}
+  </div>
+</section>
+
+<style>
+  .top { --horizon: clamp(56px, 7vw, 96px); }
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  .head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }
+  .big { font-size: var(--step-5); }
+  .big::before { display: none; }
+  .more { min-block-size: 44px; font-size: var(--step--1); }
+  .empty { padding: var(--space-5); border: 1px dashed var(--night-line); border-radius: var(--radius-m); color: var(--night-muted); }
+
+  /* ---- The log ---- */
+  .log {
+    position: relative;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: var(--space-5);
+    padding-block-start: var(--space-6);
+  }
+  /* The trajectory through the nodes. */
+  .log::before {
+    content: ""; position: absolute; inset-inline: 0; inset-block-start: calc(var(--space-2) + 5px); block-size: 0;
+    border-block-start: 1.5px dashed color-mix(in oklab, var(--night-accent) 55%, transparent);
+  }
+  .log > li { position: relative; display: flex; min-inline-size: 0; }
+  .node {
+    position: absolute; inset-block-start: calc(-1 * var(--space-6) + var(--space-2)); inset-inline-start: var(--space-5);
+    inline-size: 12px; block-size: 12px; border-radius: 50%;
+    background: var(--c-highlight); box-shadow: 0 0 0 4px color-mix(in oklab, var(--c-highlight) 22%, transparent), 0 0 18px color-mix(in oklab, var(--c-highlight) 70%, transparent);
+  }
+  /* `.log a.entry` outweighs the night sky's link colour, so titles stay white. */
+  .log a.entry {
+    flex: 1; display: flex; flex-direction: column; gap: var(--space-3);
+    padding: var(--space-5);
+    background: color-mix(in oklab, var(--night-surface) 80%, transparent);
+    border: 1px solid var(--night-line); border-radius: var(--radius-l);
+    color: var(--night-ink); text-decoration: none;
+    transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base) linear, background-color var(--dur-base) linear;
+  }
+  .log a.entry:hover { transform: translateY(-4px); border-color: color-mix(in oklab, var(--night-accent) 60%, transparent); background: var(--night-surface); }
+  .entry:hover h3 { color: var(--night-accent); }
+  .stamp {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3);
+    font-size: var(--step--1); color: var(--night-muted); font-variant-numeric: tabular-nums;
+  }
+  .no {
+    display: inline-grid; place-items: center; min-inline-size: 2em; block-size: 2em; padding-inline: 0.4em;
+    border-radius: var(--radius-pill); border: 1px solid var(--night-line);
+    font-family: var(--font-display); font-weight: 600; color: var(--c-highlight);
+  }
+  h3 { font-size: var(--step-1); transition: color var(--dur-fast) linear; }
+  p { color: var(--night-muted); font-size: var(--step--1); }
+
+  @media (max-width: 720px) {
+    .log { grid-template-columns: minmax(0, 1fr); padding-block-start: 0; padding-inline-start: var(--space-6); }
+    .log::before { inset-block: var(--space-2); inset-inline: calc(var(--space-2) + 5px) auto; block-size: auto; inline-size: 0; border-block-start: 0; border-inline-start: 1.5px dashed color-mix(in oklab, var(--night-accent) 55%, transparent); }
+    .node { inset-block-start: var(--space-5); inset-inline-start: calc(-1 * var(--space-6) + var(--space-2)); }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.ob-motion) .node { animation: pulse 2.8s ease-in-out infinite; animation-delay: calc(var(--k) * 0.4s); }
+    [data-paused] .node { animation-play-state: paused; }
+  }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 9px color-mix(in oklab, var(--c-highlight) 0%, transparent), 0 0 26px color-mix(in oklab, var(--c-highlight) 80%, transparent); } }
+</style>
