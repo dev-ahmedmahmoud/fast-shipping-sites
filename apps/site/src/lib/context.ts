@@ -56,8 +56,9 @@ export interface PageContext {
 
 interface Portal { id: string; label: unknown; href: unknown; enabled: boolean }
 /** A menu entry with no page of its own that gathers items, e.g. My Account ▸ Portal, Weekly Plan.
- *  Items are "page:<id>", "portal:<id>" or "external:<index in navExternal>". */
-interface NavGroup { label: unknown; items: string[] }
+ *  Items are "page:<id>", "portal:<id>" or "external:<index in navExternal>". `nav` places the
+ *  group among the pages (same scale as a page's `nav`); without it the group comes last. */
+interface NavGroup { label: unknown; items: string[]; nav?: number }
 
 export function buildContext(entry: Pick<Entry, 'id' | 'locale'> & Partial<Entry>): PageContext {
   const locale = entry.locale;
@@ -73,7 +74,8 @@ export function buildContext(entry: Pick<Entry, 'id' | 'locale'> & Partial<Entry
     current: e.id === entry.id,
     children: inMenu.filter((c) => c.parent === e.id).map(item),
   });
-  const keyed: { key: string; item: NavItem }[] = inMenu.filter((e) => !e.parent).map((e) => ({ key: `page:${e.id}`, item: item(e) }));
+  // `order` sorts the top level: pages by their `nav`, then external links, portals and groups.
+  const keyed: { key: string; item: NavItem; order: number }[] = inMenu.filter((e) => !e.parent).map((e) => ({ key: `page:${e.id}`, item: item(e), order: e.nav! }));
   // A parent counts as current while one of its children is open.
   for (const { item: n } of keyed) if (n.children.some((c) => c.current)) n.current = true;
 
@@ -84,25 +86,25 @@ export function buildContext(entry: Pick<Entry, 'id' | 'locale'> & Partial<Entry
   };
   client.navExternal.forEach((ext: { label: unknown; href: unknown }, i: number) => {
     const n = external(ext.label, ext.href);
-    if (n) keyed.push({ key: `external:${i}`, item: n });
+    if (n) keyed.push({ key: `external:${i}`, item: n, order: 1000 + i });
   });
-  for (const p of (client.portals ?? []) as Portal[]) {
-    if (!p.enabled) continue;
+  ((client.portals ?? []) as Portal[]).forEach((p, i) => {
+    if (!p.enabled) return;
     const n = external(p.label, p.href);
-    if (n) keyed.push({ key: `portal:${p.id}`, item: n });
-  }
+    if (n) keyed.push({ key: `portal:${p.id}`, item: n, order: 2000 + i });
+  });
   // Groups take their items out of the top level; one sub-menu level only, so a grouped
   // page keeps its own page (Weekly Plan lists its grades) but not its sub-menu.
-  for (const g of ((client as { navGroups?: NavGroup[] }).navGroups ?? [])) {
+  ((client as { navGroups?: NavGroup[] }).navGroups ?? []).forEach((g, i) => {
     const children = g.items
       .map((k) => keyed.find((x) => x.key === k))
-      .filter((x): x is { key: string; item: NavItem } => !!x)
+      .filter((x): x is { key: string; item: NavItem; order: number } => !!x)
       .map((x) => { keyed.splice(keyed.indexOf(x), 1); return { ...x.item, children: [] }; });
     const text = pick(g.label, locale);
-    if (!children.length || !text) continue;
-    keyed.push({ key: `group:${text}`, item: { label: text, href: children[0].href, external: children[0].external, current: children.some((c) => c.current), children } });
-  }
-  const nav = keyed.map((x) => x.item);
+    if (!children.length || !text) return;
+    keyed.push({ key: `group:${text}`, item: { label: text, href: children[0].href, external: children[0].external, current: children.some((c) => c.current), children }, order: g.nav ?? 3000 + i });
+  });
+  const nav = keyed.sort((a, b) => a.order - b.order).map((x) => x.item);
 
   const footerNav = pagesHere.filter((e) => e.footer).map(item);
 

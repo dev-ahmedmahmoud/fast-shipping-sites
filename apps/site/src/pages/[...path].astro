@@ -65,7 +65,7 @@ const video = entry.template === 'home' && fm.hero
 ) : entry.template === 'news' ? (
   <Base ctx={ctx} title={entry.title} description={entry.description}>
     <NewsList ctx={ctx} title={entry.title} items={newsItems()} headingLevel={1} />
-    {news.map((n) => {
+    {news.filter((n) => !n.own).map((n) => {
       const Item = n.Content;
       return (
         <Prose ctx={ctx} title={n.title} lead={n.date ? ctx.fmt.date(n.date) : undefined} headingLevel={2} id={n.id}>
@@ -76,6 +76,6 @@ const video = entry.template === 'home' && fm.hero
   </Base>
 ) : (
   <Base ctx={ctx} title={entry.title} description={entry.description}>
-    <Prose ctx={ctx} title={entry.title} lead={fm.lead} todo={todo}>{Content && <Content />}</Prose>
+    <Prose ctx={ctx} title={entry.title} lead={fm.lead ?? (entry.date ? ctx.fmt.date(entry.date) : undefined)} todo={todo}>{Content && <Content />}</Prose>
   </Base>
 )}

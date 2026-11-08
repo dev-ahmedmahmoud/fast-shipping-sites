@@ -2,7 +2,7 @@
 // The combination is chosen by environment variables and wired in through
 // Vite aliases, so only the chosen parts enter the bundle.
 import { defineConfig } from 'astro/config';
-import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { copyFileSync, createReadStream, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { satteri } from '@astrojs/markdown-satteri';
@@ -44,8 +44,13 @@ const heroClipFiles = [...new Set((env.HERO_VIDEO && heroVideos[env.HERO_VIDEO] 
   .flatMap((v) => [v.src, v.webm])
   .filter((src) => typeof src === 'string' && src.startsWith('/media/stock/'))
   .map((src) => src.slice('/media/stock/'.length)))];
-// The site root sends visitors to the default language's home (Arabic first for LFIS).
-const rootRedirect = mode === 'site' ? { '/': `${base.replace(/\/+$/, '')}/${client.defaultLocale}/` } : {};
+// A client whose default-language home lives at the site root (Genesis: English at "/")
+// declares `slug: ""` on that page. Otherwise the root sends visitors to the default
+// language's home (Arabic first for LFIS).
+const homeAtRoot = readdirSync(path.join(clientDir, 'content'), { recursive: true })
+  .filter((f) => String(f).endsWith('.md'))
+  .some((f) => /^slug:\s*(""|''|"\/"|'\/'|\/)?\s*$/m.test(readFileSync(path.join(clientDir, 'content', String(f)), 'utf8').split(/^---\s*$/m)[1] ?? ''));
+const rootRedirect = mode === 'site' && !homeAtRoot ? { '/': `${base.replace(/\/+$/, '')}/${client.defaultLocale}/` } : {};
 
 export default defineConfig({
   root: fileURLToPath(new URL('.', import.meta.url)),

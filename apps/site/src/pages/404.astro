@@ -3,15 +3,23 @@ import Base from '../layouts/Base.astro';
 import { components } from '@layout/index';
 import { homeOf } from '@engine/content';
 import { buildContext } from '@engine/context';
+import { LOCALES, type Locale } from '@engine/i18n';
+import client from '@client/client.json';
 
 const { Prose } = components;
-const home = homeOf('ar');
-const ctx = buildContext({ ...home, id: '__404' });
-const enHome = buildContext({ ...homeOf('en'), id: '__404' }).site.homeHref;
+// The page speaks the client's default language, with a line in the other one.
+const main = client.defaultLocale as Locale;
+const other = LOCALES.find((l) => l !== main)!;
+const ctx = buildContext({ ...homeOf(main), id: '__404' });
+const otherHome = buildContext({ ...homeOf(other), id: '__404' }).site.homeHref;
+const OTHER_LINE: Record<Locale, string> = {
+  en: 'Page not found. Back to the English home page.',
+  ar: 'الصفحة غير موجودة. العودة إلى الصفحة الرئيسية بالعربية.',
+};
 ---
 <Base ctx={ctx} title={ctx.ui.notFound}>
   <Prose ctx={ctx} title={ctx.ui.notFound}>
     <p><a href={ctx.site.homeHref}>{ctx.ui.backHome}</a></p>
-    <p lang="en" dir="ltr"><a href={enHome}>Page not found. Back to the English home page.</a></p>
+    <p lang={other} dir={other === 'ar' ? 'rtl' : 'ltr'}><a href={otherHome}>{OTHER_LINE[other]}</a></p>
   </Prose>
 </Base>

@@ -21,3 +21,17 @@ button, input, select, textarea { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Partner and accreditation logos in content (`<div class="logos">`): every logo shown whole,
+   never cropped like a photo. The repeated class outranks a design system's general
+   `.prose img` rules; a system can still restyle `.logos` with its own, more specific rule. */
+.logos.logos.logos {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 8rem), 1fr));
+  gap: 1rem; align-items: center; margin-block: 1.5rem;
+}
+.logos.logos.logos > p { margin: 0; }
+.logos.logos.logos img {
+  display: block; inline-size: 100%; block-size: 5.5rem; aspect-ratio: auto; object-fit: contain;
+  padding: 0.75rem; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); border-radius: 0.6rem;
+  box-shadow: none; rotate: none; transform: none;
+}

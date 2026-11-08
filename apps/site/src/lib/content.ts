@@ -1,8 +1,10 @@
 // Loads the chosen client's pages and news from clients/<slug>/content/<locale>/**.md.
 // Each page declares a shared `id` (links the Arabic and English versions) and its
 // own `slug`, which is the exact URL path the old site used. News items live under
-// content/<locale>/news/ and have no URL of their own: they appear in full on the
-// locale's news page (template: news) and are linked by anchor.
+// content/<locale>/news/. Without a `slug` they have no URL of their own: they appear
+// in full on the locale's news page (template: news) and are linked by anchor. With a
+// `slug` (an old blog post's URL) they also get their own page there, and the news
+// page lists them with a link instead of repeating them in full.
 import type { ImageMetadata } from 'astro';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
 import client from '@client/client.json';
@@ -35,7 +37,10 @@ export interface Entry {
   footer?: boolean;
   template: 'home' | 'page' | 'news';
   todo: string[];
+  /** News items and their own pages: the publication date (YYYY-MM-DD). */
   date?: string;
+  /** News items only: true when the item has its own page (a `slug`), so lists link to it. */
+  own?: boolean;
   fm: Record<string, unknown>;
   Content: AstroComponentFactory;
   file: string;
@@ -103,12 +108,35 @@ function load(): Entry[] {
     const page = out.find((e) => e.template === 'news' && e.locale === locale);
     if (!page) throw new Error(`${where}: no news page (template: news) for locale "${locale}"`);
     const id = fm.id as string;
+    let own: Entry | undefined;
+    if (typeof fm.slug === 'string') {
+      const slug = fm.slug.replace(/^\/+|\/+$/g, '');
+      if (slugs.has(slug)) throw new Error(`${where}: slug "${slug}" already used by ${slugs.get(slug)}`);
+      slugs.set(slug, where);
+      own = {
+        kind: 'page',
+        id,
+        locale,
+        slug,
+        href: url(slug),
+        title: fm.title as string,
+        description: fm.description as string | undefined,
+        template: 'page',
+        todo: Array.isArray(fm.todo) ? (fm.todo as string[]) : [],
+        date: String(fm.date),
+        fm,
+        Content: mod.Content,
+        file: where,
+      };
+      out.push(own);
+    }
     out.push({
       kind: 'news',
       id,
       locale,
-      slug: page.slug,
-      href: `${page.href}#${id}`,
+      slug: own?.slug ?? page.slug,
+      href: own?.href ?? `${page.href}#${id}`,
+      own: !!own,
       title: fm.title as string,
       description: fm.description as string | undefined,
       template: 'news',

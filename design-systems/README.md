@@ -59,4 +59,4 @@ Section components also get their section data, with links already resolved:
 | CTA | `title`, `text?`, `action` |
 | Prose | `title`, `lead?`, `todo?`, `headingLevel?` (1 for a page title, 2 when several share a page, e.g. news items), `id?` (anchor); the page body arrives in the default slot |
 
-Imported page bodies use a few class names that every layout should style inside `Prose`: `.gallery` (a grid of images, from old sliders), `.students` (captioned photo grid), `.downloads` (file list), `.actions` (buttons), `.embed` and `.embed--map` (video and map iframes), `.note`, and `.form` (old-site forms shown as they were).
+Imported page bodies use a few class names that every layout should style inside `Prose`: `.gallery` (a grid of images, from old sliders), `.students` (captioned photo grid), `.downloads` (file list), `.actions` (buttons), `.embed` and `.embed--map` (video and map iframes), `.note`, `.form` (old-site forms shown as they were), and `.logos` (partner and accreditation logos; the engine's base CSS already shows them whole in a grid, so a layout only needs to style it if it wants a different look).

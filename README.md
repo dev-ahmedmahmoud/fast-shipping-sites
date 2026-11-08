@@ -2,7 +2,7 @@
 
 Syncology's engine for bilingual (Arabic/English) client websites: a set of reusable design systems, a per-client content pack, and a preview gallery so each client can pick a look before launch.
 
-Status: engine, a neutral `baseline` system and three client-facing systems (`playground`, `sketchbook`, `comic-class`); LFIS content imported from the old site (`clients/lfis/import-report.md`).
+Status: engine, a neutral `baseline` system and three client-facing systems (`playground`, `sketchbook`, `comic-class`). Clients: LFIS (`clients/lfis/import-report.md`) and Genesis (`clients/genesis/import-report.md`).
 
 ## Requirements
 
@@ -44,12 +44,13 @@ Other environment variables: `SHOW_TODO=0` hides the "content waiting to be impo
 
 ## Content rules
 
-- Arabic is the default language and right-to-left; English is left-to-right.
+- Each client picks its default language in `client.json` (`defaultLocale`): Arabic for LFIS, English for Genesis. Arabic is right-to-left; English is left-to-right.
+- The default language's home can live at the site root: give it `slug: ""` (Genesis keeps its old English URLs at `/…/` and puts Arabic under `/ar/…/`). Otherwise the root redirects to `/<defaultLocale>/` (LFIS).
 - Each page has a shared `id` (linking its two languages) and its own `slug`. Slugs keep the old site's URLs exactly. If a URL ever changes, list the old one in `oldSlugs` and a Cloudflare Pages `_redirects` file is generated.
 - Links in frontmatter use `page:<id>`, `edusync:<key>` (from `client.json`), a root-relative path, or a full URL. In page bodies, write root-relative paths (`/en/about-us-en/`, `/docs/file.pdf`) and `edusync:<key>`; the build adds the gallery base path and resolves EduSync links per language.
 - Images in bodies use Markdown syntax with a relative path (`![](../../media/x.jpg)`), so they are resized and served as WebP. Files in `public/` are linked root-relative.
-- Menu: `navGroups` in `client.json` gathers pages and portal links under one entry without a page of its own (LFIS: My Account). `nav: <n>` puts a page in the menu; `parent: <id>` puts it in that page's sub-menu; `navLabel` overrides the title in the menu. `footer: true` lists it in the footer. `draft: true` leaves a page out of the build (`SHOW_DRAFTS=1` includes it).
-- News items have `id`, `title` and `date` but no `slug`: they appear in full on the locale's news page (`template: news`) and link by anchor.
+- Menu: `navGroups` in `client.json` gathers pages and portal links under one entry without a page of its own (LFIS: My Account; Genesis: About, Life at Genesis). A group's `nav` places it among the pages; without it the group comes last. `nav: <n>` puts a page in the menu; `parent: <id>` puts it in that page's sub-menu; `navLabel` overrides the title in the menu. `footer: true` lists it in the footer. `draft: true` leaves a page out of the build (`SHOW_DRAFTS=1` includes it).
+- News items have `id`, `title` and `date`. Without a `slug` they appear in full on the locale's news page (`template: news`) and link by anchor (LFIS). With a `slug` (an old blog post's URL) they get their own page there, and the news page and home list link to it (Genesis). `description` is the excerpt shown in lists.
 - `translated: true` marks text translated for the new site where the old site had no version in that language.
 - Numbers and dates follow `numerals` and `calendar` in `client.json`. For LFIS that means Arabic-Indic digits and Gregorian dates.
 - A page's `todo:` frontmatter lists what is still missing. It shows on the page until you build with `SHOW_TODO=0`.
