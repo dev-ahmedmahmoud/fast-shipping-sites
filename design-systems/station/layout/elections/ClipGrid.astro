@@ -1,0 +1,68 @@
+---
+// Short clips: on a program file's page every speaker on that file (with a profile link); on a
+// candidate's page the candidate's clips grouped by program file (group title links to the
+// file). Each clip sits in a small brass frame with its caption on an enamel plate.
+import type { PageContext } from '@engine/context';
+import type { Clip } from '@elections/data';
+import Video from '@elections/Video.astro';
+interface Props {
+  ctx: PageContext;
+  id?: string;
+  title?: string;
+  groups: { title?: string; href?: string; clips: Clip[] }[];
+}
+const { id, title, groups } = Astro.props;
+// A candidate's page has several program files with a clip or two each: those groups sit side
+// by side instead of each taking a full-width row.
+const compact = groups.length > 1 && groups.every((g) => g.clips.length <= 2);
+---
+<section class="section" id={id}>
+  <div class="container wrap">
+    {title && <header class="st-title"><span class="st-sign st-rivets plate"><h2>{title}</h2></span></header>}
+    <div class:list={['groups', { compact }]}>
+    {groups.map((g) => (
+      <div class="group">
+        {g.title && <h3 class="file">{g.href ? <a href={g.href}>{g.title}</a> : g.title}</h3>}
+        <div class="grid">
+          {g.clips.map((clip) => (
+            <figure data-st-reveal>
+              <div class="frame"><Video video={clip.video} sizes="(max-width: 700px) 100vw, 33vw" widths={[384, 768, 1024]} /></div>
+              <figcaption>
+                {clip.name && <strong>{clip.name}</strong>}
+                <span>{clip.title}</span>
+                {clip.profile && <a href={clip.profile.href} aria-label={`${clip.profile.label}: ${clip.name}`}>{clip.profile.label}</a>}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-6); }
+  .plate { padding-inline: var(--space-8); }
+  .plate h2 { font-size: var(--step-2); }
+  .groups { display: flex; flex-direction: column; gap: var(--space-6); }
+  .groups.compact { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--space-6) var(--space-5); }
+  .group { display: flex; flex-direction: column; gap: var(--space-4); min-inline-size: 0; }
+  .compact .grid { grid-template-columns: minmax(0, 1fr); }
+  .compact .file { font-size: var(--step-1); }
+  .file { font-size: var(--step-2); padding-block-end: var(--space-2); border-block-end: 3px solid var(--st-brass); }
+  .file a { color: var(--st-enamel); text-decoration: none; }
+  .file a:hover { text-decoration: underline; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: var(--space-5); }
+  figure { margin: 0; display: flex; flex-direction: column; }
+  .frame { padding: 8px; border-radius: calc(var(--radius-m) + 4px); background: linear-gradient(150deg, var(--st-brass-hi), var(--st-brass) 45%, var(--st-brass-lo)); }
+  .frame :global(.el-video__icon) { inline-size: 64px; block-size: 64px; }
+  figcaption {
+    display: flex; flex-direction: column; gap: var(--space-1); flex: 1;
+    margin-inline: 10px; padding: var(--space-3) var(--space-4); border-radius: 0 0 var(--radius-m) var(--radius-m);
+    background: var(--st-enamel); color: var(--st-enamel-ink);
+  }
+  figcaption strong { font-family: var(--font-body); font-weight: 700; font-size: var(--step-1); }
+  figcaption span { font-size: var(--step-0); }
+  figcaption a { display: inline-flex; align-items: center; min-block-size: 44px; color: var(--st-brass-hi); font-family: var(--font-body); font-weight: 700; }
+</style>

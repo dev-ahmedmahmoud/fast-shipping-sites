@@ -1,0 +1,163 @@
+---
+// The station's name board: the crest and the list's name on an enamel plate, the menu as
+// platform direction signs under a brass rail, and the main call to action.
+import { Image } from 'astro:assets';
+import type { PageContext, NavItem } from '@engine/context';
+import kufiArabic from '../type-fonts/reem-kufi-arabic.woff2?url';
+import naskhArabic from '../type-fonts/noto-naskh-arabic.woff2?url';
+import kufiLatin from '../type-fonts/reem-kufi-latin.woff2?url';
+import naskhLatin from '../type-fonts/noto-naskh-latin.woff2?url';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const other = ctx.languages.find((l) => !l.current);
+// Ask for the page's two faces at once (the same files fonts.css bundles), so they are in hand
+// before the first paint and the headings never re-wrap when the font swaps in. These URLs
+// come without the build's base path (gallery samples live under /<client>/<sample>/), so add it.
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+const withBase = (u: string) => (base && !u.startsWith(`${base}/`) ? `${base}${u}` : u);
+const preload = (ctx.locale === 'ar' ? [kufiArabic, naskhArabic] : [kufiLatin, naskhLatin]).map(withBase);
+const linkAttrs = (item: NavItem) => ({
+  href: item.href,
+  'aria-current': item.current ? 'page' : undefined,
+  target: item.external ? '_blank' : undefined,
+  rel: item.external ? 'noopener' : undefined,
+});
+---
+{preload.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
+<header class="header">
+  <div class="rail" aria-hidden="true"></div>
+  <div class="container bar">
+    <a class="brand" href={ctx.site.homeHref} aria-label={ctx.site.name}>
+      {ctx.site.logo
+        ? <Image src={ctx.site.logo} alt="" height={56} densities={[1, 2]} class="logo" loading="eager" />
+        : <span class="mark" aria-hidden="true">{ctx.site.shortName}</span>}
+      <span class="name">{ctx.site.name}</span>
+    </a>
+
+    <div class="actions">
+      {other && (
+        <a class="lang" href={other.href} hreflang={other.locale} lang={other.locale}>{other.name}</a>
+      )}
+      {ctx.cta && (
+        <a class="btn btn--primary cta" href={ctx.cta.href}
+           target={ctx.cta.external ? '_blank' : undefined} rel={ctx.cta.external ? 'noopener' : undefined}>
+          {ctx.cta.label}
+        </a>
+      )}
+      <details class="nav-mobile">
+        <summary class="btn btn--ghost">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          {ctx.ui.menu}
+        </summary>
+        <nav aria-label={ctx.ui.menu}>
+          <ul role="list">
+            {ctx.nav.map((item) => (
+              <li>
+                <a {...linkAttrs(item)}>{item.label}</a>
+                {item.children.length > 0 && (
+                  <ul role="list" class="sub-mobile">
+                    {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+                  </ul>
+                )}
+              </li>
+            ))}
+            {ctx.cta && <li class="cta-mobile"><a class="btn btn--primary" href={ctx.cta.href}>{ctx.cta.label}</a></li>}
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+
+  <nav class="nav-desktop" aria-label={ctx.ui.menu}>
+    <ul role="list" class="container">
+      {ctx.nav.map((item) => (
+        <li class:list={[{ 'has-sub': item.children.length > 0 }]}>
+          <a {...linkAttrs(item)}>{item.label}</a>
+          {item.children.length > 0 && (
+            <ul role="list" class="sub">
+              {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .header {
+    position: sticky; inset-block-start: 0; z-index: 20;
+    background: color-mix(in srgb, var(--c-surface) 96%, transparent);
+    backdrop-filter: blur(10px);
+    border-block-end: 1px solid var(--c-line);
+    padding-block-start: env(safe-area-inset-top, 0px);
+  }
+  .rail { block-size: 5px; background: linear-gradient(90deg, var(--st-brass-lo), var(--st-brass-hi) 30%, var(--st-brass) 50%, var(--st-brass-hi) 70%, var(--st-brass-lo)); }
+  .bar { display: flex; align-items: center; gap: var(--space-4); min-block-size: 78px; }
+  .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--c-ink); text-decoration: none; min-inline-size: 0; }
+  .logo { block-size: 56px; inline-size: auto; }
+  .mark {
+    font-family: var(--font-display); font-weight: 700; padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-s); background: var(--st-enamel); color: var(--st-enamel-ink);
+  }
+  .name {
+    font-family: var(--font-display); font-weight: 700; font-size: var(--step-1); line-height: 1.3;
+    color: var(--st-enamel);
+  }
+  .actions { display: flex; align-items: center; gap: var(--space-3); margin-inline-start: auto; }
+  .lang { color: var(--c-ink); text-decoration: none; font-weight: 700; padding: var(--space-2); min-block-size: 48px; display: inline-flex; align-items: center; }
+  .lang:hover { text-decoration: underline; }
+
+  .nav-desktop { border-block-start: 1px solid var(--c-line); background: var(--c-bg); }
+  .nav-desktop > ul { display: flex; flex-wrap: wrap; gap: var(--space-1); padding-block: var(--space-1); }
+  .nav-desktop a, .nav-mobile a {
+    display: flex; align-items: center; min-block-size: 48px; padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-s); color: var(--c-ink); text-decoration: none;
+    font-family: var(--font-body); font-size: var(--step-0); font-weight: 700; white-space: nowrap;
+  }
+  .nav-desktop a { position: relative; }
+  .nav-desktop a::after {
+    content: ''; position: absolute; inset-inline: var(--space-4); inset-block-end: 6px; block-size: 3px; border-radius: 2px;
+    background: var(--st-brass); transform: scaleX(0); transform-origin: var(--origin, right);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  :global([dir='ltr']) .nav-desktop a::after { --origin: left; }
+  .nav-desktop a:hover::after, .nav-desktop a[aria-current='page']::after { transform: scaleX(1); }
+  .nav-desktop a[aria-current='page'] { color: var(--st-enamel); }
+  .has-sub { position: relative; }
+  .sub {
+    display: none; position: absolute; inset-inline-start: 0; inset-block-start: 100%; z-index: 5;
+    min-inline-size: 16rem; padding: var(--space-2);
+    background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius-m); box-shadow: var(--st-shadow);
+  }
+  .has-sub:hover > .sub, .has-sub:focus-within > .sub { display: block; }
+
+  .nav-mobile { display: none; position: relative; }
+  .nav-mobile summary { list-style: none; color: var(--c-ink); }
+  .nav-mobile summary::-webkit-details-marker { display: none; }
+  .nav-mobile nav {
+    position: absolute; inset-inline-end: 0; inset-block-start: calc(100% + var(--space-2));
+    inline-size: min(22rem, calc(100vw - 2 * var(--gutter))); max-block-size: 75vh; overflow-y: auto; padding: var(--space-2);
+    background: var(--c-surface); border: 2px solid var(--c-line); border-radius: var(--radius-m); box-shadow: var(--st-shadow);
+  }
+  .nav-mobile li + li { border-block-start: 1px solid var(--c-line); }
+  .nav-mobile a { white-space: normal; }
+  .nav-mobile a[aria-current='page'] { color: var(--st-enamel); background: var(--c-accent-soft); }
+  .sub-mobile { padding-inline-start: var(--space-4); }
+  .cta-mobile { display: none; padding: var(--space-2); }
+  .cta-mobile .btn { inline-size: 100%; color: var(--st-enamel-ink); }
+
+  @media (max-width: 1080px) {
+    .nav-desktop { display: none; }
+    .nav-mobile { display: block; }
+  }
+  @media (max-width: 720px) {
+    .cta { display: none; }
+    .cta-mobile { display: block; }
+    .name { font-size: var(--step-0); }
+    .logo { block-size: 48px; }
+  }
+  @media (max-width: 400px) {
+    .name { display: none; }
+  }
+</style>

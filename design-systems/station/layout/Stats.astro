@@ -1,0 +1,36 @@
+---
+// Figures on the departure board: each value on split-flap tiles that settle into place.
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; title?: string; items: { value: string; label: string }[] }
+const { title, items } = Astro.props;
+---
+<section class="section">
+  <div class="container">
+    <div class="board st-glass" data-st-flaps>
+      {title && <h2>{title}</h2>}
+      <dl class="stats">
+        {items.map((s) => (
+          <div class="stat">
+            <dt>{s.label}</dt>
+            <dd><span class="st-flap value" data-st-flap>{s.value}</span></dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .board {
+    display: flex; flex-direction: column; gap: var(--space-5);
+    padding: var(--space-6); border-radius: var(--radius-l);
+    background-color: var(--st-night); color: var(--st-enamel-ink);
+    box-shadow: inset 0 0 0 3px var(--st-brass), var(--st-shadow);
+  }
+  h2 { font-size: var(--step-2); color: var(--st-brass-hi); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: var(--space-5); }
+  .stat { display: flex; flex-direction: column-reverse; align-items: flex-start; gap: var(--space-2); }
+  dd { margin: 0; }
+  .value { font-size: var(--step-4); }
+  dt { color: color-mix(in oklab, var(--st-enamel-ink) 88%, var(--st-night)); }
+</style>

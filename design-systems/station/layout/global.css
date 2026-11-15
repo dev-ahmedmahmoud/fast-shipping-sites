@@ -1,0 +1,226 @@
+/* Tanta Station: page-wide styles and the station's shared fittings (enamel signs, brass
+   rivets, split-flap tiles, ticket edges). Components style themselves with scoped styles;
+   only what several of them share lives here. Every color derives from the palette roles. */
+:root {
+  /* The station hall at night, the brass of the fittings, the ticket stock. */
+  --st-night: color-mix(in oklab, var(--c-accent) 55%, var(--c-ink));
+  --st-night-2: color-mix(in oklab, var(--c-accent) 30%, var(--c-ink));
+  --st-brass: var(--c-highlight);
+  --st-brass-hi: color-mix(in oklab, var(--c-highlight) 60%, var(--c-surface));
+  --st-brass-lo: color-mix(in oklab, var(--c-highlight) 70%, var(--c-ink));
+  --st-enamel: var(--c-accent);
+  --st-enamel-ink: var(--c-accent-ink);
+  --st-flap: color-mix(in oklab, var(--c-ink) 88%, var(--c-accent));
+  --st-flap-ink: color-mix(in oklab, var(--c-accent-ink) 92%, var(--c-highlight));
+  --st-shadow: 0 1px 0 color-mix(in oklab, var(--c-ink) 12%, transparent), 0 14px 34px -14px color-mix(in oklab, var(--c-ink) 45%, transparent);
+  --st-tap: 52px;
+}
+
+body {
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: var(--weight-body);
+  line-height: var(--lh-body);
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  line-height: var(--lh-heading);
+  text-wrap: balance;
+}
+/* The Kufi is for large lettering only (titles, signs, numbers). Small headings, names,
+   buttons and labels use the Naskh in bold: it is what readers over 40 read fastest. */
+h3, h4 { font-family: var(--font-body); font-weight: var(--weight-strong); line-height: 1.5; }
+a { color: var(--c-accent); text-underline-offset: 0.25em; text-decoration-thickness: 0.08em; }
+a:hover { text-decoration-thickness: 0.14em; }
+:focus-visible { outline: 3px solid var(--st-brass); outline-offset: 3px; border-radius: 2px; }
+::selection { background: var(--c-accent-soft); color: var(--c-ink); }
+img { max-inline-size: 100%; }
+
+.container {
+  inline-size: 100%;
+  max-inline-size: calc(var(--max-width) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+}
+.section { padding-block: var(--space-8); }
+.section + .section { padding-block-start: 0; }
+
+.label {
+  font-family: var(--font-body);
+  font-size: var(--step--1);
+  font-weight: var(--weight-strong);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+:lang(ar) .label { text-transform: none; }
+
+/* ---------- buttons: enamel plates with a brass edge ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-block-size: var(--st-tap); padding-inline: var(--space-5); padding-block: var(--space-2);
+  border-radius: var(--radius-m); border: 2px solid transparent;
+  font-family: var(--font-body); font-size: var(--step-0); font-weight: var(--weight-strong);
+  line-height: 1.3; text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.btn--primary {
+  background: var(--st-enamel); color: var(--st-enamel-ink);
+  border-color: var(--st-brass);
+  box-shadow: inset 0 0 0 2px var(--st-enamel), inset 0 0 0 3px color-mix(in oklab, var(--st-enamel-ink) 55%, transparent), 0 3px 0 var(--st-brass-lo);
+}
+.btn--primary:hover { transform: translateY(-1px); box-shadow: inset 0 0 0 2px var(--st-enamel), inset 0 0 0 3px color-mix(in oklab, var(--st-enamel-ink) 75%, transparent), 0 4px 0 var(--st-brass-lo); }
+.btn--primary:active { transform: translateY(2px); box-shadow: inset 0 0 0 2px var(--st-enamel), inset 0 0 0 3px color-mix(in oklab, var(--st-enamel-ink) 55%, transparent), 0 1px 0 var(--st-brass-lo); }
+.btn--ghost { border-color: currentColor; color: var(--c-ink); background: transparent; }
+.btn--ghost:hover { background: color-mix(in oklab, currentColor 8%, transparent); }
+.btn--brass { background: var(--st-brass-hi); color: var(--c-ink); border-color: var(--st-brass-lo); box-shadow: 0 3px 0 var(--st-brass-lo); }
+.btn--brass:hover { transform: translateY(-1px); }
+.btn--brass:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--st-brass-lo); }
+button.btn { font: inherit; font-family: var(--font-body); font-weight: var(--weight-strong); }
+button.btn[aria-busy='true'] { opacity: 0.6; cursor: progress; }
+
+.skip-link { background: var(--st-enamel); color: var(--st-enamel-ink); }
+[dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+
+.todo-note {
+  border: 1px dashed var(--c-line); border-radius: var(--radius-m);
+  padding: var(--space-3) var(--space-4); background: var(--c-sunk);
+  font-size: var(--step--1); color: var(--c-muted);
+}
+.todo-note ul { margin: var(--space-2) 0 0; padding-inline-start: var(--space-5); }
+
+/* ---------- shared fittings ---------- */
+
+/* An enamel station sign: green plate, a fine cream pinstripe inside the edge, a brass rim. */
+.st-sign {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-m);
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--st-enamel) 88%, var(--st-enamel-ink)), var(--st-enamel) 38%, color-mix(in oklab, var(--st-enamel) 86%, var(--c-ink)));
+  color: var(--st-enamel-ink);
+  box-shadow:
+    inset 0 0 0 4px var(--st-enamel),
+    inset 0 0 0 6px color-mix(in oklab, var(--st-enamel-ink) 85%, transparent),
+    0 0 0 2px var(--st-brass),
+    var(--st-shadow);
+}
+/* Brass rivets at the sign's two inline ends. */
+.st-sign.st-rivets::before, .st-sign.st-rivets::after {
+  content: ''; position: absolute; inset-block-start: 50%; inline-size: 9px; block-size: 9px; margin-block-start: -4.5px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--st-brass-hi), var(--st-brass) 55%, var(--st-brass-lo));
+  box-shadow: 0 1px 1px color-mix(in oklab, var(--c-ink) 40%, transparent);
+}
+.st-sign.st-rivets::before { inset-inline-start: 14px; }
+.st-sign.st-rivets::after { inset-inline-end: 14px; }
+
+/* A split-flap tile: dark card, the hinge line across its middle, light lettering. */
+.st-flap {
+  position: relative; display: inline-grid; place-items: center;
+  min-inline-size: 1.6em; padding: 0.12em 0.4em;
+  border-radius: 6px;
+  background:
+    linear-gradient(to bottom, color-mix(in oklab, var(--st-flap) 82%, var(--st-flap-ink)) 0 49.4%, color-mix(in oklab, var(--c-ink) 92%, transparent) 49.4% 50.6%, var(--st-flap) 50.6% 100%);
+  color: var(--st-flap-ink);
+  font-family: var(--font-display); font-weight: 600; line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--st-flap-ink) 14%, transparent), inset 0 -2px 0 color-mix(in oklab, var(--c-ink) 60%, transparent), 0 2px 4px color-mix(in oklab, var(--c-ink) 35%, transparent);
+  transform-style: preserve-3d;
+}
+/* Tiny hinge pins at the hinge line's two ends. */
+.st-flap::before, .st-flap::after {
+  content: ''; position: absolute; inset-block-start: calc(50% - 3px); inline-size: 3px; block-size: 6px; border-radius: 1px;
+  background: color-mix(in oklab, var(--st-flap-ink) 30%, var(--st-flap));
+}
+.st-flap::before { inset-inline-start: 1px; }
+.st-flap::after { inset-inline-end: 1px; }
+
+/* A brass number plate (ballot numbers on cards and profiles). */
+.st-plate {
+  display: inline-grid; place-items: center; min-inline-size: 2.3em; block-size: 2.3em; padding-inline: 0.45em;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 30%, var(--st-brass-hi), var(--st-brass) 60%, var(--st-brass-lo));
+  color: var(--c-ink);
+  font-family: var(--font-display); font-weight: 700; line-height: 1;
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--st-brass-hi) 70%, transparent), 0 2px 0 var(--st-brass-lo), 0 6px 14px -6px color-mix(in oklab, var(--c-ink) 60%, transparent);
+}
+
+/* Roof glass of the station hall: a lattice of iron glazing bars over the night band. */
+.st-glass {
+  background-image:
+    repeating-linear-gradient(90deg, color-mix(in oklab, var(--st-enamel-ink) 6%, transparent) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(0deg, color-mix(in oklab, var(--st-enamel-ink) 5%, transparent) 0 1px, transparent 1px 64px);
+}
+
+/* Section titles as enamel signs, centred. */
+.st-title { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; }
+.st-title h2 { font-size: var(--step-3); }
+.st-title .st-sign h2 { font-size: var(--step-2); }
+.st-title p { color: var(--c-muted); font-size: var(--step-1); max-inline-size: 46ch; }
+
+/* ---------- engine widgets: press-to-play video ---------- */
+.el-video { border-radius: var(--radius-m); background: var(--st-night); }
+.el-video__icon {
+  inline-size: 84px; block-size: 84px;
+  background: radial-gradient(circle at 35% 30%, var(--st-brass-hi), var(--st-brass) 62%, var(--st-brass-lo));
+  box-shadow: 0 0 0 6px color-mix(in oklab, var(--c-ink) 35%, transparent), 0 12px 28px color-mix(in oklab, var(--c-ink) 55%, transparent);
+}
+.el-video__icon::after { border-left-color: var(--c-ink); }
+.el-video__label { font-family: var(--font-body); font-weight: 700; font-size: var(--step-1); padding: var(--space-6) var(--space-5) var(--space-4); }
+
+/* ---------- engine widgets: the supporters' booking office ---------- */
+.el-sup__card {
+  gap: var(--space-4); padding: var(--space-6) var(--space-5);
+  border: 2px solid var(--c-line); border-radius: var(--radius-l); background: var(--c-surface);
+  box-shadow: var(--st-shadow);
+}
+.el-sup__intro { color: var(--c-muted); font-size: var(--step-1); }
+.el-sup__tabs { border-radius: var(--radius-m); background: var(--c-sunk); padding: 6px; gap: 6px; }
+.el-sup__tab { min-block-size: var(--st-tap); border-radius: var(--radius-s); font-family: var(--font-body); font-weight: 700; font-size: var(--step-0); color: var(--c-ink); }
+.el-sup__tab[aria-selected='true'] { background: var(--st-enamel); color: var(--st-enamel-ink); box-shadow: inset 0 0 0 2px var(--st-enamel), inset 0 0 0 3px color-mix(in oklab, var(--st-enamel-ink) 60%, transparent); }
+.el-sup__f { font-size: var(--step-0); gap: var(--space-2); }
+.el-sup__f input, .el-sup__cc select, .el-sup__url, .el-form__input {
+  min-block-size: var(--st-tap); font-size: var(--step-0); padding-inline: var(--space-4);
+  border: 2px solid var(--c-line); border-radius: var(--radius-m); background: var(--c-bg); color: var(--c-ink);
+}
+.el-sup__f input:focus, .el-form__input:focus, .el-sup__url:focus { border-color: var(--st-enamel); outline: 3px solid color-mix(in oklab, var(--st-brass) 60%, transparent); outline-offset: 1px; }
+.el-sup__cc b { min-block-size: var(--st-tap); border: 2px solid var(--c-line); border-radius: var(--radius-m); font-family: var(--font-body); font-weight: 700; }
+.el-sup__go, .el-form__go {
+  min-block-size: var(--st-tap); padding-inline: var(--space-6); border-radius: var(--radius-m);
+  border: 2px solid var(--st-brass);
+  background: var(--st-enamel); color: var(--st-enamel-ink);
+  font-family: var(--font-body); font-weight: 700; font-size: var(--step-0);
+  box-shadow: inset 0 0 0 2px var(--st-enamel), inset 0 0 0 3px color-mix(in oklab, var(--st-enamel-ink) 55%, transparent), 0 3px 0 var(--st-brass-lo);
+}
+.el-sup__go--alt { background: transparent; color: var(--st-enamel); box-shadow: none; border-color: currentColor; }
+.el-sup__link, .el-sup__inline { color: var(--st-enamel); font-size: var(--step-0); min-block-size: 44px; }
+.el-sup__hello { font-family: var(--font-display); font-size: var(--step-3); color: var(--st-enamel); }
+.el-sup__label { font-family: var(--font-body); font-weight: 700; }
+.el-sup__num b { font-size: var(--step-5); color: var(--st-enamel); }
+.el-sup__bar { block-size: 14px; background: var(--c-sunk); box-shadow: inset 0 1px 2px color-mix(in oklab, var(--c-ink) 25%, transparent); }
+.el-sup__fill { background: linear-gradient(90deg, var(--st-brass-lo), var(--st-brass), var(--st-brass-hi)); }
+.el-sup__demo, .el-form__demo { border-inline-start: 4px solid var(--st-brass); background: color-mix(in oklab, var(--st-brass) 12%, var(--c-surface)); font-size: var(--step--1); }
+.el-sup__err, .el-form__err { color: color-mix(in oklab, #b3261e 85%, var(--c-ink)); font-size: var(--step--1); }
+
+/* ---------- engine widgets: complaints form ---------- */
+.el-form {
+  gap: var(--space-5); padding: var(--space-6) var(--space-5);
+  border: 2px solid var(--c-line); border-radius: var(--radius-l); background: var(--c-surface); box-shadow: var(--st-shadow);
+}
+.el-form__label { font-family: var(--font-body); font-weight: 700; font-size: var(--step-0); }
+.el-form__req { color: var(--st-brass-lo); }
+.el-form__choice { min-block-size: var(--st-tap); padding-inline: var(--space-5); border: 2px solid var(--c-line); border-radius: var(--radius-m); font-size: var(--step-0); }
+.el-form__choice:has(input:checked) { border-color: var(--st-enamel); background: var(--c-accent-soft); }
+.el-form__choice input { inline-size: 20px; block-size: 20px; }
+.el-form__file-btn { min-block-size: var(--st-tap); padding-inline: var(--space-5); border: 2px dashed var(--st-enamel); border-radius: var(--radius-m); color: var(--st-enamel); font-family: var(--font-body); font-weight: 700; }
+.el-form__help { font-size: var(--step--1); }
+
+/* The supporters' app is built in the browser: hold its place until it appears, so the footer
+   does not jump down when it does. */
+.el-sup:not(:has(.el-sup__card)) { min-block-size: 66rem; }
+@media (min-width: 700px) { .el-sup:not(:has(.el-sup__card)) { min-block-size: 58rem; } }

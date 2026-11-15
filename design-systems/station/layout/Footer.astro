@@ -1,0 +1,115 @@
+---
+// The station at night: the facade's arches and clock tower drawn against the sky, the rails
+// in brass, then the links, contact and the legal line on the dark band.
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const links = [...ctx.nav.filter((n) => !n.external), ...ctx.footerNav];
+const external = ctx.nav.filter((n) => n.external);
+const c = ctx.contact;
+const hasContact = !!(c.address || c.phones.length || c.emails.length || c.hours || c.mapUrl);
+// Seven arched bays of the facade, the middle one under the clock tower.
+const bays = Array.from({ length: 7 }, (_, i) => i);
+---
+<footer class="footer">
+  <svg class="facade" viewBox="0 0 1200 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+    <g class="ink">
+      <path d="M0 150 V112 H1200 V150 Z" />
+      {bays.map((i) => {
+        const x = 180 + i * 140;
+        return <path d={`M${x - 52} 112 V76 A52 46 0 0 1 ${x + 52} 76 V112 Z`} />;
+      })}
+      <path d="M548 112 V40 H566 V18 L600 0 L634 18 V40 H652 V112 Z" />
+    </g>
+    <g class="lit">
+      {bays.map((i) => {
+        const x = 180 + i * 140;
+        return <path d={`M${x - 40} 112 V80 A40 34 0 0 1 ${x + 40} 80 V112`} />;
+      })}
+      <circle cx="600" cy="54" r="11" />
+    </g>
+  </svg>
+  <div class="rails" aria-hidden="true"></div>
+
+  <div class="container grid">
+    <div class="col brand">
+      <p class="name">{ctx.site.name}</p>
+      {ctx.site.motto && <p class="motto">{ctx.site.motto}</p>}
+    </div>
+
+    <nav class="col" aria-label={ctx.ui.links}>
+      <h2 class="label">{ctx.ui.links}</h2>
+      <ul role="list">
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        {external.map((l) => <li><a href={l.href} target="_blank" rel="noopener">{l.label}<span class="sr-only"> {ctx.ui.newTab}</span></a></li>)}
+      </ul>
+    </nav>
+
+    {hasContact && (
+      <div class="col">
+        <h2 class="label">{ctx.ui.contact}</h2>
+        <ul role="list">
+          {c.address && <li>{c.address}</li>}
+          {c.phones.map((p) => (
+            <li>{p.label && <>{p.label}: </>}<a href={`tel:${p.number.replace(/\s+/g, '')}`} dir="ltr">{p.number}</a></li>
+          ))}
+          {c.emails.map((e) => <li>{e.label}: <a href={`mailto:${e.address}`} dir="ltr">{e.address}</a></li>)}
+          {c.hours && <li>{c.hours}</li>}
+          {c.mapUrl && <li><a href={c.mapUrl} target="_blank" rel="noopener">{ctx.ui.map}</a></li>}
+        </ul>
+      </div>
+    )}
+
+    {ctx.social.length > 0 && (
+      <div class="col">
+        <h2 class="label">{ctx.ui.follow}</h2>
+        <ul role="list" class="social">
+          {ctx.social.map((s) => <li><a href={s.href} target="_blank" rel="noopener" lang="en">{s.label}<span class="sr-only"> {ctx.ui.newTab}</span></a></li>)}
+        </ul>
+      </div>
+    )}
+  </div>
+  <div class="container legal">
+    <p>{ctx.legal.copyright ?? `© ${ctx.year} ${ctx.site.name}. ${ctx.ui.rights}.`}</p>
+    {ctx.legal.credit && (
+      <p>{ctx.legal.credit.href ? <a href={ctx.legal.credit.href} target="_blank" rel="noopener">{ctx.legal.credit.text}</a> : ctx.legal.credit.text}</p>
+    )}
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative; margin-block-start: var(--space-8);
+    background: var(--st-night); color: var(--st-enamel-ink);
+    padding-block-end: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  }
+  .facade { display: block; inline-size: 100%; block-size: clamp(70px, 11vw, 150px); background: var(--c-bg); }
+  .facade .ink { fill: var(--st-night); }
+  .facade .lit { fill: none; stroke: var(--st-brass); stroke-width: 2; opacity: 0.75; }
+  .facade circle { fill: var(--st-brass-hi); stroke: none; }
+  .rails {
+    block-size: 10px;
+    background:
+      linear-gradient(var(--st-brass) 0 0) top / 100% 2px no-repeat,
+      linear-gradient(var(--st-brass-lo) 0 0) bottom / 100% 2px no-repeat,
+      repeating-linear-gradient(90deg, color-mix(in oklab, var(--st-brass) 45%, transparent) 0 6px, transparent 6px 26px);
+  }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--space-6);
+    padding-block: var(--space-7) var(--space-5);
+  }
+  .col { display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; }
+  .col ul { display: flex; flex-direction: column; gap: var(--space-1); }
+  .col li { overflow-wrap: anywhere; }
+  .col a { color: var(--st-enamel-ink); text-decoration: none; display: inline-flex; align-items: center; min-block-size: 44px; }
+  .col a:hover { color: var(--st-brass-hi); text-decoration: underline; }
+  .label { color: var(--st-brass-hi); }
+  .name { font-family: var(--font-display); font-weight: 700; font-size: var(--step-2); line-height: var(--lh-heading); }
+  .motto { color: color-mix(in oklab, var(--st-enamel-ink) 82%, var(--st-night)); font-size: var(--step-1); }
+  .legal {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3);
+    padding-block-start: var(--space-4); border-block-start: 1px solid color-mix(in oklab, var(--st-brass) 40%, transparent);
+    color: color-mix(in oklab, var(--st-enamel-ink) 85%, var(--st-night)); font-size: var(--step--1);
+  }
+  .legal a { color: inherit; }
+</style>

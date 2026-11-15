@@ -1,0 +1,79 @@
+---
+// A generic (non-election) hero: the station hall at night under its glass roof, the title
+// in the light, and the first photo (or silent clip) framed in an arched hall window.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action, HeroVideo } from '@engine/content';
+import HeroMedia from '@engine/HeroMedia.astro';
+interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[]; video?: HeroVideo | null }
+const { eyebrow, title, lead, actions, images = [], video } = Astro.props;
+const [first, ...rest] = images;
+---
+<section class="hero st-glass" data-st-ambient>
+  <span class="beam" aria-hidden="true"></span>
+  <div class="container grid">
+    <div class="copy">
+      {eyebrow && <p class="st-sign st-rivets eyebrow">{eyebrow}</p>}
+      <h1 data-split-words>{title}</h1>
+      {lead && <p class="lead">{lead}</p>}
+      {actions.length > 0 && (
+        <div class="actions">
+          {actions.map((a, i) => (
+            <a class:list={['btn', i === 0 ? 'btn--brass' : 'btn--ghost']} href={a.href}
+               target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>{a.label}</a>
+          ))}
+        </div>
+      )}
+    </div>
+    {first && (
+      <div class="window">
+        <HeroMedia image={first} video={video} widths={[480, 760, 1024]} sizes="(max-width: 900px) 90vw, 40vw" fetchpriority="high" />
+      </div>
+    )}
+  </div>
+  {rest.length > 0 && (
+    <ul class="container strip" role="list">
+      {rest.slice(0, 3).map((img) => (
+        <li><Image src={img} alt="" widths={[360, 640]} sizes="(max-width: 720px) 50vw, 22vw" loading="lazy" /></li>
+      ))}
+    </ul>
+  )}
+</section>
+
+<style>
+  .hero {
+    position: relative; overflow: hidden; isolation: isolate;
+    padding-block: var(--space-8);
+    background-color: var(--st-night); color: var(--st-enamel-ink);
+  }
+  .beam {
+    position: absolute; z-index: -1; inset-block-start: -80px; inset-inline-end: 8%; inline-size: 46%; block-size: calc(100% + 160px);
+    background: linear-gradient(to bottom, color-mix(in oklab, var(--st-brass-hi) 22%, transparent), transparent 70%);
+    clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%);
+    opacity: 0.7; pointer-events: none;
+  }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: var(--space-7); align-items: center; }
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; }
+  .eyebrow { font-family: var(--font-display); font-size: var(--step-0); font-weight: 600; padding-inline: var(--space-7); }
+  h1 { font-size: var(--step-5); max-inline-size: 16ch; }
+  .lead { font-size: var(--step-1); max-inline-size: 40ch; color: color-mix(in oklab, var(--st-enamel-ink) 88%, var(--st-night)); }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .actions .btn--ghost { color: var(--st-enamel-ink); }
+  .window {
+    position: relative; min-inline-size: 0;
+    padding: 10px; border-radius: 50% 50% var(--radius-m) var(--radius-m) / 32% 32% var(--radius-m) var(--radius-m);
+    background: linear-gradient(160deg, var(--st-brass-hi), var(--st-brass) 45%, var(--st-brass-lo));
+    box-shadow: 0 30px 60px -30px color-mix(in oklab, var(--c-ink) 80%, transparent);
+  }
+  .window :global(.fss-hero-media), .window :global(img), .window :global(video) {
+    border-radius: 50% 50% var(--radius-s) var(--radius-s) / 30% 30% var(--radius-s) var(--radius-s);
+  }
+  .window :global(img) { inline-size: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block; }
+  .strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-block-start: var(--space-7); }
+  .strip :global(img) { inline-size: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--radius-m); border: 3px solid var(--st-brass); display: block; }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .window { max-inline-size: 26rem; justify-self: center; }
+  }
+</style>

@@ -1,0 +1,111 @@
+---
+// "Vote for the full list" as a vintage railway ticket: card stock with punched holes and a
+// perforated tear line; inside it, the departure board where every ballot number and name
+// flips into place, group by group.
+// Engine hooks (kept): the section carries [data-el-ballot] and id; the download button is
+// <button type="button" data-el-card>. The downloaded PNG takes the --el-card-* colors set here.
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import type { BallotGroup } from '@elections/data';
+interface Props {
+  ctx: PageContext;
+  id: string;
+  title: string;
+  text: string;
+  groups: BallotGroup[];
+  share: { label: string; href: string };
+  support: Action | null;
+  download: { label: string };
+}
+const { id, title, text, groups, share, support, download } = Astro.props;
+---
+<section class="section ballot" id={id} data-el-ballot aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <div class="ticket">
+      <header class="head">
+        <h2 id={`${id}-title`}>{title}</h2>
+        <p>{text}</p>
+      </header>
+      <div class="board" data-st-flaps>
+        {groups.map((g) => (
+          <div class="group">
+            <h3>{g.label}</h3>
+            <ol role="list">
+              {g.rows.map((r) => (
+                <li>
+                  <span class="st-flap num" aria-hidden="true" data-st-digits>{r.number}</span>
+                  <span class="sr-only">{r.number}</span>
+                  <span class="who">
+                    <strong class="st-flap name" data-st-flap>{r.name}</strong>
+                    <small>{r.seat}</small>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
+      <div class="actions">
+        <a class="btn btn--primary" href={share.href} target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M9 8.5c0 3.5 2.5 6.5 6.5 6.5l1-1.6-2-1-1 1c-1.2-.4-2.6-1.8-3-3l1-1-1-2Z" fill="currentColor" /></svg>
+          {share.label}
+        </a>
+        {support && <a class="btn btn--ghost" href={support.href}>{support.label}</a>}
+        <button class="btn btn--brass" type="button" data-el-card>
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          {download.label}
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ballot {
+    --el-card-bg: var(--st-night-2); --el-card-bg2: var(--st-enamel);
+    --el-card-accent: var(--st-brass-hi); --el-card-accent2: var(--st-brass);
+    --el-card-ink: var(--st-enamel-ink);
+  }
+  .ticket {
+    --hole: 13px;
+    position: relative; display: flex; flex-direction: column; gap: var(--space-6);
+    padding: var(--space-7) var(--space-6) var(--space-6);
+    border-radius: var(--radius-l);
+    background:
+      repeating-linear-gradient(0deg, color-mix(in oklab, var(--c-ink) 3%, transparent) 0 1px, transparent 1px 6px),
+      var(--c-surface);
+    box-shadow: inset 0 0 0 2px var(--c-line), inset 0 0 0 10px var(--c-surface), inset 0 0 0 11px color-mix(in oklab, var(--st-enamel) 45%, transparent), var(--st-shadow);
+    /* Two punched holes near the top corners. */
+    -webkit-mask: radial-gradient(circle var(--hole) at 36px 36px, transparent 98%, #000) top left / 51% 100% no-repeat,
+                  radial-gradient(circle var(--hole) at calc(100% - 36px) 36px, transparent 98%, #000) top right / 51% 100% no-repeat;
+            mask: radial-gradient(circle var(--hole) at 36px 36px, transparent 98%, #000) top left / 51% 100% no-repeat,
+                  radial-gradient(circle var(--hole) at calc(100% - 36px) 36px, transparent 98%, #000) top right / 51% 100% no-repeat;
+  }
+  .head { text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
+  h2 { font-size: var(--step-4); color: var(--st-enamel); }
+  .head p { color: var(--c-muted); font-size: var(--step-1); max-inline-size: 46ch; }
+  .board {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: var(--space-5);
+    padding: var(--space-5); border-radius: var(--radius-m);
+    background-color: var(--st-night-2); color: var(--st-enamel-ink);
+    background-image: repeating-linear-gradient(0deg, color-mix(in oklab, var(--st-enamel-ink) 4%, transparent) 0 1px, transparent 1px 8px);
+    box-shadow: inset 0 0 0 3px var(--st-brass), inset 0 6px 18px color-mix(in oklab, var(--c-ink) 55%, transparent);
+  }
+  .group { display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; }
+  h3 { font-size: var(--step-0); color: var(--st-brass-hi); padding-block-end: var(--space-2); border-block-end: 1px solid color-mix(in oklab, var(--st-brass) 45%, transparent); }
+  ol { display: flex; flex-direction: column; gap: var(--space-2); }
+  li { display: flex; align-items: center; gap: var(--space-3); }
+  .num { flex: 0 0 auto; min-inline-size: 2.4em; font-size: var(--step-2); padding-block: 0.1em; }
+  .who { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-inline-size: 0; }
+  .name { font-family: var(--font-body); font-weight: 700; font-size: var(--step-0); line-height: 1.6; padding: 0.1em 0.7em; justify-items: start; }
+  small { font-size: var(--step--1); color: color-mix(in oklab, var(--st-enamel-ink) 85%, var(--st-night-2)); }
+  .actions {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3);
+    padding-block-start: var(--space-5); border-block-start: 3px dashed color-mix(in oklab, var(--st-enamel) 35%, var(--c-line));
+  }
+  @media (max-width: 560px) {
+    .ticket { padding: var(--space-7) var(--space-3) var(--space-5); }
+    .board { padding: var(--space-4) var(--space-3); }
+    .actions .btn { flex: 1 1 100%; }
+  }
+</style>

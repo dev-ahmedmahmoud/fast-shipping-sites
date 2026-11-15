@@ -1,0 +1,97 @@
+---
+// A reading page: the title on an enamel band, then the text as a timetable notice on card
+// stock: wide margins, large Naskh, headings as small platform plates.
+import type { PageContext } from '@engine/context';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  todo?: string[];
+  /** 1 for a page's own title (default); 2 when several Prose blocks share a page, e.g. news items. */
+  headingLevel?: 1 | 2;
+  /** Anchor id, so other pages can link to this block. */
+  id?: string;
+}
+const { ctx, title, lead, todo = [], headingLevel = 1, id } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+---
+<article class:list={['page', { item: headingLevel === 2 }]} id={id}>
+  {headingLevel === 1 ? (
+    <header class="band st-glass">
+      <div class="container narrow head">
+        <Heading data-split-words>{title}</Heading>
+        {lead && <p class="lead">{lead}</p>}
+      </div>
+    </header>
+  ) : (
+    <header class="container narrow head small">
+      <Heading data-split-words>{title}</Heading>
+      {lead && <p class="lead">{lead}</p>}
+    </header>
+  )}
+  <div class="container narrow body">
+    {todo.length > 0 && (
+      <aside class="todo-note">
+        <strong>{ctx.ui.pending}</strong>
+        <ul lang="en" dir="ltr">{todo.map((t) => <li>{t}</li>)}</ul>
+      </aside>
+    )}
+    <div class="prose st-prose">
+      <slot />
+    </div>
+  </div>
+</article>
+
+<style>
+  .narrow { max-inline-size: calc(48rem + 2 * var(--gutter)); }
+  .band { background-color: var(--st-night); color: var(--st-enamel-ink); padding-block: var(--space-8) var(--space-7); box-shadow: inset 0 -5px 0 var(--st-brass); }
+  .head { display: flex; flex-direction: column; gap: var(--space-3); }
+  .head.small { padding-block-start: var(--space-7); }
+  h1 { font-size: var(--step-4); }
+  .item h2 { font-size: var(--step-3); color: var(--st-enamel); }
+  .item { scroll-margin-block-start: 140px; border-block-start: 1px solid var(--c-line); margin-block-start: var(--space-7); }
+  .lead { font-size: var(--step-1); }
+  .band .lead { color: color-mix(in oklab, var(--st-enamel-ink) 88%, var(--st-night)); }
+  .small .lead { color: var(--c-muted); font-size: var(--step-0); }
+  .body { display: flex; flex-direction: column; gap: var(--space-5); padding-block: var(--space-7) var(--space-5); }
+  .prose { min-inline-size: 0; }
+  .prose :global(> * + *) { margin-block-start: var(--space-4); }
+  .prose :global(h2) {
+    display: table; font-size: var(--step-2); margin-block-start: var(--space-7);
+    padding: var(--space-1) var(--space-4); border-radius: var(--radius-s);
+    background: var(--st-enamel); color: var(--st-enamel-ink); box-shadow: 0 3px 0 var(--st-brass);
+  }
+  .prose :global(h2:first-child) { margin-block-start: 0; }
+  .prose :global(h3) { font-size: var(--step-1); margin-block-start: var(--space-6); color: var(--st-enamel); }
+  .prose :global(h4) { font-size: var(--step-0); margin-block-start: var(--space-5); }
+  .prose :global(ul), .prose :global(ol) { padding-inline-start: var(--space-5); }
+  .prose :global(li + li) { margin-block-start: var(--space-2); }
+  .prose :global(li::marker) { color: var(--st-brass-lo); }
+  .prose :global(img) { border-radius: var(--radius-m); }
+  .prose :global(video) { inline-size: 100%; border-radius: var(--radius-m); background: var(--c-sunk); }
+  .prose :global(.embed) { inline-size: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: var(--radius-m); background: var(--c-sunk); }
+  .prose :global(.embed--map) { aspect-ratio: 4 / 3; }
+  .prose :global(blockquote) { margin-inline: 0; padding-inline-start: var(--space-4); border-inline-start: 4px solid var(--st-brass); color: var(--c-muted); }
+  .prose :global(table) { border-collapse: collapse; inline-size: 100%; display: block; overflow-x: auto; }
+  .prose :global(th), .prose :global(td) { border: 1px solid var(--c-line); padding: var(--space-2) var(--space-3); text-align: start; }
+  .prose :global(th) { background: var(--c-accent-soft); font-family: var(--font-display); }
+  .prose :global(.actions) { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .prose :global(.downloads) { list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+  .prose :global(.downloads li) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2) var(--space-4); padding: var(--space-3) var(--space-4); border: 2px solid var(--c-line); border-radius: var(--radius-m); background: var(--c-surface); }
+  .prose :global(.downloads li + li) { margin-block-start: 0; }
+  .prose :global(.gallery) { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr)); gap: var(--space-3); }
+  .prose :global(.gallery img) { inline-size: 100%; block-size: auto; border: 3px solid var(--st-brass); }
+  .prose :global(.students) { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); gap: var(--space-4); }
+  .prose :global(.students figure) { margin: 0; display: flex; flex-direction: column; gap: var(--space-2); text-align: center; }
+  .prose :global(.students img) { inline-size: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+  .prose :global(.students figcaption) { font-size: var(--step--1); }
+  .prose :global(.note) { padding: var(--space-3) var(--space-4); border-radius: var(--radius-m); background: var(--c-accent-soft); border-inline-start: 4px solid var(--st-enamel); }
+
+  .prose :global(.form) { display: grid; gap: var(--space-3); padding: var(--space-5); border: 2px solid var(--c-line); border-radius: var(--radius-m); background: var(--c-surface); }
+  .prose :global(.form input), .prose :global(.form select), .prose :global(.form textarea) {
+    inline-size: 100%; min-block-size: var(--st-tap); padding: var(--space-2) var(--space-3);
+    border: 2px solid var(--c-line); border-radius: var(--radius-m); background: var(--c-bg); font: inherit;
+  }
+  .prose :global(.form textarea) { min-block-size: 7rem; resize: vertical; }
+  .prose :global(.form button[disabled]) { opacity: 0.6; cursor: not-allowed; justify-self: start; }
+</style>

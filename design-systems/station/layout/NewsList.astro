@@ -1,0 +1,56 @@
+---
+// News as a timetable: the date where the departure time would be, the title as the destination.
+import type { PageContext } from '@engine/context';
+interface NewsItem { title: string; href: string; date?: string; excerpt?: string }
+interface Props { ctx: PageContext; title?: string; items: NewsItem[]; more?: { label: string; href: string } | null; headingLevel?: 1 | 2 }
+const { ctx, title, items, more, headingLevel = 2 } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+---
+<section class="section">
+  <div class="container stack">
+    <div class="head">
+      {title && <Heading class:list={['title', { big: headingLevel === 1 }]} data-st-reveal>{title}</Heading>}
+      {more && items.length > 0 && <a class="btn btn--ghost" href={more.href}>{more.label}</a>}
+    </div>
+    {items.length === 0 ? (
+      <p class="empty">{ctx.ui.noNews}</p>
+    ) : (
+      <ul class="table" role="list">
+        {items.map((n, i) => (
+          <li data-st-reveal style={`--i:${i}`}>
+            <a class="row" href={n.href}>
+              {n.date && <time class="date">{n.date}</time>}
+              <span class="what">
+                <h3>{n.title}</h3>
+                {n.excerpt && <p>{n.excerpt}</p>}
+              </span>
+              <svg class="arrow flip-rtl" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-5); }
+  .head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .title { font-size: var(--step-3); }
+  .title.big { font-size: var(--step-4); }
+  .empty { color: var(--c-muted); padding: var(--space-5); border: 2px dashed var(--c-line); border-radius: var(--radius-m); }
+  .table { border-block-start: 3px solid var(--st-enamel); }
+  .table li { border-block-end: 1px solid var(--c-line); }
+  .row {
+    display: grid; grid-template-columns: 9rem minmax(0, 1fr) auto; gap: var(--space-4); align-items: center;
+    padding: var(--space-4) var(--space-2); color: var(--c-ink); text-decoration: none;
+    transition: background-color var(--dur-fast) var(--ease-out);
+  }
+  .row:hover { background: var(--c-accent-soft); }
+  .date { font-family: var(--font-display); color: var(--st-enamel); font-variant-numeric: tabular-nums; }
+  .what { display: flex; flex-direction: column; gap: var(--space-1); min-inline-size: 0; }
+  h3 { font-size: var(--step-1); }
+  p { color: var(--c-muted); }
+  .arrow { color: var(--st-brass-lo); }
+  @media (max-width: 640px) { .row { grid-template-columns: minmax(0, 1fr) auto; } .date { grid-column: 1 / -1; } }
+</style>

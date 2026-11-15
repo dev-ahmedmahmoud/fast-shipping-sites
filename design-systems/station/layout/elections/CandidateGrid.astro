@@ -1,0 +1,113 @@
+---
+// The candidates as a train of carriages: each one an arched window with the candidate's
+// portrait in the light, a brass plate carrying the ballot number, and the name and seat on
+// the green carriage body.
+// variant "strip": one train that scrolls sideways (home, "the rest of the team"), coupled
+// together and pulling in from the side on arrival; "groups": one platform per ballot group
+// (the team page), its name on an enamel sign.
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { CandidateCard } from '@elections/data';
+interface Props {
+  ctx: PageContext;
+  variant: 'strip' | 'groups';
+  title?: string;
+  lead?: string;
+  groups: { label: string; candidates: CandidateCard[] }[];
+  more?: { label: string; href: string } | null;
+  /** Label of the card's profile link ("عرض الملف الشخصي"). */
+  cardMore: string;
+  /** "رقم", read before the number by screen readers. */
+  numberLabel: string;
+}
+const { variant, title, lead, groups, more, cardMore, numberLabel } = Astro.props;
+---
+<section class:list={['section', 'team', variant]}>
+  <div class="container wrap">
+    {(title || lead) && (
+      <header class="st-title">
+        {title && <span class="st-sign st-rivets plate"><h2>{title}</h2></span>}
+        {lead && <p>{lead}</p>}
+      </header>
+    )}
+    {groups.map((g) => (
+      <div class="group">
+        {g.label && <h2 class="group-title"><span class="st-sign st-rivets">{g.label}</span></h2>}
+        <ul class="cars" role="list" tabindex={variant === 'strip' ? 0 : undefined}
+            aria-label={variant === 'strip' ? (title ?? g.label) : undefined} data-st-train={variant === 'strip' ? '' : undefined}>
+          {g.candidates.map((c, i) => (
+            <li style={`--i:${i}`}>
+              <a class="car" href={c.href}>
+                <span class="window">
+                  <Image class="photo" src={c.card} alt="" widths={[240, 480, 720]} sizes="(max-width: 600px) 66vw, 260px" />
+                </span>
+                <span class="num st-plate"><span class="sr-only">{numberLabel} {c.number}</span><span aria-hidden="true">{c.number}</span></span>
+                <span class="body">
+                  <h3>{c.name}</h3>
+                  <span class="seat">{c.seat}</span>
+                  <span class="more">{cardMore}<svg class="flip-rtl" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+    {more && <p class="all"><a class="btn btn--primary" href={more.href}>{more.label}</a></p>}
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-6); }
+  .plate { padding-inline: var(--space-8); }
+  .plate h2 { font-size: var(--step-2); }
+  .group { display: flex; flex-direction: column; gap: var(--space-5); }
+  .group-title { font-size: var(--step-1); text-align: center; }
+  .group-title .st-sign { padding-inline: var(--space-7); }
+
+  /* The team page: cards keep one width and a short last row sits centred under the platform sign. */
+  .groups .cars { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-5); }
+  .groups .cars > li { flex: 0 1 15rem; min-inline-size: min(100%, 13rem); }
+  .strip .cars {
+    display: flex; gap: var(--space-5); overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+    padding-block: var(--space-2) var(--space-4); padding-inline: var(--space-1);
+    scrollbar-color: var(--st-brass) var(--c-sunk);
+  }
+  .strip .cars > li { position: relative; flex: 0 0 min(15.5rem, 72%); scroll-snap-align: start; }
+  /* Couplings between carriages. */
+  .strip .cars > li + li::before {
+    content: ''; position: absolute; inset-block-end: 22%; inset-inline-start: calc(-1 * var(--space-5)); inline-size: var(--space-5); block-size: 8px;
+    border-radius: 4px; background: linear-gradient(to bottom, var(--st-brass-hi), var(--st-brass-lo));
+  }
+  .strip .cars:focus-visible { outline-offset: 6px; }
+
+  .car {
+    position: relative; display: flex; flex-direction: column; block-size: 100%;
+    border-radius: 90px 90px var(--radius-m) var(--radius-m) / 70px 70px var(--radius-m) var(--radius-m);
+    background: var(--st-enamel); color: var(--st-enamel-ink); text-decoration: none;
+    box-shadow: inset 0 0 0 2px var(--st-brass), 0 0 0 1px var(--st-brass-lo), var(--st-shadow);
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  .car:hover { transform: translateY(-6px); box-shadow: inset 0 0 0 3px var(--st-brass-hi), 0 0 0 1px var(--st-brass-lo), 0 26px 40px -22px color-mix(in oklab, var(--c-ink) 70%, transparent); }
+  .car:focus-visible { outline-offset: 5px; }
+  .window {
+    display: block; margin: 10px 10px 0; overflow: hidden;
+    border-radius: 82px 82px var(--radius-s) var(--radius-s) / 62px 62px var(--radius-s) var(--radius-s);
+    background: radial-gradient(ellipse 80% 70% at 50% 30%, var(--c-surface), color-mix(in oklab, var(--c-accent-soft) 70%, var(--c-sunk)));
+    box-shadow: inset 0 0 0 3px color-mix(in oklab, var(--st-brass) 70%, transparent);
+  }
+  .car :global(.photo) {
+    display: block; inline-size: 100%; aspect-ratio: 4 / 5; block-size: auto; object-fit: cover; object-position: 50% 12%;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+  .car:hover :global(.photo) { transform: scale(1.04); }
+  .num { position: absolute; inset-block-start: 14px; inset-inline-end: 14px; z-index: 1; font-size: var(--step-1); }
+  .body { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-4) var(--space-5); flex: 1; }
+  h3 { font-size: var(--step-1); line-height: 1.35; }
+  .seat { font-size: var(--step-0); color: color-mix(in oklab, var(--st-enamel-ink) 88%, var(--st-enamel)); }
+  .more {
+    display: inline-flex; align-items: center; gap: var(--space-2); margin-block-start: auto; padding-block-start: var(--space-3);
+    color: var(--st-brass-hi); font-family: var(--font-body); font-weight: 700; font-size: var(--step-0);
+  }
+  .all { text-align: center; }
+</style>

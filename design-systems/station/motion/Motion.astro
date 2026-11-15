@@ -1,0 +1,170 @@
+---
+// Tanta Station's motion: weighty, mechanical and calm. No libraries (a few hundred bytes of
+// script and CSS). Everything is visible without JavaScript; with reduced motion nothing
+// moves and the station clock simply shows the time once.
+//   [data-split-words]  headings rise into place word by word (never letter by letter)
+//   [data-st-reveal]    fades up into place when scrolled to (--i staggers siblings)
+//   [data-st-flaps]     a board: its [data-st-flap] tiles flip down into place one after the
+//                       other; [data-st-digits] tiles also run through the digits first
+//   [data-el-countdown] each number tile flips whenever the engine changes it
+//   [data-st-clock]     station clock hands keep the time of data-zone (Cairo), the second
+//                       hand stepping with a small overshoot
+//   [data-st-swing]     a hanging sign swings gently to rest on arrival
+//   [data-st-train]     a row of carriages pulls in from the side
+//   [data-st-ambient]   steam and light move only on capable devices, and only while in view
+---
+<script>
+  import { splitWords } from '@engine/split';
+
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function capable(): boolean {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    return (nav.hardwareConcurrency ?? 4) >= 4 && (nav.deviceMemory ?? 4) >= 4 && !nav.connection?.saveData;
+  }
+
+  // ---- the station clock (also runs, once, under reduced motion) ----
+  function clocks(live: boolean) {
+    document.querySelectorAll<SVGSVGElement>('[data-st-clock]').forEach((svg) => {
+      const zone = svg.dataset.zone || 'Africa/Cairo';
+      const hand = (k: string) => svg.querySelector<SVGGElement>(`.hand.${k}`);
+      const [h, m, s] = [hand('h'), hand('m'), hand('s')];
+      let fmt: Intl.DateTimeFormat;
+      try { fmt = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23' }); }
+      catch { fmt = new Intl.DateTimeFormat('en-GB', { hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23' }); }
+      let turns = 0;
+      let last = -1;
+      const set = () => {
+        const p: Record<string, number> = {};
+        for (const part of fmt.formatToParts(new Date())) if (part.type !== 'literal') p[part.type] = Number(part.value);
+        const hh = p.hour % 12, mm = p.minute, ss = p.second;
+        if (last >= 0 && ss < last) turns += 1;
+        last = ss;
+        h?.style.setProperty('--a', `${hh * 30 + mm * 0.5}deg`);
+        m?.style.setProperty('--a', `${mm * 6}deg`);
+        s?.style.setProperty('--a', `${turns * 360 + ss * 6}deg`);
+      };
+      set();
+      if (!live) return;
+      let timer = 0;
+      new IntersectionObserver(([e]) => {
+        clearInterval(timer);
+        if (e.isIntersecting) { set(); timer = window.setInterval(set, 1000); }
+      }).observe(svg);
+    });
+  }
+
+  function start() {
+    root.classList.add('st-motion');
+    if (capable()) root.classList.add('st-rich');
+
+    // Headings rise word by word.
+    document.querySelectorAll<HTMLElement>('[data-split-words]').forEach((el) => {
+      splitWords(el).forEach((w, i) => w.style.setProperty('--w', String(i)));
+      el.classList.add('st-words');
+    });
+
+    // Number every tile on a board so they flip one after another.
+    document.querySelectorAll<HTMLElement>('[data-st-flaps]').forEach((board) => {
+      board.querySelectorAll<HTMLElement>('[data-st-flap], [data-st-digits]').forEach((t, i) => t.style.setProperty('--f', String(i)));
+    });
+
+    // Digit tiles run through the digits of their own script before settling.
+    const runDigits = (board: Element) => {
+      board.querySelectorAll<HTMLElement>('[data-st-digits]').forEach((tile) => {
+        const final = tile.textContent ?? '';
+        const set = /[٠-٩]/.test(final) ? '٠١٢٣٤٥٦٧٨٩' : '0123456789';
+        const delay = Number(tile.style.getPropertyValue('--f') || 0) * 80;
+        let n = 0;
+        window.setTimeout(function step() {
+          if (n++ < 7) {
+            tile.textContent = final.replace(/[0-9٠-٩]/g, () => set[Math.floor(Math.random() * 10)]);
+            window.setTimeout(step, 70);
+          } else tile.textContent = final;
+        }, delay);
+      });
+    };
+
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        e.target.classList.add('st-in');
+        if (e.target.matches('[data-st-flaps]')) runDigits(e.target);
+        io.unobserve(e.target);
+      }
+    }, { rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('[data-st-reveal], [data-st-swing], [data-st-train], [data-st-flaps]').forEach((el) => io.observe(el));
+
+    // Countdown tiles flip whenever their number changes, while the board is on screen.
+    document.querySelectorAll<HTMLElement>('[data-el-countdown]').forEach((box) => {
+      let visible = false;
+      new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(box);
+      box.querySelectorAll<HTMLElement>('[data-k]').forEach((cell) => {
+        const tile = cell.closest<HTMLElement>('.st-flap') ?? cell;
+        new MutationObserver(() => {
+          if (!visible) return;
+          tile.animate(
+            [{ transform: 'perspective(420px) rotateX(0deg)' }, { transform: 'perspective(420px) rotateX(-78deg)', offset: 0.42 }, { transform: 'perspective(420px) rotateX(0deg)' }],
+            { duration: 460, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' },
+          );
+        }).observe(cell, { childList: true, characterData: true, subtree: true });
+      });
+    });
+
+    // Steam and light run only on capable devices, and only while their room is in view.
+    if (root.classList.contains('st-rich')) {
+      const amb = new IntersectionObserver((entries) => {
+        for (const e of entries) e.target.classList.toggle('st-live', e.isIntersecting);
+      });
+      document.querySelectorAll('[data-st-ambient]').forEach((el) => amb.observe(el));
+    }
+
+    clocks(true);
+  }
+
+  if (reduce) clocks(false);
+  else start();
+</script>
+
+<style is:global>
+  /* Headings: each word rises from just below its line. */
+  .st-motion .st-words [data-word] { animation: st-word var(--dur-slow) var(--ease-out) both; animation-delay: calc(var(--w, 0) * 70ms + 100ms); }
+  @keyframes st-word { from { opacity: 0; transform: translateY(0.45em); } }
+
+  /* Reveal: from just below, at rest once in view. */
+  .st-motion [data-st-reveal] { transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out); transition-delay: calc(var(--i, 0) * 90ms); }
+  .st-motion [data-st-reveal]:not(.st-in) { opacity: 0; transform: translateY(var(--reveal-distance)); }
+
+  /* Boards: tiles flip down on their top hinge, one after the other. */
+  .st-motion [data-st-flaps] :is([data-st-flap], [data-st-digits]) { transform-origin: 50% 50%; backface-visibility: hidden; }
+  .st-motion [data-st-flaps]:not(.st-in) :is([data-st-flap], [data-st-digits]) { opacity: 0; transform: perspective(500px) rotateX(85deg); }
+  .st-motion [data-st-flaps].st-in :is([data-st-flap], [data-st-digits]) { animation: st-flip 0.7s cubic-bezier(0.25, 0.8, 0.3, 1.15) both; animation-delay: calc(var(--f, 0) * 80ms); }
+  @keyframes st-flip {
+    0% { opacity: 0; transform: perspective(500px) rotateX(85deg); }
+    55% { opacity: 1; transform: perspective(500px) rotateX(-16deg); }
+    80% { transform: perspective(500px) rotateX(6deg); }
+    100% { opacity: 1; transform: none; }
+  }
+
+  /* A hanging sign swings to rest on its chains. */
+  .st-motion [data-st-swing].st-in { animation: st-swing 1.8s cubic-bezier(0.3, 0.6, 0.3, 1) both; animation-delay: calc(var(--i, 0) * 120ms); transform-origin: 50% 0; }
+  @keyframes st-swing {
+    0% { transform: rotate(4deg); }
+    30% { transform: rotate(-2.6deg); }
+    55% { transform: rotate(1.4deg); }
+    78% { transform: rotate(-0.6deg); }
+    100% { transform: rotate(0); }
+  }
+
+  /* A row of carriages pulls in from the inline end and eases to a stop. */
+  [dir='rtl'] { --st-from: -1; }
+  [dir='ltr'] { --st-from: 1; }
+  .st-motion [data-st-train]:not(.st-in) > li { opacity: 0; transform: translateX(calc(var(--st-from) * 140px)); }
+  .st-motion [data-st-train].st-in > li { animation: st-arrive 1.3s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 70ms); }
+  @keyframes st-arrive { from { opacity: 0; transform: translateX(calc(var(--st-from) * 140px)); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .st-words [data-word], [data-st-reveal], [data-st-flaps] *, [data-st-swing], [data-st-train] > li { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+  }
+</style>

@@ -1,0 +1,78 @@
+---
+// The full interview: the player in a brass window, its topics as the station timetable
+// (each time on a split-flap tile, each topic a departure that starts the video there).
+// Engine hooks (kept): the section carries [data-el-interview]; each topic is a
+// <button data-el-seek="<seconds>">; the <details data-el-open-wide> opens on wide screens.
+import type { PageContext } from '@engine/context';
+import type { VideoData } from '@elections/data';
+import Video from '@elections/Video.astro';
+interface Props {
+  ctx: PageContext;
+  id: string;
+  title: string;
+  video: VideoData;
+  summary: string;
+  chapters: { t: number; time: string; label: string; aria: string }[];
+}
+const { id, title, video, summary, chapters } = Astro.props;
+---
+<section class="section" id={id} data-el-interview aria-labelledby={`${id}-title`}>
+  <div class="container wrap">
+    <header class="st-title"><span class="st-sign st-rivets plate"><h2 id={`${id}-title`}>{title}</h2></span></header>
+    <div class="grid">
+      <div class="player"><Video video={video} sizes="(max-width: 900px) 100vw, 60vw" /></div>
+      {chapters.length > 0 && (
+        <details class="table" data-el-open-wide>
+          <summary>
+            <span>{summary}</span>
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </summary>
+          <ol role="list">
+            {chapters.map((ch) => (
+              <li>
+                <button type="button" data-el-seek={ch.t} aria-label={ch.aria}>
+                  <span class="st-flap t" aria-hidden="true">{ch.time}</span>
+                  <span class="topic">{ch.label}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-6); }
+  .plate { padding-inline: var(--space-8); }
+  .plate h2 { font-size: var(--step-2); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+  .player {
+    min-inline-size: 0; padding: 12px; border-radius: calc(var(--radius-l) + 4px);
+    background: linear-gradient(150deg, var(--st-brass-hi), var(--st-brass) 40%, var(--st-brass-lo)); box-shadow: var(--st-shadow);
+  }
+  .player :global(.el-video) { border-radius: var(--radius-l); }
+  .table { border-radius: var(--radius-l); background: var(--st-night-2); color: var(--st-enamel-ink); box-shadow: inset 0 0 0 3px var(--st-brass), var(--st-shadow); overflow: hidden; }
+  summary {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+    min-block-size: 56px; padding: var(--space-3) var(--space-5); cursor: pointer; list-style: none;
+    font-family: var(--font-body); font-weight: 700; font-size: var(--step-1); color: var(--st-brass-hi);
+    border-block-end: 1px solid color-mix(in oklab, var(--st-brass) 40%, transparent);
+  }
+  summary::-webkit-details-marker { display: none; }
+  details[open] summary svg { rotate: 180deg; }
+  summary svg { transition: rotate var(--dur-base) var(--ease-out); flex: 0 0 auto; }
+  ol { display: flex; flex-direction: column; padding: var(--space-2); max-block-size: 30rem; overflow-y: auto; }
+  li + li { border-block-start: 1px solid color-mix(in oklab, var(--st-enamel-ink) 10%, transparent); }
+  button {
+    display: flex; align-items: center; gap: var(--space-3); inline-size: 100%; min-block-size: 56px;
+    padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-s); background: none;
+    color: var(--st-enamel-ink); font: inherit; font-size: var(--step-0); text-align: start; cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-out);
+  }
+  button:hover { background: color-mix(in oklab, var(--st-enamel-ink) 8%, transparent); }
+  .t { flex: 0 0 auto; direction: ltr; min-inline-size: 4.2ch; font-size: var(--step-0); }
+  .topic { line-height: 1.6; }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>

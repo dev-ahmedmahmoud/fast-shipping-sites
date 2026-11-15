@@ -1,0 +1,91 @@
+---
+// The countdown as the station's departure board: a station clock (keeping Cairo time, its
+// brass second hand pausing at the top of each minute like the old railway clocks) beside
+// split-flap tiles for days, hours, minutes and seconds.
+// Engine hooks (kept): [data-el-countdown] with data-at, data-zone, data-today, data-after;
+// cells [data-k="d|h|m|s"]; title [data-el-countdown-title]; .is-msg/.is-today/.is-after.
+// The motion part flips a tile whenever the engine changes its number.
+import type { PageContext } from '@engine/context';
+import type { CountdownData } from '@elections/data';
+interface Props { ctx: PageContext; countdown: CountdownData }
+const { countdown: c } = Astro.props;
+const cells = ['d', 'h', 'm', 's'] as const;
+// 60 minute marks, every fifth one a heavy hour bar.
+const marks = Array.from({ length: 60 }, (_, i) => i);
+---
+<section class="section count-wrap">
+  <div class="container">
+    <div class="board st-glass" data-el-countdown data-at={c.at} data-zone={c.timezone} data-today={c.today} data-after={c.after}>
+      <div class="clock" aria-hidden="true">
+        <svg viewBox="0 0 200 200" data-st-clock data-zone={c.timezone} focusable="false">
+          <circle class="rim" cx="100" cy="100" r="97" />
+          <circle class="face" cx="100" cy="100" r="88" />
+          {marks.map((i) => (
+            <rect class:list={[i % 5 === 0 ? 'bar' : 'tick']} x={i % 5 === 0 ? 97 : 99} y={i % 5 === 0 ? 16 : 16} width={i % 5 === 0 ? 6 : 2} height={i % 5 === 0 ? 20 : 7} transform={`rotate(${i * 6} 100 100)`} />
+          ))}
+          <g class="hand h" style="--a:305deg"><rect x="95.5" y="50" width="9" height="58" rx="2" /></g>
+          <g class="hand m" style="--a:60deg"><rect x="96.5" y="28" width="7" height="80" rx="2" /></g>
+          <g class="hand s" style="--a:0deg"><rect x="99" y="34" width="2" height="88" /><circle cx="100" cy="36" r="7" /></g>
+          <circle class="pin" cx="100" cy="100" r="4" />
+        </svg>
+      </div>
+      <div class="panel">
+        <p class="title" data-el-countdown-title>{c.title}</p>
+        <ul class="cells" role="list">
+          {cells.map((k) => (
+            <li>
+              <span class="st-flap tile"><b data-k={k}>—</b></span>
+              <span class="unit">{c.labels[k]}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="date">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 3v3M17 3v3M4 9h16M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+          {c.dateText}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .count-wrap { padding-block-start: 0; }
+  .board {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: var(--space-6);
+    margin-block-start: calc(-1 * var(--space-6)); position: relative; z-index: 2;
+    padding: var(--space-6); border-radius: var(--radius-l);
+    background-color: var(--st-night-2); color: var(--st-enamel-ink);
+    box-shadow: inset 0 0 0 3px var(--st-brass), inset 0 0 0 7px var(--st-night-2), inset 0 0 0 8px color-mix(in oklab, var(--st-brass) 50%, transparent), var(--st-shadow);
+  }
+  .clock { inline-size: clamp(130px, 18vw, 200px); }
+  .clock svg { display: block; inline-size: 100%; block-size: auto; }
+  .rim { fill: var(--st-brass); stroke: var(--st-brass-lo); stroke-width: 3; }
+  .face { fill: var(--c-surface); }
+  .tick { fill: var(--c-ink); }
+  .bar { fill: var(--c-ink); }
+  .hand { transform-origin: 100px 100px; transform: rotate(var(--a)); }
+  .hand.h rect, .hand.m rect { fill: var(--c-ink); }
+  .hand.s rect, .hand.s circle { fill: var(--st-brass-lo); }
+  .pin { fill: var(--st-brass-lo); }
+  :global(.st-motion) .hand.s { transition: transform 0.25s cubic-bezier(0.4, 2.2, 0.55, 1); }
+  :global(.st-motion) .hand.s.is-wrap { transition: none; }
+
+  .panel { display: flex; flex-direction: column; gap: var(--space-4); min-inline-size: 0; }
+  .title { font-family: var(--font-display); font-size: var(--step-2); color: var(--st-brass-hi); }
+  .cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); max-inline-size: 36rem; }
+  .cells li { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
+  .tile { inline-size: 100%; padding-block: var(--space-2); font-size: var(--step-4); perspective: 400px; }
+  .tile b { font-weight: 600; display: inline-block; }
+  .unit { font-family: var(--font-body); font-weight: 700; font-size: var(--step-0); color: color-mix(in oklab, var(--st-enamel-ink) 88%, var(--st-night)); }
+  .date { display: flex; align-items: center; gap: var(--space-2); font-size: var(--step-1); }
+  .date svg { color: var(--st-brass-hi); flex: 0 0 auto; }
+  .board:global(.is-msg) .cells { display: none; }
+  .board:global(.is-msg) .title { font-size: var(--step-3); }
+
+  @media (max-width: 760px) {
+    .board { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: var(--space-5) var(--space-4); }
+    .panel { align-items: center; inline-size: 100%; }
+    .cells { inline-size: 100%; gap: var(--space-2); }
+    .tile { font-size: var(--step-3); }
+  }
+</style>

@@ -1,0 +1,31 @@
+---
+// One featured video (a candidate's word) framed as a brass carriage window.
+import type { PageContext } from '@engine/context';
+import type { VideoData } from '@elections/data';
+import Video from '@elections/Video.astro';
+interface Props { ctx: PageContext; video: VideoData; label: string }
+const { video, label } = Astro.props;
+---
+<section class="section" aria-label={label}>
+  <div class="container narrow">
+    <div class="window" data-st-reveal>
+      <Video video={video} showCaption sizes="(max-width: 900px) 100vw, 50rem" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .narrow { max-inline-size: calc(54rem + 2 * var(--gutter)); }
+  .window {
+    --rivet: radial-gradient(circle, var(--st-brass-lo) 0 3px, color-mix(in oklab, var(--st-brass-hi) 60%, transparent) 3.5px, transparent 4.5px);
+    padding: 14px; border-radius: calc(var(--radius-l) + 6px);
+    background:
+      var(--rivet) left 2px top 2px / 12px 12px no-repeat,
+      var(--rivet) right 2px top 2px / 12px 12px no-repeat,
+      var(--rivet) left 2px bottom 2px / 12px 12px no-repeat,
+      var(--rivet) right 2px bottom 2px / 12px 12px no-repeat,
+      linear-gradient(150deg, var(--st-brass-hi), var(--st-brass) 40%, var(--st-brass-lo));
+    box-shadow: var(--st-shadow);
+  }
+  .window :global(.el-video) { border-radius: var(--radius-l); }
+</style>
