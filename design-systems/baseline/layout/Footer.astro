@@ -4,6 +4,8 @@ interface Props { ctx: PageContext }
 const { ctx } = Astro.props;
 const links = [...ctx.nav.filter((n) => !n.external), ...ctx.footerNav];
 const external = ctx.nav.filter((n) => n.external);
+const c = ctx.contact;
+const hasContact = !!(c.address || c.phones.length || c.emails.length || c.hours || c.mapUrl);
 ---
 <footer class="footer">
   <div class="container grid">
@@ -20,18 +22,20 @@ const external = ctx.nav.filter((n) => n.external);
       </ul>
     </nav>
 
-    <div class="col">
-      <h2 class="label">{ctx.ui.contact}</h2>
-      <ul role="list">
-        {ctx.contact.address && <li>{ctx.contact.address}</li>}
-        {ctx.contact.phones.map((p) => (
-          <li>{p.label && <>{p.label}: </>}<a href={`tel:${p.number.replace(/\s+/g, '')}`} dir="ltr">{p.number}</a></li>
-        ))}
-        {ctx.contact.emails.map((e) => <li>{e.label}: <a href={`mailto:${e.address}`} dir="ltr">{e.address}</a></li>)}
-        {ctx.contact.hours && <li>{ctx.contact.hours}</li>}
-        {ctx.contact.mapUrl && <li><a href={ctx.contact.mapUrl} target="_blank" rel="noopener">{ctx.ui.map}</a></li>}
-      </ul>
-    </div>
+    {hasContact && (
+      <div class="col">
+        <h2 class="label">{ctx.ui.contact}</h2>
+        <ul role="list">
+          {c.address && <li>{c.address}</li>}
+          {c.phones.map((p) => (
+            <li>{p.label && <>{p.label}: </>}<a href={`tel:${p.number.replace(/\s+/g, '')}`} dir="ltr">{p.number}</a></li>
+          ))}
+          {c.emails.map((e) => <li>{e.label}: <a href={`mailto:${e.address}`} dir="ltr">{e.address}</a></li>)}
+          {c.hours && <li>{c.hours}</li>}
+          {c.mapUrl && <li><a href={c.mapUrl} target="_blank" rel="noopener">{ctx.ui.map}</a></li>}
+        </ul>
+      </div>
+    )}
 
     {ctx.social.length > 0 && (
       <div class="col">

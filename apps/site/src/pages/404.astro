@@ -9,9 +9,9 @@ import client from '@client/client.json';
 const { Prose } = components;
 // The page speaks the client's default language, with a line in the other one.
 const main = client.defaultLocale as Locale;
-const other = LOCALES.find((l) => l !== main)!;
+const other = LOCALES.find((l) => l !== main);
 const ctx = buildContext({ ...homeOf(main), id: '__404' });
-const otherHome = buildContext({ ...homeOf(other), id: '__404' }).site.homeHref;
+const otherHome = other ? buildContext({ ...homeOf(other), id: '__404' }).site.homeHref : null;
 const OTHER_LINE: Record<Locale, string> = {
   en: 'Page not found. Back to the English home page.',
   ar: 'الصفحة غير موجودة. العودة إلى الصفحة الرئيسية بالعربية.',
@@ -20,6 +20,6 @@ const OTHER_LINE: Record<Locale, string> = {
 <Base ctx={ctx} title={ctx.ui.notFound}>
   <Prose ctx={ctx} title={ctx.ui.notFound}>
     <p><a href={ctx.site.homeHref}>{ctx.ui.backHome}</a></p>
-    <p lang={other} dir={other === 'ar' ? 'rtl' : 'ltr'}><a href={otherHome}>{OTHER_LINE[other]}</a></p>
+    {other && otherHome && <p lang={other} dir={other === 'ar' ? 'rtl' : 'ltr'}><a href={otherHome}>{OTHER_LINE[other]}</a></p>}
   </Prose>
 </Base>

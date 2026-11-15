@@ -4,17 +4,19 @@
 // global styles never reach client pages. Each sample is its own build under /<sample-id>/.
 import client from '@client/client.json';
 import { homeOf } from '@engine/content';
+import { LOCALES } from '@engine/i18n';
 
 const metas = import.meta.glob<{ meta: { name: string; label: { en: string; ar: string }; summary: { en: string; ar: string } } }>(
   '@systems/*/meta.ts', { eager: true });
 const metaOf = (name: string) => Object.values(metas).find((m) => m.meta.name === name)?.meta;
 // The page speaks the client's default language first (LFIS: Arabic, Genesis: English).
 const primary: 'ar' | 'en' = client.defaultLocale === 'en' ? 'en' : 'ar';
-const secondary: 'ar' | 'en' = primary === 'en' ? 'ar' : 'en';
-const homeSlug = { en: homeOf('en').slug, ar: homeOf('ar').slug };
+// A one-language client (an Arabic-only election site) shows that language only.
+const secondary: 'ar' | 'en' | null = LOCALES.includes(primary === 'en' ? 'ar' : 'en') ? (primary === 'en' ? 'ar' : 'en') : null;
+const homeSlug = Object.fromEntries(LOCALES.map((l) => [l, homeOf(l).slug])) as Record<'ar' | 'en', string>;
 const T = {
-  ar: { pick: 'اختيار التصميم', sub: 'اختر التصميم الذي يناسبكم. كل نموذج يعمل بالعربية والإنجليزية.', view: 'عرض بالعربية', choose: 'اختر هذا التصميم', mix: 'مزيج' },
-  en: { pick: 'Pick a design', sub: 'Pick the design you like. Every sample works in Arabic and English.', view: 'View in English', choose: 'Choose this design', mix: 'Mix' },
+  ar: { pick: 'اختيار التصميم', sub: 'اختر التصميم الذي يناسبكم. كل نموذج يعمل بالعربية والإنجليزية.', subOne: 'اختر التصميم الذي يناسبكم.', view: 'عرض بالعربية', choose: 'اختر هذا التصميم', mix: 'مزيج' },
+  en: { pick: 'Pick a design', sub: 'Pick the design you like. Every sample works in Arabic and English.', subOne: 'Pick the design you like.', view: 'View in English', choose: 'Choose this design', mix: 'Mix' },
 };
 const dir = (l: 'ar' | 'en') => (l === 'ar' ? 'rtl' : 'ltr');
 const prefix = import.meta.env.BASE_URL.replace(/\/+$/, '');
@@ -51,8 +53,8 @@ const samples = (client.samples as { id: string; palette: string; type: string; 
       <div class="wrap">
         <p class="eyebrow">Syncology · <span lang="en" dir="ltr">Design samples</span></p>
         <h1>{client.name[primary]}</h1>
-        <p class="sub">{T[primary].sub}</p>
-        <p class="sub" lang={secondary} dir={dir(secondary)}>{T[secondary].sub}</p>
+        <p class="sub">{secondary ? T[primary].sub : T[primary].subOne}</p>
+        {secondary && <p class="sub" lang={secondary} dir={dir(secondary)}>{T[secondary].sub}</p>}
       </div>
     </header>
     <main class="wrap">
@@ -63,14 +65,14 @@ const samples = (client.samples as { id: string; palette: string; type: string; 
               <iframe src={href(s.id, homeSlug[primary])} title="" loading="lazy" tabindex="-1" scrolling="no"></iframe>
             </div>
             <div class="body">
-              <h2>{s.label[primary]} <span lang={secondary} dir={dir(secondary)}>· {s.label[secondary]}</span></h2>
+              <h2>{s.label[primary]} {secondary && <span lang={secondary} dir={dir(secondary)}>· {s.label[secondary]}</span>}</h2>
               {s.summary[primary] && <p>{s.summary[primary]}</p>}
               {s.parts && (
                 <p class="parts" lang="en" dir="ltr">palette {s.parts.palette} · type {s.parts.type} · layout {s.parts.layout} · motion {s.parts.motion}</p>
               )}
               <div class="row">
                 <a class="btn" href={href(s.id, homeSlug[primary])}>{T[primary].view}</a>
-                <a class="btn" href={href(s.id, homeSlug[secondary])} lang={secondary} dir={dir(secondary)}>{T[secondary].view}</a>
+                {secondary && <a class="btn" href={href(s.id, homeSlug[secondary])} lang={secondary} dir={dir(secondary)}>{T[secondary].view}</a>}
                 <button class="btn primary" type="button" disabled title="Approval flow coming soon">{T[primary].choose}</button>
               </div>
             </div>

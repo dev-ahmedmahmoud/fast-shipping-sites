@@ -1,8 +1,11 @@
 // Locale rules: Arabic is RTL; numbers and dates follow the client's numeral and calendar settings.
 import client from '@client/client.json';
 
-export const LOCALES = ['ar', 'en'] as const;
-export type Locale = (typeof LOCALES)[number];
+export const ALL_LOCALES = ['ar', 'en'] as const;
+export type Locale = (typeof ALL_LOCALES)[number];
+/** The client's languages: both by default, or just one (`"locales": ["ar"]` in client.json),
+ *  in which case no page needs a twin and the language switch disappears. */
+export const LOCALES: readonly Locale[] = ((client as { locales?: Locale[] }).locales ?? ALL_LOCALES).filter((l) => ALL_LOCALES.includes(l));
 
 export const DIR: Record<Locale, 'rtl' | 'ltr'> = { ar: 'rtl', en: 'ltr' };
 export const LANGUAGE_NAME: Record<Locale, string> = { ar: 'العربية', en: 'English' };

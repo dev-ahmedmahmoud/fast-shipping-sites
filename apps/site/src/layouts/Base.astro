@@ -12,12 +12,21 @@ import { tokensCss } from '@engine/tokens';
 import type { PageContext } from '@engine/context';
 import client from '@client/client.json';
 
-interface Props { ctx: PageContext; title: string; description?: string }
-const { ctx, title, description } = Astro.props;
+interface Props {
+  ctx: PageContext;
+  title: string;
+  description?: string;
+  /** The whole <title>, when a page wants its own instead of "title | site name". */
+  fullTitle?: string;
+  /** Share image (site-relative or absolute URL). Adds Open Graph and Twitter tags, so a link
+   *  pasted into WhatsApp or Facebook shows a card. Pages without one get no such tags. */
+  image?: string;
+}
+const { ctx, title, description, fullTitle, image } = Astro.props;
 const { Header, Footer } = components;
 
 const css = tokensCss(palette, typography, layoutTokens, motionTokens);
-const pageTitle = title === ctx.site.name ? title : `${title} | ${ctx.site.name}`;
+const pageTitle = fullTitle ?? (title === ctx.site.name ? title : `${title} | ${ctx.site.name}`);
 const site = Astro.site ?? new URL('https://example.com');
 const abs = (href: string) => new URL(href, site).href;
 const xDefault = ctx.languages.find((l) => l.locale === client.defaultLocale) ?? ctx.languages[0];
@@ -34,6 +43,18 @@ const googleFonts = typography.fontsHref.startsWith('https://fonts.googleapis.co
     {description && <meta name="description" content={description} />}
     {import.meta.env.FSS_NOINDEX && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={abs(Astro.url.pathname)} />
+    {image && (
+      <>
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={ctx.site.name} />
+        <meta property="og:title" content={pageTitle} />
+        {description && <meta property="og:description" content={description} />}
+        <meta property="og:url" content={abs(Astro.url.pathname)} />
+        <meta property="og:image" content={abs(image)} />
+        <meta property="og:locale" content={ctx.locale === 'ar' ? 'ar_AR' : 'en_US'} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </>
+    )}
     {ctx.languages.map((l) => <link rel="alternate" hreflang={l.locale} href={abs(l.href)} />)}
     {xDefault && <link rel="alternate" hreflang="x-default" href={abs(xDefault.href)} />}
     <meta name="generator" content={`fast-shipping-sites ${import.meta.env.FSS_SAMPLE}`} />
