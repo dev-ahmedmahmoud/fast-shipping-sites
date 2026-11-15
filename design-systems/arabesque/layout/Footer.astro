@@ -1,0 +1,88 @@
+---
+// Deep emerald with a faint gold girih tracery, crowned by a mashrabiya strip.
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import Rule from './Rule.astro';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const links = [...ctx.nav.filter((n) => !n.external), ...ctx.footerNav];
+const external = ctx.nav.filter((n) => n.external);
+const c = ctx.contact;
+const hasContact = !!(c.address || c.phones.length || c.emails.length || c.hours || c.mapUrl);
+---
+<footer class="footer ar-band ar-girih">
+  <div class="ar-lattice-strip top" aria-hidden="true"></div>
+  <div class="container grid">
+    <div class="col brand">
+      {ctx.site.logo && <Image src={ctx.site.logo} alt="" height={88} class="logo" loading="lazy" />}
+      <p class="name">{ctx.site.name}</p>
+      {ctx.site.motto && <p class="motto">{ctx.site.motto}</p>}
+      <Rule class="rule" />
+    </div>
+
+    <nav class="col" aria-label={ctx.ui.links}>
+      <h2 class="head">{ctx.ui.links}</h2>
+      <ul role="list">
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        {external.map((l) => <li><a href={l.href} target="_blank" rel="noopener">{l.label}<span class="sr-only"> {ctx.ui.newTab}</span></a></li>)}
+      </ul>
+    </nav>
+
+    {hasContact && (
+      <div class="col">
+        <h2 class="head">{ctx.ui.contact}</h2>
+        <ul role="list">
+          {c.address && <li>{c.address}</li>}
+          {c.phones.map((p) => (
+            <li>{p.label && <>{p.label}: </>}<a href={`tel:${p.number.replace(/\s+/g, '')}`} dir="ltr">{p.number}</a></li>
+          ))}
+          {c.emails.map((e) => <li>{e.label}: <a href={`mailto:${e.address}`} dir="ltr">{e.address}</a></li>)}
+          {c.hours && <li>{c.hours}</li>}
+          {c.mapUrl && <li><a href={c.mapUrl} target="_blank" rel="noopener">{ctx.ui.map}</a></li>}
+        </ul>
+      </div>
+    )}
+
+    {ctx.social.length > 0 && (
+      <div class="col">
+        <h2 class="head">{ctx.ui.follow}</h2>
+        <ul role="list">
+          {ctx.social.map((s) => <li><a href={s.href} target="_blank" rel="noopener">{s.label}</a></li>)}
+        </ul>
+      </div>
+    )}
+  </div>
+  <div class="container legal">
+    <p>{ctx.legal.copyright ?? `© ${ctx.year} ${ctx.site.name}. ${ctx.ui.rights}.`}</p>
+    {ctx.legal.credit && (
+      <p>{ctx.legal.credit.href ? <a href={ctx.legal.credit.href} target="_blank" rel="noopener">{ctx.legal.credit.text}</a> : ctx.legal.credit.text}</p>
+    )}
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-block-start: var(--space-8);
+    padding-block: 0 calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  }
+  .top { margin-block-end: var(--space-7); background: color-mix(in oklab, var(--ar-gold) 70%, transparent); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: var(--space-6); }
+  .col { display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; }
+  .col ul { display: flex; flex-direction: column; gap: var(--space-2); }
+  .col li { overflow-wrap: anywhere; }
+  .col a { color: var(--ar-on-deep); text-decoration: none; display: inline-flex; min-block-size: 40px; align-items: center; }
+  .col a:hover { color: var(--ar-gold); text-decoration: underline; }
+  .brand :global(.logo) { block-size: 88px; inline-size: auto; align-self: flex-start; object-fit: contain; }
+  .name { font-family: var(--font-display); font-weight: 700; font-size: var(--step-2); line-height: var(--lh-heading); }
+  .motto { font-family: var(--font-callig); font-size: var(--step-1); color: var(--ar-gold); line-height: 1.6; }
+  .brand :global(.rule) { inline-size: 12rem; }
+  .head { font-family: var(--font-body); font-size: var(--step-0); font-weight: 600; color: var(--ar-gold); }
+  .legal {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3);
+    margin-block-start: var(--space-7); padding-block-start: var(--space-4);
+    border-block-start: 1px solid color-mix(in oklab, var(--ar-gold) 35%, transparent);
+    color: color-mix(in oklab, var(--ar-on-deep) 85%, transparent); font-size: var(--step--1);
+  }
+  .legal a { color: inherit; }
+  @media (max-width: 700px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>

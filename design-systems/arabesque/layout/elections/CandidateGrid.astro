@@ -1,0 +1,107 @@
+---
+// Candidates as a gallery of arches: each portrait stands in a gold-rimmed pointed arch
+// before a faint lattice, its ballot number in a gold star medallion, name in Amiri, seat
+// underneath. variant "strip": one swipeable row (home, "the rest of the team");
+// "groups": a grid under each ballot group's heading (the team page).
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { CandidateCard } from '@elections/data';
+import Medal from '../Medal.astro';
+import Rule from '../Rule.astro';
+import SectionTitle from '../SectionTitle.astro';
+interface Props {
+  ctx: PageContext;
+  variant: 'strip' | 'groups';
+  title?: string;
+  lead?: string;
+  groups: { label: string; candidates: CandidateCard[] }[];
+  more?: { label: string; href: string } | null;
+  cardMore: string;
+  numberLabel: string;
+}
+const { variant, title, lead, groups, more, cardMore, numberLabel } = Astro.props;
+---
+<section class:list={['section', variant]}>
+  <div class="container wrap">
+    {(title || lead) && <SectionTitle title={title} lead={lead} />}
+    {groups.map((g) => (
+      <div class="group">
+        {g.label && (
+          <div class="group-head">
+            <h2 class="group-title">{g.label}</h2>
+            <Rule class="rule" />
+          </div>
+        )}
+        <ul class="cards" role="list" tabindex={variant === 'strip' ? 0 : undefined} aria-label={variant === 'strip' ? (title ?? g.label) : undefined}>
+          {g.candidates.map((c) => (
+            <li>
+              <a class="card" href={c.href}>
+                <span class="frame">
+                  <span class="arch">
+                    <span class="lattice" aria-hidden="true"></span>
+                    <Image class="photo" src={c.card} alt="" widths={[240, 400, 640]} sizes="(max-width: 600px) 62vw, 15rem" loading="lazy" />
+                  </span>
+                </span>
+                <Medal class="medal" number={c.number} label={numberLabel} size="4.4rem" />
+                <h3>{c.name}</h3>
+                <p class="seat">{c.seat}</p>
+                <span class="more">{cardMore}
+                  <svg class="flip-rtl" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+    {more && <p class="all"><a class="btn btn--primary" href={more.href}>{more.label}</a></p>}
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-7); }
+  .group { display: flex; flex-direction: column; gap: var(--space-5); }
+  .group-head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); text-align: center; }
+  .group-title { font-size: var(--step-3); color: var(--c-accent); }
+  .group-head :global(.rule) { inline-size: 14rem; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14.5rem), 1fr)); gap: var(--space-7) var(--space-5); }
+  .strip .cards {
+    display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--space-2);
+    padding: var(--space-2) var(--space-2) var(--space-5); gap: var(--space-5);
+    scrollbar-color: var(--ar-gold) var(--c-sunk);
+  }
+  .strip .cards > li { flex: 0 0 min(15.5rem, 72%); scroll-snap-align: start; }
+  .card { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--space-1); text-align: center; color: var(--c-ink); text-decoration: none; block-size: 100%; }
+  .frame {
+    position: relative; display: block; inline-size: 100%; aspect-ratio: 4 / 5.2; padding: 6px 6px 0;
+    background: linear-gradient(170deg, var(--ar-gold), color-mix(in oklab, var(--ar-gold) 50%, var(--c-ink)));
+    -webkit-mask: var(--ar-arch) no-repeat center / 100% 100%; mask: var(--ar-arch) no-repeat center / 100% 100%;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .arch {
+    position: relative; display: block; block-size: 100%; overflow: hidden;
+    -webkit-mask: var(--ar-arch) no-repeat center / 100% 100%; mask: var(--ar-arch) no-repeat center / 100% 100%;
+    background: radial-gradient(80% 60% at 50% 35%, color-mix(in oklab, var(--ar-gold) 30%, var(--c-accent)), var(--ar-deeper) 85%);
+  }
+  .lattice {
+    position: absolute; inset: 0; background: color-mix(in oklab, var(--ar-gold) 55%, transparent); opacity: 0.22;
+    -webkit-mask: var(--ar-lattice) repeat center / 30px 30px; mask: var(--ar-lattice) repeat center / 30px 30px;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+  .card :global(.photo) {
+    position: absolute; inset-block-end: 0; inset-inline: 0; margin-inline: auto; inline-size: 100%; block-size: 92%;
+    object-fit: contain; object-position: bottom; transition: transform 1s var(--ease-out);
+  }
+  .card:hover .frame { transform: translateY(-4px); }
+  .card:hover .lattice { opacity: 0.4; }
+  .card:hover :global(.photo) { transform: scale(1.03); transform-origin: bottom; }
+  .card :global(.medal) { margin-block-start: -2.4rem; z-index: 1; }
+  h3 { font-size: var(--step-2); margin-block-start: var(--space-2); }
+  .seat { color: var(--c-muted); font-size: var(--step--1); line-height: 1.6; }
+  .more { display: inline-flex; align-items: center; gap: var(--space-1); margin-block-start: auto; padding-block: var(--space-2); color: var(--c-accent); font-weight: 600; font-size: var(--step--1); }
+  .card:hover .more { text-decoration: underline; }
+  .all { text-align: center; }
+  @media (prefers-reduced-motion: reduce) {
+    .card:hover .frame, .card:hover :global(.photo) { transform: none; }
+  }
+</style>

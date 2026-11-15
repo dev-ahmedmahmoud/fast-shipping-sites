@@ -1,0 +1,77 @@
+---
+// A candidate's profile header (h1) on an emerald band: back link to the list, name in
+// Amiri, seat, ballot number in a large gold medallion, and the portrait standing in a gold
+// arch whose screens part as the page opens.
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import type { CandidateCard } from '@elections/data';
+import Doors from '../Doors.astro';
+import Medal from '../Medal.astro';
+import Rule from '../Rule.astro';
+interface Props { ctx: PageContext; candidate: CandidateCard; kicker: Action | null; numberLabel: string }
+const { candidate: c, kicker, numberLabel } = Astro.props;
+---
+<section class="person ar-band ar-girih">
+  <div class="container grid">
+    <div class="copy">
+      {kicker && <p class="kicker"><a href={kicker.href}>{kicker.label}</a></p>}
+      <h1 data-split-words>{c.name}</h1>
+      <p class="seat" data-reveal>{c.seat}</p>
+      <Rule class="rule" />
+      <div class="num" data-reveal>
+        <Medal number={c.number} size="6rem" />
+        <span>{numberLabel}</span>
+      </div>
+    </div>
+    <div class="portrait" data-ar-screen>
+      <div class="arch">
+        <div class="lattice" aria-hidden="true"></div>
+        <Image class="photo" src={c.photo} alt={c.photoAlt} widths={[320, 480, 640, 800]} sizes="(max-width: 800px) 72vw, 24rem" loading="eager" fetchpriority="high" />
+        <Doors />
+      </div>
+    </div>
+  </div>
+  <div class="ar-lattice-strip edge" aria-hidden="true"></div>
+</section>
+
+<style>
+  .person { padding-block-start: var(--space-7); overflow: clip; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-7); align-items: end; }
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); min-inline-size: 0; padding-block-end: var(--space-7); }
+  .kicker a {
+    display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 44px;
+    color: var(--ar-gold); font-weight: 600; text-decoration: none;
+  }
+  .kicker a { border-block: 1px solid color-mix(in oklab, var(--ar-gold) 70%, transparent); padding-inline: var(--space-4); }
+  .kicker a:hover { text-decoration: underline; }
+  h1 { font-size: var(--step-5); line-height: 1.35; }
+  .seat { font-size: var(--step-2); color: color-mix(in oklab, var(--ar-on-deep) 90%, transparent); font-family: var(--font-display); }
+  .copy :global(.rule) { justify-content: flex-start; inline-size: 14rem; }
+  .num { display: flex; align-items: center; gap: var(--space-4); margin-block-start: var(--space-2); }
+  .num span { font-size: var(--step-2); font-weight: 600; color: var(--ar-gold); }
+  .portrait {
+    position: relative; inline-size: min(24rem, 38vw); aspect-ratio: 4 / 5.4; padding: 9px 9px 0;
+    background: linear-gradient(170deg, var(--ar-gold), color-mix(in oklab, var(--ar-gold) 50%, var(--c-ink)));
+    -webkit-mask: var(--ar-arch) no-repeat center / 100% 100%; mask: var(--ar-arch) no-repeat center / 100% 100%;
+  }
+  .arch {
+    position: relative; block-size: 100%; overflow: hidden;
+    -webkit-mask: var(--ar-arch) no-repeat center / 100% 100%; mask: var(--ar-arch) no-repeat center / 100% 100%;
+    background: radial-gradient(80% 60% at 50% 35%, color-mix(in oklab, var(--ar-gold) 35%, var(--c-accent)), var(--ar-deeper) 80%);
+  }
+  .lattice {
+    position: absolute; inset: 0; background: color-mix(in oklab, var(--ar-gold) 50%, transparent); opacity: 0.25;
+    -webkit-mask: var(--ar-lattice) repeat center / 38px 38px; mask: var(--ar-lattice) repeat center / 38px 38px;
+  }
+  .arch :global(.photo) {
+    position: absolute; inset-block-end: 0; inset-inline: 0; margin-inline: auto; inline-size: 100%; block-size: 93%;
+    object-fit: contain; object-position: bottom; filter: drop-shadow(0 10px 20px rgb(0 0 0 / 0.35));
+  }
+  @media (max-width: 800px) {
+    .grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+    .portrait { inline-size: min(76%, 20rem); justify-self: center; order: -1; }
+    .copy { align-items: center; text-align: center; padding-block-end: var(--space-6); }
+    .copy :global(.rule) { justify-content: center; }
+  }
+</style>

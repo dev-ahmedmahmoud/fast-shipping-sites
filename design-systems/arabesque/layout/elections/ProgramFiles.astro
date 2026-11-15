@@ -1,0 +1,66 @@
+---
+// The list's program files as arched niches, like mihrab niches in a carved wall: the
+// file's icon in a gold star, its title in Amiri, its line underneath. The niche lights up
+// from within on hover.
+import type { PageContext } from '@engine/context';
+import type { FileCard } from '@elections/data';
+import SectionTitle from '../SectionTitle.astro';
+interface Props { ctx: PageContext; title?: string; lead?: string; hint?: string; files: FileCard[] }
+const { title, lead, hint, files } = Astro.props;
+---
+<section class="section">
+  <div class="container wrap">
+    {(title || lead || hint) && <SectionTitle title={title} lead={lead} hint={hint} />}
+    <ul class="grid" role="list">
+      {files.map((f) => (
+        <li data-reveal>
+          <a class="niche" href={f.href}>
+            <span class="badge" aria-hidden="true">
+              <svg class="star" viewBox="0 0 100 100" focusable="false"><polygon points="50 1 64.5 14.9 84.6 15.4 85.1 35.5 99 50 85.1 64.5 84.6 84.6 64.5 85.1 50 99 35.5 85.1 15.4 84.6 14.9 64.5 1 50 14.9 35.5 15.4 15.4 35.5 14.9" /></svg>
+              <span class="icon" set:html={f.icon} />
+            </span>
+            <h3>{f.title}</h3>
+            <p>{f.tagline}</p>
+            <svg class="arrow flip-rtl" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-7); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: var(--space-5); }
+  .grid > li { display: flex; }
+  .niche {
+    position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
+    padding: var(--space-8) var(--space-5) var(--space-6); text-align: center; text-decoration: none; color: var(--c-ink);
+    background: linear-gradient(to bottom, color-mix(in oklab, var(--ar-gold) 9%, var(--c-surface)), var(--c-surface) 45%);
+    border: 1px solid var(--c-line);
+    border-radius: 999px 999px var(--radius-s) var(--radius-s) / 9rem 9rem var(--radius-s) var(--radius-s);
+    box-shadow: inset 0 0 0 6px var(--c-surface), inset 0 0 0 7px color-mix(in oklab, var(--ar-gold) 45%, transparent);
+    transition: box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), background-color var(--dur-base);
+  }
+  .niche:hover {
+    transform: translateY(-4px);
+    box-shadow: inset 0 0 0 6px var(--c-surface), inset 0 0 0 7px var(--ar-gold), inset 0 -60px 80px -40px color-mix(in oklab, var(--ar-gold) 30%, transparent), var(--ar-shadow);
+  }
+  .badge { position: relative; display: grid; place-items: center; inline-size: 5.5rem; aspect-ratio: 1; }
+  .star { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; fill: var(--c-accent); stroke: var(--ar-gold); stroke-width: 2; transition: transform 1.2s var(--ease-out); }
+  .niche:hover .star { transform: rotate(45deg); }
+  .icon { position: relative; inline-size: 2.6rem; block-size: 2.6rem; color: var(--ar-gold); }
+  .icon :global(svg) { inline-size: 100%; block-size: 100%; }
+  h3 { font-size: var(--step-2); color: var(--c-accent); }
+  p { color: var(--c-muted); }
+  .arrow { margin-block-start: auto; color: var(--c-accent); }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+    .niche { padding: var(--space-7) var(--space-3) var(--space-4); gap: var(--space-2); border-radius: 999px 999px var(--radius-s) var(--radius-s) / 5rem 5rem var(--radius-s) var(--radius-s); }
+    .badge { inline-size: 4.25rem; }
+    .icon { inline-size: 2rem; block-size: 2rem; }
+    h3 { font-size: var(--step-1); }
+    p { font-size: var(--step--1); }
+  }
+  @media (prefers-reduced-motion: reduce) { .niche:hover { transform: none; } .niche:hover .star { transform: none; } }
+</style>

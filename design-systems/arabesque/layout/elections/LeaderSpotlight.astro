@@ -1,0 +1,74 @@
+---
+// The list's leader: his portrait standing in a tall gold arch before a lit lattice
+// (the screens part as it scrolls in), his seat, name and line, the profile link, and his
+// word as a framed video.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { VideoData } from '@elections/data';
+import Video from '@elections/Video.astro';
+import Doors from '../Doors.astro';
+import Rule from '../Rule.astro';
+interface Props {
+  ctx: PageContext;
+  kicker: string;
+  name: string;
+  text: string;
+  more: { label: string; href: string };
+  video: VideoData | null;
+  photo: ImageMetadata;
+}
+const { kicker, name, text, more, video, photo } = Astro.props;
+---
+<section class="section" id="leader" aria-labelledby="el-leader-title">
+  <div class="container grid">
+    <div class="portrait" data-ar-screen>
+      <div class="arch">
+        <div class="lattice" aria-hidden="true"></div>
+        <Image class="person" src={photo} alt="" widths={[360, 560, 800]} sizes="(max-width: 900px) 70vw, 26rem" loading="lazy" />
+        <Doors />
+      </div>
+    </div>
+    <div class="copy">
+      <p class="kicker" data-reveal>{kicker}</p>
+      <h2 id="el-leader-title" data-split-words>{name}</h2>
+      <Rule class="rule" />
+      <p class="text" data-reveal>{text}</p>
+      <a class="btn btn--ghost" href={more.href} data-reveal>{more.label}</a>
+      {video && <div class="media" data-reveal><Video video={video} showCaption sizes="(max-width: 900px) 100vw, 40rem" /></div>}
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-7); align-items: center; }
+  .portrait {
+    position: relative; inline-size: min(100%, 26rem); justify-self: center; aspect-ratio: 4 / 5.6;
+    padding: 9px 9px 0; background: linear-gradient(170deg, var(--ar-gold), color-mix(in oklab, var(--ar-gold) 50%, var(--c-ink)));
+    -webkit-mask: var(--ar-arch) no-repeat center / 100% 100%; mask: var(--ar-arch) no-repeat center / 100% 100%;
+  }
+  .arch {
+    position: relative; block-size: 100%; overflow: hidden;
+    -webkit-mask: var(--ar-arch) no-repeat center / 100% 100%; mask: var(--ar-arch) no-repeat center / 100% 100%;
+    background: radial-gradient(80% 60% at 50% 40%, color-mix(in oklab, var(--ar-gold) 35%, var(--c-accent)), var(--ar-deeper) 80%);
+  }
+  .lattice {
+    position: absolute; inset: 0; background: color-mix(in oklab, var(--ar-gold) 50%, transparent); opacity: 0.28;
+    -webkit-mask: var(--ar-lattice) repeat center / 40px 40px; mask: var(--ar-lattice) repeat center / 40px 40px;
+  }
+  .arch :global(.person) {
+    position: absolute; inset-block-end: 0; inset-inline: 0; margin-inline: auto;
+    inline-size: 100%; block-size: 92%; object-fit: contain; object-position: bottom;
+    filter: drop-shadow(0 10px 20px rgb(0 0 0 / 0.35));
+  }
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; }
+  .kicker { color: color-mix(in oklab, var(--ar-gold) 45%, var(--c-ink)); font-weight: 600; font-size: var(--step-1); }
+  h2 { font-size: var(--step-5); color: var(--c-accent); }
+  .copy :global(.rule) { justify-content: flex-start; inline-size: 14rem; }
+  .text { font-size: var(--step-1); line-height: 1.8; max-inline-size: 44ch; }
+  .media { inline-size: 100%; margin-block-start: var(--space-3); }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .portrait { inline-size: min(78%, 22rem); }
+  }
+</style>

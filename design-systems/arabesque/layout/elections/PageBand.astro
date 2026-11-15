@@ -1,0 +1,44 @@
+---
+// An inner page's title band: emerald with gold tracery, the crest, an optional kicker link,
+// the title in Ruqaa over a gold rule, the lead and one action; a lattice strip below.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import Rule from '../Rule.astro';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  kicker?: Action | null;
+  action?: Action | null;
+  crest: ImageMetadata | null;
+}
+const { title, lead, kicker, action, crest } = Astro.props;
+---
+<section class="band ar-band ar-girih">
+  <div class="container inner">
+    {crest && <Image class="crest" src={crest} alt="" height={96} loading="eager" />}
+    {kicker && <p class="kicker"><a href={kicker.href}>{kicker.label}</a></p>}
+    <h1 data-split-words>{title}</h1>
+    <Rule class="rule" />
+    {lead && <p class="lead" data-reveal>{lead}</p>}
+    {action && <p data-reveal><a class="btn btn--gold" href={action.href}>{action.label}</a></p>}
+  </div>
+  <div class="ar-lattice-strip edge" aria-hidden="true"></div>
+</section>
+
+<style>
+  .band { padding-block-start: var(--space-7); }
+  .inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; padding-block-end: var(--space-7); }
+  .inner :global(.crest) { block-size: 80px; inline-size: auto; filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.3)); }
+  .kicker a {
+    display: inline-flex; align-items: center; min-block-size: 44px; padding-inline: var(--space-4);
+    border-block: 1px solid color-mix(in oklab, var(--ar-gold) 70%, transparent);
+    color: var(--ar-gold); font-weight: 600; text-decoration: none;
+  }
+  .kicker a:hover { text-decoration: underline; }
+  h1 { font-family: var(--font-callig); font-size: var(--step-5); line-height: 1.6; }
+  .inner :global(.rule) { inline-size: min(100%, 18rem); }
+  .lead { font-size: var(--step-1); max-inline-size: 48ch; color: color-mix(in oklab, var(--ar-on-deep) 92%, transparent); }
+</style>

@@ -1,0 +1,103 @@
+/* Arabesque look for the engine's election widgets: press-to-play videos, the supporters'
+   app and the complaints form. Imported by ./index.ts, which the engine loads only for
+   election clients, so school sites never carry these rules. The engine's defaults sit
+   inside :where(); plain class rules here win. */
+
+/* ---------- video: a gold-framed screen with a star play mark ---------- */
+.el-video {
+  border-radius: var(--radius-s);
+  background: var(--ar-deeper);
+  box-shadow: 0 0 0 1px var(--ar-gold), 0 0 0 6px var(--c-surface), 0 0 0 7px color-mix(in oklab, var(--ar-gold) 55%, transparent), var(--ar-shadow);
+}
+.el-video__poster { transition: transform 1.2s var(--ease-out), filter 1.2s var(--ease-out); }
+.el-video__play:hover .el-video__poster, .el-video__play:focus-visible .el-video__poster { transform: scale(1.03); filter: brightness(1.04); }
+.el-video__icon {
+  inline-size: 84px; block-size: 84px; border-radius: 0; background: var(--ar-gold);
+  clip-path: polygon(50% 0, 64.5% 14.9%, 84.6% 15.4%, 85.1% 35.5%, 100% 50%, 85.1% 64.5%, 84.6% 84.6%, 64.5% 85.1%, 50% 100%, 35.5% 85.1%, 15.4% 84.6%, 14.9% 64.5%, 0 50%, 14.9% 35.5%, 15.4% 15.4%, 35.5% 14.9%);
+  box-shadow: none; transition: transform var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out);
+}
+.el-video__icon::before {
+  content: ''; position: absolute; inset: 12px; border-radius: 50%; background: var(--ar-deep);
+}
+/* A play mark points right in every language, so this one icon uses a physical side. */
+.el-video__icon::after { border-left-color: var(--ar-gold); border-block-width: 13px; border-left-width: 21px; z-index: 1; }
+.el-video__play:hover .el-video__icon, .el-video__play:focus-visible .el-video__icon { transform: rotate(22.5deg) scale(1.06); }
+.el-video__play:hover .el-video__icon::after, .el-video__play:focus-visible .el-video__icon::after { transform: rotate(-22.5deg); }
+.el-video__label {
+  padding: var(--space-6) var(--space-5) var(--space-4); font-family: var(--font-display); font-size: var(--step-1);
+  background: linear-gradient(to top, color-mix(in oklab, var(--ar-deeper) 92%, transparent), transparent);
+}
+@media (max-width: 600px) { .el-video__icon { inline-size: 68px; block-size: 68px; } }
+
+/* ---------- supporters' app ---------- */
+/* Hold the app's room until its script builds the first view, so nothing below it jumps. */
+@media (scripting: enabled) {
+  .el-sup:not(:has(.el-sup__card)) { min-block-size: 44rem; }
+}
+.el-sup__card {
+  gap: var(--space-4); padding: var(--space-6) var(--space-5);
+  border: 1px solid var(--c-line); border-block-start: 4px solid var(--ar-gold); border-radius: var(--radius-s);
+  background: var(--c-surface); box-shadow: var(--ar-shadow);
+}
+.el-sup__card form { gap: var(--space-4); }
+.el-sup__intro { font-size: var(--step-1); color: var(--c-ink); line-height: 1.7; }
+.el-sup__demo, .el-form__demo {
+  border-inline-start: 3px solid var(--ar-gold); border-radius: var(--radius-s);
+  background: color-mix(in oklab, var(--ar-gold) 14%, var(--c-surface)); color: var(--c-ink); font-size: var(--step--1);
+}
+.el-sup__tabs { border: 1px solid var(--c-line); border-radius: var(--radius-s); background: var(--c-sunk); padding: 4px; }
+.el-sup__tab { min-block-size: 52px; border-radius: 3px; font-size: var(--step-0); color: var(--c-muted); }
+.el-sup__tab[aria-selected='true'] { background: var(--c-accent); color: var(--c-accent-ink); box-shadow: inset 0 -3px 0 var(--ar-gold); }
+.el-sup__f { gap: var(--space-2); font-size: var(--step-0); }
+.el-sup__f input, .el-sup__cc select, .el-sup__url, .el-form__input {
+  min-block-size: 54px; font-size: var(--step-0); border: 1.5px solid var(--c-line); border-radius: var(--radius-s);
+  background: var(--c-bg); color: var(--c-ink);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.el-sup__f input:focus, .el-form__input:focus { border-color: var(--c-accent); box-shadow: 0 0 0 3px var(--c-accent-soft); outline: none; }
+.el-sup__f input:focus-visible, .el-form__input:focus-visible { outline: 3px solid var(--c-accent); outline-offset: 2px; }
+.el-sup__cc b { min-block-size: 54px; border: 1.5px solid var(--c-line); background: var(--c-sunk); font-weight: 600; }
+.el-sup__err, .el-form__err { color: #9b1c12; font-size: var(--step--1); }
+.el-sup__msg.is-good, .el-form__msg.is-good { background: var(--c-accent-soft); border-inline-start: 3px solid var(--c-accent); border-radius: var(--radius-s); }
+.el-sup__msg.is-bad, .el-form__msg.is-bad { background: #fbeceb; color: #7d1810; border-inline-start: 3px solid #b3261e; border-radius: var(--radius-s); }
+.el-sup__go, .el-form__go {
+  min-block-size: 54px; padding-inline: var(--space-6); border-radius: var(--radius-s);
+  background: var(--c-accent); color: var(--c-accent-ink); border: 1.5px solid var(--ar-gold);
+  font-size: var(--step-0); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ar-gold) 45%, transparent);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.el-sup__go:hover, .el-form__go:hover { background: var(--ar-deep); }
+.el-sup__go--alt { background: var(--c-surface); color: var(--c-accent); border-color: color-mix(in oklab, var(--c-accent) 55%, var(--c-line)); box-shadow: none; }
+.el-sup__go--alt:hover { background: var(--c-accent-soft); }
+.el-sup__go--wa { background: #17804a; border-color: #17804a; box-shadow: none; }
+.el-sup__go--wa:hover { background: #126a3d; }
+.el-sup__link, .el-sup__inline { color: var(--c-accent); font-weight: 600; min-block-size: 44px; }
+.el-sup__hello { font-family: var(--font-display); font-size: var(--step-3); color: var(--c-accent); }
+.el-sup__label { color: var(--c-ink); }
+.el-sup__url { font-family: var(--font-body); direction: ltr; }
+.el-sup__num b { font-size: var(--step-5); color: var(--c-accent); }
+.el-sup__bar { block-size: 14px; border-radius: var(--radius-s); background: var(--c-sunk); box-shadow: inset 0 0 0 1px var(--c-line); }
+.el-sup__fill { border-radius: var(--radius-s); background: linear-gradient(to right, var(--c-accent), color-mix(in oklab, var(--c-accent) 60%, var(--ar-gold))); }
+.el-sup__box { color: var(--c-muted); }
+.el-sup__box.is-open { color: var(--ar-gold); }
+
+/* ---------- complaints form ---------- */
+.el-form {
+  gap: var(--space-5); padding: var(--space-6) var(--space-5);
+  border: 1px solid var(--c-line); border-block-start: 4px solid var(--ar-gold); border-radius: var(--radius-s);
+  background: var(--c-surface); box-shadow: var(--ar-shadow);
+}
+.el-form__field { gap: var(--space-2); }
+.el-form__label { font-size: var(--step-0); color: var(--c-ink); }
+.el-form__req { color: #9b1c12; }
+textarea.el-form__input { min-block-size: 10rem; line-height: 1.7; }
+.el-form__choice {
+  min-block-size: 52px; padding-inline: var(--space-5); border: 1.5px solid var(--c-line); border-radius: var(--radius-s);
+  font-weight: 600; background: var(--c-bg);
+}
+.el-form__choice:has(input:checked) { border-color: var(--c-accent); background: var(--c-accent-soft); box-shadow: inset 0 -3px 0 var(--ar-gold); }
+.el-form__choice input { inline-size: 1.15em; block-size: 1.15em; }
+.el-form__file-btn { min-block-size: 52px; padding-inline: var(--space-5); border: 1.5px dashed var(--c-accent); border-radius: var(--radius-s); color: var(--c-accent); background: var(--c-bg); }
+.el-form__help { font-size: var(--step--1); color: var(--c-muted); }
+.el-form__go { align-self: stretch; }
+@media (min-width: 640px) { .el-form__go { align-self: flex-start; } }

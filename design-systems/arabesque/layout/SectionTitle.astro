@@ -1,0 +1,17 @@
+---
+// A calligraphic section heading: Ruqaa title, gold rule, optional lead and hint.
+import Rule from './Rule.astro';
+interface Props { title?: string; lead?: string; hint?: string; level?: 1 | 2; id?: string; onDeep?: boolean }
+const { title, lead, hint, level = 2, id, onDeep = false } = Astro.props;
+const Heading = level === 1 ? 'h1' : 'h2';
+---
+<header class:list={['ar-title', { 'ar-title--on-deep': onDeep }]} data-reveal>
+  {title && <Heading id={id} data-split-words>{title}</Heading>}
+  <Rule />
+  {lead && <p>{lead}</p>}
+  {hint && <p class="hint">{hint}</p>}
+</header>
+
+<style>
+  .hint { font-size: var(--step-0) !important; }
+</style>

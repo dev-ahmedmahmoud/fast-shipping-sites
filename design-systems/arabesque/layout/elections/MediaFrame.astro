@@ -1,0 +1,27 @@
+---
+// One featured video (a candidate's word) in a gold frame (the frame itself is the shared
+// .el-video look in ./elections.css), with its title above in Ruqaa.
+import type { PageContext } from '@engine/context';
+import type { VideoData } from '@elections/data';
+import Video from '@elections/Video.astro';
+import Rule from '../Rule.astro';
+interface Props { ctx: PageContext; video: VideoData; label: string }
+const { video, label } = Astro.props;
+---
+<section class="section" aria-label={label}>
+  <div class="container narrow" data-reveal>
+    {label && label !== video.caption && (
+      <>
+        <p class="label-line" aria-hidden="true">{label}</p>
+        <Rule class="rule" />
+      </>
+    )}
+    <Video video={video} showCaption sizes="(max-width: 900px) 100vw, 50rem" />
+  </div>
+</section>
+
+<style>
+  .narrow { max-inline-size: calc(52rem + 2 * var(--gutter)); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+  .label-line { font-family: var(--font-callig); font-size: var(--step-3); line-height: 1.6; color: var(--c-accent); text-align: center; }
+  .narrow :global(.rule) { inline-size: 14rem; margin-block-end: var(--space-4); }
+</style>

@@ -1,0 +1,14 @@
+---
+// A ballot number in a gold-inlaid eight-point star (styles: .ar-medal in global.css).
+// `label` is read before the number by screen readers ("رقم ٢"); the star is decoration.
+interface Props { number: string; label?: string; size?: string; class?: string }
+const { number, label, size, class: cls } = Astro.props;
+---
+<span class:list={['ar-medal', cls]} style={size ? `--medal:${size}` : undefined} data-ar-medal>
+  <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+    <polygon class="ar-medal__star" points="50 1 64.5 14.9 84.6 15.4 85.1 35.5 99 50 85.1 64.5 84.6 84.6 64.5 85.1 50 99 35.5 85.1 15.4 84.6 14.9 64.5 1 50 14.9 35.5 15.4 15.4 35.5 14.9" />
+    <polygon class="ar-medal__rim" points="50 9 62.2 20.6 79 21 79.4 37.8 91 50 79.4 62.2 79 79 62.2 79.4 50 91 37.8 79.4 21 79 20.6 62.2 9 50 20.6 37.8 21 21 37.8 20.6" />
+    <circle class="ar-medal__disc" cx="50" cy="50" r="29" />
+  </svg>
+  {label ? <><span class="sr-only">{label} {number}</span><b aria-hidden="true">{number}</b></> : <b>{number}</b>}
+</span>

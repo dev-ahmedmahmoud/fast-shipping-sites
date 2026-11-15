@@ -1,0 +1,111 @@
+---
+// "Vote for the full list" as an ornate certificate on an emerald band: double gold border,
+// eight-point stars in the corners, Ruqaa title, every ballot number in a gold medallion,
+// then WhatsApp share, the supporters' team and "download the card".
+// Engine hooks (kept): the section carries [data-el-ballot] and id; the download button is
+// <button type="button" data-el-card>; the PNG takes its colors from --el-card-* below.
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import type { BallotGroup } from '@elections/data';
+import Medal from '../Medal.astro';
+import Rule from '../Rule.astro';
+interface Props {
+  ctx: PageContext;
+  id: string;
+  title: string;
+  text: string;
+  groups: BallotGroup[];
+  share: { label: string; href: string };
+  support: Action | null;
+  download: { label: string };
+}
+const { id, title, text, groups, share, support, download } = Astro.props;
+const corner = '50 1 64.5 14.9 84.6 15.4 85.1 35.5 99 50 85.1 64.5 84.6 84.6 64.5 85.1 50 99 35.5 85.1 15.4 84.6 14.9 64.5 1 50 14.9 35.5 15.4 15.4 35.5 14.9';
+---
+<section class="ballot ar-band ar-girih" id={id} data-el-ballot aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <div class="certificate" data-reveal>
+      {['ss', 'se', 'es', 'ee'].map((k) => (
+        <svg class:list={['corner', k]} viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon points={corner} /><circle cx="50" cy="50" r="16" /></svg>
+      ))}
+      <header class="head">
+        <h2 id={`${id}-title`} data-split-words>{title}</h2>
+        <Rule class="rule" />
+        <p>{text}</p>
+      </header>
+      <div class="groups">
+        {groups.map((g) => (
+          <div class="group">
+            <h3>{g.label}</h3>
+            <ol role="list">
+              {g.rows.map((r) => (
+                <li>
+                  <Medal number={r.number} size="3.6rem" />
+                  <span class="who"><strong>{r.name}</strong><small>{r.seat}</small></span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
+      <div class="actions">
+        <a class="btn btn--primary wa" href={share.href} target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.6.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z" /></svg>
+          {share.label}
+        </a>
+        {support && <a class="btn btn--ghost" href={support.href}>{support.label}</a>}
+        <button class="btn btn--ghost" type="button" data-el-card>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          {download.label}
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ballot {
+    --el-card-bg: var(--ar-deeper);
+    --el-card-bg2: var(--c-accent);
+    --el-card-accent: var(--c-highlight);
+    --el-card-accent2: color-mix(in oklab, var(--c-highlight) 70%, var(--c-ink));
+    --el-card-ink: var(--c-accent-ink);
+    padding-block: var(--space-8); margin-block: var(--space-6);
+    scroll-margin-block-start: 100px;
+  }
+  .certificate {
+    position: relative; display: flex; flex-direction: column; gap: var(--space-6);
+    max-inline-size: 60rem; margin-inline: auto; padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.25rem, 5vw, 4rem);
+    background: var(--c-surface); color: var(--c-ink); border-radius: var(--radius-s);
+    box-shadow:
+      inset 0 0 0 10px var(--c-surface), inset 0 0 0 11px var(--ar-gold),
+      inset 0 0 0 15px var(--c-surface), inset 0 0 0 16px color-mix(in oklab, var(--ar-gold) 55%, transparent),
+      0 30px 60px -30px rgb(0 0 0 / 0.55);
+  }
+  .corner { position: absolute; inline-size: 2.6rem; block-size: 2.6rem; fill: var(--ar-gold); }
+  .corner circle { fill: var(--c-surface); }
+  .corner.ss { inset-block-start: 4px; inset-inline-start: 4px; }
+  .corner.se { inset-block-start: 4px; inset-inline-end: 4px; }
+  .corner.es { inset-block-end: 4px; inset-inline-start: 4px; }
+  .corner.ee { inset-block-end: 4px; inset-inline-end: 4px; }
+  .head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); text-align: center; }
+  h2 { font-family: var(--font-callig); font-size: var(--step-4); line-height: 1.6; color: var(--c-accent); }
+  .head :global(.rule) { inline-size: min(100%, 16rem); }
+  .head p { color: var(--c-muted); font-size: var(--step-1); max-inline-size: 44ch; }
+  .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--space-6); }
+  .group { display: flex; flex-direction: column; gap: var(--space-3); }
+  h3 {
+    font-size: var(--step-1); color: var(--c-accent); padding-block-end: var(--space-2);
+    border-block-end: 1px solid color-mix(in oklab, var(--ar-gold) 60%, transparent);
+  }
+  ol { display: flex; flex-direction: column; gap: var(--space-3); }
+  li { display: flex; align-items: center; gap: var(--space-3); }
+  .who { display: flex; flex-direction: column; min-inline-size: 0; }
+  strong { font-family: var(--font-display); font-size: var(--step-1); line-height: 1.4; }
+  small { color: var(--c-muted); font-size: var(--step--1); }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); padding-block-start: var(--space-2); }
+  .wa { background: #17804a; border-color: #17804a; box-shadow: none; }
+  .wa:hover { background: #126a3d; }
+  button[aria-busy='true'] { opacity: 0.6; cursor: progress; }
+  @media (max-width: 480px) { .actions .btn { inline-size: 100%; } }
+</style>

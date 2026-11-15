@@ -1,0 +1,32 @@
+---
+// Figures set like brass plaques: large Amiri numerals between two gold rules.
+import type { PageContext } from '@engine/context';
+import SectionTitle from './SectionTitle.astro';
+interface Props { ctx: PageContext; title?: string; items: { value: string; label: string }[] }
+const { title, items } = Astro.props;
+---
+<section class="section">
+  <div class="container stack">
+    {title && <SectionTitle title={title} />}
+    <dl class="stats">
+      {items.map((s) => (
+        <div class="stat" data-reveal>
+          <dt>{s.label}</dt>
+          <dd>{s.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--space-5); }
+  .stat {
+    display: flex; flex-direction: column-reverse; align-items: center; gap: var(--space-2); text-align: center;
+    padding: var(--space-5) var(--space-4); border-block: 1px solid var(--ar-gold);
+    background: linear-gradient(to bottom, transparent, color-mix(in oklab, var(--ar-gold) 10%, transparent));
+  }
+  dd { margin: 0; font-family: var(--font-display); font-size: var(--step-5); font-weight: 700; color: var(--c-accent); font-variant-numeric: tabular-nums; line-height: 1.2; }
+  dt { color: var(--c-muted); font-weight: 600; }
+</style>

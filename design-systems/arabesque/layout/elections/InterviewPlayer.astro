@@ -1,0 +1,76 @@
+---
+// The full interview: the framed player and, beside it, its topics as an index with gold
+// timestamps. Engine hooks (kept): the section carries [data-el-interview]; each topic is a
+// <button data-el-seek="<seconds>">; the <details data-el-open-wide> is opened by the engine
+// on wide screens.
+import type { PageContext } from '@engine/context';
+import type { VideoData } from '@elections/data';
+import Video from '@elections/Video.astro';
+import SectionTitle from '../SectionTitle.astro';
+interface Props {
+  ctx: PageContext;
+  id: string;
+  title: string;
+  video: VideoData;
+  summary: string;
+  chapters: { t: number; time: string; label: string; aria: string }[];
+}
+const { id, title, video, summary, chapters } = Astro.props;
+---
+<section class="section interview" id={id} data-el-interview aria-labelledby={`${id}-title`}>
+  <div class="container wrap">
+    <SectionTitle title={title} id={`${id}-title`} />
+    <div class="grid">
+      <div class="player"><Video video={video} sizes="(max-width: 900px) 100vw, 46rem" /></div>
+      {chapters.length > 0 && (
+        <details class="topics" data-el-open-wide>
+          <summary>
+            <span>{summary}</span>
+            <svg class="chev" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </summary>
+          <ol role="list">
+            {chapters.map((ch) => (
+              <li>
+                <button type="button" data-el-seek={ch.t} aria-label={ch.aria}>
+                  <span class="t" aria-hidden="true">{ch.time}</span>
+                  <span class="l">{ch.label}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .interview { scroll-margin-block-start: 100px; }
+  .wrap { display: flex; flex-direction: column; gap: var(--space-6); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+  .player { min-inline-size: 0; padding: 7px; }
+  .topics { border: 1px solid var(--c-line); border-block-start: 3px solid var(--ar-gold); border-radius: var(--radius-s); background: var(--c-surface); }
+  summary {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+    min-block-size: 56px; padding: var(--space-3) var(--space-4); font-family: var(--font-display); font-size: var(--step-1); font-weight: 700;
+    color: var(--c-accent); cursor: pointer; list-style: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  .chev { transition: transform var(--dur-base) var(--ease-out); }
+  .topics[open] .chev { transform: rotate(180deg); }
+  ol { display: flex; flex-direction: column; padding: 0 var(--space-2) var(--space-2); max-block-size: 30rem; overflow-y: auto; }
+  li + li { border-block-start: 1px solid color-mix(in oklab, var(--c-line) 70%, transparent); }
+  button {
+    display: flex; align-items: center; gap: var(--space-3); inline-size: 100%; min-block-size: 52px;
+    padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-s); background: none;
+    text-align: start; cursor: pointer; font: inherit; color: var(--c-ink);
+  }
+  button:hover { background: var(--c-sunk); }
+  .t {
+    flex: none; min-inline-size: 4.2rem; padding: 2px var(--space-2); border-radius: var(--radius-s); text-align: center;
+    background: var(--c-accent); color: var(--c-accent-ink); font-variant-numeric: tabular-nums; direction: ltr;
+    box-shadow: inset 0 -2px 0 var(--ar-gold); font-size: var(--step--1); font-weight: 600;
+  }
+  .l { line-height: 1.6; }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>

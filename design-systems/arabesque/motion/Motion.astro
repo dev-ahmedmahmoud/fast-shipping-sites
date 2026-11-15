@@ -1,0 +1,109 @@
+---
+// Arabesque motion: slow light and carved screens, no libraries (about 2 KB).
+// - [data-ar-screen]: mashrabiya doors (.ar-doors) part when the frame comes into view.
+// - [data-split-words]: words rise one after another (whole words; Arabic is never split
+//   into letters), when the heading comes into view.
+// - [data-reveal]: a gentle rise and fade.
+// - [data-ar-medal]: light passes over the gold star once.
+// - [data-ar-loop]: ambient loops (drifting light, the clock's sweep) run only on capable
+//   devices and pause while off screen.
+// Nothing here runs under prefers-reduced-motion; without JavaScript every element is
+// simply shown at rest (the hidden starting states hang off html.ar-motion).
+---
+<script>
+  import { splitWords } from '@engine/split';
+
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function capable(): boolean {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    return (nav.hardwareConcurrency ?? 4) >= 4 && (nav.deviceMemory ?? 4) >= 4 && !nav.connection?.saveData;
+  }
+
+  function start() {
+    root.classList.add('ar-motion');
+    if (capable()) root.classList.add('ar-rich');
+
+    document.querySelectorAll<HTMLElement>('[data-split-words]').forEach((el) => {
+      splitWords(el).forEach((w, i) => w.style.setProperty('--i', String(i)));
+      el.classList.add('ar-words');
+    });
+
+    const targets = document.querySelectorAll<HTMLElement>('[data-split-words], [data-reveal], [data-ar-screen], [data-ar-medal]');
+    const show = (el: HTMLElement) => {
+      el.classList.add('is-in');
+      if (el.hasAttribute('data-ar-screen')) setTimeout(() => el.classList.add('is-open'), 260);
+      if (el.hasAttribute('data-ar-medal')) el.classList.add('is-lit');
+    };
+    if (!('IntersectionObserver' in window)) { targets.forEach(show); return; }
+
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        show(e.target as HTMLElement);
+        io.unobserve(e.target);
+      }
+      // As soon as the top edge passes the lowest tenth of the screen, whatever the height
+      // (a ratio threshold would never fire for blocks taller than the screen).
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0 });
+    targets.forEach((el) => io.observe(el));
+
+    // Stagger medals that share a row, so the light travels along them.
+    document.querySelectorAll<HTMLElement>('[data-ar-medal]').forEach((m, i) => m.style.setProperty('--ar-n', String(i % 12)));
+
+    // Ambient loops pause off screen.
+    const loops = new IntersectionObserver((entries) => {
+      for (const e of entries) (e.target as HTMLElement).classList.toggle('is-paused', !e.isIntersecting);
+    });
+    document.querySelectorAll<HTMLElement>('[data-ar-loop]').forEach((el) => loops.observe(el));
+  }
+
+  if (!reduce) start();
+</script>
+
+<style is:global>
+  :root { --ar-dir: 1; }
+  [dir='rtl'] { --ar-dir: -1; }
+
+  /* Words */
+  .ar-motion .ar-words:not(.is-in) [data-word] { opacity: 0; }
+  .ar-motion .ar-words.is-in [data-word] {
+    animation: ar-word 1.1s var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * 85ms + 120ms);
+  }
+  @keyframes ar-word {
+    from { opacity: 0; transform: translateY(0.45em); filter: blur(3px); }
+    to { opacity: 1; transform: none; filter: none; }
+  }
+
+  /* Gentle reveals */
+  .ar-motion [data-reveal] { transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out); }
+  .ar-motion [data-reveal]:not(.is-in) { opacity: 0; transform: translateY(var(--reveal-distance)); }
+
+  /* Mashrabiya doors */
+  .ar-motion [data-ar-screen] .ar-doors { display: block; }
+  .ar-motion [data-ar-screen] .ar-doors > i { transition: transform 1.9s var(--ease-in-out); }
+  .ar-motion [data-ar-screen] .ar-doors > b { transition: opacity 0.6s var(--ease-out); }
+  .ar-motion [data-ar-screen].is-open .ar-doors > i:first-child { transform: translateX(calc(-101% * var(--ar-dir))); }
+  .ar-motion [data-ar-screen].is-open .ar-doors > i:last-child { transform: translateX(calc(101% * var(--ar-dir))); }
+  .ar-motion [data-ar-screen].is-open .ar-doors > b { opacity: 0; }
+  .ar-motion [data-ar-screen].is-open .ar-doors { visibility: hidden; transition: visibility 0s 2s; }
+
+  /* Light on the gold */
+  .ar-motion .ar-medal.is-lit::after { animation: ar-sheen 1.6s var(--ease-out) both; animation-delay: calc(var(--ar-n, 0) * 110ms + 250ms); }
+  @keyframes ar-sheen {
+    0% { opacity: 0; background-position: 120% 0; }
+    25% { opacity: 1; }
+    100% { opacity: 0; background-position: -30% 0; }
+  }
+  .ar-motion .ar-medal { transition: transform 0.9s var(--ease-out), opacity 0.9s var(--ease-out); transition-delay: calc(var(--ar-n, 0) * 70ms); }
+  .ar-motion .ar-medal:not(.is-lit) { opacity: 0; transform: scale(0.82) rotate(-22deg); }
+
+  /* Ambient loops (capable devices only) */
+  .ar-rich [data-ar-loop].is-paused, .ar-rich [data-ar-loop].is-paused::before, .ar-rich [data-ar-loop].is-paused::after { animation-play-state: paused !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ar-doors { display: none !important; }
+  }
+</style>

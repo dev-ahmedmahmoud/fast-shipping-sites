@@ -1,0 +1,72 @@
+---
+// The list's interviews on an emerald band: one framed poster per candidate (a gold star
+// play mark), name and seat, linking to the full interview on the profile.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import SectionTitle from '../SectionTitle.astro';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  items: { name: string; seat: string; href: string; poster: ImageMetadata; cta: string }[];
+}
+const { title, lead, items } = Astro.props;
+---
+<section class="band ar-band ar-girih">
+  <div class="container wrap">
+    <SectionTitle title={title} lead={lead} onDeep />
+    <ul class="row" role="list" tabindex="0" aria-label={title}>
+      {items.map((it) => (
+        <li>
+          <a class="item" href={it.href}>
+            <span class="media">
+              <Image src={it.poster} alt="" widths={[384, 640]} sizes="(max-width: 600px) 80vw, 22rem" loading="lazy" />
+              <span class="play" aria-hidden="true"></span>
+            </span>
+            <span class="who">
+              <strong>{it.name}</strong>
+              <span class="seat">{it.seat}</span>
+            </span>
+            <span class="more">{it.cta}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .band { padding-block: var(--space-8); margin-block: var(--space-6); }
+  .wrap { display: flex; flex-direction: column; gap: var(--space-6); }
+  .row {
+    display: flex; gap: var(--space-5); overflow-x: auto; scroll-snap-type: x mandatory;
+    padding: var(--space-3) var(--space-2) var(--space-5); scrollbar-color: var(--ar-gold) transparent;
+  }
+  .row > li { flex: 0 0 min(21rem, 82%); scroll-snap-align: start; }
+  .item { display: flex; flex-direction: column; gap: var(--space-2); color: var(--ar-on-deep); text-decoration: none; block-size: 100%; }
+  .media {
+    position: relative; display: block; overflow: hidden; border-radius: var(--radius-s);
+    box-shadow: 0 0 0 1px var(--ar-gold), 0 0 0 5px var(--ar-deeper), 0 0 0 6px color-mix(in oklab, var(--ar-gold) 55%, transparent);
+  }
+  .media :global(img) { display: block; inline-size: 100%; aspect-ratio: 16 / 9; block-size: auto; object-fit: cover; transition: transform 1.2s var(--ease-out); }
+  .item:hover .media :global(img) { transform: scale(1.04); }
+  .play {
+    position: absolute; inset: 0; margin: auto; inline-size: 66px; block-size: 66px; background: var(--ar-gold);
+    clip-path: polygon(50% 0, 64.5% 14.9%, 84.6% 15.4%, 85.1% 35.5%, 100% 50%, 85.1% 64.5%, 84.6% 84.6%, 64.5% 85.1%, 50% 100%, 35.5% 85.1%, 15.4% 84.6%, 14.9% 64.5%, 0 50%, 14.9% 35.5%, 15.4% 15.4%, 35.5% 14.9%);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .play::before { content: ''; position: absolute; inset: 10px; border-radius: 50%; background: var(--ar-deep); }
+  /* A play mark points right in every language, so this one icon uses a physical side. */
+  .play::after {
+    content: ''; position: absolute; inset: 0; margin: auto; inline-size: 0; block-size: 0;
+    border-block: 10px solid transparent; border-left: 16px solid var(--ar-gold); translate: 3px 0;
+  }
+  .item:hover .play { transform: rotate(22.5deg); }
+  .who { display: flex; flex-direction: column; margin-block-start: var(--space-3); }
+  strong { font-family: var(--font-display); font-size: var(--step-2); line-height: 1.4; }
+  .seat { color: color-mix(in oklab, var(--ar-on-deep) 85%, transparent); font-size: var(--step--1); }
+  .more { margin-block-start: auto; color: var(--ar-gold); font-weight: 600; }
+  .item:hover .more { text-decoration: underline; }
+  @media (prefers-reduced-motion: reduce) { .item:hover .media :global(img), .item:hover .play { transform: none; } }
+</style>

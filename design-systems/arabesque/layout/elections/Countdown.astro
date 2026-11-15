@@ -1,0 +1,89 @@
+---
+// Countdown to election day, framed like an ornamental clock: a gold rosette dial with
+// twelve star marks and a slow sweep of light (capable devices only), and the four numbers
+// in arched windows. Engine hooks (kept): [data-el-countdown] with data-at, data-zone,
+// data-today, data-after; cells [data-k]; title [data-el-countdown-title]. On the day the
+// engine adds .is-msg (+ .is-today / .is-after) and the cells hide.
+import type { PageContext } from '@engine/context';
+import type { CountdownData } from '@elections/data';
+interface Props { ctx: PageContext; countdown: CountdownData }
+const { countdown: c } = Astro.props;
+const cells = ['d', 'h', 'm', 's'] as const;
+const marks = Array.from({ length: 12 }, (_, i) => i * 30);
+---
+<section class="section wrap-section">
+  <div class="container">
+    <div class="clock" data-el-countdown data-at={c.at} data-zone={c.timezone} data-today={c.today} data-after={c.after}>
+      <div class="dial" aria-hidden="true" data-ar-loop>
+        <svg viewBox="0 0 200 200" focusable="false">
+          <circle class="ring" cx="100" cy="100" r="96" />
+          <circle class="ring thin" cx="100" cy="100" r="88" />
+          {marks.map((deg) => (
+            <g transform={`rotate(${deg} 100 100)`}>
+              <polygon class="mark" points="100 3 102.2 8.5 108 9.5 102.2 10.5 100 16 97.8 10.5 92 9.5 97.8 8.5" />
+            </g>
+          ))}
+        </svg>
+      </div>
+      <div class="face">
+        <p class="title" data-el-countdown-title>{c.title}</p>
+        <ul class="cells" role="list">
+          {cells.map((k) => (
+            <li>
+              <b data-k={k}>—</b>
+              <span>{c.labels[k]}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="date">{c.dateText}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .wrap-section { padding-block-start: var(--space-8); }
+  .clock {
+    position: relative; isolation: isolate; overflow: hidden;
+    display: grid; place-items: center; padding: var(--space-7) var(--space-4);
+    border-radius: var(--radius-m); color: var(--ar-on-deep);
+    background:
+      radial-gradient(60% 80% at 50% 50%, color-mix(in oklab, var(--c-accent) 85%, var(--ar-gold)), var(--ar-deeper) 78%);
+    border: 1px solid color-mix(in oklab, var(--ar-gold) 60%, transparent);
+    box-shadow: inset 0 0 0 7px var(--ar-deeper), inset 0 0 0 8px color-mix(in oklab, var(--ar-gold) 55%, transparent), var(--ar-shadow);
+  }
+  .dial {
+    position: absolute; z-index: -1; inline-size: min(40rem, 120%); aspect-ratio: 1; opacity: 0.9;
+  }
+  .dial svg { inline-size: 100%; block-size: 100%; }
+  .ring { fill: none; stroke: color-mix(in oklab, var(--ar-gold) 55%, transparent); stroke-width: 0.8; }
+  .ring.thin { stroke-width: 0.4; stroke-dasharray: 1.5 3; }
+  .mark { fill: var(--ar-gold); }
+  /* The slow sweep of light, like the shine travelling round a brass dial. */
+  .dial::before {
+    content: ''; position: absolute; inset: 4%; border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0 78%, color-mix(in oklab, var(--ar-gold) 40%, transparent) 92%, transparent 100%);
+    opacity: 0.6;
+  }
+  :global(.ar-rich) .dial::before { animation: ar-sweep 14s linear infinite; }
+  @keyframes ar-sweep { to { transform: rotate(1turn); } }
+
+  .face { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); text-align: center; }
+  .title { font-family: var(--font-callig); font-size: var(--step-3); line-height: 1.6; color: var(--ar-gold); }
+  .cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(0.5rem, 2.5vw, 1.5rem); inline-size: min(100%, 40rem); }
+  .cells li {
+    display: flex; flex-direction: column; align-items: center; gap: var(--space-1);
+    padding: var(--space-5) var(--space-2) var(--space-3);
+    background: color-mix(in oklab, var(--ar-deeper) 75%, transparent);
+    border: 1px solid color-mix(in oklab, var(--ar-gold) 65%, transparent);
+    border-radius: 999px 999px var(--radius-s) var(--radius-s);
+  }
+  b {
+    font-family: var(--font-display); font-weight: 700; font-size: clamp(2rem, 1.4rem + 3.5vw, 3.75rem); line-height: 1.1;
+    font-variant-numeric: tabular-nums; color: var(--ar-on-deep);
+  }
+  .cells span { font-size: var(--step--1); color: color-mix(in oklab, var(--ar-on-deep) 85%, transparent); }
+  .date { font-size: var(--step-1); font-weight: 600; }
+  .clock:global(.is-msg) .cells { display: none; }
+  .clock:global(.is-msg) .title { font-size: var(--step-4); }
+</style>

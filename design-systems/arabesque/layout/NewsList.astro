@@ -1,0 +1,46 @@
+---
+// News as entries in a fine ledger: gold date, Amiri title, a rule between entries.
+import type { PageContext } from '@engine/context';
+import SectionTitle from './SectionTitle.astro';
+interface NewsItem { title: string; href: string; date?: string; excerpt?: string }
+interface Props { ctx: PageContext; title?: string; items: NewsItem[]; more?: { label: string; href: string } | null; headingLevel?: 1 | 2 }
+const { ctx, title, items, more, headingLevel = 2 } = Astro.props;
+---
+<section class="section">
+  <div class="container stack">
+    {title && <SectionTitle title={title} level={headingLevel} />}
+    {items.length === 0 ? (
+      <p class="empty">{ctx.ui.noNews}</p>
+    ) : (
+      <ul class="list" role="list">
+        {items.map((n) => (
+          <li data-reveal>
+            <a class="item" href={n.href}>
+              {n.date && <time class="date">{n.date}</time>}
+              <h3>{n.title}</h3>
+              {n.excerpt && <p>{n.excerpt}</p>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+    {more && items.length > 0 && <p class="more"><a class="btn btn--ghost" href={more.href}>{more.label}</a></p>}
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  .empty { color: var(--c-muted); padding: var(--space-5); border: 1px dashed var(--c-line); border-radius: var(--radius-m); text-align: center; }
+  .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: var(--space-5); }
+  .item {
+    display: flex; flex-direction: column; gap: var(--space-2); block-size: 100%;
+    padding: var(--space-5); border-radius: var(--radius-s); background: var(--c-surface);
+    border: 1px solid var(--c-line); border-inline-start: 3px solid var(--ar-gold);
+    color: var(--c-ink); text-decoration: none; transition: box-shadow var(--dur-base) var(--ease-out);
+  }
+  .item:hover { box-shadow: var(--ar-shadow); }
+  .date { font-size: var(--step--1); color: color-mix(in oklab, var(--ar-gold) 55%, var(--c-ink)); font-weight: 600; font-variant-numeric: tabular-nums; }
+  h3 { font-size: var(--step-1); color: var(--c-accent); }
+  p { color: var(--c-muted); }
+  .more { text-align: center; }
+</style>

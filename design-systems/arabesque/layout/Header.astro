@@ -1,0 +1,174 @@
+---
+// Ivory bar with a gold hairline: crest and name, a clear menu in large type, the call to
+// action, and the language switch when the client has a second language.
+import { Image } from 'astro:assets';
+import type { PageContext, NavItem } from '@engine/context';
+// The faces every page sets above the fold, asked for while the page is still being read
+// rather than after the stylesheet: titles and text appear in their own faces sooner and
+// without reflowing (the calligraphic titles change line count when their face arrives).
+// The Arabic files only on right-to-left pages; the body face's Latin file holds the
+// footer's © and names, so every page uses it.
+import ruqaaArabic from '../fonts/aref-ruqaa-700-arabic.woff2?url';
+import amiriBoldArabic from '../fonts/amiri-700-arabic.woff2?url';
+import plexArabic from '../fonts/plex-arabic-400-arabic.woff2?url';
+import plexSemiArabic from '../fonts/plex-arabic-600-arabic.woff2?url';
+import plexLatin from '../fonts/plex-arabic-400-latin.woff2?url';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const preloads = [...(ctx.dir === 'rtl' ? [ruqaaArabic, amiriBoldArabic, plexArabic, plexSemiArabic] : []), plexLatin];
+const other = ctx.languages.find((l) => !l.current);
+const linkAttrs = (item: NavItem) => ({
+  href: item.href,
+  'aria-current': item.current ? 'page' : undefined,
+  target: item.external ? '_blank' : undefined,
+  rel: item.external ? 'noopener' : undefined,
+});
+---
+{preloads.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" />)}
+<header class:list={['header', { 'has-lang': other }]}>
+  <div class="container bar">
+    <a class="brand" href={ctx.site.homeHref} aria-label={ctx.site.name}>
+      {ctx.site.logo
+        ? <Image src={ctx.site.logo} alt="" height={56} class="logo" loading="eager" />
+        : <span class="mark" aria-hidden="true">{ctx.site.shortName}</span>}
+      <span class="name">{ctx.site.name}</span>
+    </a>
+
+    <nav class="nav-desktop" aria-label={ctx.ui.menu}>
+      <ul role="list">
+        {ctx.nav.map((item) => (
+          <li class:list={[{ 'has-sub': item.children.length > 0 }]}>
+            <a {...linkAttrs(item)}>{item.label}</a>
+            {item.children.length > 0 && (
+              <ul role="list" class="sub">
+                {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="actions">
+      {other && (
+        <a class="lang" href={other.href} hreflang={other.locale} lang={other.locale}>{other.name}</a>
+      )}
+      {ctx.cta && (
+        <a class="btn btn--primary cta" href={ctx.cta.href}
+           target={ctx.cta.external ? '_blank' : undefined} rel={ctx.cta.external ? 'noopener' : undefined}>
+          {ctx.cta.label}
+        </a>
+      )}
+      <details class="nav-mobile">
+        <summary>
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          <span>{ctx.ui.menu}</span>
+        </summary>
+        <nav aria-label={ctx.ui.menu}>
+          <ul role="list">
+            {ctx.nav.map((item) => (
+              <li>
+                <a {...linkAttrs(item)}>{item.label}</a>
+                {item.children.length > 0 && (
+                  <ul role="list" class="sub-mobile">
+                    {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+                  </ul>
+                )}
+              </li>
+            ))}
+            {ctx.cta && (
+              <li class="cta-mobile"><a class="btn btn--primary" href={ctx.cta.href}>{ctx.cta.label}</a></li>
+            )}
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+  <div class="trim" aria-hidden="true"></div>
+</header>
+
+<style>
+  .header {
+    position: sticky; inset-block-start: 0; z-index: 30;
+    background: color-mix(in srgb, var(--c-surface) 96%, transparent);
+    backdrop-filter: blur(10px);
+    padding-block-start: env(safe-area-inset-top, 0px);
+  }
+  .trim {
+    block-size: 7px;
+    background: linear-gradient(to bottom, var(--ar-gold) 0 1px, transparent 1px 5px, color-mix(in oklab, var(--ar-gold) 50%, transparent) 5px 6px, transparent 6px);
+  }
+  .bar { display: flex; align-items: center; gap: var(--space-5); min-block-size: 80px; }
+  .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--c-ink); text-decoration: none; min-inline-size: 0; flex: none; }
+  .logo { block-size: 56px; inline-size: auto; }
+  .mark {
+    font-family: var(--font-display); font-weight: 700; font-size: var(--step-0);
+    padding: var(--space-1) var(--space-3); border: 1.5px solid var(--ar-gold); border-radius: var(--radius-s);
+    color: var(--c-accent);
+  }
+  .name { font-family: var(--font-display); font-weight: 700; font-size: var(--step-1); line-height: 1.3; max-inline-size: 18ch; }
+
+  .nav-desktop { margin-inline-start: auto; min-inline-size: 0; }
+  .nav-desktop > ul { display: flex; flex-wrap: nowrap; justify-content: flex-end; gap: 0; }
+  .nav-desktop a, .nav-mobile a:not(.btn) {
+    position: relative; display: block; padding: var(--space-2) var(--space-3);
+    color: var(--c-ink); text-decoration: none; font-size: 1.125rem; font-weight: 600; white-space: nowrap;
+    border-radius: var(--radius-s);
+  }
+  .nav-desktop > ul > li > a::after {
+    content: ''; position: absolute; inset-inline: var(--space-3); inset-block-end: 4px; block-size: 2px;
+    background: var(--ar-gold); transform: scaleX(0); transition: transform var(--dur-base) var(--ease-out);
+  }
+  .nav-desktop > ul > li > a:hover::after, .nav-desktop a[aria-current="page"]::after { transform: scaleX(1); }
+  a[aria-current="page"] { color: var(--c-accent); }
+  .has-sub { position: relative; }
+  .sub {
+    display: none; position: absolute; inset-inline-start: 0; inset-block-start: 100%; z-index: 5;
+    min-inline-size: 15rem; padding: var(--space-2);
+    background: var(--c-surface); border: 1px solid var(--c-line); border-block-start: 2px solid var(--ar-gold);
+    border-radius: 0 0 var(--radius-m) var(--radius-m); box-shadow: var(--ar-shadow);
+  }
+  .sub a:hover { background: var(--c-sunk); }
+  .has-sub:hover > .sub, .has-sub:focus-within > .sub { display: block; }
+
+  .actions { display: flex; align-items: center; gap: var(--space-3); flex: none; }
+  .nav-desktop + .actions { margin-inline-start: var(--space-3); }
+  .lang { color: var(--c-accent); text-decoration: none; font-weight: 600; padding: var(--space-2) var(--space-3); min-block-size: 48px; display: inline-flex; align-items: center; }
+  .lang:hover { text-decoration: underline; }
+
+  .nav-mobile { display: none; position: relative; }
+  .nav-mobile summary {
+    list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-2);
+    min-block-size: 52px; padding-inline: var(--space-4); border: 1.5px solid var(--c-line); border-radius: var(--radius-s);
+    font-weight: 600; color: var(--c-ink); background: var(--c-surface);
+  }
+  .nav-mobile summary::-webkit-details-marker { display: none; }
+  .nav-mobile[open] summary { border-color: var(--c-accent); color: var(--c-accent); }
+  .nav-mobile nav {
+    position: absolute; inset-inline-end: 0; inset-block-start: calc(100% + var(--space-2));
+    inline-size: min(20rem, calc(100vw - 2 * var(--gutter))); max-block-size: 75vh; overflow-y: auto; padding: var(--space-3);
+    background: var(--c-surface); border: 1px solid var(--c-line); border-block-start: 3px solid var(--ar-gold);
+    border-radius: var(--radius-m); box-shadow: var(--ar-shadow);
+  }
+  .nav-mobile li + li { border-block-start: 1px solid color-mix(in oklab, var(--c-line) 60%, transparent); }
+  .nav-mobile a:not(.btn) { padding-block: var(--space-3); white-space: normal; }
+  .nav-mobile a:not(.btn):hover { background: var(--c-sunk); }
+  .sub-mobile { padding-inline-start: var(--space-4); }
+  .cta-mobile { display: none; padding-block-start: var(--space-3); }
+  .cta-mobile .btn { inline-size: 100%; }
+
+  @media (max-width: 1240px) {
+    .nav-desktop { display: none; }
+    .actions { margin-inline-start: auto; }
+    .nav-mobile { display: block; }
+  }
+  @media (max-width: 640px) {
+    .name { font-size: var(--step-0); max-inline-size: 12ch; }
+    .cta { display: none; }
+    .cta-mobile { display: block; }
+    .logo { block-size: 48px; }
+  }
+  /* With a language switch beside the menu, the crest alone carries the name on a phone. */
+  @media (max-width: 540px) { .has-lang .name { display: none; } }
+  @media (max-width: 380px) { .name { display: none; } }
+</style>

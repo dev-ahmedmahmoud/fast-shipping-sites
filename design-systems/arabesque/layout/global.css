@@ -1,0 +1,172 @@
+/* Arabesque: page-wide styles and the shared ornaments every section uses.
+   Ornament shapes are SVG masks, so their color always comes from the tokens. */
+:root {
+  /* Ruqaa calligraphy for section titles only; names and headings stay in Amiri. */
+  --font-callig: "Aref Ruqaa", var(--font-display);
+  /* Derived materials: gold leaf, turned wood and the deep emerald of the bands. */
+  --ar-gold: var(--c-highlight);
+  --ar-gold-soft: color-mix(in oklab, var(--c-highlight) 35%, var(--c-bg));
+  --ar-wood: color-mix(in oklab, var(--c-ink) 72%, var(--c-highlight));
+  --ar-deep: color-mix(in oklab, var(--c-accent) 72%, var(--c-ink));
+  --ar-deeper: color-mix(in oklab, var(--c-accent) 45%, var(--c-ink));
+  --ar-on-deep: var(--c-accent-ink);
+  --ar-shadow: 0 18px 40px -18px color-mix(in oklab, var(--c-ink) 55%, transparent);
+
+  --ar-lattice: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='black' stroke-width='3.6'%3E%3Cpath d='M0 0L48 48M48 0L0 48'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='24' cy='24' r='7'/%3E%3Ccircle cx='0' cy='0' r='7'/%3E%3Ccircle cx='48' cy='0' r='7'/%3E%3Ccircle cx='0' cy='48' r='7'/%3E%3Ccircle cx='48' cy='48' r='7'/%3E%3Ccircle cx='12' cy='12' r='4.4'/%3E%3Ccircle cx='36' cy='12' r='4.4'/%3E%3Ccircle cx='12' cy='36' r='4.4'/%3E%3Ccircle cx='36' cy='36' r='4.4'/%3E%3C/g%3E%3C/svg%3E");
+  --ar-girih: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='black' stroke-width='1.3'%3E%3Cpolygon points='48 22 55.6 29.6 66.4 29.6 66.4 40.4 74 48 66.4 55.6 66.4 66.4 55.6 66.4 48 74 40.4 66.4 29.6 66.4 29.6 55.6 22 48 29.6 40.4 29.6 29.6 40.4 29.6'/%3E%3Cpath d='M48 0V22M48 74V96M0 48H22M74 48H96M66.4 29.6L96 0M66.4 66.4L96 96M29.6 66.4L0 96M29.6 29.6L0 0'/%3E%3Ccircle cx='48' cy='48' r='6'/%3E%3C/g%3E%3C/svg%3E");
+  --ar-arch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 130' preserveAspectRatio='none'%3E%3Cpath d='M0 130V60C0 32 20 13 50 0C80 13 100 32 100 60V130Z'/%3E%3C/svg%3E");
+}
+
+body {
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: var(--weight-body);
+  line-height: var(--lh-body);
+}
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  line-height: var(--lh-heading);
+  text-wrap: balance;
+}
+p { text-wrap: pretty; }
+a { color: var(--c-accent); text-underline-offset: 0.25em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+/* A clear, double ring for keyboard users: ivory gap, then emerald. */
+:focus-visible { outline: 3px solid var(--c-accent); outline-offset: 3px; box-shadow: 0 0 0 3px var(--c-bg); border-radius: var(--radius-s); }
+::selection { background: var(--ar-gold-soft); color: var(--c-ink); }
+img { max-inline-size: 100%; }
+
+.container {
+  inline-size: 100%;
+  max-inline-size: calc(var(--max-width) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+}
+.section { padding-block: var(--space-8); }
+.section + .section { padding-block-start: 0; }
+
+.label {
+  font-size: var(--step--1);
+  font-weight: var(--weight-strong);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+:lang(ar) .label { text-transform: none; }
+
+/* Buttons: 52px tall, wide hit area, clear text. Primary is emerald with a gold rim. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-block-size: 52px; padding-inline: var(--space-6); padding-block: var(--space-2);
+  border-radius: var(--radius-s); border: 1.5px solid transparent;
+  font-family: var(--font-body); font-size: var(--step-0); font-weight: var(--weight-strong);
+  line-height: 1.3; text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.btn--primary {
+  background: var(--c-accent); color: var(--c-accent-ink); border-color: var(--ar-gold);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ar-gold) 45%, transparent);
+}
+.btn--primary:hover { background: var(--ar-deep); text-decoration: none; }
+.btn--ghost { border-color: color-mix(in oklab, var(--c-accent) 55%, var(--c-line)); color: var(--c-accent); background: var(--c-surface); }
+.btn--ghost:hover { border-color: var(--c-accent); background: var(--c-accent-soft); text-decoration: none; }
+/* On emerald bands. */
+.btn--gold { background: var(--ar-gold); color: var(--c-ink); border-color: var(--ar-gold); }
+.btn--gold:hover { background: color-mix(in oklab, var(--ar-gold) 85%, white); text-decoration: none; }
+.btn--line { border-color: color-mix(in oklab, var(--ar-gold) 75%, transparent); color: var(--ar-on-deep); background: transparent; }
+.btn--line:hover { background: color-mix(in oklab, var(--ar-on-deep) 10%, transparent); text-decoration: none; }
+@media (max-width: 480px) { .btn { white-space: normal; text-align: center; } }
+
+.skip-link { background: var(--c-accent); color: var(--c-accent-ink); }
+[dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+
+.todo-note {
+  border: 1px dashed var(--c-line); border-radius: var(--radius-m);
+  padding: var(--space-3) var(--space-4); background: var(--c-sunk);
+  font-size: var(--step--1); color: var(--c-muted);
+}
+.todo-note ul { margin: var(--space-2) 0 0; padding-inline-start: var(--space-5); }
+
+/* ---------- shared ornaments ---------- */
+
+/* A calligraphic section title: Ruqaa heading, a fine gold rule with an eight-point star. */
+.ar-title { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); text-align: center; }
+.ar-title > h2, .ar-title > h1 {
+  font-family: var(--font-callig); font-weight: 700; line-height: 1.6;
+  font-size: var(--step-4); color: var(--c-accent);
+}
+.ar-title > p { color: var(--c-muted); font-size: var(--step-1); max-inline-size: 46ch; }
+.ar-title--on-deep > h2, .ar-title--on-deep > h1 { color: var(--ar-on-deep); }
+.ar-title--on-deep > p { color: color-mix(in oklab, var(--ar-on-deep) 88%, transparent); }
+.ar-rule { display: flex; align-items: center; gap: var(--space-3); inline-size: min(100%, 17rem); color: var(--ar-gold); }
+/* Each side fades out toward the outer edge (gradients have no logical directions). */
+.ar-rule::before, .ar-rule::after { content: ''; flex: 1; block-size: 1px; }
+.ar-rule::before { background: linear-gradient(to right, transparent, currentColor); }
+.ar-rule::after { background: linear-gradient(to right, currentColor, transparent); }
+[dir="rtl"] .ar-rule::before { background: linear-gradient(to left, transparent, currentColor); }
+[dir="rtl"] .ar-rule::after { background: linear-gradient(to left, currentColor, transparent); }
+.ar-rule svg { inline-size: 22px; block-size: 22px; flex: none; }
+
+/* Girih star pattern, laid over a band as a faint gold tracery. */
+.ar-girih { position: relative; isolation: isolate; }
+.ar-girih::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--ar-gold); opacity: 0.16;
+  -webkit-mask: var(--ar-girih) repeat 0 0 / 96px 96px; mask: var(--ar-girih) repeat 0 0 / 96px 96px;
+}
+
+/* The deep emerald band used by the hero, countdown, ballot card and footer. */
+.ar-band {
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in oklab, var(--c-accent) 92%, var(--c-highlight)) 0%, transparent 60%),
+    linear-gradient(to bottom, var(--ar-deep), var(--ar-deeper));
+  color: var(--ar-on-deep);
+}
+.ar-band a:not(.btn) { color: var(--ar-on-deep); }
+
+/* Pointed (Mamluk) arch, for portraits and photo windows. */
+.ar-arch { -webkit-mask: var(--ar-arch) no-repeat center / 100% 100%; mask: var(--ar-arch) no-repeat center / 100% 100%; }
+
+/* Eight-point star medallion for ballot numbers (markup: layout/Medal.astro). */
+.ar-medal { position: relative; display: inline-grid; place-items: center; inline-size: var(--medal, 4.2rem); aspect-ratio: 1; flex: none; isolation: isolate; }
+.ar-medal svg { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; overflow: visible; z-index: -1; }
+.ar-medal .ar-medal__star { fill: var(--ar-gold); }
+.ar-medal .ar-medal__rim { fill: none; stroke: color-mix(in oklab, var(--ar-gold) 55%, var(--c-ink)); stroke-width: 1.4; }
+.ar-medal .ar-medal__disc { fill: var(--ar-deep); stroke: color-mix(in oklab, var(--ar-gold) 85%, white); stroke-width: 2; }
+.ar-medal b {
+  font-family: var(--font-display); font-weight: 700; color: var(--ar-on-deep);
+  font-size: calc(var(--medal, 4.2rem) * 0.4); line-height: 1; font-variant-numeric: tabular-nums;
+  translate: 0 0.06em;
+}
+/* Light passing over the gold as the medal enters (motion adds .is-lit). */
+.ar-medal::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: 50%;
+  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.55) 50%, transparent 65%);
+  background-size: 250% 100%; background-position: 120% 0; opacity: 0;
+}
+
+/* Mashrabiya doors: two carved screens over a picture that part to reveal it. Motion adds
+   .is-open; without motion (or JavaScript) they are not drawn at all. */
+.ar-doors { position: absolute; inset: 0; z-index: 2; display: none; pointer-events: none; }
+.ar-doors > i {
+  position: absolute; inset-block: 0; inline-size: 50.5%;
+  background: var(--ar-wood);
+  -webkit-mask: var(--ar-lattice) repeat center / 34px 34px; mask: var(--ar-lattice) repeat center / 34px 34px;
+}
+.ar-doors > i:first-child { inset-inline-start: 0; }
+.ar-doors > i:last-child { inset-inline-end: 0; }
+.ar-doors > b {
+  position: absolute; inset-block: 0; inline-size: 6px; inset-inline-start: calc(50% - 3px);
+  background: linear-gradient(to bottom, var(--ar-gold), color-mix(in oklab, var(--ar-gold) 50%, var(--c-ink)), var(--ar-gold));
+}
+
+/* A lattice band (decorative strip at the top or bottom of a band). */
+.ar-lattice-strip {
+  block-size: 30px; background: color-mix(in oklab, var(--ar-gold) 60%, transparent);
+  -webkit-mask: var(--ar-lattice) repeat-x center / 30px 30px; mask: var(--ar-lattice) repeat-x center / 30px 30px;
+}

@@ -1,0 +1,8 @@
+---
+// The fine gold rule with a small eight-point star, under calligraphic titles.
+interface Props { class?: string }
+const { class: cls } = Astro.props;
+---
+<span class:list={['ar-rule', cls]} aria-hidden="true">
+  <svg viewBox="0 0 24 24" focusable="false"><polygon fill="currentColor" points="12 1 13.9 7.4 19.8 4.2 16.6 10.1 23 12 16.6 13.9 19.8 19.8 13.9 16.6 12 23 10.1 16.6 4.2 19.8 7.4 13.9 1 12 7.4 10.1 4.2 4.2 10.1 7.4" /></svg>
+</span>

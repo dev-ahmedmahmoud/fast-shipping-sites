@@ -1,0 +1,37 @@
+---
+// A row of portrait photos in gold-rimmed arches, scrolling sideways.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; photos: ImageMetadata[]; alt: string; label: string; hint?: string }
+const { photos, alt, label, hint } = Astro.props;
+---
+<section class="section" aria-label={label}>
+  <div class="container">
+    <div class="row" tabindex="0" role="group" aria-label={hint ?? label}>
+      {photos.map((p) => (
+        <figure class="frame" data-reveal>
+          <span class="arch"><Image src={p} alt={alt} widths={[320, 560]} sizes="(max-width: 600px) 64vw, 18rem" loading="lazy" /></span>
+        </figure>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .row {
+    display: flex; gap: var(--space-5); overflow-x: auto; scroll-snap-type: x mandatory;
+    padding-block: var(--space-2) var(--space-5); scrollbar-color: var(--ar-gold) var(--c-sunk);
+  }
+  .frame {
+    margin: 0; flex: 0 0 min(18rem, 64%); scroll-snap-align: start; aspect-ratio: 4 / 5.2; padding: 6px 6px 0;
+    background: linear-gradient(170deg, var(--ar-gold), color-mix(in oklab, var(--ar-gold) 50%, var(--c-ink)));
+    -webkit-mask: var(--ar-arch) no-repeat center / 100% 100%; mask: var(--ar-arch) no-repeat center / 100% 100%;
+  }
+  .arch {
+    display: block; block-size: 100%; overflow: hidden;
+    -webkit-mask: var(--ar-arch) no-repeat center / 100% 100%; mask: var(--ar-arch) no-repeat center / 100% 100%;
+    background: radial-gradient(80% 60% at 50% 35%, color-mix(in oklab, var(--ar-gold) 30%, var(--c-accent)), var(--ar-deeper) 85%);
+  }
+  .arch :global(img) { inline-size: 100%; block-size: 100%; object-fit: cover; object-position: top; }
+</style>
