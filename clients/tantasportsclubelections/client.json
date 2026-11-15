@@ -69,11 +69,25 @@
   },
   "samples": [
     {
-      "id": "baseline",
-      "palette": "baseline",
-      "type": "baseline",
-      "layout": "baseline",
-      "motion": "baseline"
+      "id": "station",
+      "palette": "station",
+      "type": "station",
+      "layout": "station",
+      "motion": "station"
+    },
+    {
+      "id": "arabesque",
+      "palette": "arabesque",
+      "type": "arabesque",
+      "layout": "arabesque",
+      "motion": "arabesque"
+    },
+    {
+      "id": "hall-of-fame",
+      "palette": "hall-of-fame",
+      "type": "hall-of-fame",
+      "layout": "hall-of-fame",
+      "motion": "hall-of-fame"
     }
   ],
   "todo": [
