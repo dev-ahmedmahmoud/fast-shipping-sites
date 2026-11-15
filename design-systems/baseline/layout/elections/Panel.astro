@@ -1,0 +1,25 @@
+---
+// A plain reading column for page bodies (a bio, a program file's text) and for the
+// engine's widgets (supporters' app, complaints form). Body HTML arrives in the slot.
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; id?: string; label?: string }
+const { id, label } = Astro.props;
+---
+<section class="section" id={id} aria-label={label}>
+  <div class="container narrow">
+    <div class="prose"><slot /></div>
+  </div>
+</section>
+
+<style>
+  .narrow { max-inline-size: calc(46rem + 2 * var(--gutter)); }
+  .prose { min-inline-size: 0; }
+  .prose :global(> * + *) { margin-block-start: var(--space-4); }
+  .prose :global(h2) { font-size: var(--step-2); margin-block-start: var(--space-6); }
+  .prose :global(h2:first-child) { margin-block-start: 0; }
+  .prose :global(h3) { font-size: var(--step-1); margin-block-start: var(--space-5); }
+  .prose :global(ul), .prose :global(ol) { padding-inline-start: var(--space-5); }
+  .prose :global(li + li) { margin-block-start: var(--space-2); }
+  .prose :global(li > ul) { margin-block-start: var(--space-2); }
+  .prose :global(blockquote) { margin-inline: 0; padding-inline-start: var(--space-4); border-inline-start: 3px solid var(--c-accent); color: var(--c-muted); }
+</style>

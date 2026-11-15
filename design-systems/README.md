@@ -60,3 +60,50 @@ Section components also get their section data, with links already resolved:
 | Prose | `title`, `lead?`, `todo?`, `headingLevel?` (1 for a page title, 2 when several share a page, e.g. news items), `id?` (anchor); the page body arrives in the default slot |
 
 Imported page bodies use a few class names that every layout should style inside `Prose`: `.gallery` (a grid of images, from old sliders), `.students` (captioned photo grid), `.downloads` (file list), `.actions` (buttons), `.embed` and `.embed--map` (video and map iframes), `.note`, `.form` (old-site forms shown as they were), and `.logos` (partner and accreditation logos; the engine's base CSS already shows them whole in a grid, so a layout only needs to style it if it wants a different look).
+
+## Election sites
+
+A client with `"kind": "elections"` in `client.json` (a club's election list, such as `clients/tantasportsclubelections`) gets its pages from `clients/<slug>/elections.json` through a second, optional set of section components. Systems that only serve schools can ignore all of this: a system that wants to style an election site adds `layout/elections/index.ts` exporting `electionComponents`, and any component it leaves out falls back to baseline's (`baseline/layout/elections/`). Header, Footer and the rules above apply unchanged. Don't re-export the set from `layout/index.ts`: the engine loads it only for election clients, so school sites never carry its code or styles.
+
+```ts
+// layout/elections/index.ts
+import Countdown from './Countdown.astro';
+export const electionComponents = { Countdown };   // the rest come from baseline
+```
+
+Types come from `@elections/data` (`VideoData`, `CandidateCard`, `FileCard`, `CountdownData`, `BallotGroup`, `Clip`) and `Action` from `@engine/content`. Every component also gets `ctx`. Text arrives already written in the client's numerals.
+
+| Component | Used on | Props besides `ctx` |
+| --- | --- | --- |
+| ElectionHero | home | `title`, `slogan`, `sub`, `actions: Action[]`, `image` (team photo or null), `imageAlt`, `crest` (or null) |
+| Countdown | home | `countdown: CountdownData` (`at`, `timezone`, `title`, `labels {d,h,m,s}`, `today`, `after`, `dateText`) |
+| ProgramFiles | home, files, file | `title?`, `lead?`, `hint?`, `files: FileCard[]` (`title`, `tagline`, `icon` as inline SVG using `currentColor`, `href`) |
+| LeaderSpotlight | home | `kicker`, `name`, `text`, `more {label, href}`, `video: VideoData \| null`, `photo` |
+| CandidateGrid | home, candidates, candidate | `variant: 'strip' \| 'groups'`, `title?`, `lead?`, `groups: {label, candidates: CandidateCard[]}[]`, `more?`, `cardMore` (profile link label), `numberLabel` ("رقم") |
+| InterviewStrip | home | `title`, `lead?`, `items: {name, seat, href, poster, cta}[]` |
+| BallotCard | home, candidates | `id`, `title`, `text`, `groups: BallotGroup[]`, `share {label, href}` (WhatsApp), `support: Action \| null`, `download {label}` |
+| PageBand | inner pages | `title`, `lead?`, `kicker?: Action \| null`, `action?: Action \| null`, `crest` |
+| CandidateHero | candidate | `candidate: CandidateCard`, `kicker: Action \| null` (link to the group), `numberLabel` |
+| MediaFrame | candidate | `video: VideoData` (the candidate's word), `label` |
+| InterviewPlayer | candidate | `id`, `title`, `video`, `summary`, `chapters: {t, time, label, aria}[]` |
+| PhotoRow | candidate | `photos: ImageMetadata[]`, `alt`, `label`, `hint?` |
+| ClipGrid | candidate, file | `id?`, `title?`, `groups: {title?, href?, clips: Clip[]}[]` |
+| Panel | candidate, file, support, complaints | `id?`, `label?`; the page body or an engine widget arrives in the slot |
+
+### Engine hooks
+
+The engine owns the behaviour; a design only styles it. Keep these attributes in your markup:
+
+- **Countdown**: a box with `data-el-countdown`, `data-at`, `data-zone`, `data-today`, `data-after`; number cells `[data-k="d|h|m|s"]`; the title `[data-el-countdown-title]`. The engine fills the cells every second in the client's numerals. On election day it shows `data-today` in the title and adds `.is-msg.is-today` (after it, `data-after` and `.is-msg.is-after`); hide the cells under `.is-msg`.
+- **Ballot card**: the section carries `data-el-ballot` and an `id`; the download button is `<button type="button" data-el-card>`. The PNG is drawn on a canvas in `--font-display`, in colors read from `--el-card-bg`, `--el-card-bg2` (gradient end), `--el-card-accent`, `--el-card-accent2` and `--el-card-ink` set on that section (any CSS color, tokens included).
+- **Interview player**: the section carries `data-el-interview`; each chapter is `<button data-el-seek="<seconds>">`, which starts the section's video at that moment. A `<details data-el-open-wide>` is opened by the engine on wide screens.
+- **Videos**: render every video with `@elections/Video.astro` (props `video`, `widths?`, `sizes?`, `class?`, `showCaption?`). It outputs `.el-video[data-el-video][data-src]` holding a poster button `.el-video__play` (`.el-video__poster`, `.el-video__icon`, `.el-video__label`). The engine swaps in a `<video>` only when pressed (nothing downloads before), plays one at a time, and adds `.is-playing` and, while buffering, `.is-loading`.
+
+### Engine widgets
+
+These come from the engine as finished markup; a system restyles them through their classes (default styles in `apps/site/src/elections/elections.css` sit inside `:where()`, so any selector of yours wins):
+
+- **Supporters' app** (`@elections/SupportApp.astro`, `.el-sup`): join, log in, WhatsApp code, password reset and the dashboard (personal link, copy, WhatsApp share, visit count, progress to the goal). Classes: `.el-sup__box`, `.el-sup__tabs`, `.el-sup__tab`, `.el-sup__f` (a field), `.el-sup__label`, `.el-sup__go` (`--alt`, `--wa`), `.el-sup__link`, `.el-sup__msg`, `.el-sup__err`, `.el-sup__card`, `.el-sup__url`, `.el-sup__num`, `.el-sup__track` and `.el-sup__fill` (progress), `.el-sup__demo`.
+- **Complaints form** (`@elections/ComplaintForm.astro`, `.el-form`): `.el-form__field`, `.el-form__label`, `.el-form__input`, `.el-form__choice`, `.el-form__file-btn`, `.el-form__help`, `.el-form__err`, `.el-form__go`, `.el-form__msg` (`.is-good` / `.is-bad`), `.el-form__demo`.
+
+Both talk to the backend through one adapter (`apps/site/src/elections/client/api.ts`): `"api": {"mode": "demo"}` keeps everything in the visitor's browser and labels it as a preview; `"live"` calls the routes in `clients/<slug>/API.md`.

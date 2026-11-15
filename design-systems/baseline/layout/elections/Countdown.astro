@@ -1,0 +1,32 @@
+---
+// Countdown to election day. Engine hooks (keep them): [data-el-countdown] with data-at,
+// data-zone, data-today, data-after; cells [data-k="d|h|m|s"]; title [data-el-countdown-title].
+// The engine fills the cells every second and adds .is-msg (plus .is-today / .is-after) when time is up.
+import type { PageContext } from '@engine/context';
+import type { CountdownData } from '@elections/data';
+interface Props { ctx: PageContext; countdown: CountdownData }
+const { countdown: c } = Astro.props;
+const cells = ['d', 'h', 'm', 's'] as const;
+---
+<section class="section count-wrap">
+  <div class="container">
+    <div class="count" data-el-countdown data-at={c.at} data-zone={c.timezone} data-today={c.today} data-after={c.after}>
+      <p class="title" data-el-countdown-title>{c.title}</p>
+      <ul class="cells" role="list">
+        {cells.map((k) => <li><b data-k={k}>—</b><span>{c.labels[k]}</span></li>)}
+      </ul>
+      <p class="date">{c.dateText}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .count { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-6); border-radius: var(--radius-l); background: var(--c-accent); color: var(--c-accent-ink); text-align: center; }
+  .title { font-size: var(--step-1); font-weight: var(--weight-strong); }
+  .cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); inline-size: min(100%, 32rem); }
+  .cells li { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3) var(--space-2); border-radius: var(--radius-m); background: color-mix(in oklab, var(--c-accent-ink) 14%, transparent); }
+  b { font-family: var(--font-display); font-size: var(--step-3); font-variant-numeric: tabular-nums; }
+  .date { opacity: 0.9; }
+  .count:global(.is-msg) .cells { display: none; }
+  .count:global(.is-msg) .title { font-size: var(--step-2); }
+</style>

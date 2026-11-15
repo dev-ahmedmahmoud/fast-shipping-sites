@@ -1,0 +1,76 @@
+---
+// The complaints and suggestions form, rendered from elections.json "complaints" with
+// the source's labels, options and messages. ./client/complaints.ts validates it with
+// the same rules (6-digit membership, a valid mobile, Arabic digits accepted, an image of
+// JPG/PNG up to 10 MB) and sends it through the API adapter (demo or live).
+// Hooks for design systems (defaults in ./elections.css):
+//   .el-form, .el-form__field, .el-form__label, .el-form__req, .el-form__input,
+//   .el-form__choices, .el-form__choice, .el-form__file, .el-form__file-btn,
+//   .el-form__file-name, .el-form__help, .el-form__err, .el-form__ts, .el-form__msg
+//   (.is-good / .is-bad), .el-form__go, .el-form__demo
+import { complaints } from './data';
+
+const f = complaints.fields ?? {};
+const id = (name: string) => `el-c-${name}`;
+---
+<form class="el-form" data-el-complaints novalidate aria-labelledby="el-c-legend">
+  <p class="sr-only" id="el-c-legend">{complaints.legend}</p>
+
+  <div class="el-form__field">
+    <label class="el-form__label" for={id('membership')}>{f.membership.label} <span class="el-form__req" aria-hidden="true">*</span></label>
+    <input class="el-form__input" id={id('membership')} name="membership" type="text" dir="ltr" inputmode="numeric"
+           autocomplete="off" maxlength="12" placeholder={f.membership.placeholder} required aria-required="true" />
+  </div>
+
+  <div class="el-form__field">
+    <label class="el-form__label" for={id('full_name')}>{f.full_name.label}</label>
+    <input class="el-form__input" id={id('full_name')} name="full_name" type="text" maxlength={f.full_name.maxlength} autocomplete="name" dir="auto" />
+  </div>
+
+  <div class="el-form__field">
+    <label class="el-form__label" for={id('phone')}>{f.phone.label} <span class="el-form__req" aria-hidden="true">*</span></label>
+    <input class="el-form__input" id={id('phone')} name="phone" type="tel" dir="ltr" inputmode="tel" autocomplete="tel"
+           maxlength={f.phone.maxlength} placeholder={f.phone.placeholder} required aria-required="true" />
+  </div>
+
+  <fieldset class="el-form__field el-form__choices" id={id('kind')}>
+    <legend class="el-form__label">{f.kind.label} <span class="el-form__req" aria-hidden="true">*</span></legend>
+    <div role="radiogroup">
+      {f.kind.options.map((o: string, i: number) => (
+        <label class="el-form__choice" for={`${id('kind')}-${i}`}>
+          <input type="radio" id={`${id('kind')}-${i}`} name="kind" value={o} required />
+          <span>{o}</span>
+        </label>
+      ))}
+    </div>
+  </fieldset>
+
+  <div class="el-form__field">
+    <label class="el-form__label" for={id('topic')}>{f.topic.label} <span class="el-form__req" aria-hidden="true">*</span></label>
+    <select class="el-form__input" id={id('topic')} name="topic" required aria-required="true">
+      <option value="">{f.topic.placeholder}</option>
+      {f.topic.options.map((o: string) => <option value={o}>{o}</option>)}
+    </select>
+  </div>
+
+  <div class="el-form__field">
+    <label class="el-form__label" for={id('details')}>{f.details.label} <span class="el-form__req" aria-hidden="true">*</span></label>
+    <textarea class="el-form__input" id={id('details')} name="details" rows="5" maxlength={f.details.maxlength}
+              placeholder={f.details.placeholder} required aria-required="true"></textarea>
+  </div>
+
+  <div class="el-form__field el-form__file">
+    <span class="el-form__label" id={`${id('photo')}-label`}>{f.photo.label}</span>
+    <label class="el-form__file-btn" for={id('photo')}>
+      <span aria-hidden="true">{f.photo.button}</span>
+      <input class="sr-only" id={id('photo')} name="photo" type="file" accept={f.photo.types.join(',')} aria-labelledby={`${id('photo')}-label`} aria-describedby={`${id('photo')}-help`} />
+    </label>
+    <span class="el-form__file-name" data-el-file-name aria-live="polite"></span>
+    <p class="el-form__help" id={`${id('photo')}-help`}>{f.photo.help}</p>
+  </div>
+
+  <div class="el-form__ts" data-el-ts></div>
+  <p class="el-form__msg" role="status" aria-live="polite" data-el-msg></p>
+  <button class="el-form__go" type="submit">{complaints.submit}</button>
+  <p class="el-form__demo" data-el-demo hidden>{complaints.demoNote}</p>
+</form>

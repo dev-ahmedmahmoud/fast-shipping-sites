@@ -1,0 +1,17 @@
+---
+// One featured video (a candidate's word) in a frame.
+import type { PageContext } from '@engine/context';
+import type { VideoData } from '@elections/data';
+import Video from '@elections/Video.astro';
+interface Props { ctx: PageContext; video: VideoData; label: string }
+const { video, label } = Astro.props;
+---
+<section class="section" aria-label={label}>
+  <div class="container narrow">
+    <Video video={video} showCaption sizes="(max-width: 900px) 100vw, 46rem" />
+  </div>
+</section>
+
+<style>
+  .narrow { max-inline-size: calc(52rem + 2 * var(--gutter)); }
+</style>

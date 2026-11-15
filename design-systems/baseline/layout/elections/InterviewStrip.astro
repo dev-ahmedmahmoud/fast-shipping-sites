@@ -1,0 +1,54 @@
+---
+// "The list's interviews": one poster per candidate, linking to the full interview on the profile.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  items: { name: string; seat: string; href: string; poster: ImageMetadata; cta: string }[];
+}
+const { title, lead, items } = Astro.props;
+---
+<section class="section">
+  <div class="container wrap">
+    <header class="head">
+      <h2>{title}</h2>
+      {lead && <p class="lead">{lead}</p>}
+    </header>
+    <ul class="row" role="list" tabindex="0" aria-label={title}>
+      {items.map((it) => (
+        <li>
+          <a class="item" href={it.href}>
+            <span class="media">
+              <Image src={it.poster} alt="" widths={[384, 768]} sizes="(max-width: 600px) 80vw, 320px" />
+              <span class="play" aria-hidden="true"></span>
+            </span>
+            <h3>{it.name}</h3>
+            <p class="seat">{it.seat}</p>
+            <span class="more">{it.cta}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-5); }
+  .head { text-align: center; display: flex; flex-direction: column; gap: var(--space-2); }
+  h2 { font-size: var(--step-3); }
+  .lead { color: var(--c-muted); }
+  .row { display: flex; gap: var(--space-4); overflow-x: auto; scroll-snap-type: x mandatory; padding-block-end: var(--space-3); }
+  .row > li { flex: 0 0 min(20rem, 82%); scroll-snap-align: start; }
+  .item { display: flex; flex-direction: column; gap: var(--space-1); color: var(--c-ink); text-decoration: none; }
+  .media { position: relative; display: block; border-radius: var(--radius-m); overflow: hidden; }
+  .media :global(img) { inline-size: 100%; aspect-ratio: 16 / 9; block-size: auto; object-fit: cover; }
+  .play { position: absolute; inset: 0; margin: auto; inline-size: 56px; block-size: 56px; border-radius: 50%; background: color-mix(in oklab, var(--c-accent) 88%, transparent); }
+  /* A play mark points right in every language, so this one icon uses a physical side. */
+  .play::after { content: ''; position: absolute; inset: 0; margin: auto; inline-size: 0; block-size: 0; border-block: 10px solid transparent; border-left: 16px solid var(--c-accent-ink); translate: 2px 0; }
+  h3 { font-size: var(--step-1); margin-block-start: var(--space-2); }
+  .seat { color: var(--c-muted); font-size: var(--step--1); }
+  .more { color: var(--c-accent); font-weight: var(--weight-strong); font-size: var(--step--1); }
+</style>

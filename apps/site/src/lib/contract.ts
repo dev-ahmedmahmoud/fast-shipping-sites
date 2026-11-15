@@ -55,3 +55,11 @@ export interface MotionTokens {
 
 /** The section components every layout must export from layout/index.ts. */
 export const SECTION_COMPONENTS = ['Header', 'Hero', 'FeatureGrid', 'Stats', 'NewsList', 'CTA', 'Footer', 'Prose'] as const;
+
+/** Election sections (clients with "kind": "elections"), exported as `electionComponents`
+ *  from layout/elections/index.ts. Optional per component: what a system leaves out falls back to
+ *  baseline's. Props and engine hooks: design-systems/README.md, "Election sites". */
+export const ELECTION_COMPONENTS = [
+  'ElectionHero', 'Countdown', 'ProgramFiles', 'LeaderSpotlight', 'CandidateGrid', 'InterviewStrip', 'BallotCard',
+  'PageBand', 'CandidateHero', 'MediaFrame', 'InterviewPlayer', 'PhotoRow', 'ClipGrid', 'Panel',
+] as const;

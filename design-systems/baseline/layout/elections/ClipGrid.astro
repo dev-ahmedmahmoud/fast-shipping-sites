@@ -1,0 +1,49 @@
+---
+// Short clips: on a program file's page every speaker on that file (with a profile link);
+// on a candidate's page the candidate's clips grouped by program file (group title links
+// to the file).
+import type { PageContext } from '@engine/context';
+import type { Clip } from '@elections/data';
+import Video from '@elections/Video.astro';
+interface Props {
+  ctx: PageContext;
+  id?: string;
+  title?: string;
+  groups: { title?: string; href?: string; clips: Clip[] }[];
+}
+const { id, title, groups } = Astro.props;
+---
+<section class="section" id={id}>
+  <div class="container wrap">
+    {title && <h2>{title}</h2>}
+    {groups.map((g) => (
+      <div class="group">
+        {g.title && <h3 class="file">{g.href ? <a href={g.href}>{g.title}</a> : g.title}</h3>}
+        <div class="grid">
+          {g.clips.map((clip) => (
+            <figure>
+              <Video video={clip.video} sizes="(max-width: 700px) 100vw, 33vw" widths={[384, 768, 1024]} />
+              <figcaption>
+                {clip.name && <strong>{clip.name}</strong>}
+                <span>{clip.title}</span>
+                {clip.profile && <a href={clip.profile.href} aria-label={`${clip.profile.label}: ${clip.name}`}>{clip.profile.label}</a>}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-5); }
+  h2 { font-size: var(--step-3); text-align: center; }
+  .group { display: flex; flex-direction: column; gap: var(--space-3); }
+  .file { font-size: var(--step-1); }
+  .file a { color: var(--c-ink); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); gap: var(--space-4); }
+  figure { margin: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+  figcaption { display: flex; flex-direction: column; gap: var(--space-1); }
+  figcaption a { color: var(--c-accent); font-weight: var(--weight-strong); font-size: var(--step--1); }
+</style>

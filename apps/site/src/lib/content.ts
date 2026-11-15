@@ -17,6 +17,10 @@ interface MdModule {
   file: string;
 }
 
+/** Page templates. The election ones render from clients/<slug>/elections.json (see src/elections). */
+export const TEMPLATES = ['home', 'page', 'news', 'candidates', 'candidate', 'files', 'file', 'support', 'complaints'] as const;
+export type Template = (typeof TEMPLATES)[number];
+
 export interface Entry {
   kind: 'page' | 'news';
   id: string;
@@ -35,7 +39,7 @@ export interface Entry {
   navLabel?: string;
   /** Listed in the footer's link column. */
   footer?: boolean;
-  template: 'home' | 'page' | 'news';
+  template: Template;
   todo: string[];
   /** News items and their own pages: the publication date (YYYY-MM-DD). */
   date?: string;
@@ -96,7 +100,7 @@ function load(): Entry[] {
       parent: typeof fm.parent === 'string' ? fm.parent : undefined,
       navLabel: typeof fm.navLabel === 'string' ? fm.navLabel : undefined,
       footer: fm.footer === true,
-      template: fm.template === 'home' || fm.template === 'news' ? fm.template : 'page',
+      template: TEMPLATES.includes(fm.template as Template) ? (fm.template as Template) : 'page',
       todo: Array.isArray(fm.todo) ? (fm.todo as string[]) : [],
       fm,
       Content: mod.Content,

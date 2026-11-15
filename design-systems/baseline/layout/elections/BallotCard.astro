@@ -1,0 +1,67 @@
+---
+// "Vote for the full list": ballot numbers by group, with WhatsApp share, a link to the
+// supporters' team, and "download the card". Engine hooks (keep them): the section carries
+// [data-el-ballot] and id; the download button is <button type="button" data-el-card>.
+// The downloaded image takes its colors from --el-card-bg, --el-card-bg2, --el-card-accent,
+// --el-card-accent2 and --el-card-ink set here (any CSS color).
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import type { BallotGroup } from '@elections/data';
+interface Props {
+  ctx: PageContext;
+  id: string;
+  title: string;
+  text: string;
+  groups: BallotGroup[];
+  share: { label: string; href: string };
+  support: Action | null;
+  download: { label: string };
+}
+const { id, title, text, groups, share, support, download } = Astro.props;
+---
+<section class="section ballot" id={id} data-el-ballot aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <div class="card">
+      <header class="head">
+        <h2 id={`${id}-title`}>{title}</h2>
+        <p>{text}</p>
+      </header>
+      <div class="groups">
+        {groups.map((g) => (
+          <div class="group">
+            <h3>{g.label}</h3>
+            <ol role="list">
+              {g.rows.map((r) => (
+                <li><span class="num">{r.number}</span><span class="who"><strong>{r.name}</strong><small>{r.seat}</small></span></li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
+      <div class="actions">
+        <a class="btn btn--primary" href={share.href} target="_blank" rel="noopener">{share.label}</a>
+        {support && <a class="btn btn--ghost" href={support.href}>{support.label}</a>}
+        <button class="btn btn--ghost" type="button" data-el-card>{download.label}</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ballot { --el-card-bg: var(--c-accent); --el-card-bg2: var(--c-accent); --el-card-accent: var(--c-highlight, var(--c-accent-soft)); --el-card-accent2: var(--c-accent-soft); --el-card-ink: var(--c-accent-ink); }
+  .card { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-6); border: 1px solid var(--c-line); border-radius: var(--radius-l); background: var(--c-surface); }
+  .head { text-align: center; display: flex; flex-direction: column; gap: var(--space-2); }
+  h2 { font-size: var(--step-3); }
+  .head p { color: var(--c-muted); }
+  .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--space-5); }
+  .group { display: flex; flex-direction: column; gap: var(--space-3); }
+  h3 { font-size: var(--step-0); color: var(--c-accent); }
+  ol { display: flex; flex-direction: column; gap: var(--space-2); }
+  li { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2); border-radius: var(--radius-m); background: var(--c-sunk); }
+  .num { display: grid; place-items: center; flex: 0 0 auto; inline-size: 2.8rem; block-size: 2.8rem; border-radius: var(--radius-s); background: var(--c-accent); color: var(--c-accent-ink); font-family: var(--font-display); font-size: var(--step-1); }
+  .who { display: flex; flex-direction: column; min-inline-size: 0; }
+  small { color: var(--c-muted); }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); }
+  button.btn { cursor: pointer; font: inherit; font-weight: var(--weight-strong); }
+  button[aria-busy='true'] { opacity: 0.6; cursor: progress; }
+</style>

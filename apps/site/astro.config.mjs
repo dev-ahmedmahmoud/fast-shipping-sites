@@ -123,6 +123,13 @@ export default defineConfig({
     resolve: {
       alias: {
         '@engine': fileURLToPath(new URL('./src/lib', import.meta.url)),
+        // Election clients: data shapes, widgets (Video, SupportApp, ComplaintForm) and runtime.
+        '@elections': fileURLToPath(new URL('./src/elections', import.meta.url)),
+        // The election page renderer enters the bundle only for election clients; others get a stub.
+        '@elections-page': fileURLToPath(new URL(client.kind === 'elections' ? './src/elections/Page.astro' : './src/elections/Off.astro', import.meta.url)),
+        // The layout system's election sections (layout/elections/index.ts), or baseline's when it has none.
+        // Kept out of layout/index.ts so school builds never bundle them.
+        '@layout-elections': existsSync(ds(parts.layout, 'layout/elections/index.ts')) ? ds(parts.layout, 'layout/elections/index.ts') : ds('baseline', 'layout/elections/index.ts'),
         '@client': clientDir,
         '@stock': path.join(root, 'stock'),
         '@systems': path.join(root, 'design-systems'),

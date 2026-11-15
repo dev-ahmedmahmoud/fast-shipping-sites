@@ -1,0 +1,15 @@
+---
+// Where the supporters' team app mounts (./client/supporters.ts builds its views here).
+// Hooks for design systems (defaults in ./elections.css):
+//   .el-sup__card  one view; .el-sup__intro, .el-sup__demo (preview notice)
+//   .el-sup__tabs / .el-sup__tab[aria-selected]   join | log in
+//   .el-sup__f (label + field), .el-sup__tel + .el-sup__cc (country picker), .el-sup__pw + .el-sup__eye
+//   .el-sup__err, .el-sup__msg (.is-good / .is-bad), .el-sup__to, .el-sup__ts (bot check)
+//   .el-sup__go (main button), .el-sup__go--alt, .el-sup__go--wa (WhatsApp), .el-sup__link, .el-sup__inline
+//   dashboard: .el-sup__hello, .el-sup__label, .el-sup__url, .el-sup__row, .el-sup__num,
+//              .el-sup__track > .el-sup__bar > .el-sup__fill, .el-sup__box(.is-open) .el-sup__lid, .el-sup__next(.is-done)
+import { supporters } from './data';
+---
+<div class="el-sup" id="el-sup" data-el-sup aria-live="polite">
+  <noscript>{supporters.words?.off}</noscript>
+</div>

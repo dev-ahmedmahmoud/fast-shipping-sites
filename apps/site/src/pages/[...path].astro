@@ -6,6 +6,7 @@ import { pages, newsFor, resolveAction, resolveHref, type Entry } from '@engine/
 import { buildContext } from '@engine/context';
 import { heroVideo, mediaList } from '@engine/media';
 import client from '@client/client.json';
+import ElectionsPage from '@elections-page';
 
 export function getStaticPaths() {
   // A gallery-index build renders only the comparison page (src/gallery/Index.astro).
@@ -41,11 +42,15 @@ const linkItems = (items: any[] = []) =>
     const target = it.href ? resolveHref(it.href, ctx.locale) : null;
     return { title: it.title, text: it.text, href: target?.href, external: target?.external };
   });
-const video = entry.template === 'home' && fm.hero
+// Election clients ("kind": "elections") render from their election data instead.
+const elections = (client as { kind?: string }).kind === 'elections';
+const video = !elections && entry.template === 'home' && fm.hero
   ? heroVideo(fm.hero.video, (client as { heroVideos?: Record<string, { src: string; poster: string }> }).heroVideos)
   : null;
 ---
-{entry.template === 'home' ? (
+{elections ? (
+  <ElectionsPage entry={entry} />
+) : entry.template === 'home' ? (
   <Base ctx={ctx} title={ctx.site.name} description={entry.description}>
     {fm.hero && (
       <Hero ctx={ctx} eyebrow={fm.hero.eyebrow} title={fm.hero.title} lead={fm.hero.lead}

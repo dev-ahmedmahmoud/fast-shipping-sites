@@ -1,0 +1,49 @@
+---
+// The full interview with its topics. Engine hooks (keep them): the section carries
+// [data-el-interview]; each topic is a <button data-el-seek="<seconds>">. A <details>
+// with [data-el-open-wide] stays open beside the player on wide screens.
+import type { PageContext } from '@engine/context';
+import type { VideoData } from '@elections/data';
+import Video from '@elections/Video.astro';
+interface Props {
+  ctx: PageContext;
+  id: string;
+  title: string;
+  video: VideoData;
+  summary: string;
+  chapters: { t: number; time: string; label: string; aria: string }[];
+}
+const { id, title, video, summary, chapters } = Astro.props;
+---
+<section class="section" id={id} data-el-interview aria-labelledby={`${id}-title`}>
+  <div class="container wrap">
+    <h2 id={`${id}-title`}>{title}</h2>
+    <div class="grid">
+      <div class="player"><Video video={video} sizes="(max-width: 900px) 100vw, 60vw" /></div>
+      {chapters.length > 0 && (
+        <details class="topics" data-el-open-wide>
+          <summary>{summary}</summary>
+          <ol role="list">
+            {chapters.map((ch) => (
+              <li><button type="button" data-el-seek={ch.t} aria-label={ch.aria}><span class="t" aria-hidden="true">{ch.time}</span><span>{ch.label}</span></button></li>
+            ))}
+          </ol>
+        </details>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-4); }
+  h2 { font-size: var(--step-3); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+  .player { min-inline-size: 0; }
+  .topics { border: 1px solid var(--c-line); border-radius: var(--radius-m); background: var(--c-surface); }
+  summary { padding: var(--space-3) var(--space-4); font-weight: var(--weight-strong); cursor: pointer; }
+  ol { display: flex; flex-direction: column; padding: 0 var(--space-2) var(--space-2); }
+  button { display: flex; gap: var(--space-3); inline-size: 100%; padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-s); background: none; text-align: start; cursor: pointer; }
+  button:hover { background: var(--c-sunk); }
+  .t { color: var(--c-accent); font-variant-numeric: tabular-nums; direction: ltr; min-inline-size: 3ch; }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>

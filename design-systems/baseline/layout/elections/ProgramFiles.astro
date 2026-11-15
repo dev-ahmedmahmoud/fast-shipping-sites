@@ -1,0 +1,43 @@
+---
+// The list's program files as cards (home, the files index, "other files" on a file page).
+import type { PageContext } from '@engine/context';
+import type { FileCard } from '@elections/data';
+interface Props { ctx: PageContext; title?: string; lead?: string; hint?: string; files: FileCard[] }
+const { title, lead, hint, files } = Astro.props;
+---
+<section class="section">
+  <div class="container wrap">
+    {(title || lead || hint) && (
+      <header class="head">
+        {title && <h2>{title}</h2>}
+        {lead && <p class="lead">{lead}</p>}
+        {hint && <p class="hint">{hint}</p>}
+      </header>
+    )}
+    <ul class="grid" role="list">
+      {files.map((f) => (
+        <li>
+          <a class="card" href={f.href}>
+            <span class="icon" aria-hidden="true" set:html={f.icon} />
+            <h3>{f.title}</h3>
+            <p>{f.tagline}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-5); }
+  .head { text-align: center; display: flex; flex-direction: column; gap: var(--space-2); }
+  h2 { font-size: var(--step-3); }
+  .lead, .hint { color: var(--c-muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: var(--space-4); }
+  .card { display: flex; flex-direction: column; gap: var(--space-2); block-size: 100%; padding: var(--space-5); border: 1px solid var(--c-line); border-radius: var(--radius-l); background: var(--c-surface); color: var(--c-ink); text-decoration: none; transition: border-color var(--dur-fast) var(--ease-out); }
+  .card:hover { border-color: var(--c-accent); }
+  .icon { color: var(--c-accent); inline-size: 44px; block-size: 44px; }
+  .icon :global(svg) { inline-size: 100%; block-size: 100%; }
+  h3 { font-size: var(--step-1); }
+  .card p { color: var(--c-muted); }
+</style>

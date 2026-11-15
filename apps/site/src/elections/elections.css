@@ -1,0 +1,130 @@
+/* Default look for the engine's own election widgets: press-to-play video, the supporters'
+   app and the complaints form. Built only from design tokens and wrapped in :where(), so
+   they carry no specificity: any design system restyles them with a plain class rule. */
+
+/* ---------- video ---------- */
+:where(.el-video) {
+  position: relative; aspect-ratio: 16 / 9; inline-size: 100%;
+  border-radius: var(--radius-m); overflow: hidden; background: var(--c-sunk);
+}
+:where(.el-video) video, :where(.el-video__play) { inline-size: 100%; block-size: 100%; display: block; }
+:where(.el-video) video { object-fit: contain; background: #000; }
+:where(.el-video__play) { position: relative; padding: 0; border: 0; cursor: pointer; background: none; }
+:where(.el-video__poster) { inline-size: 100%; block-size: 100%; object-fit: cover; }
+:where(.el-video__icon) {
+  position: absolute; inset: 0; margin: auto; inline-size: 72px; block-size: 72px; border-radius: 50%;
+  background: color-mix(in oklab, var(--c-accent) 88%, transparent); box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+/* A play mark points right in every language, so this one icon uses a physical side. */
+:where(.el-video__icon)::after {
+  content: ''; position: absolute; inset: 0; margin: auto; inline-size: 0; block-size: 0;
+  border-block: 12px solid transparent; border-left: 20px solid var(--c-accent-ink);
+  translate: 3px 0;
+}
+:where(.el-video__play):hover .el-video__icon, :where(.el-video__play):focus-visible .el-video__icon { transform: scale(1.08); }
+:where(.el-video__label) {
+  position: absolute; inset-inline: 0; inset-block-end: 0; padding: var(--space-4) var(--space-4) var(--space-3);
+  color: #fff; font-weight: var(--weight-strong); text-align: start;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.65), transparent);
+}
+:where(.el-video.is-loading)::after {
+  content: ''; position: absolute; inset: 0; margin: auto; inline-size: 48px; block-size: 48px; border-radius: 50%;
+  border: 4px solid rgb(255 255 255 / 0.35); border-block-start-color: #fff; animation: el-spin 0.9s linear infinite; pointer-events: none;
+}
+@keyframes el-spin { to { rotate: 1turn; } }
+
+/* ---------- supporters' app ---------- */
+:where(.el-sup) { display: block; }
+:where(.el-sup__card) {
+  display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6) var(--space-5);
+  border: 1px solid var(--c-line); border-radius: var(--radius-l); background: var(--c-surface);
+}
+:where(.el-sup__card) form { display: flex; flex-direction: column; gap: var(--space-3); }
+:where(.el-sup__intro) { color: var(--c-muted); }
+:where(.el-sup__demo), :where(.el-form__demo) {
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-s);
+  background: var(--c-accent-soft); color: var(--c-ink); font-size: var(--step--1);
+}
+:where(.el-sup__tabs) { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-1); padding: var(--space-1); border-radius: var(--radius-pill); background: var(--c-sunk); }
+:where(.el-sup__tab) { min-block-size: 44px; border: 0; border-radius: var(--radius-pill); background: transparent; font-weight: var(--weight-strong); cursor: pointer; }
+:where(.el-sup__tab[aria-selected='true']) { background: var(--c-surface); color: var(--c-accent); box-shadow: 0 1px 3px rgb(0 0 0 / 0.12); }
+:where(.el-sup__f) { display: flex; flex-direction: column; gap: var(--space-1); font-weight: var(--weight-strong); }
+:where(.el-sup__f) small { color: var(--c-muted); font-weight: var(--weight-body); }
+:where(.el-sup__f) input, :where(.el-sup__cc) select, :where(.el-sup__url),
+:where(.el-form__input) {
+  inline-size: 100%; min-block-size: 48px; padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--c-line); border-radius: var(--radius-s); background: var(--c-bg); font-weight: var(--weight-body);
+}
+:where(.el-sup__f) input[aria-invalid='true'], :where(.el-form__input[aria-invalid='true']) { border-color: #c0392b; }
+:where(.el-sup__tel) { display: flex; gap: var(--space-2); }
+:where(.el-sup__tel) input { flex: 1 1 auto; min-inline-size: 0; }
+:where(.el-sup__cc) { position: relative; display: flex; align-items: center; flex: 0 0 auto; }
+:where(.el-sup__cc) b {
+  display: flex; align-items: center; min-block-size: 48px; padding-inline: var(--space-3);
+  border: 1px solid var(--c-line); border-radius: var(--radius-s); background: var(--c-sunk); pointer-events: none;
+}
+:where(.el-sup__cc) select { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+:where(.el-sup__pw) { position: relative; display: flex; }
+:where(.el-sup__pw) input { padding-inline-end: 48px; }
+:where(.el-sup__eye) { position: absolute; inset-block: 0; inset-inline-end: 0; inline-size: 48px; border: 0; background: none; color: var(--c-muted); cursor: pointer; display: grid; place-items: center; }
+:where(.el-sup__eye[aria-pressed='true']) .el-sup__eye-off { display: none; }
+:where(.el-sup__err), :where(.el-form__err) { color: #b3261e; font-size: var(--step--1); font-weight: var(--weight-strong); }
+:where(.el-sup__msg), :where(.el-form__msg) { white-space: pre-line; }
+:where(.el-sup__msg:empty), :where(.el-form__msg:empty) { display: none; }
+:where(.el-sup__msg.is-good), :where(.el-form__msg.is-good) { padding: var(--space-3); border-radius: var(--radius-s); background: var(--c-accent-soft); }
+:where(.el-sup__msg.is-bad), :where(.el-form__msg.is-bad) { padding: var(--space-3); border-radius: var(--radius-s); background: #fdecea; color: #8a1c14; }
+:where(.el-sup__go), :where(.el-form__go) {
+  display: inline-flex; align-items: center; justify-content: center; min-block-size: 48px; padding-inline: var(--space-5);
+  border: 0; border-radius: var(--radius-pill); background: var(--c-accent); color: var(--c-accent-ink);
+  font-weight: var(--weight-strong); text-decoration: none; cursor: pointer;
+}
+:where(.el-sup__go[disabled]), :where(.el-form__go[disabled]) { opacity: 0.6; cursor: progress; }
+:where(.el-sup__go--alt) { background: transparent; color: var(--c-accent); border: 1px solid currentColor; }
+:where(.el-sup__go--wa) { background: #1f9d55; }
+/* The share button is a link: one class of weight so a system's plain `a { color }` cannot dim it. */
+.el-sup__go--wa:where(:link, :visited, :hover, :focus-visible) { color: #fff; text-decoration: none; }
+:where(.el-sup__link), :where(.el-sup__inline) { align-self: center; border: 0; background: none; color: var(--c-accent); text-decoration: underline; cursor: pointer; padding: var(--space-1); }
+:where(.el-sup__inline) { padding: 0; }
+:where(.el-sup__to) { color: var(--c-muted); }
+:where(.el-sup__hello) { font-size: var(--step-2); }
+:where(.el-sup__label) { font-weight: var(--weight-strong); }
+:where(.el-sup__num) { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-2); margin-block-start: var(--space-3); }
+:where(.el-sup__num) b { font-size: var(--step-4); font-family: var(--font-display); color: var(--c-accent); }
+:where(.el-sup__num) small { font-size: var(--step-0); color: var(--c-muted); margin-inline-start: var(--space-1); }
+:where(.el-sup__track) { display: flex; align-items: center; gap: var(--space-3); }
+:where(.el-sup__bar) { flex: 1 1 auto; block-size: 12px; border-radius: var(--radius-pill); background: var(--c-sunk); overflow: hidden; }
+:where(.el-sup__fill) { block-size: 100%; border-radius: inherit; background: var(--c-accent); transition: inline-size var(--dur-slow) var(--ease-out); }
+:where(.el-sup__box) { color: var(--c-muted); }
+:where(.el-sup__box.is-open) { color: var(--c-highlight, var(--c-accent)); }
+:where(.el-sup__box.is-open) .el-sup__lid { translate: 0 -4px; rotate: -8deg; transform-origin: 20% 100%; }
+:where(.el-sup__ribbon) { opacity: 0.85; fill: var(--c-surface); }
+:where(.el-sup__next) { color: var(--c-muted); }
+:where(.el-sup__next.is-done) { color: var(--c-ink); font-weight: var(--weight-strong); }
+:where(.is-ltr) { direction: ltr; text-align: left; }
+
+/* ---------- complaints form ---------- */
+:where(.el-form) {
+  display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-6) var(--space-5);
+  border: 1px solid var(--c-line); border-radius: var(--radius-l); background: var(--c-surface);
+}
+:where(.el-form__field) { display: flex; flex-direction: column; gap: var(--space-1); min-inline-size: 0; border: 0; margin: 0; padding: 0; }
+:where(.el-form__label) { font-weight: var(--weight-strong); padding: 0; }
+:where(.el-form__req) { color: var(--c-accent); }
+:where(.el-form__input) { font: inherit; }
+:where(textarea.el-form__input) { min-block-size: 8rem; resize: vertical; }
+:where(.el-form__choices) [role='radiogroup'] { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+:where(.el-form__choice) {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 44px; padding-inline: var(--space-4);
+  border: 1px solid var(--c-line); border-radius: var(--radius-pill); cursor: pointer;
+}
+:where(.el-form__choice):has(input:checked) { border-color: var(--c-accent); background: var(--c-accent-soft); }
+:where(.el-form__choice) input { accent-color: var(--c-accent); }
+:where(.el-form__file-btn) {
+  display: inline-flex; align-items: center; align-self: flex-start; min-block-size: 44px; padding-inline: var(--space-4);
+  border: 1px dashed var(--c-accent); border-radius: var(--radius-s); color: var(--c-accent); font-weight: var(--weight-strong); cursor: pointer;
+}
+:where(.el-form__file-btn):focus-within { outline: 2px solid var(--c-accent); outline-offset: 3px; }
+:where(.el-form__file-name) { font-size: var(--step--1); color: var(--c-ink); }
+:where(.el-form__help) { font-size: var(--step--1); color: var(--c-muted); }
+:where(.el-form__go) { align-self: flex-start; }

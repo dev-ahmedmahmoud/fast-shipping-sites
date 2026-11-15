@@ -1,0 +1,52 @@
+---
+// Rendered once on every election page: the settings the browser scripts need (as JSON)
+// and the scripts themselves (./client/runtime.ts), plus default styles for the engine's
+// own widgets (./elections.css), which design systems may restyle.
+import './elections.css';
+import client from '@client/client.json';
+import { homeOf } from '@engine/content';
+import { ballotGroups, cardLogo, complaints, list, supporters, vote } from './data';
+
+const api = (client as { api?: { mode?: string; base?: string; turnstileSiteKey?: string } }).api ?? {};
+const site = Astro.site ?? new URL('https://example.com');
+const numerals = ((client as { numerals?: Record<string, string> }).numerals ?? {}).ar ?? 'arab';
+
+// Shown only in demo mode (previews), so nobody mistakes a preview for the real thing.
+const DEMO_WORDS = {
+  demoBadge: 'معاينة: نسخة تجريبية. البيانات تُحفظ على هذا الجهاز فقط، ولا تُرسل رسائل واتساب.',
+  demoCode: 'معاينة: كود التأكيد هو %s',
+};
+
+const config = {
+  api: {
+    mode: api.mode === 'live' ? 'live' : 'demo',
+    base: api.base ?? `${import.meta.env.BASE_URL.replace(/\/+$/, '')}/api/`,
+    turnstileSiteKey: api.turnstileSiteKey ?? '',
+    key: `el-demo:${client.slug}:${import.meta.env.FSS_SAMPLE}`,
+  },
+  numerals,
+  // Site-relative: the browser resolves it against the address it is on, so a supporter's
+  // link points at the site they joined on (a preview, or the production domain).
+  home: homeOf('ar').href,
+  ballot: {
+    title: vote.title,
+    text: vote.text,
+    groups: ballotGroups,
+    logo: cardLogo?.src ?? null,
+    site: list.site ?? site.host,
+    filename: vote.download?.filename ?? 'list.png',
+  },
+  supporters: { words: { ...supporters.words, ...DEMO_WORDS }, goal: supporters.goal ?? 5 },
+  complaints: {
+    fields: complaints.fields,
+    sending: complaints.sending,
+    failed: complaints.failed,
+    success: complaints.success,
+    demoNote: complaints.demoNote,
+  },
+};
+---
+<script type="application/json" id="el-config" set:html={JSON.stringify(config).replace(/</g, '\\u003c')}></script>
+<script>
+  import './client/runtime.ts';
+</script>

@@ -5,6 +5,9 @@
     "resolveJsonModule": true,
     "paths": {
       "@engine/*": ["./src/lib/*"],
+      "@elections/*": ["./src/elections/*"],
+      "@elections-page": ["./src/elections/Page.astro"],
+      "@layout-elections": ["../../design-systems/baseline/layout/elections/index.ts"],
       "@client/*": ["../../clients/lfis/*"],
       "@systems/*": ["../../design-systems/*"],
       "@palette": ["../../design-systems/baseline/palette.ts"],

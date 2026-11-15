@@ -1,0 +1,70 @@
+---
+// Candidate cards: ballot number, photo, name, seat, link to the profile.
+// variant "strip": one swipeable row (home, "the rest of the team"); "groups": a grid per
+// ballot group under its heading (the team page).
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { CandidateCard } from '@elections/data';
+interface Props {
+  ctx: PageContext;
+  variant: 'strip' | 'groups';
+  title?: string;
+  lead?: string;
+  groups: { label: string; candidates: CandidateCard[] }[];
+  more?: { label: string; href: string } | null;
+  /** Label of the card's profile link ("عرض الملف الشخصي"). */
+  cardMore: string;
+  /** "رقم", read before the number by screen readers. */
+  numberLabel: string;
+}
+const { variant, title, lead, groups, more, cardMore, numberLabel } = Astro.props;
+---
+<section class:list={['section', variant]}>
+  <div class="container wrap">
+    {(title || lead) && (
+      <header class="head">
+        {title && <h2>{title}</h2>}
+        {lead && <p class="lead">{lead}</p>}
+      </header>
+    )}
+    {groups.map((g) => (
+      <div class="group">
+        {g.label && <h2 class="group-title">{g.label}</h2>}
+        <ul class="cards" role="list" tabindex={variant === 'strip' ? 0 : undefined} aria-label={variant === 'strip' ? (title ?? g.label) : undefined}>
+          {g.candidates.map((c) => (
+            <li>
+              <a class="card" href={c.href}>
+                <span class="num"><span class="sr-only">{numberLabel} {c.number}</span><span aria-hidden="true">{c.number}</span></span>
+                <Image class="photo" src={c.card} alt="" widths={[240, 480, 768]} sizes="(max-width: 600px) 60vw, 240px" />
+                <h3>{c.name}</h3>
+                <p class="seat">{c.seat}</p>
+                <span class="more">{cardMore}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+    {more && <p class="all"><a class="btn btn--ghost" href={more.href}>{more.label}</a></p>}
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-5); }
+  .head { text-align: center; display: flex; flex-direction: column; gap: var(--space-2); }
+  h2 { font-size: var(--step-3); }
+  .group { display: flex; flex-direction: column; gap: var(--space-4); }
+  .group-title { font-size: var(--step-2); }
+  .lead { color: var(--c-muted); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: var(--space-4); }
+  .strip .cards { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-block-end: var(--space-3); }
+  .strip .cards > li { flex: 0 0 min(15rem, 70%); scroll-snap-align: start; }
+  .card { position: relative; display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3); border: 1px solid var(--c-line); border-radius: var(--radius-l); background: var(--c-surface); color: var(--c-ink); text-decoration: none; block-size: 100%; }
+  .card:hover { border-color: var(--c-accent); }
+  .num { position: absolute; inset-block-start: var(--space-4); inset-inline-start: var(--space-4); z-index: 1; display: grid; place-items: center; min-inline-size: 2.6rem; block-size: 2.6rem; padding-inline: var(--space-2); border-radius: var(--radius-pill); background: var(--c-accent); color: var(--c-accent-ink); font-family: var(--font-display); font-size: var(--step-1); }
+  .card :global(.photo) { inline-size: 100%; aspect-ratio: 4 / 5; block-size: auto; object-fit: cover; border-radius: var(--radius-m); margin-block-end: var(--space-2); }
+  h3 { font-size: var(--step-1); }
+  .seat { color: var(--c-muted); font-size: var(--step--1); }
+  .more { margin-block-start: auto; padding-block-start: var(--space-2); color: var(--c-accent); font-weight: var(--weight-strong); font-size: var(--step--1); }
+  .all { text-align: center; }
+</style>

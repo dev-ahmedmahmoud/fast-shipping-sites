@@ -1,0 +1,34 @@
+---
+// Press-to-play video: a poster button that becomes the player when pressed, so the
+// video file is requested only then. Starting one video pauses any other; chapter
+// buttons ([data-el-seek] inside the same [data-el-interview]) jump to their moment.
+// Behaviour lives in ./client/video.ts. Design systems place this inside their own
+// frame and style the hooks below (defaults in ./elections.css):
+//   .el-video            the box (16:9); gets .is-playing once the player is in, .is-loading while it buffers
+//   .el-video__play      the poster button
+//   .el-video__poster    the poster image
+//   .el-video__icon      the round play mark
+//   .el-video__label     optional caption on the poster
+import { Image } from 'astro:assets';
+import type { VideoData } from './data';
+import { ui } from './data';
+
+interface Props {
+  video: VideoData;
+  /** Responsive widths for the poster. */
+  widths?: number[];
+  sizes?: string;
+  class?: string;
+  /** Show the caption on the poster (the leader's word, a profile's word video). */
+  showCaption?: boolean;
+}
+const { video, widths = [480, 768, 1024, 1440], sizes = '(max-width: 900px) 100vw, 60vw', class: cls, showCaption = false } = Astro.props;
+const playLabel = `${ui.play ?? 'تشغيل الفيديو'}: ${video.label}`;
+---
+<div class:list={['el-video', cls]} data-el-video data-src={video.src}>
+  <button class="el-video__play" type="button" aria-label={playLabel}>
+    <Image class="el-video__poster" src={video.poster} alt="" widths={widths} sizes={sizes} loading="lazy" />
+    <span class="el-video__icon" aria-hidden="true"></span>
+    {showCaption && video.caption && <span class="el-video__label">{video.caption}</span>}
+  </button>
+</div>

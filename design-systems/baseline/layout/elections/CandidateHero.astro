@@ -1,0 +1,32 @@
+---
+// A candidate's profile header (h1): back link to the list, name, seat, ballot number, photo.
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import type { CandidateCard } from '@elections/data';
+interface Props { ctx: PageContext; candidate: CandidateCard; kicker: Action | null; numberLabel: string }
+const { candidate: c, kicker, numberLabel } = Astro.props;
+---
+<section class="person">
+  <div class="container grid">
+    <div class="copy">
+      {kicker && <p class="kicker"><a href={kicker.href}>{kicker.label}</a></p>}
+      <h1 data-split-words>{c.name}</h1>
+      <p class="seat">{c.seat}</p>
+      <p class="num">{numberLabel}</p>
+    </div>
+    <Image class="photo" src={c.photo} alt={c.photoAlt} widths={[320, 480, 800]} sizes="(max-width: 900px) 70vw, 360px" loading="eager" fetchpriority="high" />
+  </div>
+</section>
+
+<style>
+  .person { padding-block: var(--space-7); background: var(--c-sunk); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-6); align-items: center; }
+  .copy { display: flex; flex-direction: column; gap: var(--space-2); min-inline-size: 0; }
+  .kicker a { color: var(--c-accent); font-weight: var(--weight-strong); text-decoration: none; }
+  h1 { font-size: var(--step-4); }
+  .seat { font-size: var(--step-1); color: var(--c-muted); }
+  .num { align-self: flex-start; padding: var(--space-1) var(--space-4); border-radius: var(--radius-pill); background: var(--c-accent); color: var(--c-accent-ink); font-family: var(--font-display); font-size: var(--step-2); }
+  .grid :global(.photo) { inline-size: min(100%, 22rem); block-size: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius-l); }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } .grid :global(.photo) { order: -1; justify-self: center; } }
+</style>

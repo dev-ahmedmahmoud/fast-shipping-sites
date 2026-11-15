@@ -1,0 +1,37 @@
+---
+// The list's leader: seat, name, a line, link to the profile, and his word (a video).
+import type { ImageMetadata } from 'astro';
+import type { PageContext } from '@engine/context';
+import type { VideoData } from '@elections/data';
+import Video from '@elections/Video.astro';
+interface Props {
+  ctx: PageContext;
+  kicker: string;
+  name: string;
+  text: string;
+  more: { label: string; href: string };
+  video: VideoData | null;
+  photo: ImageMetadata;
+}
+const { kicker, name, text, more, video } = Astro.props;
+---
+<section class="section" id="leader" aria-labelledby="el-leader-title">
+  <div class="container grid">
+    <div class="copy">
+      <p class="kicker">{kicker}</p>
+      <h2 id="el-leader-title">{name}</h2>
+      <p>{text}</p>
+      <a class="btn btn--ghost" href={more.href}>{more.label}</a>
+    </div>
+    {video && <div class="media"><Video video={video} showCaption sizes="(max-width: 900px) 100vw, 55vw" /></div>}
+  </div>
+</section>
+
+<style>
+  .grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-6); align-items: center; }
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); min-inline-size: 0; }
+  .kicker { color: var(--c-accent); font-weight: var(--weight-strong); }
+  h2 { font-size: var(--step-4); }
+  .media { min-inline-size: 0; }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>

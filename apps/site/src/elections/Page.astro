@@ -1,0 +1,137 @@
+---
+// One page of an election client, by its template. Sections come from the design
+// system's `electionComponents` (layout/elections/index.ts); any the system does not provide
+// fall back to baseline's, so every system renders a complete, working election site.
+// Behaviour (countdown, videos, ballot card, supporters, complaints) is the engine's:
+// see ./Runtime.astro and ./client.
+import Base from '../layouts/Base.astro';
+import * as layout from '@layout/index';
+import { electionComponents as baselineElections } from '@systems/baseline/layout/elections/index';
+import { electionComponents as layoutElections } from '@layout-elections';
+import { byId, type Entry } from '@engine/content';
+import { buildContext } from '@engine/context';
+import Runtime from './Runtime.astro';
+import SupportApp from './SupportApp.astro';
+import ComplaintForm from './ComplaintForm.astro';
+import {
+  action, ballotGroups, candidate, candidateGroups, candidateRaw, candidates, clipsForCandidate, clipsForFile,
+  complaints, countdown, crest, fileRaw, filesPage, home, list, programFiles, shareImage, supporters, teamPage,
+  timeLabel, ui, video, vote,
+} from './data';
+import { media } from '@engine/media';
+
+interface Props { entry: Entry }
+const { entry } = Astro.props;
+const ctx = buildContext(entry);
+const E = { ...baselineElections, ...(layoutElections as Partial<typeof baselineElections>) };
+const { CTA } = layout.components;
+const fm = entry.fm as Record<string, any>;
+const Content = entry.Content;
+const site = Astro.site ?? new URL('https://example.com');
+
+const teamHref = byId('team', 'ar')?.href ?? '#';
+const shareHref = `https://wa.me/?text=${encodeURIComponent(`${vote.shareText} ${new URL(`${teamHref}#vote`, site).href}`)}`;
+const ballot = {
+  id: 'vote',
+  title: vote.title,
+  text: vote.text,
+  groups: ballotGroups,
+  share: { label: vote.share?.label, href: shareHref },
+  download: { label: vote.download?.label },
+};
+const strip = (except?: string) => [{ label: '', candidates: candidates.filter((c) => c.slug !== except) }];
+const cardMore = ui.profile ?? '';
+
+let image = shareImage()?.src;
+let fullTitle: string | undefined;
+let c: ReturnType<typeof candidate> | null = null;
+let cr: any = null;
+if (entry.template === 'home') fullTitle = fm.titleTag;
+if (entry.template === 'candidate') {
+  c = candidate(fm.candidate);
+  cr = candidateRaw(fm.candidate);
+  if (cr.shareImage) image = media(cr.shareImage).src;
+}
+const file = entry.template === 'file' ? fileRaw(fm.file) : null;
+const leader = list.leader ? candidate(list.leader) : null;
+---
+<Base ctx={ctx} title={entry.title} description={entry.description} fullTitle={fullTitle} image={image}>
+  {entry.template === 'home' && (
+    <>
+      <E.ElectionHero ctx={ctx} title={home.hero.title} slogan={home.hero.slogan} sub={home.hero.sub}
+        actions={home.hero.actions.map(action).filter(Boolean)}
+        image={home.hero.image ? media(home.hero.image) : null} imageAlt={home.hero.imageAlt} crest={crest} />
+      <E.Countdown ctx={ctx} countdown={countdown} />
+      <E.ProgramFiles ctx={ctx} title={home.filesTitle} files={programFiles} />
+      {leader && (
+        <E.LeaderSpotlight ctx={ctx} kicker={home.leader.kicker} name={leader.name} text={home.leader.text}
+          more={{ label: home.leader.more, href: leader.href }} video={video(home.leader.video)} photo={leader.photo} />
+      )}
+      <E.CandidateGrid ctx={ctx} variant="strip" title={home.team.title} lead={home.team.lead} groups={strip()}
+        more={{ label: home.team.all, href: teamHref }} cardMore={cardMore} numberLabel={ui.number} />
+      <E.InterviewStrip ctx={ctx} title={home.interviews.title} lead={home.interviews.lead}
+        items={home.interviews.items.map((it: any) => {
+          const who = candidate(it.candidate);
+          return { name: who.name, seat: who.seat, href: `${who.href}#interview`, poster: media(it.poster), cta: ui.watch };
+        })} />
+      <E.BallotCard ctx={ctx} {...ballot} support={action(vote.support)} />
+      <CTA ctx={ctx} title={home.cta.title} text={home.cta.text} action={action(home.cta.action)} />
+    </>
+  )}
+
+  {entry.template === 'candidates' && (
+    <>
+      <E.PageBand ctx={ctx} title={teamPage.title} lead={teamPage.lead} crest={crest} />
+      <E.CandidateGrid ctx={ctx} variant="groups" groups={candidateGroups()} cardMore={cardMore} numberLabel={ui.number} />
+      <E.BallotCard ctx={ctx} {...ballot} support={null} />
+    </>
+  )}
+
+  {entry.template === 'candidate' && c && cr && (
+    <>
+      <E.CandidateHero ctx={ctx} candidate={c} kicker={action(cr.kicker)} numberLabel={`${ui.number} ${c.number}`} />
+      {cr.word && <E.MediaFrame ctx={ctx} video={video(cr.word)!} label={cr.word.title ?? cr.word.label} />}
+      <E.Panel ctx={ctx}><Content /></E.Panel>
+      {cr.interview && (
+        <E.InterviewPlayer ctx={ctx} id="interview" title={cr.interview.title} video={video(cr.interview)!}
+          summary={cr.interview.summary}
+          chapters={cr.interview.chapters.map((ch: any) => ({ t: ch.t, time: timeLabel(ch.t), label: ch.label, aria: `شاهد: ${ch.label} (عند ${timeLabel(ch.t)})` }))} />
+      )}
+      {cr.gallery?.length > 0 && <E.PhotoRow ctx={ctx} photos={cr.gallery.map((g: string) => media(g))} alt={c.name} label={cr.galleryLabel} hint={ui.galleryHint} />}
+      {clipsForCandidate(c.slug).length > 0 && <E.ClipGrid ctx={ctx} title={cr.filesTitle} groups={clipsForCandidate(c.slug)} />}
+      <E.CandidateGrid ctx={ctx} variant="strip" title={cr.restTitle} groups={strip(c.slug)} cardMore={cardMore} numberLabel={ui.number} />
+    </>
+  )}
+
+  {entry.template === 'files' && (
+    <>
+      <E.PageBand ctx={ctx} title={filesPage.title} lead={filesPage.lead} crest={crest} />
+      <E.ProgramFiles ctx={ctx} hint={filesPage.hint} files={programFiles} />
+    </>
+  )}
+
+  {entry.template === 'file' && file && (
+    <>
+      <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} />
+      <E.Panel ctx={ctx}><Content /></E.Panel>
+      <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} />
+      <E.ProgramFiles ctx={ctx} title={file.othersTitle} files={programFiles.filter((f) => f.slug !== file.slug)} />
+    </>
+  )}
+
+  {entry.template === 'support' && (
+    <>
+      <E.PageBand ctx={ctx} title={supporters.title ?? entry.title} crest={crest} />
+      <E.Panel ctx={ctx}><SupportApp /></E.Panel>
+    </>
+  )}
+
+  {entry.template === 'complaints' && (
+    <>
+      <E.PageBand ctx={ctx} title={complaints.title ?? entry.title} lead={complaints.lead} crest={crest} />
+      <E.Panel ctx={ctx}><ComplaintForm /></E.Panel>
+    </>
+  )}
+
+  <Runtime />
+</Base>
