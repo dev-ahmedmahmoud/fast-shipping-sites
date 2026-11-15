@@ -1,0 +1,93 @@
+---
+// The hall's entrance: crest, the list's name in Amiri and its slogan in gold under three
+// stage lights, and the whole team standing on a marble dais. The lights warm up once on
+// arrival; on capable devices they drift slowly and the team rises gently as you scroll.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  slogan: string;
+  sub: string;
+  actions: Action[];
+  image: ImageMetadata | null;
+  imageAlt: string;
+  crest: ImageMetadata | null;
+}
+const { title, slogan, sub, actions, image, imageAlt, crest } = Astro.props;
+---
+<section class="hero hof-wall">
+  <div class="lights" aria-hidden="true">
+    <span class="beam b1" data-hof-sway></span>
+    <span class="beam b2"></span>
+    <span class="beam b3" data-hof-sway></span>
+  </div>
+  <div class="container copy">
+    {crest && <Image class="crest" src={crest} alt="" height={120} loading="eager" />}
+    <p class="sub">{sub}</p>
+    <h1><span class="gleam">{title}</span></h1>
+    <span class="hof-orn" aria-hidden="true"><i></i></span>
+    <p class="slogan">{slogan}</p>
+    <div class="actions">
+      {actions.map((a, i) => (
+        <a class:list={['btn', i === 0 ? 'btn--primary' : 'btn--ghost']} href={a.href}>{a.label}</a>
+      ))}
+    </div>
+  </div>
+  {image && (
+    <div class="stage">
+      <figure class="team" data-hof-depth="0.08">
+        <Image src={image} alt={imageAlt} widths={[640, 960, 1397]} sizes="(max-width: 1200px) 100vw, 72rem" loading="eager" fetchpriority="high" />
+      </figure>
+      <span class="dais" aria-hidden="true"></span>
+    </div>
+  )}
+</section>
+
+<style>
+  .hero { overflow: hidden; padding-block: var(--space-7) 0; }
+  /* The lights come up once on arrival (the wrapper); each beam may also sway (motion island). */
+  .lights { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; animation: hof-lights-up 2.4s var(--ease-out) both; }
+  .beam {
+    position: absolute; inset-block-start: -24px; block-size: 92%; inline-size: 34%;
+    background: conic-gradient(from 180deg at 50% 0%, transparent 0deg 162deg, color-mix(in oklab, var(--hof-gold-light) 22%, transparent) 172deg 188deg, transparent 198deg 360deg);
+    filter: blur(6px); transform-origin: 50% 0%;
+  }
+  .b1 { inset-inline-start: 4%; rotate: -14deg; }
+  .b2 { inset-inline-start: 33%; inline-size: 34%; }
+  .b3 { inset-inline-end: 4%; rotate: 14deg; }
+  @keyframes hof-lights-up { from { opacity: 0.4; } to { opacity: 1; } }
+
+  .copy { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; }
+  .copy :global(.crest) { block-size: clamp(84px, 9vw, 120px); inline-size: auto; filter: drop-shadow(0 10px 22px color-mix(in oklab, var(--c-ink) 75%, transparent)); }
+  .sub { color: var(--hof-gold-text); font-weight: var(--weight-strong); font-size: var(--step-0); margin-block-start: var(--space-2); }
+  h1 { font-size: var(--step-5); color: var(--hof-on-wall); text-shadow: 0 3px 24px color-mix(in oklab, var(--c-ink) 70%, transparent); }
+  /* One slow light sweep across the name on arrival. */
+  .gleam {
+    background: linear-gradient(100deg, var(--hof-on-wall) 0%, var(--hof-on-wall) 42%, var(--hof-gold-light) 50%, var(--hof-on-wall) 58%, var(--hof-on-wall) 100%);
+    background-size: 260% 100%; background-position: 100% 0;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: hof-sweep 2.8s 0.6s var(--ease-in-out) both;
+  }
+  @keyframes hof-sweep { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+  .slogan { font-family: var(--font-display); font-weight: 700; font-size: var(--step-3); color: var(--hof-gold-text); line-height: 1.4; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-block-start: var(--space-3); }
+
+  .stage { position: relative; margin-block-start: var(--space-7); }
+  .team { position: relative; z-index: 1; margin: 0 auto; inline-size: min(100%, 72rem); padding-inline: var(--gutter); }
+  .team :global(img) { inline-size: 100%; block-size: auto; filter: drop-shadow(0 26px 30px color-mix(in oklab, var(--c-ink) 65%, transparent)); }
+  /* A marble dais under the team, catching the stage light. */
+  .dais {
+    position: absolute; inset-inline: 0; inset-block-end: 0; block-size: clamp(60px, 9vw, 120px);
+    background:
+      radial-gradient(60% 120% at 50% 0%, color-mix(in oklab, var(--hof-gold-light) 30%, transparent), transparent 70%),
+      linear-gradient(180deg, color-mix(in oklab, var(--c-sunk) 55%, var(--hof-wall-deep)), var(--hof-wall-deep));
+    border-block-start: 1px solid color-mix(in oklab, var(--hof-gold) 65%, transparent);
+  }
+  @media (max-width: 600px) {
+    .actions { flex-direction: column; align-items: stretch; inline-size: 100%; }
+    .actions .btn { white-space: normal; }
+  }
+</style>

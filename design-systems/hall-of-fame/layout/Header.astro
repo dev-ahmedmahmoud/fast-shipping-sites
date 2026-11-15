@@ -1,0 +1,204 @@
+---
+// The hall's doorway: a deep wine bar with a gold hairline, the crest and the name in
+// Amiri, the menu, and the header call to action in brass. Every target is at least 48px.
+import { Image } from 'astro:assets';
+import type { PageContext, NavItem } from '@engine/context';
+import amiriArabic from '../fonts/amiri-700-arabic.woff2?url';
+import amiriLatin from '../fonts/amiri-700-latin.woff2?url';
+import almaraiArabic from '../fonts/almarai-400-arabic.woff2?url';
+import almaraiLatin from '../fonts/almarai-400-latin.woff2?url';
+import almaraiBoldArabic from '../fonts/almarai-700-arabic.woff2?url';
+import almaraiBoldLatin from '../fonts/almarai-700-latin.woff2?url';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+// Every page opens with these faces (an Arabic page needs the Latin files too: its spaces
+// and full stops live there), so fetch them as the page starts rather than after the first
+// layout; the headings then rarely re-wrap as they arrive. The engine has no font-preload
+// hook, and a preload link is allowed in <body>. Same hashed files as fonts.css, under the base.
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+const withBase = (u: string) => (base && !u.startsWith(`${base}/`) ? `${base}${u}` : u);
+const latin = [amiriLatin, almaraiLatin, almaraiBoldLatin];
+const preloads = (ctx.dir === 'rtl' ? [amiriArabic, almaraiArabic, almaraiBoldArabic, ...latin] : latin).map(withBase);
+const other = ctx.languages.find((l) => !l.current);
+// A short menu (an election list's four pages) sits in the bar beside the crest; a long one
+// (a school's dozen pages) gets its own row under the bar, wrapping as needed.
+const short = ctx.nav.length <= 6;
+const linkAttrs = (item: NavItem) => ({
+  href: item.href,
+  'aria-current': item.current ? 'page' : undefined,
+  target: item.external ? '_blank' : undefined,
+  rel: item.external ? 'noopener' : undefined,
+});
+---
+{preloads.map((href) => <link rel="preload" as="font" type="font/woff2" href={href} crossorigin="anonymous" />)}
+<header class="header">
+  <div class="container bar">
+    <a class="brand" href={ctx.site.homeHref} aria-label={ctx.site.name}>
+      {ctx.site.logo
+        ? <Image src={ctx.site.logo} alt="" height={56} class="logo" loading="eager" />
+        : <span class="mark" aria-hidden="true">{ctx.site.shortName}</span>}
+      <span class="name">{ctx.site.name}</span>
+    </a>
+
+    {short && (
+      <nav class="nav-desktop" aria-label={ctx.ui.menu}>
+        <ul role="list">
+          {ctx.nav.map((item) => (
+            <li class:list={[{ 'has-sub': item.children.length > 0 }]}>
+              <a {...linkAttrs(item)}>{item.label}</a>
+              {item.children.length > 0 && (
+                <ul role="list" class="sub">
+                  {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    <div class="actions">
+      {other && (
+        <a class="lang" href={other.href} hreflang={other.locale} lang={other.locale}>{other.name}</a>
+      )}
+      {ctx.cta && (
+        <a class="btn btn--gold cta" href={ctx.cta.href}
+           target={ctx.cta.external ? '_blank' : undefined} rel={ctx.cta.external ? 'noopener' : undefined}>
+          {ctx.cta.label}
+        </a>
+      )}
+      <details class="nav-mobile">
+        <summary>
+          <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>{ctx.ui.menu}</span>
+        </summary>
+        <nav aria-label={ctx.ui.menu}>
+          <ul role="list">
+            {ctx.nav.map((item) => (
+              <li>
+                <a {...linkAttrs(item)}>{item.label}</a>
+                {item.children.length > 0 && (
+                  <ul role="list" class="sub-mobile">
+                    {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+                  </ul>
+                )}
+              </li>
+            ))}
+            {ctx.cta && (
+              <li class="cta-mobile"><a class="btn btn--gold" href={ctx.cta.href}
+                target={ctx.cta.external ? '_blank' : undefined} rel={ctx.cta.external ? 'noopener' : undefined}>{ctx.cta.label}</a></li>
+            )}
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+  {!short && (
+    <nav class="nav-desktop nav-row" aria-label={ctx.ui.menu}>
+      <ul role="list" class="container">
+        {ctx.nav.map((item) => (
+          <li class:list={[{ 'has-sub': item.children.length > 0 }]}>
+            <a {...linkAttrs(item)}>{item.label}</a>
+            {item.children.length > 0 && (
+              <ul role="list" class="sub">
+                {item.children.map((c) => <li><a {...linkAttrs(c)}>{c.label}</a></li>)}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+</header>
+
+<style>
+  .header {
+    position: sticky; inset-block-start: 0; z-index: 30;
+    background: color-mix(in oklab, var(--hof-wall-deep) 96%, transparent);
+    color: var(--hof-on-wall);
+    border-block-end: 1px solid color-mix(in oklab, var(--hof-gold) 60%, transparent);
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--hof-gold-deep) 40%, transparent), 0 10px 30px -18px var(--c-ink);
+    padding-block-start: env(safe-area-inset-top, 0px);
+  }
+  .bar { display: flex; align-items: center; gap: var(--space-5); min-block-size: 76px; }
+  .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--hof-on-wall); text-decoration: none; min-inline-size: 0; flex: 0 1 auto; }
+  .logo { block-size: 52px; inline-size: auto; filter: drop-shadow(0 2px 6px color-mix(in oklab, var(--c-ink) 60%, transparent)); }
+  .mark {
+    font-family: var(--font-display); font-size: var(--step-0);
+    padding: var(--space-1) var(--space-3); border-radius: var(--radius-s);
+    background: var(--hof-brass); color: var(--hof-wall-deep);
+  }
+  .name { font-family: var(--font-display); font-weight: 700; font-size: var(--step-1); line-height: 1.25; color: var(--hof-on-wall); }
+
+  .nav-desktop { margin-inline-start: auto; }
+  .nav-desktop > ul { display: flex; align-items: center; gap: var(--space-1); }
+  .nav-row { margin-inline-start: 0; border-block-start: 1px solid color-mix(in oklab, var(--hof-gold) 30%, transparent); }
+  .nav-row > ul { flex-wrap: wrap; justify-content: center; }
+  .bar:not(:has(.nav-desktop)) .actions { margin-inline-start: auto; }
+  .nav-desktop a {
+    position: relative; display: flex; align-items: center; min-block-size: 48px; padding-inline: var(--space-3);
+    color: var(--hof-on-wall); text-decoration: none; font-size: var(--step--1); font-weight: var(--weight-strong); white-space: nowrap;
+  }
+  .nav-desktop > ul > li > a::after {
+    content: ''; position: absolute; inset-inline: var(--space-3); inset-block-end: 8px; block-size: 2px;
+    background: var(--hof-brass); scale: 0 1; transition: scale var(--dur-base) var(--ease-out);
+  }
+  .nav-desktop > ul > li > a:hover::after, .nav-desktop a[aria-current='page']::after { scale: 1 1; }
+  .nav-desktop a[aria-current='page'] { color: var(--hof-gold-text); }
+  .has-sub { position: relative; }
+  .sub {
+    display: none; position: absolute; inset-inline-start: 0; inset-block-start: 100%; z-index: 5;
+    min-inline-size: 15rem; padding: var(--space-2);
+    background: var(--hof-wall-deep); border: 1px solid color-mix(in oklab, var(--hof-gold) 50%, transparent); border-radius: var(--radius-s);
+    box-shadow: var(--hof-shadow);
+  }
+  .sub a { min-block-size: 48px; }
+  .sub a:hover { background: color-mix(in oklab, var(--hof-on-wall) 8%, transparent); }
+  .has-sub:hover > .sub, .has-sub:focus-within > .sub { display: block; }
+
+  .actions { display: flex; align-items: center; gap: var(--space-3); flex: 0 0 auto; }
+  .nav-desktop + .actions { margin-inline-start: var(--space-2); }
+  .lang { display: flex; align-items: center; min-block-size: 48px; padding-inline: var(--space-2); color: var(--hof-on-wall); text-decoration: none; font-weight: var(--weight-strong); }
+  .lang:hover { color: var(--hof-gold-text); }
+  .cta { font-size: var(--step--1); padding-inline: var(--space-5); }
+
+  .nav-mobile { display: none; position: relative; }
+  .nav-mobile summary {
+    display: flex; align-items: center; gap: var(--space-2); min-block-size: 48px; padding-inline: var(--space-4);
+    list-style: none; cursor: pointer; border: 1px solid color-mix(in oklab, var(--hof-gold-light) 60%, transparent); border-radius: var(--radius-s);
+    color: var(--hof-on-wall); font-weight: var(--weight-strong);
+  }
+  .nav-mobile summary::-webkit-details-marker { display: none; }
+  .burger { display: grid; gap: 4px; inline-size: 20px; }
+  .burger i { display: block; block-size: 2px; border-radius: 2px; background: var(--hof-gold-light); transition: rotate var(--dur-fast) var(--ease-out), opacity var(--dur-fast); }
+  details[open] .burger i:nth-child(1) { translate: 0 6px; rotate: 45deg; }
+  details[open] .burger i:nth-child(2) { opacity: 0; }
+  details[open] .burger i:nth-child(3) { translate: 0 -6px; rotate: -45deg; }
+  .nav-mobile nav {
+    position: absolute; inset-inline-end: 0; inset-block-start: calc(100% + var(--space-3));
+    inline-size: min(22rem, calc(100vw - 2 * var(--gutter))); max-block-size: 78vh; overflow-y: auto; padding: var(--space-3);
+    background: var(--hof-wall-deep); border: 1px solid color-mix(in oklab, var(--hof-gold) 55%, transparent); border-radius: var(--radius-m);
+    box-shadow: var(--hof-shadow);
+  }
+  .nav-mobile nav a:not(.btn) {
+    display: flex; align-items: center; min-block-size: 52px; padding-inline: var(--space-3);
+    color: var(--hof-on-wall); text-decoration: none; font-weight: var(--weight-strong);
+    border-block-end: 1px solid color-mix(in oklab, var(--hof-gold) 22%, transparent);
+  }
+  .nav-mobile nav a[aria-current='page'] { color: var(--hof-gold-text); }
+  .sub-mobile { padding-inline-start: var(--space-4); }
+  .cta-mobile { padding-block-start: var(--space-3); }
+  .cta-mobile .btn { inline-size: 100%; white-space: normal; text-align: center; }
+
+  @media (max-width: 1100px) {
+    .nav-desktop { display: none; }
+    .nav-mobile { display: block; }
+    .actions { margin-inline-start: auto; }
+  }
+  @media (max-width: 720px) {
+    .cta { display: none; }
+    .name { font-size: var(--step-0); max-inline-size: 16ch; }
+    .logo { block-size: 44px; }
+    .bar { min-block-size: 68px; gap: var(--space-3); }
+  }
+</style>

@@ -1,0 +1,57 @@
+---
+// Engraved plaques on the stone wall: each link is a framed plaque with a gold rule that
+// draws across on hover.
+import type { PageContext } from '@engine/context';
+interface Item { title: string; text?: string; href?: string; external?: boolean }
+interface Props { ctx: PageContext; title?: string; items: Item[] }
+const { title, items } = Astro.props;
+---
+<section class="section">
+  <div class="container stack">
+    {title && (
+      <header class="hof-head" data-hof-reveal>
+        <h2>{title}</h2>
+        <span class="hof-orn" aria-hidden="true"><i></i></span>
+      </header>
+    )}
+    <ul class="grid" role="list">
+      {items.map((item) => (
+        <li data-hof-reveal>
+          {item.href ? (
+            <a class="plaque" href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noopener' : undefined}>
+              <h3>{item.title}</h3>
+              {item.text && <p>{item.text}</p>}
+              <span class="rule" aria-hidden="true"></span>
+              <svg class="arrow flip-rtl" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </a>
+          ) : (
+            <div class="plaque">
+              <h3>{item.title}</h3>
+              {item.text && <p>{item.text}</p>}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-7); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--space-5); }
+  .plaque {
+    position: relative; display: flex; flex-direction: column; gap: var(--space-2); block-size: 100%;
+    padding: var(--space-6) var(--space-5) var(--space-5);
+    background: linear-gradient(180deg, var(--c-surface), color-mix(in oklab, var(--c-surface) 70%, var(--c-sunk)));
+    border: 1px solid var(--c-line); border-radius: var(--radius-s);
+    box-shadow: inset 0 0 0 5px var(--c-surface), inset 0 0 0 6px color-mix(in oklab, var(--hof-gold) 45%, transparent), 0 12px 26px -20px var(--c-ink);
+    color: var(--c-ink); text-decoration: none;
+    transition: translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  a.plaque:hover { translate: 0 -4px; box-shadow: inset 0 0 0 5px var(--c-surface), inset 0 0 0 6px var(--hof-gold), 0 22px 36px -22px var(--c-ink); }
+  h3 { font-size: var(--step-2); color: var(--c-accent); }
+  .plaque p { color: var(--c-muted); }
+  .rule { display: block; block-size: 2px; inline-size: 3rem; margin-block-start: auto; background: var(--hof-brass); transition: inline-size var(--dur-base) var(--ease-out); }
+  a.plaque:hover .rule { inline-size: 100%; }
+  .arrow { position: absolute; inset-block-start: var(--space-5); inset-inline-end: var(--space-5); color: var(--hof-bronze); }
+</style>

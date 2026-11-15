@@ -1,0 +1,57 @@
+---
+// A candidate's own portrait room (h1): the portrait in a large gilt frame under a stage
+// light, the ballot number on a big gold medal, the name in Amiri and the seat in gold.
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import type { CandidateCard } from '@elections/data';
+interface Props { ctx: PageContext; candidate: CandidateCard; kicker: Action | null; numberLabel: string }
+const { candidate: c, kicker, numberLabel } = Astro.props;
+---
+<section class="person hof-wall">
+  <span class="light" aria-hidden="true" data-hof-sway></span>
+  <div class="container grid">
+    <div class="copy">
+      {kicker && <p class="kicker"><a href={kicker.href}><svg class="flip-rtl" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>{kicker.label}</a></p>}
+      <h1 data-split-words>{c.name}</h1>
+      <span class="hof-orn" aria-hidden="true"><i></i></span>
+      <p class="seat">{c.seat}</p>
+      <p class="ballot">
+        <span class="hof-medal big" data-hof-medal aria-hidden="true"><span>{c.number}</span></span>
+        <span class="hof-plate label">{numberLabel}</span>
+      </p>
+    </div>
+    <figure class="hof-frame portrait">
+      <span class="hof-frame__mat">
+        <Image src={c.photo} alt={c.photoAlt} widths={[320, 480, 760]} sizes="(max-width: 900px) 74vw, 26rem" loading="eager" fetchpriority="high" />
+      </span>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .person { overflow: hidden; padding-block: var(--space-7) var(--space-8); }
+  .light {
+    position: absolute; inset-block-start: -60px; inset-inline-end: 2%; z-index: -1; inline-size: 50%; block-size: 140%;
+    background: conic-gradient(from 180deg at 50% 0%, transparent 0deg 156deg, color-mix(in oklab, var(--hof-gold-light) 28%, transparent) 170deg 190deg, transparent 204deg 360deg);
+    filter: blur(8px); transform-origin: 50% 0;
+  }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-8); align-items: center; }
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); min-inline-size: 0; }
+  .copy .hof-orn { margin-inline: 0; inline-size: 10rem; }
+  .kicker a { display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 44px; color: var(--hof-gold-text); font-weight: var(--weight-strong); }
+  h1 { font-size: var(--step-5); color: var(--hof-on-wall); text-shadow: 0 3px 20px color-mix(in oklab, var(--c-ink) 65%, transparent); }
+  .seat { font-size: var(--step-2); font-family: var(--font-display); font-weight: 700; color: var(--hof-gold-text); }
+  .ballot { display: flex; align-items: center; gap: var(--space-4); margin-block-start: var(--space-3); }
+  .big { --size: clamp(5.5rem, 9vw, 7rem); }
+  .label { font-size: var(--step-1); font-weight: var(--weight-strong); }
+  .portrait { inline-size: min(26rem, 74vw); }
+  .portrait .hof-frame__mat { aspect-ratio: 4 / 5; }
+  .portrait :global(img) { inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 50% 10%; }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+    .portrait { order: -1; justify-self: center; }
+    .copy { align-items: center; text-align: center; }
+    .copy .hof-orn { margin-inline: auto; }
+  }
+</style>

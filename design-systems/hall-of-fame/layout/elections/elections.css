@@ -1,0 +1,100 @@
+/* Hall of Fame restyle of the engine's election widgets (press-to-play video, supporters'
+   app, complaints form). The engine's defaults sit in :where(), so these plain class rules
+   win. Imported from ./index.ts, so only election sites load it. Big type, 52px targets. */
+
+/* ---------- video: brass play medallion, Amiri caption ---------- */
+.el-video { border-radius: 0; background: var(--hof-wall-deep); }
+.el-video__icon {
+  inline-size: 84px; block-size: 84px;
+  background: radial-gradient(circle at 35% 30%, var(--hof-gold-light), var(--hof-gold) 45%, var(--hof-gold-deep));
+  box-shadow: 0 0 0 5px color-mix(in oklab, var(--hof-wall-deep) 45%, transparent), 0 14px 28px -8px var(--c-ink);
+}
+.el-video__icon::after { border-block-width: 14px; border-left-width: 22px; border-left-color: var(--hof-wall-deep); }
+.el-video__label {
+  padding: var(--space-6) var(--space-5) var(--space-4);
+  font-family: var(--font-display); font-weight: 700; font-size: var(--step-1); color: var(--hof-on-wall);
+  background: linear-gradient(to top, color-mix(in oklab, var(--hof-wall-deep) 88%, transparent), transparent);
+}
+
+/* The supporters' app is drawn by script; until then hold the room its join card needs, so
+   the footer doesn't jump (CLS). Every view replaces the <noscript> placeholder. */
+.el-sup:has(> noscript:only-child) { min-block-size: 62rem; }
+
+/* ---------- shared form furniture ---------- */
+.el-sup__card, .el-form {
+  gap: var(--space-4); padding: clamp(var(--space-5), 4.5vw, var(--space-7));
+  background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius-s);
+  border-block-start: 3px solid var(--hof-gold);
+  box-shadow: 0 30px 60px -48px var(--c-ink);
+  font-size: var(--step-0);
+}
+.el-sup__intro { color: var(--c-muted); font-size: var(--step-1); line-height: 1.75; }
+.el-sup__demo, .el-form__demo {
+  padding: var(--space-3) var(--space-4); border-radius: var(--radius-s);
+  background: var(--c-accent-soft); color: var(--c-ink); font-size: var(--step--1);
+  border-inline-start: 3px solid var(--c-accent);
+}
+.el-sup__f, .el-form__label { font-size: var(--step-0); font-weight: var(--weight-strong); color: var(--c-ink); }
+.el-sup__f small, .el-form__help { color: var(--c-muted); font-size: var(--step--1); }
+.el-sup__f input, .el-sup__cc select, .el-sup__url, .el-form__input {
+  min-block-size: 56px; padding: var(--space-2) var(--space-4);
+  border: 1px solid color-mix(in oklab, var(--c-ink) 32%, transparent); border-radius: var(--radius-s);
+  background: var(--c-bg); color: var(--c-ink); font-size: var(--step-0);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.el-sup__f input:focus, .el-form__input:focus {
+  outline: none; border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--hof-gold) 55%, transparent);
+}
+.el-sup__f input[aria-invalid='true'], .el-form__input[aria-invalid='true'] { border-color: var(--c-accent); box-shadow: 0 0 0 2px color-mix(in oklab, var(--c-accent) 35%, transparent); }
+.el-sup__cc b { min-block-size: 56px; border-color: color-mix(in oklab, var(--c-ink) 32%, transparent); background: var(--c-sunk); border-radius: var(--radius-s); font-weight: var(--weight-strong); }
+.el-sup__eye { inline-size: 56px; color: var(--c-muted); }
+.el-sup__err, .el-form__err { color: var(--c-accent); font-size: var(--step--1); font-weight: var(--weight-strong); }
+.el-sup__msg.is-good, .el-form__msg.is-good { padding: var(--space-4); border-radius: var(--radius-s); background: color-mix(in oklab, var(--hof-gold) 18%, var(--c-surface)); border-inline-start: 3px solid var(--hof-gold); color: var(--c-ink); }
+.el-sup__msg.is-bad, .el-form__msg.is-bad { padding: var(--space-4); border-radius: var(--radius-s); background: var(--c-accent-soft); border-inline-start: 3px solid var(--c-accent); color: var(--c-ink); }
+
+/* Buttons: the hall's primary (wine, gold hairline); the alternative is an outlined plate. */
+.el-sup__go, .el-form__go {
+  min-block-size: 56px; padding-inline: var(--space-7); border-radius: var(--radius-s);
+  background: var(--c-accent); color: var(--c-accent-ink); font-size: var(--step-0); font-weight: var(--weight-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--hof-gold) 55%, transparent), 0 8px 18px -10px var(--c-accent);
+  transition: background-color var(--dur-fast) var(--ease-out), translate var(--dur-fast) var(--ease-out);
+}
+.el-sup__go:hover, .el-form__go:hover { background: color-mix(in oklab, var(--c-accent) 86%, var(--c-ink)); translate: 0 -1px; }
+.el-sup__go--alt { background: transparent; color: var(--c-accent); box-shadow: inset 0 0 0 1.5px currentColor; }
+.el-sup__go--alt:hover { background: var(--c-accent-soft); }
+.el-sup__link, .el-sup__inline { min-block-size: 44px; color: var(--c-accent); font-weight: var(--weight-strong); }
+
+/* ---------- supporters' app ---------- */
+.el-sup__tabs { gap: var(--space-1); padding: 6px; border-radius: var(--radius-s); background: var(--c-sunk); box-shadow: inset 0 0 0 1px var(--c-line); }
+.el-sup__tab { min-block-size: 52px; border-radius: 3px; font-size: var(--step-0); color: var(--c-muted); }
+.el-sup__tab[aria-selected='true'] {
+  background: var(--hof-brass); color: var(--hof-wall-deep);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--c-surface) 60%, transparent), 0 4px 10px -6px var(--c-ink);
+}
+.el-sup__hello { font-family: var(--font-display); font-weight: 700; font-size: var(--step-3); color: var(--c-accent); }
+.el-sup__label { font-weight: var(--weight-strong); color: var(--c-ink); }
+.el-sup__url { font-size: var(--step--1); background: var(--c-sunk); }
+.el-sup__num b { font-family: var(--font-display); font-size: var(--step-5); color: var(--c-accent); line-height: 1.1; }
+.el-sup__num small { font-size: var(--step-0); color: var(--c-muted); }
+.el-sup__bar { block-size: 14px; border-radius: 2px; background: var(--c-sunk); box-shadow: inset 0 0 0 1px var(--c-line); }
+.el-sup__fill { border-radius: 2px; background: var(--hof-brass); }
+.el-sup__box { color: var(--hof-bronze); }
+.el-sup__box.is-open { color: var(--hof-gold); }
+.el-sup__next { color: var(--c-muted); }
+.el-sup__next.is-done { color: var(--c-accent); }
+
+/* ---------- complaints form ---------- */
+.el-form__req { color: var(--c-accent); }
+textarea.el-form__input { min-block-size: 9rem; line-height: 1.7; }
+.el-form__choice {
+  min-block-size: 52px; padding-inline: var(--space-5); border-radius: var(--radius-s);
+  border: 1px solid color-mix(in oklab, var(--c-ink) 30%, transparent); font-weight: var(--weight-strong);
+}
+.el-form__choice:has(input:checked) { border-color: var(--hof-gold-deep); background: color-mix(in oklab, var(--hof-gold) 20%, var(--c-surface)); }
+.el-form__choice input { accent-color: var(--c-accent); inline-size: 20px; block-size: 20px; }
+.el-form__file-btn {
+  min-block-size: 52px; padding-inline: var(--space-5); border-radius: var(--radius-s);
+  border: 1.5px dashed var(--hof-gold-deep); color: var(--c-accent); background: var(--c-bg);
+}
+.el-form__file-btn:hover { background: color-mix(in oklab, var(--hof-gold) 14%, var(--c-bg)); }

@@ -1,0 +1,73 @@
+---
+// The full interview in a gilt frame, with its topics on an engraved index card beside it.
+// Engine hooks (kept): the section carries [data-el-interview]; each topic is a
+// <button data-el-seek="<seconds>">; <details data-el-open-wide> opens on wide screens.
+import type { PageContext } from '@engine/context';
+import type { VideoData } from '@elections/data';
+import Video from '@elections/Video.astro';
+interface Props {
+  ctx: PageContext;
+  id: string;
+  title: string;
+  video: VideoData;
+  summary: string;
+  chapters: { t: number; time: string; label: string; aria: string }[];
+}
+const { id, title, video, summary, chapters } = Astro.props;
+---
+<section class="section" id={id} data-el-interview aria-labelledby={`${id}-title`}>
+  <div class="container wrap">
+    <header class="hof-head" data-hof-reveal>
+      <h2 id={`${id}-title`}>{title}</h2>
+      <span class="hof-orn" aria-hidden="true"><i></i></span>
+    </header>
+    <div class="grid">
+      <div class="player hof-frame"><span class="hof-frame__mat"><Video video={video} sizes="(max-width: 900px) 100vw, 60vw" /></span></div>
+      {chapters.length > 0 && (
+        <details class="topics" data-el-open-wide>
+          <summary><span>{summary}</span><span class="chev" aria-hidden="true"></span></summary>
+          <ol role="list">
+            {chapters.map((ch) => (
+              <li><button type="button" data-el-seek={ch.t} aria-label={ch.aria}><span class="t" aria-hidden="true">{ch.time}</span><span class="l">{ch.label}</span></button></li>
+            ))}
+          </ol>
+        </details>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-6); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+  .player { min-inline-size: 0; padding: clamp(6px, 0.9vw, 10px); }
+  .topics {
+    border-radius: var(--radius-s); background: var(--c-surface);
+    box-shadow: inset 0 0 0 1px var(--c-line), inset 0 3px 0 var(--hof-gold), 0 20px 40px -32px var(--c-ink);
+  }
+  summary {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+    min-block-size: 56px; padding: var(--space-3) var(--space-5);
+    font-family: var(--font-display); font-weight: 700; font-size: var(--step-1); color: var(--c-accent);
+    cursor: pointer; list-style: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  .chev { inline-size: 10px; block-size: 10px; border-inline-end: 2px solid currentColor; border-block-end: 2px solid currentColor; rotate: 45deg; transition: rotate var(--dur-fast) var(--ease-out); }
+  details[open] .chev { rotate: 225deg; }
+  ol { display: flex; flex-direction: column; padding: 0 var(--space-3) var(--space-3); }
+  li + li { border-block-start: 1px solid var(--c-line); }
+  button {
+    display: flex; align-items: center; gap: var(--space-3); inline-size: 100%; min-block-size: 56px;
+    padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-s); background: none;
+    text-align: start; cursor: pointer; line-height: 1.5;
+    transition: background-color var(--dur-fast) var(--ease-out);
+  }
+  button:hover { background: var(--c-accent-soft); }
+  .t {
+    flex: 0 0 auto; min-inline-size: 4.2rem; padding: 2px var(--space-2); border-radius: 3px; text-align: center;
+    background: var(--hof-brass); color: var(--hof-wall-deep); font-weight: var(--weight-strong);
+    font-variant-numeric: tabular-nums; direction: ltr;
+  }
+  .l { font-weight: var(--weight-strong); }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>

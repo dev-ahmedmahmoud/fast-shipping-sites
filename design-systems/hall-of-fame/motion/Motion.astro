@@ -1,0 +1,132 @@
+---
+// Hall of Fame motion: slow and settled, no libraries (CSS plus this small script).
+// - Things below the fold wait in a dim or lowered state and arrive as they scroll in:
+//   portraits ([data-hof-lit]) light up, blocks ([data-hof-reveal]) rise, headings rise
+//   word by word (never letter by letter), medals ([data-hof-medal]) turn once and gleam.
+//   What is on screen at load is never hidden first, and without JavaScript all is at rest.
+// - On capable devices only: stage lights ([data-hof-sway]) drift slowly, and a few layers
+//   ([data-hof-depth]) move at their own pace as you scroll; both pause off screen.
+// - The countdown dial's hand sweeps once a minute, set to the real seconds left.
+// prefers-reduced-motion: none of it runs.
+---
+<script>
+  import { splitWords } from '@engine/split';
+
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function capable(): boolean {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    return (nav.hardwareConcurrency ?? 4) >= 4 && (nav.deviceMemory ?? 4) >= 4 && !nav.connection?.saveData;
+  }
+
+  function start() {
+    root.classList.add('hof-motion');
+    const rich = capable();
+    if (rich) root.classList.add('hof-rich');
+    // Arrivals: one observer for everything. Its first report (after the first paint, so the
+    // script never forces a layout before it) says what is below the fold: only that waits,
+    // in its pending or dim state, and arrives when it scrolls in. What was on screen stays.
+    const wait: Record<string, (el: HTMLElement) => void> = {
+      words: (el) => {
+        splitWords(el).forEach((w, i) => w.style.setProperty('--i', String(i)));
+        el.classList.add('is-pending');
+      },
+      reveal: (el) => el.classList.add('is-pending'),
+      lit: (el) => el.classList.add('is-dim'),
+      medal: () => {},
+    };
+    const kind = new Map<HTMLElement, string>();
+    let onScreenMedals = 0;
+    const arrive = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        const el = e.target as HTMLElement;
+        const k = kind.get(el);
+        if (k) {
+          kind.delete(el);
+          if (e.boundingClientRect.top > window.innerHeight * 0.9) { wait[k](el); continue; }
+          arrive.unobserve(el);
+          // Medals already in view turn once, one after another, after the page settles.
+          if (k === 'medal') window.setTimeout(() => el.classList.add('is-in'), 500 + Math.min(onScreenMedals++, 8) * 120);
+          continue;
+        }
+        if (!e.isIntersecting) continue;
+        el.classList.remove('is-pending', 'is-dim');
+        el.classList.add('is-in');
+        arrive.unobserve(el);
+      }
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
+    const track = (selector: string, k: string) =>
+      document.querySelectorAll<HTMLElement>(selector).forEach((el) => { kind.set(el, k); arrive.observe(el); });
+    track('[data-split-words]', 'words');
+    track('[data-hof-reveal]', 'reveal');
+    track('[data-hof-lit]', 'lit');
+    track('[data-hof-medal]', 'medal');
+
+    // Off-screen loops pause.
+    const pause = new IntersectionObserver((entries) => {
+      for (const e of entries) e.target.classList.toggle('is-off', !e.isIntersecting);
+    });
+
+    // Countdown dial: start the hand where the remaining seconds put it.
+    document.querySelectorAll<HTMLElement>('[data-el-countdown]').forEach((box) => {
+      const at = Date.parse(box.dataset.at || '');
+      if (Number.isNaN(at)) return;
+      const left = Math.max(0, Math.floor((at - Date.now()) / 1000)) % 60;
+      box.style.setProperty('--hof-hand-delay', `-${(60 - left) % 60}s`);
+      pause.observe(box);
+    });
+
+    if (!rich) return;
+    document.querySelectorAll<HTMLElement>('[data-hof-sway]').forEach((el, i) => {
+      el.style.setProperty('--hof-sway-delay', `${-i * 3.5}s`);
+      pause.observe(el);
+    });
+
+    // Gentle depth on scroll, only while the layer is on screen. The offset follows the
+    // layer's own container (how far it has scrolled past the top), so it is 0 at rest.
+    const layers = [...document.querySelectorAll<HTMLElement>('[data-hof-depth]')];
+    if (layers.length === 0) return;
+    const visible = new Set<HTMLElement>();
+    let queued = false;
+    const paint = () => {
+      queued = false;
+      visible.forEach((el) => {
+        const depth = parseFloat(el.dataset.hofDepth || '0');
+        const top = (el.parentElement ?? el).getBoundingClientRect().top;
+        el.style.transform = `translate3d(0, ${(Math.min(0, top) * -depth).toFixed(1)}px, 0)`;
+      });
+    };
+    const queue = () => { if (!queued) { queued = true; requestAnimationFrame(paint); } };
+    const watch = new IntersectionObserver((entries) => {
+      for (const e of entries) (e.isIntersecting ? visible.add(e.target as HTMLElement) : visible.delete(e.target as HTMLElement));
+      queue();
+    });
+    layers.forEach((el) => watch.observe(el));
+    window.addEventListener('scroll', queue, { passive: true });
+  }
+
+  if (!reduce) start();
+</script>
+
+<style is:global>
+  /* Arrivals (only ever applied below the fold, by the script). */
+  .hof-motion [data-hof-reveal] { transition: opacity var(--dur-slow) var(--ease-out), translate var(--dur-slow) var(--ease-out); }
+  .hof-motion [data-hof-reveal].is-pending { opacity: 0; translate: 0 var(--reveal-distance); }
+  .hof-motion [data-split-words] [data-word] {
+    transition: opacity 0.9s var(--ease-out), translate 0.9s var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 70ms);
+  }
+  .hof-motion [data-split-words].is-pending [data-word] { opacity: 0; translate: 0 0.45em; }
+
+  /* Medals: one slow turn on their axis, then a gleam crosses the gold. */
+  .hof-motion [data-hof-medal].is-in { animation: hof-medal-turn 1.5s var(--ease-out) both; }
+  .hof-motion [data-hof-medal].is-in::after { animation: hof-gleam 1.4s 0.9s var(--ease-in-out) both; }
+  @keyframes hof-medal-turn { 0% { transform: perspective(400px) rotateY(0deg); } 70%, 100% { transform: perspective(400px) rotateY(360deg); } }
+  @keyframes hof-gleam { from { translate: -120% 0; } to { translate: 120% 0; } }
+
+  /* Stage lights drift on capable devices; they hang from the top, so they swing from there. */
+  .hof-rich [data-hof-sway] { animation: hof-sway 16s var(--ease-in-out) var(--hof-sway-delay, 0s) infinite alternate; }
+  .hof-rich [data-hof-sway].is-off { animation-play-state: paused; }
+  @keyframes hof-sway { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+</style>

@@ -1,0 +1,19 @@
+---
+// One featured video (a candidate's word) hung in a gilt frame on the stone wall.
+import type { PageContext } from '@engine/context';
+import type { VideoData } from '@elections/data';
+import Video from '@elections/Video.astro';
+interface Props { ctx: PageContext; video: VideoData; label: string }
+const { video, label } = Astro.props;
+---
+<section class="section" aria-label={label}>
+  <div class="container narrow">
+    <div class="hof-frame" data-hof-reveal>
+      <span class="hof-frame__mat"><Video video={video} showCaption sizes="(max-width: 900px) 100vw, 50rem" /></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .narrow { max-inline-size: calc(54rem + 2 * var(--gutter)); }
+</style>

@@ -1,0 +1,67 @@
+---
+// The screening room: one framed poster per candidate along the velvet wall, a brass play
+// medallion on each, the name on a plate below. Each links to the full interview.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  items: { name: string; seat: string; href: string; poster: ImageMetadata; cta: string }[];
+}
+const { title, lead, items } = Astro.props;
+---
+<section class="section hof-wall screening">
+  <div class="container wrap">
+    <header class="hof-head" data-hof-reveal>
+      <h2>{title}</h2>
+      <span class="hof-orn" aria-hidden="true"><i></i></span>
+      {lead && <p class="hof-lead">{lead}</p>}
+    </header>
+    <ul class="row" role="list" tabindex="0" aria-label={title}>
+      {items.map((it) => (
+        <li>
+          <a class="item" href={it.href}>
+            <span class="hof-frame screen">
+              <span class="hof-frame__mat">
+                <Image src={it.poster} alt="" widths={[384, 640]} sizes="(max-width: 600px) 82vw, 22rem" />
+                <span class="play" aria-hidden="true"></span>
+              </span>
+            </span>
+            <div class="caption">
+              <h3>{it.name}</h3>
+              <span class="seat">{it.seat}</span>
+              <span class="cta">{it.cta}</span>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-6); }
+  .row { display: flex; gap: var(--space-6); overflow-x: auto; scroll-snap-type: x mandatory; padding-block: var(--space-3) var(--space-5); padding-inline: var(--space-2); scrollbar-width: thin; scrollbar-color: var(--hof-gold) transparent; }
+  .row > li { flex: 0 0 min(22rem, 84%); scroll-snap-align: start; }
+  .row:focus-visible { outline-offset: 4px; }
+  .item { display: flex; flex-direction: column; gap: var(--space-4); color: var(--hof-on-wall); text-decoration: none; block-size: 100%; }
+  .screen { padding: clamp(6px, 0.8vw, 9px); }
+  .screen .hof-frame__mat { aspect-ratio: 16 / 9; }
+  .screen :global(img) { inline-size: 100%; block-size: 100%; object-fit: cover; transition: scale var(--dur-slow) var(--ease-out), filter var(--dur-base) var(--ease-out); }
+  .play {
+    position: absolute; inset: 0; margin: auto; inline-size: 64px; block-size: 64px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--hof-gold-light), var(--hof-gold) 45%, var(--hof-gold-deep));
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--hof-wall-deep) 50%, transparent), 0 10px 22px -6px var(--c-ink);
+    transition: scale var(--dur-base) var(--ease-out);
+  }
+  /* A play mark points right in every language, so this one icon uses a physical side. */
+  .play::after { content: ''; position: absolute; inset: 0; margin: auto; inline-size: 0; block-size: 0; border-block: 11px solid transparent; border-left: 18px solid var(--hof-wall-deep); translate: 3px 0; }
+  .caption { display: flex; flex-direction: column; gap: var(--space-1); text-align: center; }
+  h3 { font-size: var(--step-1); color: var(--hof-on-wall); }
+  .seat { color: var(--hof-on-wall-muted); font-size: var(--step--1); }
+  .cta { color: var(--hof-gold-text); font-weight: var(--weight-strong); font-size: var(--step--1); }
+  .item:hover :global(img) { scale: 1.04; filter: brightness(1.06); }
+  .item:hover .play { scale: 1.08; }
+</style>

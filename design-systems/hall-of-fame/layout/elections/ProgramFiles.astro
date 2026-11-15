@@ -1,0 +1,97 @@
+---
+// The trophy cabinet: the programme files on glass shelves in a lit wine cabinet. Each file
+// is a compartment with a downlight, a glass sheen and an engraved gold plaque; hovering
+// brightens the light and lifts the plaque.
+import type { PageContext } from '@engine/context';
+import type { FileCard } from '@elections/data';
+interface Props { ctx: PageContext; title?: string; lead?: string; hint?: string; files: FileCard[] }
+const { title, lead, hint, files } = Astro.props;
+---
+<section class="section">
+  <div class="container wrap">
+    {(title || lead || hint) && (
+      <header class="hof-head" data-hof-reveal>
+        {title && <h2>{title}</h2>}
+        <span class="hof-orn" aria-hidden="true"><i></i></span>
+        {lead && <p class="hof-lead">{lead}</p>}
+        {hint && <p class="hof-lead">{hint}</p>}
+      </header>
+    )}
+    <div class="cabinet" data-hof-reveal>
+      <ul class="shelves" role="list">
+        {files.map((f) => (
+          <li>
+            <a class="cell" href={f.href}>
+              <span class="downlight" aria-hidden="true"></span>
+              <span class="trophy" aria-hidden="true" set:html={f.icon} />
+              <div class="plaque">
+                <h3>{f.title}</h3>
+                <span class="tagline">{f.tagline}</span>
+              </div>
+              <span class="glass" aria-hidden="true"></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-6); }
+  .cabinet {
+    padding: clamp(10px, 1.6vw, 18px); border-radius: var(--radius-s);
+    background: linear-gradient(180deg, color-mix(in oklab, var(--hof-wall-deep) 85%, var(--hof-gold-deep)), var(--hof-wall-deep));
+    box-shadow: inset 0 0 0 1px var(--hof-gold-deep), inset 0 0 0 4px color-mix(in oklab, var(--hof-gold) 35%, transparent), var(--hof-shadow);
+  }
+  .shelves { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: clamp(8px, 1.2vw, 14px); }
+  .cell {
+    position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; gap: var(--space-4);
+    block-size: 100%; padding: var(--space-6) var(--space-4) var(--space-5); overflow: hidden;
+    background: radial-gradient(80% 60% at 50% 0%, color-mix(in oklab, var(--hof-wall-lift) 70%, transparent), transparent 75%), var(--hof-wall);
+    border-block-end: 6px solid color-mix(in oklab, var(--hof-gold-light) 45%, var(--hof-wall-deep));
+    box-shadow: inset 0 -16px 22px -12px color-mix(in oklab, var(--c-ink) 70%, transparent), inset 0 0 0 1px color-mix(in oklab, var(--hof-gold) 25%, transparent);
+    color: var(--hof-on-wall); text-decoration: none; text-align: center;
+  }
+  .downlight {
+    position: absolute; inset-block-start: 0; inset-inline: -50%; margin-inline: auto; z-index: -1;
+    inline-size: 120%; block-size: 85%;
+    background: radial-gradient(50% 60% at 50% 0%, color-mix(in oklab, var(--hof-gold-light) 34%, transparent), transparent 72%);
+    opacity: 0.75; transition: opacity var(--dur-base) var(--ease-out);
+  }
+  .trophy {
+    display: grid; place-items: center; inline-size: 5.5rem; block-size: 5.5rem; border-radius: 50%;
+    color: var(--hof-gold-light);
+    background: radial-gradient(circle at 50% 35%, color-mix(in oklab, var(--hof-gold) 30%, transparent), transparent 70%);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--hof-gold) 60%, transparent);
+    transition: translate var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+  }
+  .trophy :global(svg) { inline-size: 56%; block-size: 56%; }
+  .plaque {
+    display: flex; flex-direction: column; align-items: center; gap: var(--space-1);
+    padding: var(--space-3) var(--space-4); inline-size: 100%; border-radius: 3px;
+    background: var(--hof-brass); color: var(--hof-wall-deep);
+    box-shadow: inset 0 1px 0 color-mix(in oklab, var(--c-surface) 60%, transparent), 0 8px 16px -10px var(--c-ink);
+    transition: translate var(--dur-base) var(--ease-out);
+  }
+  h3 { font-size: var(--step-2); line-height: 1.3; }
+  .tagline { font-size: var(--step--1); font-weight: var(--weight-strong); line-height: 1.5; }
+  .glass {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: linear-gradient(120deg, transparent 30%, color-mix(in oklab, var(--c-surface) 12%, transparent) 42%, transparent 52%);
+    translate: -30% 0; transition: translate 1.2s var(--ease-out);
+  }
+  .cell:hover .downlight, .cell:focus-visible .downlight { opacity: 1; }
+  .cell:hover .trophy, .cell:focus-visible .trophy { translate: 0 -4px; color: var(--hof-on-wall); }
+  .cell:hover .plaque, .cell:focus-visible .plaque { translate: 0 -3px; }
+  .cell:hover .glass, .cell:focus-visible .glass { translate: 30% 0; }
+  .cell:focus-visible { outline-offset: -6px; }
+  /* Phones: a two-by-two cabinet with smaller trophies, so the four files fit one screen. */
+  @media (max-width: 600px) {
+    .shelves { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cell { gap: var(--space-3); padding: var(--space-5) var(--space-2) var(--space-3); }
+    .trophy { inline-size: 4rem; block-size: 4rem; }
+    .plaque { padding: var(--space-2) var(--space-2); }
+    h3 { font-size: var(--step-1); }
+  }
+</style>

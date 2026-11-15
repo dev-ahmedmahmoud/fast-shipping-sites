@@ -1,0 +1,91 @@
+---
+// Leaving the hall: the velvet wall once more, the crest and name under a gold ornament,
+// the links, contact and social columns, and the legal line on a brass hairline.
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+const links = [...ctx.nav.filter((n) => !n.external), ...ctx.footerNav];
+const external = ctx.nav.filter((n) => n.external);
+const c = ctx.contact;
+const hasContact = !!(c.address || c.phones.length || c.emails.length || c.hours || c.mapUrl);
+---
+<footer class="footer hof-wall">
+  <div class="container crown">
+    {ctx.site.logo && <Image src={ctx.site.logo} alt="" height={88} class="crest" loading="lazy" />}
+    <p class="name">{ctx.site.name}</p>
+    {ctx.site.motto && <p class="motto">{ctx.site.motto}</p>}
+    <span class="hof-orn" aria-hidden="true"><i></i></span>
+  </div>
+
+  <div class="container grid">
+    <nav class="col" aria-label={ctx.ui.links}>
+      <h2 class="col-title">{ctx.ui.links}</h2>
+      <ul role="list">
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        {external.map((l) => <li><a href={l.href} target="_blank" rel="noopener">{l.label}<span class="sr-only"> {ctx.ui.newTab}</span></a></li>)}
+      </ul>
+    </nav>
+
+    {hasContact && (
+      <div class="col">
+        <h2 class="col-title">{ctx.ui.contact}</h2>
+        <ul role="list">
+          {c.address && <li>{c.address}</li>}
+          {c.phones.map((p) => (
+            <li>{p.label && <>{p.label}: </>}<a href={`tel:${p.number.replace(/\s+/g, '')}`} dir="ltr">{p.number}</a></li>
+          ))}
+          {c.emails.map((e) => <li>{e.label}: <a href={`mailto:${e.address}`} dir="ltr">{e.address}</a></li>)}
+          {c.hours && <li>{c.hours}</li>}
+          {c.mapUrl && <li><a href={c.mapUrl} target="_blank" rel="noopener">{ctx.ui.map}</a></li>}
+        </ul>
+      </div>
+    )}
+
+    {ctx.social.length > 0 && (
+      <div class="col">
+        <h2 class="col-title">{ctx.ui.follow}</h2>
+        <ul role="list" class="social">
+          {ctx.social.map((s) => <li><a href={s.href} target="_blank" rel="noopener" lang="en">{s.label}</a></li>)}
+        </ul>
+      </div>
+    )}
+  </div>
+
+  <div class="container legal">
+    <p>{ctx.legal.copyright ?? `© ${ctx.year} ${ctx.site.name}. ${ctx.ui.rights}.`}</p>
+    {ctx.legal.credit && (
+      <p>{ctx.legal.credit.href ? <a href={ctx.legal.credit.href} target="_blank" rel="noopener">{ctx.legal.credit.text}</a> : ctx.legal.credit.text}</p>
+    )}
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: var(--space-8) calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+    border-block-start: 1px solid color-mix(in oklab, var(--hof-gold) 60%, transparent);
+  }
+  .crown { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); text-align: center; }
+  .crest { block-size: 88px; inline-size: auto; filter: drop-shadow(0 6px 14px color-mix(in oklab, var(--c-ink) 70%, transparent)); }
+  .name { font-family: var(--font-display); font-weight: 700; font-size: var(--step-2); line-height: 1.3; margin-block-start: var(--space-2); }
+  .motto { color: var(--hof-gold-text); font-size: var(--step-1); }
+  .crown .hof-orn { margin-block-start: var(--space-3); }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--space-6);
+    margin-block-start: var(--space-7); justify-items: center; text-align: center;
+  }
+  .col { display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; }
+  .col-title { font-family: var(--font-body); font-size: var(--step--1); font-weight: var(--weight-strong); color: var(--hof-gold-text); }
+  .col ul { display: flex; flex-direction: column; gap: var(--space-1); }
+  .col li { overflow-wrap: anywhere; }
+  .col a { display: inline-flex; align-items: center; min-block-size: 44px; color: var(--hof-on-wall); text-decoration: none; }
+  .col a:hover { color: var(--hof-gold-text); text-decoration: underline; }
+  .social { flex-direction: row !important; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-5) !important; }
+  .legal {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-6);
+    margin-block-start: var(--space-7); padding-block-start: var(--space-4);
+    border-block-start: 1px solid color-mix(in oklab, var(--hof-gold) 35%, transparent);
+    color: var(--hof-on-wall-muted); font-size: var(--step--1); text-align: center;
+  }
+  .legal a { color: inherit; }
+</style>

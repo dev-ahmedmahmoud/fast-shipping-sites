@@ -1,0 +1,55 @@
+---
+// The club's chronicle: dated entries as framed notices on the stone wall.
+import type { PageContext } from '@engine/context';
+interface NewsItem { title: string; href: string; date?: string; excerpt?: string }
+interface Props { ctx: PageContext; title?: string; items: NewsItem[]; more?: { label: string; href: string } | null; headingLevel?: 1 | 2 }
+const { ctx, title, items, more, headingLevel = 2 } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+---
+<section class="section">
+  <div class="container stack">
+    {title && (
+      <header class="hof-head" data-hof-reveal>
+        <Heading class:list={['title', { big: headingLevel === 1 }]}>{title}</Heading>
+        <span class="hof-orn" aria-hidden="true"><i></i></span>
+      </header>
+    )}
+    {items.length === 0 ? (
+      <p class="empty">{ctx.ui.noNews}</p>
+    ) : (
+      <ul class="list" role="list">
+        {items.map((n) => (
+          <li data-hof-reveal>
+            <a class="item" href={n.href}>
+              {n.date && <time class="date">{n.date}</time>}
+              <h3>{n.title}</h3>
+              {n.excerpt && <p>{n.excerpt}</p>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+    {more && items.length > 0 && <p class="more"><a class="btn btn--ghost" href={more.href}>{more.label}</a></p>}
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-6); }
+  .title { font-size: var(--step-4); }
+  .big { font-size: var(--step-5); }
+  .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: var(--space-5); }
+  .item {
+    display: flex; flex-direction: column; gap: var(--space-2); block-size: 100%;
+    padding: var(--space-5); border-radius: var(--radius-s);
+    background: var(--c-surface); border: 1px solid var(--c-line);
+    border-block-start: 3px solid var(--c-accent);
+    color: var(--c-ink); text-decoration: none;
+    transition: translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  .item:hover { translate: 0 -3px; box-shadow: 0 18px 30px -22px var(--c-ink); }
+  .date { color: var(--hof-bronze); font-weight: var(--weight-strong); font-size: var(--step--1); }
+  h3 { font-size: var(--step-1); }
+  .item p { color: var(--c-muted); }
+  .empty { color: var(--c-muted); text-align: center; }
+  .more { text-align: center; }
+</style>

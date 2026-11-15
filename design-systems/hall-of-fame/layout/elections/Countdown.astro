@@ -1,0 +1,90 @@
+---
+// The scoreboard below the stage: four engraved brass plaques for days, hours, minutes and
+// seconds, beside a brass dial whose hand sweeps once a minute. Engine hooks (kept):
+// [data-el-countdown] with data-at, data-zone, data-today, data-after; cells [data-k];
+// title [data-el-countdown-title]; .is-msg (.is-today / .is-after) hides cells and dial.
+import type { PageContext } from '@engine/context';
+import type { CountdownData } from '@elections/data';
+interface Props { ctx: PageContext; countdown: CountdownData }
+const { countdown: c } = Astro.props;
+const cells = ['d', 'h', 'm', 's'] as const;
+const ticks = Array.from({ length: 12 }, (_, i) => i * 30);
+---
+<section class="section hof-wall count-wall">
+  <div class="container">
+    <div class="count" data-el-countdown data-at={c.at} data-zone={c.timezone} data-today={c.today} data-after={c.after}>
+      <div class="dial" aria-hidden="true">
+        <svg viewBox="0 0 120 120" focusable="false">
+          <circle class="face" cx="60" cy="60" r="56" />
+          <circle class="ring" cx="60" cy="60" r="49" />
+          {ticks.map((a) => <line class="tick" x1="60" y1="14" x2="60" y2={a % 90 === 0 ? 24 : 20} transform={`rotate(${a} 60 60)`} />)}
+        </svg>
+        <span class="hand" data-hof-hand></span>
+        <span class="pin"></span>
+      </div>
+      <div class="board">
+        <p class="title" data-el-countdown-title>{c.title}</p>
+        <ul class="cells" role="list">
+          {cells.map((k) => (
+            <li>
+              <b data-k={k}>—</b>
+              <span>{c.labels[k]}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="date">{c.dateText}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .count-wall { padding-block: var(--space-6) var(--space-8); }
+  .hero + .count-wall { padding-block-start: var(--space-6); }
+  .count {
+    display: flex; align-items: center; justify-content: center; gap: var(--space-7);
+    padding: var(--space-6) var(--space-6); border-radius: var(--radius-s);
+    background: linear-gradient(180deg, color-mix(in oklab, var(--hof-wall-deep) 80%, transparent), color-mix(in oklab, var(--hof-wall-deep) 95%, transparent));
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--hof-gold) 55%, transparent), inset 0 0 0 6px color-mix(in oklab, var(--hof-wall-deep) 60%, transparent), inset 0 0 0 7px color-mix(in oklab, var(--hof-gold) 30%, transparent), var(--hof-shadow);
+  }
+  .board { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); text-align: center; min-inline-size: 0; }
+  .title { font-family: var(--font-display); font-weight: 700; font-size: var(--step-2); color: var(--hof-on-wall); }
+  .cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); inline-size: min(100%, 36rem); }
+  .cells li {
+    display: flex; flex-direction: column; align-items: center; gap: var(--space-1);
+    padding: var(--space-3) var(--space-2) var(--space-2); border-radius: 3px;
+    background: var(--hof-brass); color: var(--hof-wall-deep);
+    box-shadow: inset 0 1px 0 color-mix(in oklab, var(--c-surface) 60%, transparent), inset 0 -2px 0 var(--hof-gold-deep), 0 10px 18px -12px var(--c-ink);
+  }
+  b {
+    display: block; min-inline-size: 2ch; font-family: var(--font-display); font-weight: 700; font-size: clamp(2rem, 1.4rem + 2.6vw, 3.4rem); line-height: 1.15;
+    font-variant-numeric: tabular-nums; text-shadow: 0 1px 0 color-mix(in oklab, var(--c-surface) 55%, transparent);
+  }
+  .cells span { font-weight: var(--weight-strong); font-size: var(--step--1); }
+  .date { color: var(--hof-gold-text); font-size: var(--step-1); font-weight: var(--weight-strong); }
+
+  .dial { position: relative; flex: 0 0 auto; inline-size: clamp(7rem, 12vw, 9.5rem); aspect-ratio: 1; }
+  .dial svg { inline-size: 100%; block-size: 100%; }
+  .face { fill: color-mix(in oklab, var(--hof-wall-deep) 70%, var(--hof-gold-deep)); stroke: var(--hof-gold); stroke-width: 3; }
+  .ring { fill: none; stroke: color-mix(in oklab, var(--hof-gold-light) 55%, transparent); stroke-width: 1; }
+  .tick { stroke: var(--hof-gold-light); stroke-width: 2; stroke-linecap: round; }
+  .hand {
+    position: absolute; inset-inline-start: calc(50% - 1.5px); inset-block-start: 14%; inline-size: 3px; block-size: 36%;
+    background: var(--hof-gold-light); border-radius: 2px; transform-origin: 50% 100%;
+    box-shadow: 0 0 8px color-mix(in oklab, var(--hof-gold-light) 60%, transparent);
+  }
+  /* The hand sweeps only where motion is welcome; the motion island syncs it to the clock. */
+  :global(.hof-motion) .hand { animation: hof-sweep-hand 60s linear infinite; animation-delay: var(--hof-hand-delay, 0s); }
+  :global(.hof-motion) .count:global(.is-off) .hand { animation-play-state: paused; }
+  @keyframes hof-sweep-hand { from { rotate: 0turn; } to { rotate: 1turn; } }
+  .pin { position: absolute; inset: 0; margin: auto; inline-size: 12px; block-size: 12px; border-radius: 50%; background: var(--hof-brass); box-shadow: 0 0 0 2px var(--hof-gold-deep); }
+
+  .count:global(.is-msg) .cells, .count:global(.is-msg) .dial { display: none; }
+  .count:global(.is-msg) .title { font-size: var(--step-3); color: var(--hof-gold-text); }
+
+  @media (max-width: 720px) {
+    .count { flex-direction: column; gap: var(--space-4); padding: var(--space-5) var(--space-3); }
+    .dial { inline-size: 6rem; }
+    .cells { gap: var(--space-2); }
+  }
+</style>

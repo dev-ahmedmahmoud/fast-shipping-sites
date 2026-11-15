@@ -1,0 +1,43 @@
+---
+// An inner page's entrance (h1): the crest under a stage light on the velvet wall, an
+// optional kicker link back, the title in Amiri, the gold ornament, a lead and one action.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+interface Props {
+  ctx: PageContext;
+  title: string;
+  lead?: string;
+  kicker?: Action | null;
+  action?: Action | null;
+  crest: ImageMetadata | null;
+}
+const { title, lead, kicker, action, crest } = Astro.props;
+---
+<section class="band hof-wall">
+  <span class="light" aria-hidden="true" data-hof-sway></span>
+  <div class="container inner">
+    {crest && <Image class="crest" src={crest} alt="" height={96} loading="eager" />}
+    {kicker && <p class="kicker"><a href={kicker.href}>{kicker.label}</a></p>}
+    <h1 data-split-words>{title}</h1>
+    <span class="hof-orn" aria-hidden="true"><i></i></span>
+    {lead && <p class="lead">{lead}</p>}
+    {action && <p><a class="btn btn--primary" href={action.href}>{action.label}</a></p>}
+  </div>
+</section>
+
+<style>
+  .band { overflow: hidden; padding-block: var(--space-7) var(--space-8); }
+  .light {
+    position: absolute; inset-block-start: -60px; inset-inline: -50%; margin-inline: auto; z-index: -1;
+    inline-size: min(56rem, 120vw); block-size: 140%;
+    background: conic-gradient(from 180deg at 50% 0%, transparent 0deg 156deg, color-mix(in oklab, var(--hof-gold-light) 24%, transparent) 170deg 190deg, transparent 204deg 360deg);
+    filter: blur(8px); transform-origin: 50% 0;
+  }
+  .inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; }
+  .inner :global(.crest) { block-size: 84px; inline-size: auto; filter: drop-shadow(0 8px 18px color-mix(in oklab, var(--c-ink) 70%, transparent)); }
+  .kicker a { display: inline-flex; align-items: center; min-block-size: 44px; color: var(--hof-gold-text); font-weight: var(--weight-strong); }
+  h1 { font-size: var(--step-5); color: var(--hof-on-wall); text-shadow: 0 3px 20px color-mix(in oklab, var(--c-ink) 65%, transparent); }
+  .lead { color: var(--hof-on-wall-muted); font-size: var(--step-1); max-inline-size: 48ch; }
+</style>

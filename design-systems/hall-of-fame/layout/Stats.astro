@@ -1,0 +1,35 @@
+---
+// Honours on the velvet wall: each figure struck on a gold medal, its label on a brass plate.
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; title?: string; items: { value: string; label: string }[] }
+const { title, items } = Astro.props;
+---
+<section class="section hof-wall stats-wall">
+  <div class="container stack">
+    {title && (
+      <header class="hof-head" data-hof-reveal>
+        <h2>{title}</h2>
+        <span class="hof-orn" aria-hidden="true"><i></i></span>
+      </header>
+    )}
+    <dl class="stats">
+      {items.map((s) => (
+        <div class="stat" data-hof-reveal>
+          <dt class="hof-plate">{s.label}</dt>
+          <dd class="hof-medal" data-hof-medal><span>{s.value}</span></dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-7); }
+  .stats { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-7) var(--space-8); margin: 0; }
+  /* The label comes first in the source (dt before dd); the medal shows above it. */
+  .stat { display: flex; flex-direction: column-reverse; align-items: center; gap: var(--space-4); }
+  dd { margin: 0; }
+  .hof-medal { --size: clamp(6.5rem, 12vw, 8.5rem); }
+  .hof-medal span { font-size: clamp(1.9rem, 1.4rem + 2vw, 2.8rem); }
+  .hof-plate { font-size: var(--step--1); font-weight: var(--weight-strong); max-inline-size: 16rem; }
+</style>

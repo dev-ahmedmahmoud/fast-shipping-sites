@@ -1,0 +1,34 @@
+---
+// The reading room: a bio or a programme file's text on a stone-white leaf with a brass
+// top rule. The engine's widgets (supporters' app, complaints form) bring their own card,
+// so around them the leaf steps aside. Body HTML arrives in the slot.
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; id?: string; label?: string }
+const { id, label } = Astro.props;
+---
+<section class="section" id={id} aria-label={label}>
+  <div class="container narrow">
+    <div class="leaf" data-hof-reveal><div class="prose"><slot /></div></div>
+  </div>
+</section>
+
+<style>
+  .narrow { max-inline-size: calc(50rem + 2 * var(--gutter)); }
+  .leaf {
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+    background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius-s);
+    border-block-start: 3px solid var(--hof-gold);
+    box-shadow: 0 24px 50px -40px var(--c-ink);
+  }
+  .leaf:has(:global(.el-sup), :global(.el-form)) { padding: 0; background: none; border: 0; box-shadow: none; }
+  .prose { min-inline-size: 0; max-inline-size: 66ch; margin-inline: auto; }
+  .prose :global(> * + *) { margin-block-start: var(--space-4); }
+  .prose :global(h2) { font-size: var(--step-3); color: var(--c-accent); margin-block-start: var(--space-7); }
+  .prose :global(h2:first-child) { margin-block-start: 0; }
+  .prose :global(h3) { font-size: var(--step-2); margin-block-start: var(--space-6); }
+  .prose :global(ul), .prose :global(ol) { padding-inline-start: var(--space-5); }
+  .prose :global(li + li) { margin-block-start: var(--space-2); }
+  .prose :global(li > ul) { margin-block-start: var(--space-2); }
+  .prose :global(li::marker) { color: var(--hof-bronze); }
+  .prose :global(blockquote) { margin-inline: 0; padding: var(--space-3) var(--space-5); border-inline-start: 3px solid var(--hof-gold); background: var(--c-bg); font-family: var(--font-display); font-size: var(--step-1); }
+</style>

@@ -1,0 +1,77 @@
+---
+// The entrance hall: velvet wall under a stage light, the title in Amiri, and the first
+// photo (or silent clip) in a gilt frame, with up to two smaller frames hung beside it.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { Action, HeroVideo } from '@engine/content';
+import HeroMedia from '@engine/HeroMedia.astro';
+interface Props { ctx: PageContext; eyebrow?: string; title: string; lead?: string; actions: Action[]; images?: ImageMetadata[]; video?: HeroVideo | null }
+const { eyebrow, title, lead, actions, images = [], video } = Astro.props;
+const [first, ...rest] = images;
+const side = rest.slice(0, 2);
+---
+<section class="hero hof-wall">
+  <span class="spot" aria-hidden="true" data-hof-sway></span>
+  <div class="container grid">
+    <div class="copy">
+      {eyebrow && <p class="hof-kicker">{eyebrow}</p>}
+      <h1 data-split-words>{title}</h1>
+      <span class="hof-orn" aria-hidden="true"><i></i></span>
+      {lead && <p class="lead">{lead}</p>}
+      {actions.length > 0 && (
+        <div class="actions">
+          {actions.map((a, i) => (
+            <a class:list={['btn', i === 0 ? 'btn--primary' : 'btn--ghost']} href={a.href}
+               target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>{a.label}</a>
+          ))}
+        </div>
+      )}
+    </div>
+    {first && (
+      <div class="wall" data-hof-depth="0.06">
+        <figure class="hof-frame main">
+          <span class="hof-frame__mat">
+            <HeroMedia image={first} video={video} widths={[480, 760, 1100]} sizes="(max-width: 900px) 90vw, 40vw" fetchpriority="high" />
+          </span>
+        </figure>
+        {side.map((img, i) => (
+          <figure class:list={['hof-frame', 'small', `s${i}`]} data-hof-reveal>
+            <span class="hof-frame__mat"><Image src={img} alt="" widths={[320, 480]} sizes="(max-width: 900px) 40vw, 14vw" loading="lazy" /></span>
+          </figure>
+        ))}
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .hero { overflow: hidden; padding-block: var(--space-8) var(--space-9); }
+  .spot {
+    position: absolute; inset-block-start: -40px; inset-inline: -50%; margin-inline: auto; z-index: -1;
+    inline-size: min(70rem, 140vw); block-size: 120%;
+    background: radial-gradient(42% 58% at 50% 0%, color-mix(in oklab, var(--hof-gold-light) 26%, transparent) 0%, transparent 70%);
+    pointer-events: none; transform-origin: 50% 0;
+  }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-7); align-items: center; }
+  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; }
+  .copy .hof-orn { margin-inline: 0; inline-size: 10rem; }
+  h1 { font-size: var(--step-5); color: var(--hof-on-wall); text-shadow: 0 2px 18px color-mix(in oklab, var(--c-ink) 60%, transparent); }
+  .lead { font-size: var(--step-1); line-height: 1.75; color: var(--hof-on-wall-muted); max-inline-size: 44ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-block-start: var(--space-2); }
+  .wall { position: relative; min-inline-size: 0; padding-block-end: var(--space-6); }
+  .main { inline-size: min(100%, 34rem); margin-inline: auto; }
+  .main .hof-frame__mat { aspect-ratio: 4 / 3; }
+  .main :global(img), .main :global(video) { inline-size: 100%; block-size: 100%; object-fit: cover; }
+  .small { position: absolute; inline-size: 34%; padding: clamp(6px, 0.9vw, 10px); }
+  .small .hof-frame__mat { aspect-ratio: 1; }
+  .small :global(img) { inline-size: 100%; block-size: 100%; object-fit: cover; }
+  .s0 { inset-inline-start: -4%; inset-block-end: -4%; rotate: -3deg; }
+  .s1 { inset-inline-end: -4%; inset-block-start: -8%; rotate: 2.5deg; inline-size: 28%; }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .wall { order: -1; }
+    .s0 { inset-inline-start: 0; }
+    .s1 { inset-inline-end: 0; }
+  }
+</style>

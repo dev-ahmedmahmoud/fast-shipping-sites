@@ -1,0 +1,97 @@
+---
+// "Vote for the full list" as an engraved invitation: a wine card with a double gold rule,
+// corner ornaments and every ballot number struck on a medal. Engine hooks (kept): the
+// section carries [data-el-ballot] and id; the download button is <button data-el-card>.
+// The downloaded PNG takes the same wine and gold through --el-card-*.
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+import type { BallotGroup } from '@elections/data';
+interface Props {
+  ctx: PageContext;
+  id: string;
+  title: string;
+  text: string;
+  groups: BallotGroup[];
+  share: { label: string; href: string };
+  support: Action | null;
+  download: { label: string };
+}
+const { id, title, text, groups, share, support, download } = Astro.props;
+---
+<section class="section ballot" id={id} data-el-ballot aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <div class="invite hof-wall" data-hof-reveal>
+      <span class="corner c1" aria-hidden="true"></span><span class="corner c2" aria-hidden="true"></span>
+      <span class="corner c3" aria-hidden="true"></span><span class="corner c4" aria-hidden="true"></span>
+      <header class="head">
+        <h2 id={`${id}-title`}>{title}</h2>
+        <span class="hof-orn" aria-hidden="true"><i></i></span>
+        <p>{text}</p>
+      </header>
+      <div class="groups">
+        {groups.map((g) => (
+          <div class="group">
+            <h3>{g.label}</h3>
+            <ol role="list">
+              {g.rows.map((r) => (
+                <li>
+                  <span class="hof-medal" data-hof-medal><span>{r.number}</span></span>
+                  <span class="who"><strong>{r.name}</strong><small>{r.seat}</small></span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
+      <div class="actions">
+        <a class="btn btn--primary" href={share.href} target="_blank" rel="noopener">{share.label}</a>
+        {support && <a class="btn btn--ghost" href={support.href}>{support.label}</a>}
+        <button class="btn btn--ghost" type="button" data-el-card>{download.label}</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ballot {
+    --el-card-bg: var(--hof-wall); --el-card-bg2: var(--hof-wall-deep);
+    --el-card-accent: var(--hof-gold-light); --el-card-accent2: var(--hof-gold);
+    --el-card-ink: var(--hof-on-wall);
+  }
+  .invite {
+    position: relative; display: flex; flex-direction: column; gap: var(--space-6);
+    padding: clamp(var(--space-6), 6vw, var(--space-8)) clamp(var(--space-4), 5vw, var(--space-8));
+    border-radius: 2px;
+    box-shadow:
+      inset 0 0 0 10px var(--hof-wall), inset 0 0 0 11px var(--hof-gold),
+      inset 0 0 0 15px var(--hof-wall), inset 0 0 0 16px color-mix(in oklab, var(--hof-gold) 55%, transparent),
+      var(--hof-shadow);
+  }
+  .corner { position: absolute; inline-size: 30px; block-size: 30px; border: 2px solid var(--hof-gold); }
+  .c1 { inset-block-start: 24px; inset-inline-start: 24px; border-inline-end: 0; border-block-end: 0; }
+  .c2 { inset-block-start: 24px; inset-inline-end: 24px; border-inline-start: 0; border-block-end: 0; }
+  .c3 { inset-block-end: 24px; inset-inline-start: 24px; border-inline-end: 0; border-block-start: 0; }
+  .c4 { inset-block-end: 24px; inset-inline-end: 24px; border-inline-start: 0; border-block-start: 0; }
+  .head { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; }
+  h2 { font-size: var(--step-4); color: var(--hof-gold-text); }
+  .head p { color: var(--hof-on-wall-muted); font-size: var(--step-1); max-inline-size: 44ch; }
+  .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: var(--space-6); }
+  .group { display: flex; flex-direction: column; gap: var(--space-3); }
+  h3 {
+    font-family: var(--font-body); font-size: var(--step-0); color: var(--hof-gold-text); text-align: center;
+    padding-block-end: var(--space-2); border-block-end: 1px solid color-mix(in oklab, var(--hof-gold) 45%, transparent);
+  }
+  ol { display: flex; flex-direction: column; gap: var(--space-3); }
+  li { display: flex; align-items: center; gap: var(--space-3); }
+  .hof-medal { --size: 3.4rem; }
+  .who { display: flex; flex-direction: column; min-inline-size: 0; line-height: 1.45; }
+  strong { font-size: var(--step-0); color: var(--hof-on-wall); }
+  small { color: var(--hof-on-wall-muted); font-size: var(--step--1); }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); }
+  button.btn { cursor: pointer; font: inherit; font-weight: var(--weight-strong); }
+  button[aria-busy='true'] { opacity: 0.6; cursor: progress; }
+  @media (max-width: 600px) {
+    .actions { flex-direction: column; align-items: stretch; }
+    .actions .btn { white-space: normal; }
+  }
+</style>
