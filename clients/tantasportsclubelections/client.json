@@ -1,0 +1,87 @@
+{
+  "slug": "tantasportsclubelections",
+  "kind": "elections",
+  "name": {
+    "ar": "قائمة أ.د أشرف محرم"
+  },
+  "shortName": {
+    "ar": "قائمة أشرف محرم"
+  },
+  "motto": {
+    "ar": "بفكر جديد.. هنطوّر صيد زمان"
+  },
+  "logo": "crest-192.webp",
+  "favicon": "favicon.png",
+  "locales": [
+    "ar"
+  ],
+  "defaultLocale": "ar",
+  "numerals": {
+    "ar": "arab"
+  },
+  "calendar": "gregory",
+  "domains": {
+    "production": "ashrafmoharamlist.com",
+    "preview": "websites-preview.syncology.tech/tantasportsclubelections"
+  },
+  "api": {
+    "mode": "demo",
+    "base": "/api/",
+    "turnstileSiteKey": ""
+  },
+  "edusync": {},
+  "headerCta": {
+    "label": {
+      "ar": "سجّل شكوى أو مقترح"
+    },
+    "href": "page:complaints"
+  },
+  "navExternal": [],
+  "portals": [],
+  "navGroups": [],
+  "contact": {
+    "address": null,
+    "phones": [],
+    "whatsapp": [],
+    "emails": {},
+    "mapUrl": null,
+    "hours": null
+  },
+  "social": {
+    "facebook": {
+      "label": "Facebook",
+      "href": "https://www.facebook.com/profile.php?id=61590505206701"
+    },
+    "instagram": {
+      "label": "Instagram",
+      "href": "https://www.instagram.com/ashrafmoharram2026"
+    }
+  },
+  "copyright": {
+    "ar": "© 2026 قائمة أ.د أشرف محرم. جميع الحقوق محفوظة."
+  },
+  "footerCredit": {
+    "show": true,
+    "text": {
+      "ar": "بواسطة سينكولوجي"
+    },
+    "href": "https://syncology.tech"
+  },
+  "samples": [
+    {
+      "id": "baseline",
+      "palette": "baseline",
+      "type": "baseline",
+      "layout": "baseline",
+      "motion": "baseline"
+    }
+  ],
+  "todo": [
+    "content: copied as-is from ashrafmoharamlist.com (Prof. Ashraf Moharam's list, Egyptian Shooting Club 2026 elections) as the template; the owner will replace names, text and media with the Tanta Sports Club list's.",
+    "videos: interview, word and program-file clips stream from media.ashrafmoharamlist.com (the source's own server); move them to our storage or replace them with the client's.",
+    "api: supporters and complaints run in demo mode (this browser only, nothing sent). Live needs the backend in API.md (Cloudflare Pages Functions + D1 + R2), a WhatsApp sender for the codes, and a Turnstile site key.",
+    "supporters goal: the source sets it on its server (not visible on the page); 5 is a placeholder.",
+    "complaints success message: the source shows its server's text after sending; ours (elections.json complaints.success) is a placeholder.",
+    "production domain: to decide (domains.production keeps the source's domain for now)."
+  ]
+}
