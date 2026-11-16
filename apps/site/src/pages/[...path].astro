@@ -2,7 +2,7 @@
 // Every client page, at the exact URL path its content file declares.
 import Base from '../layouts/Base.astro';
 import { components } from '@layout/index';
-import { pages, newsFor, resolveAction, resolveHref, type Entry } from '@engine/content';
+import { byId, homeOf, pages, newsFor, resolveAction, resolveHref, type Entry } from '@engine/content';
 import { buildContext } from '@engine/context';
 import { heroVideo, mediaList } from '@engine/media';
 import client from '@client/client.json';
@@ -42,6 +42,14 @@ const linkItems = (items: any[] = []) =>
     const target = it.href ? resolveHref(it.href, ctx.locale) : null;
     return { title: it.title, text: it.text, href: target?.href, external: target?.external };
   });
+// Breadcrumbs for search results: home, the page's menu parent if any, then the page.
+const home = homeOf(ctx.locale);
+const parentEntry = entry.parent ? byId(entry.parent, ctx.locale) : undefined;
+const crumbs = entry.template === 'home' ? [] : [
+  { name: ctx.site.name, href: home.href },
+  ...(parentEntry && parentEntry.id !== home.id ? [{ name: parentEntry.navLabel ?? parentEntry.title, href: parentEntry.href }] : []),
+  { name: entry.title, href: entry.href },
+];
 // Election clients ("kind": "elections") render from their election data instead.
 const elections = (client as { kind?: string }).kind === 'elections';
 const video = !elections && entry.template === 'home' && fm.hero
@@ -68,7 +76,7 @@ const video = !elections && entry.template === 'home' && fm.hero
     {fm.cta && <CTA ctx={ctx} title={fm.cta.title} text={fm.cta.text} action={resolveAction(fm.cta.action, ctx.locale)} />}
   </Base>
 ) : entry.template === 'news' ? (
-  <Base ctx={ctx} title={entry.title} description={entry.description}>
+  <Base ctx={ctx} title={entry.title} description={entry.description} breadcrumbs={crumbs}>
     <NewsList ctx={ctx} title={entry.title} items={newsItems()} headingLevel={1} />
     {news.filter((n) => !n.own).map((n) => {
       const Item = n.Content;
@@ -80,7 +88,7 @@ const video = !elections && entry.template === 'home' && fm.hero
     })}
   </Base>
 ) : (
-  <Base ctx={ctx} title={entry.title} description={entry.description}>
+  <Base ctx={ctx} title={entry.title} description={entry.description} breadcrumbs={crumbs}>
     <Prose ctx={ctx} title={entry.title} lead={fm.lead ?? (entry.date ? ctx.fmt.date(entry.date) : undefined)} todo={todo}>{Content && <Content />}</Prose>
   </Base>
 )}

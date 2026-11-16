@@ -11,6 +11,8 @@ import Motion from '@motion/Motion.astro';
 import { tokensCss } from '@engine/tokens';
 import type { PageContext } from '@engine/context';
 import client from '@client/client.json';
+import type { ImageMetadata } from 'astro';
+import { breadcrumbLd, defaultShareImage, ldJson, ogLocale, organizationLd, verification, websiteLd, type Crumb } from '@engine/seo';
 
 interface Props {
   ctx: PageContext;
@@ -18,11 +20,20 @@ interface Props {
   description?: string;
   /** The whole <title>, when a page wants its own instead of "title | site name". */
   fullTitle?: string;
-  /** Share image (site-relative or absolute URL). Adds Open Graph and Twitter tags, so a link
-   *  pasted into WhatsApp or Facebook shows a card. Pages without one get no such tags. */
-  image?: string;
+  /** Share image: image metadata (gives the card its size) or a site-relative/absolute URL.
+   *  Pages without one share the client's default card (seo.shareImage, else the logo). */
+  image?: string | ImageMetadata;
+  imageAlt?: string;
+  /** Open Graph type: a candidate's page is a "profile", news an "article". */
+  type?: 'website' | 'profile' | 'article';
+  /** Trail from the home page to this one, as BreadcrumbList structured data. */
+  breadcrumbs?: Crumb[];
+  /** Extra schema.org nodes for this page (an Event, a Person…), merged into one JSON-LD graph. */
+  jsonLd?: Record<string, unknown>[];
+  /** Keep this page out of search results even on the live site (e.g. 404). */
+  noindex?: boolean;
 }
-const { ctx, title, description, fullTitle, image } = Astro.props;
+const { ctx, title, description, fullTitle, image, imageAlt, type = 'website', breadcrumbs, jsonLd = [], noindex } = Astro.props;
 const { Header, Footer } = components;
 
 const css = tokensCss(palette, typography, layoutTokens, motionTokens);
@@ -30,6 +41,23 @@ const pageTitle = fullTitle ?? (title === ctx.site.name ? title : `${title} | ${
 const site = Astro.site ?? new URL('https://example.com');
 const abs = (href: string) => new URL(href, site).href;
 const xDefault = ctx.languages.find((l) => l.locale === client.defaultLocale) ?? ctx.languages[0];
+const canonical = abs(Astro.url.pathname);
+const homeUrl = abs(ctx.site.homeHref);
+const isHome = Astro.url.pathname === ctx.site.homeHref;
+// Previews (and pages that ask) stay out of search engines; live pages invite rich snippets.
+const robots = import.meta.env.FSS_NOINDEX || noindex
+  ? 'noindex, nofollow'
+  : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+const share = image ?? defaultShareImage();
+const shareUrl = share ? abs(typeof share === 'string' ? share : share.src) : null;
+const shareSize = share && typeof share !== 'string' ? { w: share.width, h: share.height } : null;
+const shareAlt = imageAlt ?? pageTitle;
+const graph = [
+  ...(isHome ? [websiteLd(homeUrl), organizationLd(homeUrl, abs)] : []),
+  ...(breadcrumbs && breadcrumbs.length > 1 ? [breadcrumbLd(breadcrumbs, abs)] : []),
+  ...jsonLd,
+];
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 // Google Fonts load without blocking first paint (display=swap shows fallback text at once).
 // Any other fontsHref, such as a system's inline data: stylesheet for self-hosted fonts, loads as is.
 const googleFonts = typography.fontsHref.startsWith('https://fonts.googleapis.com/');
@@ -41,20 +69,28 @@ const googleFonts = typography.fontsHref.startsWith('https://fonts.googleapis.co
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{pageTitle}</title>
     {description && <meta name="description" content={description} />}
-    {import.meta.env.FSS_NOINDEX && <meta name="robots" content="noindex" />}
-    <link rel="canonical" href={abs(Astro.url.pathname)} />
-    {image && (
-      <>
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content={ctx.site.name} />
-        <meta property="og:title" content={pageTitle} />
-        {description && <meta property="og:description" content={description} />}
-        <meta property="og:url" content={abs(Astro.url.pathname)} />
-        <meta property="og:image" content={abs(image)} />
-        <meta property="og:locale" content={ctx.locale === 'ar' ? 'ar_AR' : 'en_US'} />
-        <meta name="twitter:card" content="summary_large_image" />
-      </>
-    )}
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={ctx.site.name} />
+    <meta property="og:title" content={pageTitle} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={ogLocale(ctx.locale)} />
+    {ctx.languages.filter((l) => l.locale !== ctx.locale).map((l) => <meta property="og:locale:alternate" content={ogLocale(l.locale)} />)}
+    {shareUrl && <meta property="og:image" content={shareUrl} />}
+    {shareSize && <meta property="og:image:width" content={String(shareSize.w)} />}
+    {shareSize && <meta property="og:image:height" content={String(shareSize.h)} />}
+    {shareUrl && <meta property="og:image:alt" content={shareAlt} />}
+    <meta name="twitter:card" content={shareUrl ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={pageTitle} />
+    {description && <meta name="twitter:description" content={description} />}
+    {shareUrl && <meta name="twitter:image" content={shareUrl} />}
+    {shareUrl && <meta name="twitter:image:alt" content={shareAlt} />}
+    <meta name="theme-color" content={(palette.scheme === 'dark' ? palette.dark : palette.light).accent} />
+    <link rel="manifest" href={`${base}/site.webmanifest`} />
+    {verification.google && <meta name="google-site-verification" content={verification.google} />}
+    {verification.bing && <meta name="msvalidate.01" content={verification.bing} />}
     {ctx.languages.map((l) => <link rel="alternate" hreflang={l.locale} href={abs(l.href)} />)}
     {xDefault && <link rel="alternate" hreflang="x-default" href={abs(xDefault.href)} />}
     <meta name="generator" content={`fast-shipping-sites ${import.meta.env.FSS_SAMPLE}`} />
@@ -69,6 +105,7 @@ const googleFonts = typography.fontsHref.startsWith('https://fonts.googleapis.co
       </>
     ) : typography.fontsHref && <link rel="stylesheet" href={typography.fontsHref} />}
     <style is:inline set:html={css}></style>
+    {graph.length > 0 && <script type="application/ld+json" set:html={ldJson(graph)} />}
   </head>
   <body>
     <a class="skip-link" href="#main">{ctx.ui.skip}</a>

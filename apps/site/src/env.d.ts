@@ -9,4 +9,5 @@ interface ImportMetaEnv {
   readonly FSS_NOINDEX: boolean;
   readonly FSS_SHOW_DRAFTS: boolean;
   readonly FSS_HERO_VIDEO: string;
+  readonly FSS_PUBLIC_DIR: string;
 }

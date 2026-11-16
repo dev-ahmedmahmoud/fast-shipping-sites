@@ -120,6 +120,7 @@ export default defineConfig({
       'import.meta.env.FSS_SHOW_TODO': JSON.stringify(env.SHOW_TODO !== '0'),
       'import.meta.env.FSS_NOINDEX': JSON.stringify(env.NOINDEX === '1'),
       'import.meta.env.FSS_HERO_VIDEO': JSON.stringify(env.HERO_VIDEO || ''),
+      'import.meta.env.FSS_PUBLIC_DIR': JSON.stringify(path.join(clientDir, 'public')),
     },
     resolve: {
       alias: {

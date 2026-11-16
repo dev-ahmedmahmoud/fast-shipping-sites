@@ -17,7 +17,7 @@ const OTHER_LINE: Record<Locale, string> = {
   ar: 'الصفحة غير موجودة. العودة إلى الصفحة الرئيسية بالعربية.',
 };
 ---
-<Base ctx={ctx} title={ctx.ui.notFound}>
+<Base ctx={ctx} title={ctx.ui.notFound} noindex>
   <Prose ctx={ctx} title={ctx.ui.notFound}>
     <p><a href={ctx.site.homeHref}>{ctx.ui.backHome}</a></p>
     {other && otherHome && <p lang={other} dir={other === 'ar' ? 'rtl' : 'ltr'}><a href={otherHome}>{OTHER_LINE[other]}</a></p>}

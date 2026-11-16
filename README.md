@@ -33,6 +33,12 @@ Free stock pictures and silent hero clips any client may use live in `stock/` (s
 
 Other environment variables: `SHOW_TODO=0` hides the "content waiting to be imported" notes, `SITE_URL` overrides the canonical domain, and `BASE` and `OUT_DIR` are set by the gallery script.
 
+## Search and sharing
+
+Every page gets a title, description, canonical URL, robots rules, Open Graph and Twitter cards (with the image's size and alt text, falling back to the client's share image), hreflang links, a theme colour and a web manifest. Home pages carry schema.org `WebSite` and the client's organisation (from `client.json`: name, logo, address, phone, email, social links); inner pages carry breadcrumbs. Election clients add the election as an `Event`, the list's members, an `ItemList` of candidates and a `ProfilePage`/`Person` per candidate. Each site build writes `sitemap.xml`, `robots.txt` and `site.webmanifest`.
+
+Previews are `noindex` everywhere; a live build (no `NOINDEX`) is indexable and points robots.txt at its sitemap. Optional `seo` settings in `client.json`: `orgType`, `country`, `ogLocale`, `shareImage`, `googleSiteVerification`, `bingSiteVerification` (see `apps/site/src/lib/seo.ts`). Canonical URLs use `domains.production`, or the preview domain until one is set.
+
 ## Layout
 
 - `apps/site/`: the Astro engine (routing, i18n, content loading, page assembly).

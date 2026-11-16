@@ -261,5 +261,13 @@
     "motto: the old home page says 'Think to make the difference.' / 'فكر لتصنع الفرق'; the intake gave 'Think to bring about a difference.' / 'فلتكن سببا في إحداث فارق' (used in the header and footer).",
     "contact forms: the Admission, HR and School Counselor forms on the contact page do not send yet; they need the EduSync lead endpoint.",
     "logo: redraw lfis_Only.png as SVG (intake B02)."
-  ]
+  ],
+  "seo": {
+    "orgType": "School",
+    "country": "SA",
+    "ogLocale": {
+      "ar": "ar_SA",
+      "en": "en_US"
+    }
+  }
 }

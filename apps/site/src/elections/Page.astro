@@ -16,9 +16,10 @@ import ComplaintForm from './ComplaintForm.astro';
 import {
   action, ballotGroups, candidate, candidateGroups, candidateRaw, candidates, clipsForCandidate, clipsForFile,
   complaints, countdown, crest, fileRaw, filesPage, home, list, programFiles, shareImage, supporters, teamPage,
-  timeLabel, ui, video, vote,
+  timeLabel, ui, video, vote, election,
 } from './data';
 import { media } from '@engine/media';
+import type { ImageMetadata } from 'astro';
 
 interface Props { entry: Entry }
 const { entry } = Astro.props;
@@ -42,7 +43,8 @@ const ballot = {
 const strip = (except?: string) => [{ label: '', candidates: candidates.filter((c) => c.slug !== except) }];
 const cardMore = ui.profile ?? '';
 
-let image = shareImage()?.src;
+let image: ImageMetadata | string | undefined = shareImage() ?? undefined;
+let imageAlt: string | undefined;
 let fullTitle: string | undefined;
 let c: ReturnType<typeof candidate> | null = null;
 let cr: any = null;
@@ -50,12 +52,86 @@ if (entry.template === 'home') fullTitle = fm.titleTag;
 if (entry.template === 'candidate') {
   c = candidate(fm.candidate);
   cr = candidateRaw(fm.candidate);
-  if (cr.shareImage) image = media(cr.shareImage).src;
+  if (cr.shareImage) image = media(cr.shareImage);
+  imageAlt = `${c.name} — ${c.seat}`;
 }
 const file = entry.template === 'file' ? fileRaw(fm.file) : null;
 const leader = list.leader ? candidate(list.leader) : null;
+
+// ---- Search: breadcrumbs and schema.org data (the election, the list, each candidate) ----
+const abs = (href: string) => new URL(href, site).href;
+const homeEntry = byId('home', 'ar');
+const homeUrl = abs(homeEntry?.href ?? '/');
+const orgRef = { '@id': `${homeUrl}#organization` };
+const crumb = (id: string) => { const e = byId(id, 'ar'); return e ? { name: e.navLabel ?? e.title, href: e.href } : null; };
+const here = { name: entry.title, href: entry.href };
+const homeCrumb = { name: list.name ?? ctx.site.name, href: homeEntry?.href ?? '/' };
+const breadcrumbs = entry.template === 'home' ? [] : [
+  homeCrumb,
+  ...(entry.template === 'candidate' ? [crumb('team')] : entry.template === 'file' ? [crumb('files')] : []).filter(Boolean),
+  entry.template === 'candidate' && c ? { name: c.name, href: entry.href } : here,
+] as { name: string; href: string }[];
+
+// "د. محمد…" → honorificPrefix "د." + name "محمد…", so search engines see the person's name.
+const PREFIXES = ['أ.د.', 'أ.د', 'د.', 'م.', 'أ.', 'المستشار', 'المحاسب', 'الكابتن', 'اللواء', 'المهندس', 'الدكتور', 'الأستاذ'];
+const person = (cand: ReturnType<typeof candidate>, description?: string) => {
+  const prefix = PREFIXES.find((p) => cand.name.startsWith(p + ' '));
+  const url = abs(cand.href);
+  return {
+    '@type': 'Person',
+    '@id': `${url}#person`,
+    name: prefix ? cand.name.slice(prefix.length + 1) : cand.name,
+    ...(prefix ? { honorificPrefix: prefix } : {}),
+    jobTitle: cand.seat.replace(/^لمقعد\s+/, ''),
+    url,
+    image: abs(cand.photo.src),
+    ...(description ? { description } : {}),
+    memberOf: orgRef,
+  };
+};
+const loc = (election as { location?: { name: string; locality?: string; region?: string; country?: string; street?: string } }).location;
+const jsonLd: Record<string, unknown>[] = [];
+if (entry.template === 'home') {
+  jsonLd.push({ ...orgRef, member: candidates.map((x) => ({ '@id': `${abs(x.href)}#person`, name: x.name })) });
+  if (loc && election.at) {
+    jsonLd.push({
+      '@type': 'Event',
+      name: election.title,
+      startDate: election.at,
+      eventStatus: 'https://schema.org/EventScheduled',
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      location: {
+        '@type': 'Place',
+        name: loc.name,
+        address: {
+          '@type': 'PostalAddress',
+          ...(loc.street ? { streetAddress: loc.street } : {}),
+          ...(loc.locality ? { addressLocality: loc.locality } : {}),
+          ...(loc.region ? { addressRegion: loc.region } : {}),
+          ...(loc.country ? { addressCountry: loc.country } : {}),
+        },
+      },
+      organizer: { '@type': 'SportsOrganization', name: loc.name },
+      ...(image ? { image: [abs(typeof image === 'string' ? image : image.src)] } : {}),
+      description: entry.description,
+      url: homeUrl,
+    });
+  }
+}
+if (entry.template === 'candidates') {
+  jsonLd.push({
+    '@type': 'ItemList',
+    name: entry.title,
+    itemListElement: candidates.map((x, i) => ({ '@type': 'ListItem', position: i + 1, url: abs(x.href), name: x.name })),
+  });
+}
+if (entry.template === 'candidate' && c) {
+  jsonLd.push({ '@type': 'ProfilePage', url: abs(entry.href), name: entry.title, mainEntity: person(c, entry.description) });
+}
+const ogType = entry.template === 'candidate' ? 'profile' : 'website';
 ---
-<Base ctx={ctx} title={entry.title} description={entry.description} fullTitle={fullTitle} image={image}>
+<Base ctx={ctx} title={entry.title} description={entry.description} fullTitle={fullTitle} image={image} imageAlt={imageAlt}
+  type={ogType} breadcrumbs={breadcrumbs} jsonLd={jsonLd}>
   {entry.template === 'home' && (
     <>
       <E.ElectionHero ctx={ctx} title={home.hero.title} slogan={home.hero.slogan} sub={home.hero.sub}

@@ -77,6 +77,17 @@
     "leader and El-Shamkawy: CVs haven't arrived; their pages have placeholder text.",
     "seats: from the campaign poster (via the media agent). Ballot numbers are placeholders (1–12) until the client sends the real ones.",
     "names to confirm: Fathy Selim's title (CV: الكابتن, poster: الدكتور); the poster spells the leader 'داود'.",
-    "photos: client photos cut out by the media agent and matched to names by face (needs one human confirmation, see media-manifest.json). Crest is upscaled from the poster: ask the club for the original file."
-  ]
+    "photos: client photos cut out by the media agent and matched to names by face (needs one human confirmation, see media-manifest.json). Crest is upscaled from the poster: ask the club for the original file.",
+    "seo: once the production domain is set (domains.production), canonical URLs, the sitemap and robots.txt use it automatically; then add the site to Google Search Console (put its code in seo.googleSiteVerification) and submit /sitemap.xml. The election's street address (election.location.street) would strengthen the event listing."
+  ],
+  "seo": {
+    "orgType": "Organization",
+    "country": "EG",
+    "ogLocale": {
+      "ar": "ar_EG"
+    },
+    "shareImage": "share.jpg",
+    "googleSiteVerification": "",
+    "bingSiteVerification": ""
+  }
 }

@@ -232,5 +232,13 @@
     "Portal page: the old page had placeholder text only; decide which links it should list.",
     "FAQs: the old page had placeholder text only; /faqs/ now redirects to Admissions. Add real questions if the school wants the page back.",
     "History says Menese was founded in 1992; the home and About pages say 1990. Confirm which year is right."
-  ]
+  ],
+  "seo": {
+    "orgType": "School",
+    "country": "EG",
+    "ogLocale": {
+      "en": "en_US",
+      "ar": "ar_EG"
+    }
+  }
 }
