@@ -28,7 +28,8 @@ const samples = (client.samples as { id: string; palette: string; type: string; 
   const m = metaOf(s.layout);
   return {
     ...s,
-    label: { en: single ? m?.label.en ?? s.id : `${T.en.mix}: ${s.id}`, ar: single ? m?.label.ar ?? s.id : `${T.ar.mix}: ${s.id}` },
+    // A layout's own name, even when another system supplies the palette or type; the parts line shows the mix.
+    label: { en: m?.label.en ?? `${T.en.mix}: ${s.id}`, ar: m?.label.ar ?? `${T.ar.mix}: ${s.id}` },
     summary: { en: m?.summary.en ?? '', ar: m?.summary.ar ?? '' },
     parts: single ? null : s,
   };

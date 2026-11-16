@@ -61,7 +61,7 @@
   "samples": [
     {
       "id": "station",
-      "palette": "station",
+      "palette": "royal-blue",
       "type": "station",
       "layout": "station",
       "motion": "station"
