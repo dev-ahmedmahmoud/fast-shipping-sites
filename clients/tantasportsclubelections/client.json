@@ -10,7 +10,7 @@
   "motto": {
     "ar": "تاريخ نحترمه .. ومستقبل نصنعه"
   },
-  "logo": "crest.webp",
+  "logo": "logo.webp",
   "favicon": "favicon.png",
   "locales": [
     "ar"
@@ -79,7 +79,7 @@
     "leader: CV in (age left out, as for the other candidates). Company logos from the media agent: 4 of 5 in (co-<slug>.webp and -mono.webp); Friends (فريندز للمقاولات العامة) has no logo yet, so its plaque shows the name. Add it as co-friends.webp / co-friends-mono.webp and set logo/logoMono/color in elections.json.",
     "seats: from the campaign poster (via the media agent). Ballot numbers are placeholders (1–12) until the client sends the real ones.",
     "names to confirm: Fathy Selim's title (CV: الكابتن, poster: الدكتور); the poster spells the leader 'داود'.",
-    "photos: client photos cut out by the media agent and matched to names by face (needs one human confirmation, see media-manifest.json). Crest is upscaled from the poster: ask the club for the original file.",
+    "photos: client photos cut out by the media agent and matched to names by face (needs one human confirmation, see media-manifest.json). Crest: the media agent's 3D version (crest.webp with shadow on blue: hero, page bands, ballot card, share cards; logo.webp without shadow: header, favicon, schema logo). The club's original file would still be the best source.",
     "seo: Google Search Console is verified by DNS (TXT record in Cloudflare, so seo.googleSiteVerification stays empty) and /sitemap.xml is submitted. Cloudflare Web Analytics is on. The election's street address (election.location.street) would strengthen the event listing."
   ],
   "seo": {
