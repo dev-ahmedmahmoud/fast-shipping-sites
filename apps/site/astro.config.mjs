@@ -54,7 +54,8 @@ const rootRedirect = mode === 'site' && !homeAtRoot ? { '/': `${base.replace(/\/
 
 export default defineConfig({
   root: fileURLToPath(new URL('.', import.meta.url)),
-  site: env.SITE_URL || `https://${client.domains.production}`,
+  // Until a client has a production domain, canonical URLs point at its preview.
+  site: env.SITE_URL || `https://${client.domains.production || client.domains.preview.split('/')[0]}`,
   base,
   // Client files (video, PDFs) belong to each sample; the comparison page gets none.
   publicDir: mode === 'site' ? path.join(clientDir, 'public') : path.join(root, 'apps/site/.no-public'),

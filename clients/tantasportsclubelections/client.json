@@ -2,15 +2,15 @@
   "slug": "tantasportsclubelections",
   "kind": "elections",
   "name": {
-    "ar": "قائمة أ.د أشرف محرم"
+    "ar": "قائمة حسين داوود"
   },
   "shortName": {
-    "ar": "قائمة أشرف محرم"
+    "ar": "قائمة حسين داوود"
   },
   "motto": {
-    "ar": "بفكر جديد.. هنطوّر صيد زمان"
+    "ar": "معًا.. لنادي طنطا يليق بتاريخه"
   },
-  "logo": "crest-192.webp",
+  "logo": "crest.webp",
   "favicon": "favicon.png",
   "locales": [
     "ar"
@@ -21,7 +21,7 @@
   },
   "calendar": "gregory",
   "domains": {
-    "production": "ashrafmoharamlist.com",
+    "production": "",
     "preview": "websites-preview.syncology.tech/tantasportsclubelections"
   },
   "api": {
@@ -47,18 +47,9 @@
     "mapUrl": null,
     "hours": null
   },
-  "social": {
-    "facebook": {
-      "label": "Facebook",
-      "href": "https://www.facebook.com/profile.php?id=61590505206701"
-    },
-    "instagram": {
-      "label": "Instagram",
-      "href": "https://www.instagram.com/ashrafmoharram2026"
-    }
-  },
+  "social": {},
   "copyright": {
-    "ar": "© 2026 قائمة أ.د أشرف محرم. جميع الحقوق محفوظة."
+    "ar": "© 2026 قائمة حسين داوود. جميع الحقوق محفوظة."
   },
   "footerCredit": {
     "show": true,
@@ -74,28 +65,19 @@
       "type": "station",
       "layout": "station",
       "motion": "station"
-    },
-    {
-      "id": "arabesque",
-      "palette": "arabesque",
-      "type": "arabesque",
-      "layout": "arabesque",
-      "motion": "arabesque"
-    },
-    {
-      "id": "hall-of-fame",
-      "palette": "hall-of-fame",
-      "type": "hall-of-fame",
-      "layout": "hall-of-fame",
-      "motion": "hall-of-fame"
     }
   ],
   "todo": [
-    "content: copied as-is from ashrafmoharamlist.com (Prof. Ashraf Moharam's list, Egyptian Shooting Club 2026 elections) as the template; the owner will replace names, text and media with the Tanta Sports Club list's.",
-    "videos: interview, word and program-file clips stream from media.ashrafmoharamlist.com (the source's own server); move them to our storage or replace them with the client's.",
-    "api: supporters and complaints run in demo mode (this browser only, nothing sent). Live needs the backend in API.md (Cloudflare Pages Functions + D1 + R2), a WhatsApp sender for the codes, and a Turnstile site key.",
-    "supporters goal: the source sets it on its server (not visible on the page); 5 is a placeholder.",
-    "complaints success message: the source shows its server's text after sending; ours (elections.json complaints.success) is a placeholder.",
-    "production domain: to decide (domains.production keeps the source's domain for now)."
+    "leader: Hussein Dawood's CV hasn't arrived; his page has placeholder text.",
+    "seats and ballot numbers: placeholders (1–11). Given by the client: Waleed Afify treasurer; Karim Abu El-Azm and Ahmed Sweilem over-age; Mohamed El-Menshawy under-age. Assumed: Mohamed Sedky vice president; Attia, Hamza, Mabrouk, Fathy Selim over-age; Ashoush under-age.",
+    "names to confirm: 'حمد رضا عشوش' (أحمد؟); Hussein Dawood's title.",
+    "photos: placeholder silhouettes, crest and share image until the media agent delivers clients/tantasportsclubelections/media/tanta/ (spec sent to session_01CG4akosFw9qSsqNFZdRDtz).",
+    "videos: none yet (leader's word, interviews, program clips); sections stay hidden until the client sends them.",
+    "program files: the four pages wait for the client's text.",
+    "election date/time: still the template's (Friday 20 Nov 2026, 8 PM) until the client confirms.",
+    "slogan 'معًا.. لنادي طنطا يليق بتاريخه' is a placeholder drawn from the candidates' own wording.",
+    "membership number rule (6 digits) is the template's; confirm Tanta's format.",
+    "social links, production domain and the site name printed on the ballot card: to come.",
+    "api: supporters and complaints run in demo mode (this browser only, nothing sent). Live needs the backend in API.md, a WhatsApp sender for the codes, and a Turnstile site key."
   ]
 }

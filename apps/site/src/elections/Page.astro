@@ -69,11 +69,11 @@ const leader = list.leader ? candidate(list.leader) : null;
       )}
       <E.CandidateGrid ctx={ctx} variant="strip" title={home.team.title} lead={home.team.lead} groups={strip()}
         more={{ label: home.team.all, href: teamHref }} cardMore={cardMore} numberLabel={ui.number} />
-      <E.InterviewStrip ctx={ctx} title={home.interviews.title} lead={home.interviews.lead}
+      {home.interviews.items.length > 0 && <E.InterviewStrip ctx={ctx} title={home.interviews.title} lead={home.interviews.lead}
         items={home.interviews.items.map((it: any) => {
           const who = candidate(it.candidate);
           return { name: who.name, seat: who.seat, href: `${who.href}#interview`, poster: media(it.poster), cta: ui.watch };
-        })} />
+        })} />}
       <E.BallotCard ctx={ctx} {...ballot} support={action(vote.support)} />
       <CTA ctx={ctx} title={home.cta.title} text={home.cta.text} action={action(home.cta.action)} />
     </>
@@ -114,7 +114,7 @@ const leader = list.leader ? candidate(list.leader) : null;
     <>
       <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} />
       <E.Panel ctx={ctx}><Content /></E.Panel>
-      <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} />
+      {clipsForFile(file.slug).length > 0 && <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} />}
       <E.ProgramFiles ctx={ctx} title={file.othersTitle} files={programFiles.filter((f) => f.slug !== file.slug)} />
     </>
   )}

@@ -1,6 +1,6 @@
 {
   "election": {
-    "title": "انتخابات نادي الصيد المصري 2026",
+    "title": "انتخابات نادي طنطا الرياضي 2026",
     "at": "2026-11-20T20:00:00+02:00",
     "timezone": "Africa/Cairo",
     "dateText": "الجمعة 20 نوفمبر 2026 — الساعة 8 مساءً",
@@ -17,13 +17,13 @@
     }
   },
   "list": {
-    "name": "قائمة أ.د أشرف محرم",
-    "slogan": "بفكر جديد.. هنطوّر صيد زمان",
-    "leader": "ashraf-moharam",
-    "crest": "crest-192.webp",
-    "logo": "logo-640.webp",
-    "cardLogo": "logo-640.webp",
-    "site": "ashrafmoharamlist.com",
+    "name": "قائمة حسين داوود",
+    "slogan": "معًا.. لنادي طنطا يليق بتاريخه",
+    "leader": "hussein-dawood",
+    "crest": "crest.webp",
+    "logo": "logo.webp",
+    "cardLogo": "logo.webp",
+    "site": "",
     "shareImage": "share.jpg"
   },
   "groups": [
@@ -42,796 +42,213 @@
   ],
   "candidates": [
     {
-      "slug": "ashraf-moharam",
-      "name": "أ.د أشرف محرم",
+      "slug": "hussein-dawood",
+      "name": "حسين داوود",
       "seat": "لمقعد رئيس مجلس الإدارة",
       "group": "presidency",
-      "number": 2,
-      "card": "ashraf-moharam-card.webp",
+      "number": 1,
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "حسين داوود",
       "kicker": {
         "label": "تعرّف على القائمة",
         "href": "page:team"
       },
-      "photo": "ashraf-moharam-card.webp",
-      "photoAlt": "أ.د أشرف محرم",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/ashraf-moharram.mp4",
-        "poster": "poster-ashraf-moharam-hq.webp",
-        "label": "كلمة أ.د أشرف محرم",
-        "caption": "كلمة أ.د أشرف محرم",
-        "title": "كلمة أ.د أشرف محرم"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٥)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/Ashraf-Moharram-full.mp4",
-        "poster": "interview-ashraf-moharam.jpg",
-        "label": "اللقاء الكامل مع أ.د أشرف محرم",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "ما يحتاجه النادي: النظام والانضباط"
-          },
-          {
-            "t": 26,
-            "label": "الأهداف القريبة والبعيدة"
-          },
-          {
-            "t": 74,
-            "label": "الملفات قليلة التكلفة والملفات المكلفة"
-          },
-          {
-            "t": 102,
-            "label": "خطة الأربعة وعشرين شهرًا"
-          },
-          {
-            "t": 126,
-            "label": "كلمة لأعضاء النادي"
-          }
-        ]
-      },
-      "gallery": [
-        "ashraf-moharam-1.webp",
-        "ashraf-moharam-2.webp",
-        "ashraf-moharam-3.webp"
-      ],
       "galleryLabel": "صور",
-      "filesTitle": "أ.د أشرف محرم يتحدث عن الملفات الأربعة",
+      "filesTitle": "حسين داوود يتحدث عن الملفات الأربعة",
       "restTitle": "باقي فريق القائمة",
-      "shareImage": "ashraf-moharam-share.jpg",
-      "description": "يقود أ.د أشرف محرم قائمة من أحد عشر مرشحًا تجمعهم رؤية واحدة: بفكر جديد.. هنطوّر صيد زمان."
+      "shareImage": "share.jpg",
+      "description": "يقود حسين داوود قائمة من أحد عشر مرشحًا تجمعهم رؤية واحدة: تطوير نادي طنطا الرياضي والارتقاء بمنشآته وخدماته بما يليق بتاريخه ومكانته."
     },
     {
-      "slug": "adel-selim",
-      "name": "م. عادل سليم",
+      "slug": "mohamed-sedky",
+      "name": "المستشار محمد صدقي",
       "seat": "لمقعد نائب رئيس مجلس الإدارة",
       "group": "presidency",
-      "number": 4,
-      "card": "adel-selim-card.webp",
+      "number": 2,
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "المستشار محمد صدقي",
       "kicker": {
         "label": "تعرّف على القائمة",
         "href": "page:team"
       },
-      "photo": "adel-selim-card.webp",
-      "photoAlt": "م. عادل سليم",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/adel-selim.mp4",
-        "poster": "poster-adel-selim-hq.webp",
-        "label": "كلمة م. عادل سليم",
-        "caption": "كلمة م. عادل سليم",
-        "title": "كلمة م. عادل سليم"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٩)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/adel-salim-full.mp4",
-        "poster": "interview-adel-selim.jpg",
-        "label": "اللقاء الكامل مع م. عادل سليم",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "ما ينتظره الأعضاء من المجلس القادم"
-          },
-          {
-            "t": 67,
-            "label": "دور نائب الرئيس"
-          },
-          {
-            "t": 90,
-            "label": "المحاور الأربعة: الميزانية والإيرادات"
-          },
-          {
-            "t": 126,
-            "label": "مطاعم وأصول النادي غير المستغلة"
-          },
-          {
-            "t": 218,
-            "label": "الحفاظ على الخدمات وإصلاح المتعثر"
-          },
-          {
-            "t": 276,
-            "label": "الإبداع والتطوير"
-          },
-          {
-            "t": 375,
-            "label": "الخبرة الإدارية والرياضية والتواصل مع أولياء الأمور"
-          },
-          {
-            "t": 481,
-            "label": "عودة اللجان الرياضية"
-          },
-          {
-            "t": 529,
-            "label": "تعريف بالمرشح وشخصيته"
-          }
-        ]
-      },
-      "gallery": [
-        "adel-selim-1.webp",
-        "adel-selim-2.webp",
-        "adel-selim-3.webp"
-      ],
       "galleryLabel": "صور",
-      "filesTitle": "م. عادل سليم يتحدث عن الملفات",
+      "filesTitle": "المستشار محمد صدقي يتحدث عن الملفات الأربعة",
       "restTitle": "باقي فريق القائمة",
-      "shareImage": "adel-selim-share.jpg",
-      "description": "مهندس ورجل أعمال بخبرة تتجاوز 35 عامًا في الهندسة والإدارة وتطوير الأسواق، شغل خلالها مناصب قيادية دولية في مجموعة Mantrac وأسّس شركات متخصصة في الاستشارات الهندسية وحلول المعدات الثقيلة، إلى جانب دراسات متقدمة في الإدارة والقيادة والتخطيط الاستراتيجي."
+      "shareImage": "share.jpg",
+      "description": "نائب رئيس هيئة قضايا الدولة، وأمين صندوق نادي طنطا الرياضي حاليًا، وعضو مجلس إدارة النادي في دورة 2017–2021."
     },
     {
-      "slug": "hesham-el-shenawy",
-      "name": "أ. هشام الشنوفي",
+      "slug": "waleed-afify",
+      "name": "أ.د. وليد محمد عفيفي",
       "seat": "لمقعد أمين الصندوق",
       "group": "presidency",
-      "number": 5,
-      "card": "hesham-el-shenawy-card-v2.webp",
+      "number": 3,
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "أ.د. وليد محمد عفيفي",
       "kicker": {
         "label": "تعرّف على القائمة",
         "href": "page:team"
       },
-      "photo": "hesham-el-shenawy-card-v2.webp",
-      "photoAlt": "أ. هشام الشنوفي",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/hisham-el-shannoufi.mp4",
-        "poster": "poster-hesham-el-shenawy-v3.webp",
-        "label": "كلمة أ. هشام الشنوفي",
-        "caption": "كلمة أ. هشام الشنوفي",
-        "title": "كلمة أ. هشام الشنوفي"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٩)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/Hisham-ElShenofi-full.mp4",
-        "poster": "interview-hesham-el-shenawy.jpg",
-        "label": "اللقاء الكامل مع أ. هشام الشنوفي",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "الملف المالي وأولويات الأعضاء"
-          },
-          {
-            "t": 47,
-            "label": "منظومة مالية مؤسسية لأمانة الصندوق"
-          },
-          {
-            "t": 106,
-            "label": "استغلال الأصول وتنمية الموارد"
-          },
-          {
-            "t": 200,
-            "label": "حقيقة المركز المالي للنادي"
-          },
-          {
-            "t": 297,
-            "label": "هوية نادي الصيد وتاريخه"
-          },
-          {
-            "t": 337,
-            "label": "الشباب واحتياجاتهم في النادي"
-          },
-          {
-            "t": 507,
-            "label": "روح الفريق ودعوة الخبرات للمشاركة"
-          },
-          {
-            "t": 711,
-            "label": "الأولويات وضبط التكاليف والهدر"
-          },
-          {
-            "t": 969,
-            "label": "رسالة لأعضاء النادي"
-          }
-        ]
-      },
-      "gallery": [
-        "hesham-el-shenawy-1-v2.webp",
-        "hesham-el-shenawy-2.webp",
-        "hesham-el-shenawy-3.webp"
-      ],
       "galleryLabel": "صور",
-      "filesTitle": "أ. هشام الشنوفي يتحدث عن ملف الاستثمار وتنمية الموارد",
+      "filesTitle": "أ.د. وليد محمد عفيفي يتحدث عن الملفات الأربعة",
       "restTitle": "باقي فريق القائمة",
-      "shareImage": "hesham-el-shenawy-share-v2.jpg",
-      "description": "يمتلك ما يقرب من ثلاثة عقود من الخبرة في القطاع المصرفي، اكتسب خلالها خبرة واسعة في الإدارة المالية والاستثمار وإدارة المخاطر والحوكمة، بما يجمع بين المعرفة المالية المتخصصة والخبرة العملية في إدارة المؤسسات الكبرى."
+      "shareImage": "share.jpg",
+      "description": "أستاذ الإحصاء الرياضي وعميد كلية التجارة بجامعة كفر الشيخ، وخريج كلية التجارة – جامعة طنطا."
     },
     {
-      "slug": "ahmed-wagih",
-      "name": "أ. أحمد وجيه",
+      "slug": "karim-abu-elazm",
+      "name": "المحاسب كريم ممدوح أبو العزم",
       "seat": "عضو مجلس الإدارة — فوق السن",
       "group": "board-over",
-      "number": 1,
-      "card": "ahmed-wagih-card.webp",
+      "number": 4,
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "المحاسب كريم ممدوح أبو العزم",
       "kicker": {
         "label": "تعرّف على القائمة",
         "href": "page:team"
       },
-      "photo": "ahmed-wagih-card.webp",
-      "photoAlt": "أ. أحمد وجيه",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/ahmed-wagih.mp4",
-        "poster": "poster-ahmed-wagih-hq.webp",
-        "label": "كلمة أ. أحمد وجيه",
-        "caption": "كلمة أ. أحمد وجيه",
-        "title": "كلمة أ. أحمد وجيه"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٨)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/ahmed-wagih-full.mp4",
-        "poster": "interview-ahmed-wagih.jpg",
-        "label": "اللقاء الكامل مع أ. أحمد وجيه",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "الخبرة الحقيقية داخل مجلس الإدارة"
-          },
-          {
-            "t": 50,
-            "label": "سؤال عن مطالب رواد النادي"
-          },
-          {
-            "t": 76,
-            "label": "ما يحتاجه الرواد يوميًا في النادي"
-          },
-          {
-            "t": 110,
-            "label": "الرواد تراث النادي وأساسه"
-          },
-          {
-            "t": 149,
-            "label": "النظافة والصيانة ووسائل الانتقال"
-          },
-          {
-            "t": 186,
-            "label": "رحلات مناسبة لكبار السن"
-          },
-          {
-            "t": 488,
-            "label": "رسالة لأعضاء الجمعية العمومية"
-          },
-          {
-            "t": 504,
-            "label": "رسالة للعاملين في النادي"
-          }
-        ]
-      },
-      "gallery": [
-        "ahmed-wagih-1.webp",
-        "ahmed-wagih-2.webp",
-        "ahmed-wagih-3.webp"
-      ],
       "galleryLabel": "صور",
-      "filesTitle": "أ. أحمد وجيه يتحدث عن ملف الرياضة",
+      "filesTitle": "المحاسب كريم ممدوح أبو العزم يتحدث عن الملفات الأربعة",
       "restTitle": "باقي فريق القائمة",
-      "shareImage": "ahmed-wagih-share.jpg",
-      "description": "أ. أحمد وجيه، مرشح قائمة أ.د أشرف محرم عضو مجلس الإدارة — فوق السن، رقم 1 في انتخابات نادي الصيد المصري 2026."
+      "shareImage": "share.jpg",
+      "description": "شريك ومدير تنفيذي لشركتي B&K لتوريدات المطاعم وEgy Mak Pharma، وعضو مجلس إدارة حالي (تحت السن)، ولاعب سباحة سابق بالنادي."
     },
     {
-      "slug": "eman-el-assy",
-      "name": "أ. إيمان العاصي",
+      "slug": "ahmed-sweilem",
+      "name": "د. أحمد إبراهيم سويلم",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 5,
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "د. أحمد إبراهيم سويلم",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "د. أحمد إبراهيم سويلم يتحدث عن الملفات الأربعة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "share.jpg",
+      "description": "مدير المستشفى الرئيسي ومستشفى الجراحات الجديدة بجامعة طنطا، وأستاذ مساعد الجراحة العامة بكلية الطب – جامعة طنطا."
+    },
+    {
+      "slug": "mohamed-attia",
+      "name": "م. محمد السيد عطية",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 6,
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "م. محمد السيد عطية",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "م. محمد السيد عطية يتحدث عن الملفات الأربعة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "share.jpg",
+      "description": "مهندس معماري، وصاحب شركة المدينة المنورة للمقاولات وشركة Creative Line Construction (CLC) للتشطيبات والاستثمار العقاري."
+    },
+    {
+      "slug": "khaled-hamza",
+      "name": "م. خالد عادل حمزة",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 7,
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "م. خالد عادل حمزة",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "م. خالد عادل حمزة يتحدث عن الملفات الأربعة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "share.jpg",
+      "description": "مدير قطاع تجارة ونقل المواد البترولية بشركة غاز الشرق، ولاعب تنس طاولة سابق بنادي طنطا، من عائلة رياضية ارتبط اسمها بتاريخ النادي."
+    },
+    {
+      "slug": "mohamed-mabrouk",
+      "name": "د. محمد مختار مبروك",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 8,
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "د. محمد مختار مبروك",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "د. محمد مختار مبروك يتحدث عن الملفات الأربعة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "share.jpg",
+      "description": "أستاذ مساعد الأمراض الباطنة والجهاز الهضمي والمناظير بكلية الطب – جامعة طنطا، ومدير إدارة الجودة والاعتماد بمستشفيات جامعة طنطا."
+    },
+    {
+      "slug": "fathy-selim",
+      "name": "الكابتن فتحي محمد سليم",
       "seat": "عضو مجلس الإدارة — فوق السن",
       "group": "board-over",
       "number": 9,
-      "card": "eman-el-assy-card.webp",
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "الكابتن فتحي محمد سليم",
       "kicker": {
         "label": "تعرّف على القائمة",
         "href": "page:team"
       },
-      "photo": "eman-el-assy-card.webp",
-      "photoAlt": "أ. إيمان العاصي",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/eman-el-assy.mp4",
-        "poster": "poster-eman-el-assy-hq.webp",
-        "label": "كلمة أ. إيمان العاصي",
-        "caption": "كلمة أ. إيمان العاصي",
-        "title": "كلمة أ. إيمان العاصي"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٩)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/eman-el-assi-full.mp4",
-        "poster": "interview-eman-el-assy.jpg",
-        "label": "اللقاء الكامل مع أ. إيمان العاصي",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "أهمية التخصص في مجلس الإدارة"
-          },
-          {
-            "t": 31,
-            "label": "الموارد البشرية بين الصورة الشائعة والحقيقة"
-          },
-          {
-            "t": 105,
-            "label": "التقييمات وخطط تطوير الكوادر"
-          },
-          {
-            "t": 127,
-            "label": "العاملون عمود النادي"
-          },
-          {
-            "t": 192,
-            "label": "الخدمة الأساسية وطلب الإكراميات"
-          },
-          {
-            "t": 251,
-            "label": "تطوير الإشراف من القمة إلى القاعدة"
-          },
-          {
-            "t": 316,
-            "label": "تدريب العمال على صيانة المنشآت"
-          },
-          {
-            "t": 346,
-            "label": "العلاقة الإنسانية بالعاملين واحتواؤهم"
-          },
-          {
-            "t": 448,
-            "label": "الهيكل الوظيفي والترقيات وتقييم الأداء"
-          }
-        ]
-      },
-      "gallery": [
-        "eman-el-assy-1.webp",
-        "eman-el-assy-2.webp",
-        "eman-el-assy-3.webp"
-      ],
       "galleryLabel": "صور",
-      "filesTitle": "أ. إيمان العاصي تتحدث عن الملفات",
+      "filesTitle": "الكابتن فتحي محمد سليم يتحدث عن الملفات الأربعة",
       "restTitle": "باقي فريق القائمة",
-      "shareImage": "eman-el-assy-share.jpg",
-      "description": "خبيرة في الموارد البشرية والتطوير المؤسسي وإدارة المواهب، تجمع بين الخبرة المهنية والانتماء الأصيل لنادي الصيد."
+      "shareImage": "share.jpg",
+      "description": "لاعب سابق بالفريق الأول لكرة القدم بنادي طنطا الرياضي منذ عام 1966، ومديره الفني لاحقًا، ومدرب كرة قدم محترف بخبرات دولية."
     },
     {
-      "slug": "karim-abdelrahman",
-      "name": "م. كريم عبدالرحمن",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 27,
-      "card": "karim-abdelrahman-card.webp",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "photo": "karim-abdelrahman-card.webp",
-      "photoAlt": "م. كريم عبدالرحمن",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/karim-abdelrahman.mp4",
-        "poster": "poster-karim-abdelrahman-hq.webp",
-        "label": "كلمة م. كريم عبدالرحمن",
-        "caption": "كلمة م. كريم عبدالرحمن",
-        "title": "كلمة م. كريم عبدالرحمن"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٩)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/Karim-Abdulrahman-full.mp4",
-        "poster": "interview-karim-abdelrahman.jpg",
-        "label": "اللقاء الكامل مع م. كريم عبدالرحمن",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "تنوع الخبرات في العمل التطوعي"
-          },
-          {
-            "t": 44,
-            "label": "الخبرة المهنية والتعلم المستمر"
-          },
-          {
-            "t": 128,
-            "label": "ملف الأصول وتنمية الموارد"
-          },
-          {
-            "t": 190,
-            "label": "الاستقرار المالي وأثره على الخدمات"
-          },
-          {
-            "t": 268,
-            "label": "مطالب الأعضاء الرياضية والاجتماعية"
-          },
-          {
-            "t": 297,
-            "label": "أبطال النادي ومكانته الدولية"
-          },
-          {
-            "t": 360,
-            "label": "مكانة النادي وفروعه"
-          },
-          {
-            "t": 414,
-            "label": "ارتباطه الشخصي بنادي الصيد"
-          },
-          {
-            "t": 461,
-            "label": "وعد للأعضاء وروح التحدي"
-          }
-        ]
-      },
-      "gallery": [
-        "karim-abdelrahman-1.webp",
-        "karim-abdelrahman-2.webp",
-        "karim-abdelrahman-3.webp"
-      ],
-      "galleryLabel": "صور",
-      "filesTitle": "م. كريم عبدالرحمن يتحدث عن ملف الاستثمار وتنمية الموارد",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "karim-abdelrahman-share.jpg",
-      "description": "قيادي إداري يجمع بين الانتماء الأصيل لنادي الصيد، والخبرة التنفيذية، والنجاح في إدارة المؤسسات وتطويرها."
-    },
-    {
-      "slug": "mohamed-fahmy",
-      "name": "د. محمد فهمي",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 32,
-      "card": "mohamed-fahmy-card.webp",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "photo": "mohamed-fahmy-card.webp",
-      "photoAlt": "د. محمد فهمي",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/mohamed-fahmy.mp4",
-        "poster": "poster-mohamed-fahmy-hq.webp",
-        "label": "كلمة د. محمد فهمي",
-        "caption": "كلمة د. محمد فهمي",
-        "title": "كلمة د. محمد فهمي"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٩)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/Mohamed-Fahmy-Full.mp4",
-        "poster": "interview-mohamed-fahmy.jpg",
-        "label": "اللقاء الكامل مع د. محمد فهمي",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "التحول الرقمي ومكانة نادي الصيد"
-          },
-          {
-            "t": 83,
-            "label": "الخدمات الرقمية أبعد من تركيب الأجهزة"
-          },
-          {
-            "t": 140,
-            "label": "العضو محور الخدمة"
-          },
-          {
-            "t": 226,
-            "label": "قياس رضا الأعضاء وإدارة البيانات"
-          },
-          {
-            "t": 294,
-            "label": "الموارد المالية وأولويات الإنفاق"
-          },
-          {
-            "t": 448,
-            "label": "العدالة بين فروع النادي"
-          },
-          {
-            "t": 501,
-            "label": "سرعة الاستجابة لشكاوى الأعضاء"
-          },
-          {
-            "t": 584,
-            "label": "موقع القائمة وقناة الشكاوى"
-          },
-          {
-            "t": 621,
-            "label": "نصيحة للأعضاء عند الاختيار"
-          }
-        ]
-      },
-      "gallery": [
-        "mohamed-fahmy-1.webp",
-        "mohamed-fahmy-2.webp",
-        "mohamed-fahmy-3.webp"
-      ],
-      "galleryLabel": "صور",
-      "filesTitle": "د. محمد فهمي يتحدث عن الملفات",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "mohamed-fahmy-share.jpg",
-      "description": "خبير في الإدارة والتخطيط الاستراتيجي والتطوير المؤسسي والذكاء الاصطناعي، بخبرة تتجاوز 30 عامًا في تأسيس الشركات وقيادة المؤسسات."
-    },
-    {
-      "slug": "mahmoud-aoun",
-      "name": "أ. محمود عون",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 34,
-      "card": "mahmoud-aoun-card.webp",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "photo": "mahmoud-aoun-card.webp",
-      "photoAlt": "أ. محمود عون",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/mahmoud-aoun.mp4",
-        "poster": "poster-mahmoud-aoun-hq.webp",
-        "label": "كلمة أ. محمود عون",
-        "caption": "كلمة أ. محمود عون",
-        "title": "كلمة أ. محمود عون"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٧)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/Mahmoud-Aoun%20-full.mp4",
-        "poster": "interview-mahmoud-aoun.jpg",
-        "label": "اللقاء الكامل مع أ. محمود عون",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "تقديم"
-          },
-          {
-            "t": 36,
-            "label": "من الرياضة إلى العمل التطوعي ولجنة الشباب"
-          },
-          {
-            "t": 130,
-            "label": "روح النادي التي نريد استعادتها"
-          },
-          {
-            "t": 193,
-            "label": "الخبرة في الأعمال والتسويق والرعاية"
-          },
-          {
-            "t": 217,
-            "label": "دراسة القانون"
-          },
-          {
-            "t": 246,
-            "label": "لائحة واضحة للحقوق والواجبات"
-          },
-          {
-            "t": 327,
-            "label": "ختام اللقاء"
-          }
-        ]
-      },
-      "gallery": [
-        "mahmoud-aoun-1.webp",
-        "mahmoud-aoun-2.webp",
-        "mahmoud-aoun-3.webp"
-      ],
-      "galleryLabel": "صور",
-      "filesTitle": "أ. محمود عون يتحدث عن الملفات",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "mahmoud-aoun-share.jpg",
-      "description": "كادر قيادي شاب يجمع بين الانتماء للنادي، والخبرة المهنية والإدارية، والتجربة الرياضية والعمل العام."
-    },
-    {
-      "slug": "wael-mehran",
-      "name": "م. وائل مهران",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 39,
-      "card": "wael-mehran-card.webp",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "photo": "wael-mehran-card.webp",
-      "photoAlt": "م. وائل مهران",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/wael-mahran.mp4",
-        "poster": "poster-wael-mehran-hq.webp",
-        "label": "كلمة م. وائل مهران",
-        "caption": "كلمة م. وائل مهران",
-        "title": "كلمة م. وائل مهران"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٨)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/wael-mahran-full.mp4",
-        "poster": "interview-wael-mehran.jpg",
-        "label": "اللقاء الكامل مع م. وائل مهران",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "صناعة الأبطال في نادي الصيد"
-          },
-          {
-            "t": 82,
-            "label": "إنجازات النادي الأولمبية"
-          },
-          {
-            "t": 110,
-            "label": "صناعة البطل من الصغر واختيار الأجهزة الفنية"
-          },
-          {
-            "t": 131,
-            "label": "تجربة البطلة هداية ملاك"
-          },
-          {
-            "t": 184,
-            "label": "الملاعب والبنية التحتية"
-          },
-          {
-            "t": 260,
-            "label": "العدالة وتكافؤ الفرص لأولاد النادي"
-          },
-          {
-            "t": 354,
-            "label": "معايير اختيار المدربين"
-          },
-          {
-            "t": 409,
-            "label": "رسالة للأهالي والأبطال الصغار"
-          }
-        ]
-      },
-      "gallery": [
-        "wael-mehran-1.webp",
-        "wael-mehran-2.webp",
-        "wael-mehran-3.webp"
-      ],
-      "galleryLabel": "صور",
-      "filesTitle": "م. وائل مهران يتحدث عن ملف الرياضة",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "wael-mehran-share.jpg",
-      "description": "مهندس وقيادي تنفيذي ومستشار رياضي، يجمع بين الخبرة الإدارية والإنجاز الرياضي والعمل المجتمعي، ومسيرة تمتد لنحو 40 عامًا داخل نادي الصيد."
-    },
-    {
-      "slug": "ali-gebaly",
-      "name": "أ. علي جبيلي",
+      "slug": "mohamed-el-menshawy",
+      "name": "د. محمد رياض المنشاوي",
       "seat": "عضو مجلس الإدارة — تحت السن",
       "group": "board-under",
-      "number": 4,
-      "card": "ali-gebaly-card.webp",
+      "number": 10,
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "د. محمد رياض المنشاوي",
       "kicker": {
         "label": "تعرّف على القائمة",
         "href": "page:team"
       },
-      "photo": "ali-gebaly-card.webp",
-      "photoAlt": "أ. علي جبيلي",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/ali-jubeili.mp4",
-        "poster": "poster-ali-gebaly-hq.webp",
-        "label": "كلمة أ. علي جبيلي",
-        "caption": "كلمة أ. علي جبيلي",
-        "title": "كلمة أ. علي جبيلي"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٦)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/ali-jubaili-full.mp4",
-        "poster": "interview-ali-gebaly.jpg",
-        "label": "اللقاء الكامل مع أ. علي جبيلي",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "النادي بين الأمس واليوم"
-          },
-          {
-            "t": 81,
-            "label": "الخبرة في إدارة الرياضة"
-          },
-          {
-            "t": 138,
-            "label": "نظرة مختلفة إلى منشآت النادي"
-          },
-          {
-            "t": 182,
-            "label": "منظومة للرياضة والناشئين"
-          },
-          {
-            "t": 236,
-            "label": "العلاج الطبيعي والاعتماد على أبناء النادي"
-          },
-          {
-            "t": 276,
-            "label": "رسالة لأعضاء الجمعية العمومية"
-          }
-        ]
-      },
-      "gallery": [
-        "ali-gebaly-1.webp",
-        "ali-gebaly-2.webp",
-        "ali-gebaly-3.webp"
-      ],
       "galleryLabel": "صور",
-      "filesTitle": "أ. علي جبيلي يتحدث عن ملف الرياضة",
+      "filesTitle": "د. محمد رياض المنشاوي يتحدث عن الملفات الأربعة",
       "restTitle": "باقي فريق القائمة",
-      "shareImage": "ali-gebaly-share.jpg",
-      "description": "يجمع بين التأهيل الأكاديمي في الإدارة الرياضية، والخبرة العملية، والانتماء الممتد لنادي الصيد."
+      "shareImage": "share.jpg",
+      "description": "دكتوراه في التدريب الرياضي ومدرس بقسم الرياضات المائية بكلية علوم الرياضة – جامعة طنطا، وأحد أبناء النادي ومديره الفني للسباحة سابقًا."
     },
     {
-      "slug": "nada-hafez",
-      "name": "د. ندى حافظ",
+      "slug": "ashoush",
+      "name": "حمد رضا عشوش",
       "seat": "عضو مجلس الإدارة — تحت السن",
       "group": "board-under",
-      "number": 12,
-      "card": "nada-hafez-card.webp",
+      "number": 11,
+      "card": "placeholder-card.webp",
+      "photo": "placeholder-card.webp",
+      "photoAlt": "حمد رضا عشوش",
       "kicker": {
         "label": "تعرّف على القائمة",
         "href": "page:team"
       },
-      "photo": "nada-hafez-card.webp",
-      "photoAlt": "د. ندى حافظ",
-      "word": {
-        "src": "https://media.ashrafmoharamlist.com/videos/nada-hafez.mp4",
-        "poster": "poster-nada-hafez-hq.webp",
-        "label": "كلمة د. ندى حافظ",
-        "caption": "كلمة د. ندى حافظ",
-        "title": "كلمة د. ندى حافظ"
-      },
-      "interview": {
-        "title": "اللقاء الكامل",
-        "summary": "موضوعات اللقاء (٩)",
-        "src": "https://media.ashrafmoharamlist.com/interviews/Nada-Hafez-full.mp4",
-        "poster": "interview-nada-hafez.jpg",
-        "label": "اللقاء الكامل مع د. ندى حافظ",
-        "chapters": [
-          {
-            "t": 0,
-            "label": "الاستثمار الرياضي وصناعة الأبطال"
-          },
-          {
-            "t": 65,
-            "label": "الأمومة ومواصلة المسيرة"
-          },
-          {
-            "t": 115,
-            "label": "صناعة البطل في أكاديميات النادي"
-          },
-          {
-            "t": 174,
-            "label": "اكتشاف المواهب ومنظومة دعمها"
-          },
-          {
-            "t": 217,
-            "label": "اختيار المدربين الأكفاء"
-          },
-          {
-            "t": 245,
-            "label": "التوازن بين الرياضات المختلفة"
-          },
-          {
-            "t": 371,
-            "label": "مطالب الشباب والفتيات في النادي"
-          },
-          {
-            "t": 413,
-            "label": "احتياجات الكبار ولجنة المرأة"
-          },
-          {
-            "t": 437,
-            "label": "هوية نادي الصيد المتميزة"
-          }
-        ]
-      },
-      "gallery": [
-        "nada-hafez-1.webp",
-        "nada-hafez-2.webp",
-        "nada-hafez-3.webp"
-      ],
       "galleryLabel": "صور",
-      "filesTitle": "د. ندى حافظ تتحدث عن ملف الرياضة",
+      "filesTitle": "حمد رضا عشوش يتحدث عن الملفات الأربعة",
       "restTitle": "باقي فريق القائمة",
-      "shareImage": "nada-hafez-share.jpg",
-      "description": "ابنة نادي الصيد، وبطلة مصر وإفريقيا والعرب والبحر المتوسط في سلاح السيف، وممثلة مصر في ثلاث دورات أولمبية متتالية، وحاصلة على وسام الرياضة من الطبقة الأولى."
+      "shareImage": "share.jpg",
+      "description": "حاصل على ليسانس الحقوق من جامعة طنطا، وصاحب شركات في التجارة والاستثمار السياحي والعقاري، وأحد أبناء نادي طنطا الرياضي."
     }
   ],
   "files": [
@@ -843,10 +260,6 @@
       "kicker": {
         "label": "الملفات",
         "href": "page:files"
-      },
-      "action": {
-        "label": "شاهد الفيديوهات",
-        "href": "#videos"
       },
       "clipsTitle": "فريق القائمة يتحدث عن هذا الملف",
       "othersTitle": "ملفات أخرى"
@@ -860,25 +273,17 @@
         "label": "الملفات",
         "href": "page:files"
       },
-      "action": {
-        "label": "شاهد الفيديوهات",
-        "href": "#videos"
-      },
       "clipsTitle": "فريق القائمة يتحدث عن هذا الملف",
       "othersTitle": "ملفات أخرى"
     },
     {
       "slug": "services",
       "title": "الخدمات",
-      "tagline": "بطابع وجودة تليق بنادي الصيد",
+      "tagline": "بطابع وجودة تليق بنادي طنطا",
       "icon": "<svg viewBox=\"0 0 24 24\" width=\"40\" height=\"40\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" focusable=\"false\"><path d=\"M4 17h16\"/><path d=\"M6 17a6 6 0 0 1 12 0\"/><path d=\"M12 9V7.5M10.5 7.5h3\"/><path d=\"M3 20h18\"/></svg>",
       "kicker": {
         "label": "الملفات",
         "href": "page:files"
-      },
-      "action": {
-        "label": "شاهد الفيديوهات",
-        "href": "#videos"
       },
       "clipsTitle": "فريق القائمة يتحدث عن هذا الملف",
       "othersTitle": "ملفات أخرى"
@@ -886,194 +291,21 @@
     {
       "slug": "culture",
       "title": "الثقافة والتنمية",
-      "tagline": "مجتمع نادي الصيد",
+      "tagline": "مجتمع نادي طنطا",
       "icon": "<svg viewBox=\"0 0 24 24\" width=\"40\" height=\"40\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" focusable=\"false\"><path d=\"M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5z\"/><path d=\"M12 6.5v13\"/></svg>",
       "kicker": {
         "label": "الملفات",
         "href": "page:files"
       },
-      "action": {
-        "label": "شاهد الفيديوهات",
-        "href": "#videos"
-      },
       "clipsTitle": "فريق القائمة يتحدث عن هذا الملف",
       "othersTitle": "ملفات أخرى"
     }
   ],
-  "clips": [
-    {
-      "file": "sports",
-      "candidate": "ashraf-moharam",
-      "title": "الرياضة تعود لأبناء النادي",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/01-sports/ashraf-moharram-sports.mp4",
-      "poster": "poster-ashraf-moharam-hq.webp"
-    },
-    {
-      "file": "sports",
-      "candidate": "adel-selim",
-      "title": "عودة اللجان والاعتماد على أبناء النادي",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/01-sports/adel-selim-committees-club-players.mp4",
-      "poster": "poster-adel-selim-hq.webp"
-    },
-    {
-      "file": "sports",
-      "candidate": "adel-selim",
-      "title": "لماذا يترك لاعبونا النادي؟",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/01-sports/adel-selim-player-migration.mp4",
-      "poster": "poster-adel-selim-hq.webp"
-    },
-    {
-      "file": "sports",
-      "candidate": "ahmed-wagih",
-      "title": "رعاية الأبطال والناشئين",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/01-sports/ahmed-wagih-champions-sponsors.mp4",
-      "poster": "poster-ahmed-wagih-hq.webp"
-    },
-    {
-      "file": "sports",
-      "candidate": "mahmoud-aoun",
-      "title": "مكان للشباب وفرصة لأبناء النادي",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/01-sports/mahmoud-aoun-youth-sports.mp4",
-      "poster": "poster-mahmoud-aoun-hq.webp"
-    },
-    {
-      "file": "sports",
-      "candidate": "wael-mehran",
-      "title": "أبناء النادي أبطالًا ومدربين",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/01-sports/wael-mahran-club-players-talents.mp4",
-      "poster": "poster-wael-mehran-hq.webp"
-    },
-    {
-      "file": "sports",
-      "candidate": "wael-mehran",
-      "title": "اختيار المدربين والفرق بشفافية",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/01-sports/wael-mahran-coaches-transparency.mp4",
-      "poster": "poster-wael-mehran-hq.webp"
-    },
-    {
-      "file": "sports",
-      "candidate": "ali-gebaly",
-      "title": "مواهب النادي غير المستغلة",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/01-sports/ali-jubeili-talents-sponsors.mp4",
-      "poster": "poster-ali-gebaly-hq.webp"
-    },
-    {
-      "file": "sports",
-      "candidate": "nada-hafez",
-      "title": "حلقة وصل بين الرياضيين والمجلس",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/01-sports/nada-hafez-athletes-board.mp4",
-      "poster": "poster-nada-hafez-hq.webp"
-    },
-    {
-      "file": "finance",
-      "candidate": "ashraf-moharam",
-      "title": "ترتيب أولويات الصرف واستغلال الأصول",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/02-finance-investment/ashraf-moharram-finance.mp4",
-      "poster": "poster-ashraf-moharam-hq.webp"
-    },
-    {
-      "file": "finance",
-      "candidate": "hesham-el-shenawy",
-      "title": "دور أمين الصندوق في جملة واحدة",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/02-finance-investment/hisham-el-shannoufi-treasurer-role.mp4",
-      "poster": "poster-hesham-el-shenawy-v3.webp"
-    },
-    {
-      "file": "finance",
-      "candidate": "hesham-el-shenawy",
-      "title": "الأصول والدخل المستدام",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/02-finance-investment/hisham-el-shannoufi-assets-sustainability.mp4",
-      "poster": "poster-hesham-el-shenawy-v3.webp"
-    },
-    {
-      "file": "finance",
-      "candidate": "eman-el-assy",
-      "title": "رعاة وشراكات طويلة الأمد",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/02-finance-investment/eman-el-assy-sponsorships.mp4",
-      "poster": "poster-eman-el-assy-hq.webp"
-    },
-    {
-      "file": "finance",
-      "candidate": "karim-abdelrahman",
-      "title": "المحفظة المالية واستعادة مكانة النادي",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/02-finance-investment/karim-abdelrahman-portfolio.mp4",
-      "poster": "poster-karim-abdelrahman-hq.webp"
-    },
-    {
-      "file": "services",
-      "candidate": "ashraf-moharam",
-      "title": "برنامج للرواد أصل النادي",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/03-services/ashraf-moharram-pioneers.mp4",
-      "poster": "poster-ashraf-moharam-hq.webp"
-    },
-    {
-      "file": "services",
-      "candidate": "eman-el-assy",
-      "title": "مستوى واحد في كل الفروع",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/03-services/eman-el-assy-branches.mp4",
-      "poster": "poster-eman-el-assy-hq.webp"
-    },
-    {
-      "file": "services",
-      "candidate": "eman-el-assy",
-      "title": "راحة الرواد وخدمتهم في النادي",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/03-services/eman-el-assy-pioneers.mp4",
-      "poster": "poster-eman-el-assy-hq.webp"
-    },
-    {
-      "file": "services",
-      "candidate": "eman-el-assy",
-      "title": "المرأة في كل مراحل عمرها بالنادي",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/03-services/eman-el-assy-women-family.mp4",
-      "poster": "poster-eman-el-assy-hq.webp"
-    },
-    {
-      "file": "services",
-      "candidate": "mohamed-fahmy",
-      "title": "التحول الرقمي وتواصل فوري مع الأعضاء",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/03-services/mohamed-fahmy-digital-transformation.mp4",
-      "poster": "poster-mohamed-fahmy-hq.webp"
-    },
-    {
-      "file": "services",
-      "candidate": "mahmoud-aoun",
-      "title": "الصيانة والنظافة وجودة الخدمة",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/03-services/mahmoud-aoun-maintenance-service.mp4",
-      "poster": "poster-mahmoud-aoun-hq.webp"
-    },
-    {
-      "file": "culture",
-      "candidate": "ashraf-moharam",
-      "title": "أنشطة تربط الشباب بالنادي",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/04-culture-development/ashraf-moharram-social-activities.mp4",
-      "poster": "poster-ashraf-moharam-hq.webp"
-    },
-    {
-      "file": "culture",
-      "candidate": "adel-selim",
-      "title": "الاستفادة من خبرات الموظفين وعودة اللجان",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/04-culture-development/adel-selim-staff-committees.mp4",
-      "poster": "poster-adel-selim-hq.webp"
-    },
-    {
-      "file": "culture",
-      "candidate": "eman-el-assy",
-      "title": "تطوير الموظفين لخدمة الأعضاء",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/04-culture-development/eman-el-assy-staff-development.mp4",
-      "poster": "poster-eman-el-assy-hq.webp"
-    },
-    {
-      "file": "culture",
-      "candidate": "mohamed-fahmy",
-      "title": "كيف قسّمنا العمل إلى أربعة ملفات",
-      "src": "https://media.ashrafmoharamlist.com/files-videos/04-culture-development/mohamed-fahmy-four-files.mp4",
-      "poster": "poster-mohamed-fahmy-hq.webp"
-    }
-  ],
+  "clips": [],
   "vote": {
     "title": "انتخب القائمة كاملة",
     "text": "فريق واحد.. وهدف واحد. احفظ الأرقام وشاركها مع أصدقائك من أعضاء النادي.",
-    "shareText": "قائمة أ.د أشرف محرم كاملة — الأرقام هنا:",
+    "shareText": "قائمة حسين داوود كاملة — الأرقام هنا:",
     "share": {
       "label": "شارك على واتساب"
     },
@@ -1083,7 +315,7 @@
     },
     "download": {
       "label": "حمّل الكارت",
-      "filename": "ashraf-moharam-list.png"
+      "filename": "hussein-dawood-list.png"
     }
   },
   "ui": {
@@ -1097,9 +329,9 @@
   },
   "home": {
     "hero": {
-      "title": "قائمة أ.د أشرف محرم",
-      "slogan": "بفكر جديد.. هنطوّر صيد زمان",
-      "sub": "انتخابات نادي الصيد المصري 2026",
+      "title": "قائمة حسين داوود",
+      "slogan": "معًا.. لنادي طنطا يليق بتاريخه",
+      "sub": "انتخابات نادي طنطا الرياضي 2026",
       "actions": [
         {
           "label": "تعرّف على القائمة",
@@ -1114,20 +346,14 @@
           "href": "page:files"
         }
       ],
-      "image": "team-1397.webp",
-      "imageAlt": "مرشحو قائمة أ.د أشرف محرم"
+      "image": "team.webp",
+      "imageAlt": "مرشحو قائمة حسين داوود"
     },
     "filesTitle": "ملفات القائمة",
     "leader": {
       "kicker": "لمقعد رئيس مجلس الإدارة",
-      "text": "يقود أ.د أشرف محرم قائمة من أحد عشر مرشحًا تجمعهم رؤية واحدة: بفكر جديد.. هنطوّر صيد زمان.",
       "more": "الملف الشخصي",
-      "video": {
-        "src": "https://media.ashrafmoharamlist.com/videos/ashraf-moharram.mp4",
-        "poster": "poster-ashraf-moharam-hq.webp",
-        "label": "كلمة أ.د أشرف محرم",
-        "caption": "كلمة أ.د أشرف محرم"
-      }
+      "text": "يقود حسين داوود قائمة من أحد عشر مرشحًا تجمعهم رؤية واحدة: تطوير نادي طنطا الرياضي والارتقاء بمنشآته وخدماته بما يليق بتاريخه ومكانته."
     },
     "team": {
       "title": "فريق القائمة",
@@ -1137,56 +363,11 @@
     "interviews": {
       "title": "لقاءات القائمة",
       "lead": "شاهد اللقاء الكامل مع كل مرشح",
-      "items": [
-        {
-          "candidate": "ashraf-moharam",
-          "poster": "interview-ashraf-moharam.jpg"
-        },
-        {
-          "candidate": "adel-selim",
-          "poster": "interview-adel-selim.jpg"
-        },
-        {
-          "candidate": "hesham-el-shenawy",
-          "poster": "interview-hesham-el-shenawy.jpg"
-        },
-        {
-          "candidate": "ahmed-wagih",
-          "poster": "interview-ahmed-wagih.jpg"
-        },
-        {
-          "candidate": "eman-el-assy",
-          "poster": "interview-eman-el-assy.jpg"
-        },
-        {
-          "candidate": "karim-abdelrahman",
-          "poster": "interview-karim-abdelrahman.jpg"
-        },
-        {
-          "candidate": "mohamed-fahmy",
-          "poster": "interview-mohamed-fahmy.jpg"
-        },
-        {
-          "candidate": "mahmoud-aoun",
-          "poster": "interview-mahmoud-aoun.jpg"
-        },
-        {
-          "candidate": "wael-mehran",
-          "poster": "interview-wael-mehran.jpg"
-        },
-        {
-          "candidate": "ali-gebaly",
-          "poster": "interview-ali-gebaly.jpg"
-        },
-        {
-          "candidate": "nada-hafez",
-          "poster": "interview-nada-hafez.jpg"
-        }
-      ]
+      "items": []
     },
     "cta": {
       "title": "لديك شكوى أو مقترح؟",
-      "text": "سجّل الآن برقم عضويتك في نادي الصيد لنتابع شكواك أو اقتراحك.",
+      "text": "سجّل الآن برقم عضويتك في نادي طنطا الرياضي لنتابع شكواك أو اقتراحك.",
       "action": {
         "label": "سجّل شكوى أو مقترح",
         "href": "page:complaints"
@@ -1195,11 +376,11 @@
   },
   "teamPage": {
     "title": "تعرّف على مرشحي القائمة",
-    "lead": "فريق واحد.. من أجل نادي الصيد"
+    "lead": "فريق واحد.. من أجل نادي طنطا الرياضي"
   },
   "filesPage": {
     "title": "ملفات القائمة",
-    "lead": "رؤية متكاملة لمستقبل نادي الصيد في أربعة ملفات.",
+    "lead": "رؤية متكاملة لمستقبل نادي طنطا الرياضي في أربعة ملفات.",
     "hint": "اختر الملف لتتعرّف على تفاصيله."
   },
   "support": {
@@ -1208,7 +389,7 @@
       "intro": "سجّل في فريق دعم القائمة، واحصل على لينك خاص بك تشاركه مع أصدقائك.",
       "tabJoin": "تسجيل جديد",
       "tabLogin": "تسجيل الدخول",
-      "membership": "الرقم التعريفي بنادي الصيد",
+      "membership": "رقم العضوية بنادي طنطا الرياضي",
       "membershipPh": "6 أرقام",
       "name": "الاسم",
       "mobile": "رقم الموبايل (واتساب)",
@@ -1237,7 +418,7 @@
       "copy": "نسخ اللينك",
       "copied": "تم النسخ",
       "share": "مشاركة على واتساب",
-      "shareText": "ادعم قائمة أ.د أشرف محرم في انتخابات نادي الصيد",
+      "shareText": "ادعم قائمة حسين داوود في انتخابات نادي طنطا الرياضي",
       "countLabel": "عدد من دخلوا من اللينك الخاص بيك",
       "countOf": "من %d",
       "goalText": "وصّل %d أصدقاء واستنى مفاجأة من القائمة، تقديرًا لدعمك.",
@@ -1269,7 +450,7 @@
   },
   "complaints": {
     "title": "شكاوى ومقترحات",
-    "lead": "صوتك يهمنا.. من أجل تطوير نادي الصيد",
+    "lead": "صوتك يهمنا.. من أجل تطوير نادي طنطا الرياضي",
     "legend": "شكاوى ومقترحات",
     "fields": {
       "membership": {
@@ -1339,34 +520,25 @@
     "nav": [
       {
         "label": "تعرّف على القائمة",
-        "href": "https://ashrafmoharamlist.com/team/"
+        "href": "page:team"
       },
       {
         "label": "الملفات الأربعة",
-        "href": "https://ashrafmoharamlist.com/files/"
+        "href": "page:files"
       },
       {
         "label": "كن من فريق دعم القائمة",
-        "href": "https://ashrafmoharamlist.com/support/"
+        "href": "page:support"
       },
       {
         "label": "شكاوى ومقترحات",
-        "href": "https://ashrafmoharamlist.com/complaints/"
+        "href": "page:complaints"
       }
     ],
     "headerCta": "سجّل شكوى أو مقترح",
-    "crestSmall": "crest-192.webp",
-    "footerLogo": "logo-640.webp",
-    "social": {
-      "facebook": {
-        "label": "فيسبوك",
-        "href": "https://www.facebook.com/profile.php?id=61590505206701"
-      },
-      "instagram": {
-        "label": "إنستجرام",
-        "href": "https://www.instagram.com/ashrafmoharram2026"
-      }
-    },
-    "copyright": "© 2026 قائمة أ.د أشرف محرم. جميع الحقوق محفوظة."
+    "crestSmall": "crest.webp",
+    "footerLogo": "logo.webp",
+    "social": {},
+    "copyright": "© 2026 قائمة حسين داوود. جميع الحقوق محفوظة."
   }
 }
