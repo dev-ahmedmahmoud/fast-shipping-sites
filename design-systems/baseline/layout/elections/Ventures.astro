@@ -1,0 +1,56 @@
+---
+// A candidate's companies (candidate page): a few numbers, then one card per company with
+// its logo, what it does and its main projects.
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { VenturesData } from '@elections/data';
+interface Props { ctx: PageContext; id?: string; ventures: VenturesData }
+const { id = 'ventures', ventures: v } = Astro.props;
+---
+<section class="section" id={id} aria-labelledby={`${id}-title`}>
+  <div class="container wrap">
+    <header class="head">
+      <h2 id={`${id}-title`}>{v.title}</h2>
+      {v.lead && <p class="lead">{v.lead}</p>}
+    </header>
+    {v.stats.length > 0 && (
+      <dl class="stats">
+        {v.stats.map((s) => <div><dd>{s.value}</dd><dt>{s.label}</dt></div>)}
+      </dl>
+    )}
+    <ul class="grid" role="list">
+      {v.items.map((it) => (
+        <li class="card" style={it.color ? `--brand:${it.color}` : undefined}>
+          <div class="logo">
+            {it.logo
+              ? <Image src={it.logo} alt={`شعار ${it.name}`} widths={[320, 640]} sizes="(max-width: 600px) 80vw, 320px" />
+              : <span aria-hidden="true">{it.name}</span>}
+          </div>
+          <p class="sector">{it.sector}</p>
+          <h3>{it.name}</h3>
+          <p>{it.text}</p>
+          {it.highlights.length > 0 && <ul class="tags" role="list">{it.highlights.map((h) => <li>{h}</li>)}</ul>}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-5); }
+  .head { text-align: center; display: flex; flex-direction: column; gap: var(--space-2); }
+  h2 { font-size: var(--step-3); }
+  .lead { color: var(--c-muted); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--space-4); margin: 0; text-align: center; }
+  .stats div { display: flex; flex-direction: column; gap: var(--space-1); }
+  .stats dd { margin: 0; font-family: var(--font-display); font-size: var(--step-4); color: var(--c-accent); }
+  .stats dt { color: var(--c-muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--space-4); }
+  .card { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5); border: 1px solid var(--c-line); border-block-start: 4px solid var(--brand, var(--c-accent)); border-radius: var(--radius-l); background: var(--c-surface); }
+  .logo { display: grid; place-items: center; aspect-ratio: 3 / 2; border-radius: var(--radius-m); background: #fff; color: var(--c-accent); font-family: var(--font-display); font-size: var(--step-2); text-align: center; padding: var(--space-3); }
+  .logo :global(img) { inline-size: 100%; block-size: 100%; object-fit: contain; }
+  .sector { color: var(--c-muted); font-size: var(--step--1); font-weight: var(--weight-strong); }
+  h3 { font-size: var(--step-1); }
+  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: 0; margin: 0; list-style: none; }
+  .tags li { padding: 2px var(--space-3); border-radius: var(--radius-pill); background: var(--c-accent-soft); font-size: var(--step--1); }
+</style>

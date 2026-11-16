@@ -71,7 +71,7 @@ import Countdown from './Countdown.astro';
 export const electionComponents = { Countdown };   // the rest come from baseline
 ```
 
-Types come from `@elections/data` (`VideoData`, `CandidateCard`, `FileCard`, `CountdownData`, `BallotGroup`, `Clip`) and `Action` from `@engine/content`. Every component also gets `ctx`. Text arrives already written in the client's numerals.
+Types come from `@elections/data` (`VideoData`, `CandidateCard`, `FileCard`, `CountdownData`, `BallotGroup`, `Clip`, `VenturesData`) and `Action` from `@engine/content`. Every component also gets `ctx`. Text arrives already written in the client's numerals.
 
 | Component | Used on | Props besides `ctx` |
 | --- | --- | --- |
@@ -89,6 +89,7 @@ Types come from `@elections/data` (`VideoData`, `CandidateCard`, `FileCard`, `Co
 | PhotoRow | candidate | `photos: ImageMetadata[]`, `alt`, `label`, `hint?` |
 | ClipGrid | candidate, file | `id?`, `title?`, `groups: {title?, href?, clips: Clip[]}[]` |
 | Panel | candidate, file, support, complaints | `id?`, `label?`; the page body or an engine widget arrives in the slot |
+| Ventures | candidate (when its `ventures` block in elections.json has items) | `id?`, `ventures: VenturesData` (`title`, `lead?`, `stats {value, label}[]`, `items: Venture[]` with `name`, `nameLatin?`, `sector`, `text`, `highlights[]`, `logo` (full colour, transparent 3:2) and `logoMono` (white) or null, `color?`; `numbers` (1…n in the client's numerals), `labels {list, prev, next, pause, play, pick}`) |
 
 ### Engine hooks
 

@@ -8,7 +8,7 @@
 import type { ImageMetadata } from 'astro';
 import client from '@client/client.json';
 import { byId, resolveHref, type Action, type Entry } from '@engine/content';
-import { formatNumber, type Locale } from '@engine/i18n';
+import { formatNumber, formatYear, type Locale } from '@engine/i18n';
 import { media } from '@engine/media';
 
 // Only election clients ship the file; others get an empty object and never call in here.
@@ -203,6 +203,66 @@ export function timeLabel(t: number): string {
   const m = Math.floor(t / 60);
   const s = String(t % 60).padStart(2, '0');
   return `${m}:${s}`;
+}
+
+export interface Venture {
+  slug: string;
+  name: string;
+  /** The name in Latin letters as the logo writes it, when it has one. */
+  nameLatin?: string;
+  /** What the company does ("تطوير عقاري"). */
+  sector: string;
+  text: string;
+  /** Short facts shown as tags (projects, branches). */
+  highlights: string[];
+  /** Full-colour logo on a transparent 3:2 canvas, for light plaques. */
+  logo: ImageMetadata | null;
+  /** The same logo in white on transparent, for dark backgrounds. */
+  logoMono: ImageMetadata | null;
+  /** The brand's main colour (any CSS colour), for small accents. */
+  color?: string;
+}
+
+export interface VenturesData {
+  title: string;
+  lead?: string;
+  /** Numbers on a board ("١٩٩٨ بداية العمل الحر"), already in the client's numerals. */
+  stats: { value: string; label: string }[];
+  items: Venture[];
+  /** 1…n in the client's numerals, for a "٢ / ٥" counter. */
+  numbers: string[];
+  labels: { list: string; prev: string; next: string; pause: string; play: string; pick: string };
+}
+
+/** A candidate's companies or affiliations (elections.json → candidates[].ventures), or null. */
+export function ventures(slug: string): VenturesData | null {
+  const v = candidateRaw(slug)?.ventures;
+  if (!v?.items?.length) return null;
+  const items: Venture[] = v.items.map((it: any) => ({
+    slug: it.slug,
+    name: it.name,
+    nameLatin: it.nameLatin || undefined,
+    sector: it.sector ?? '',
+    text: it.text ?? '',
+    highlights: it.highlights ?? [],
+    logo: it.logo ? media(it.logo) : null,
+    logoMono: it.logoMono ? media(it.logoMono) : null,
+    color: it.color || undefined,
+  }));
+  return {
+    title: v.title,
+    lead: v.lead,
+    stats: (v.stats ?? []).map((s: any) => ({
+      value: s.year ? formatYear(s.value, loc()) : formatNumber(s.value, loc()),
+      label: s.label,
+    })),
+    items,
+    numbers: items.map((_, i) => formatNumber(i + 1, loc())),
+    labels: {
+      list: v.listLabel ?? v.title,
+      prev: ui.prev ?? '', next: ui.next ?? '', pause: ui.pause ?? '', play: ui.resume ?? '', pick: ui.pick ?? '',
+    },
+  };
 }
 
 export const crest = list.crest ? media(list.crest) : null;

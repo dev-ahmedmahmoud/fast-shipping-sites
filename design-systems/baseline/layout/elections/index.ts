@@ -16,8 +16,9 @@ import InterviewPlayer from './InterviewPlayer.astro';
 import PhotoRow from './PhotoRow.astro';
 import ClipGrid from './ClipGrid.astro';
 import Panel from './Panel.astro';
+import Ventures from './Ventures.astro';
 
 export const electionComponents = {
   ElectionHero, Countdown, ProgramFiles, LeaderSpotlight, CandidateGrid, InterviewStrip, BallotCard,
-  PageBand, CandidateHero, MediaFrame, InterviewPlayer, PhotoRow, ClipGrid, Panel,
+  PageBand, CandidateHero, MediaFrame, InterviewPlayer, PhotoRow, ClipGrid, Panel, Ventures,
 };

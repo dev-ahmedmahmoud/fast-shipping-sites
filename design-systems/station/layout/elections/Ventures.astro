@@ -1,0 +1,357 @@
+---
+// A candidate's companies, shown as a turntable of brass-framed plaques on the night platform
+// (a "coverflow"). The plaque in front faces the visitor, lit, and its logo catches a glint
+// of light; its neighbours turn away into the dark. Above it, a split-flap board of numbers.
+// Below it, the arrows, a "٢ / ٥" counter, a pause button whose brass ring fills until the
+// next plaque, and a rail of the logos in white that jumps straight to a company.
+//
+// Underneath it is a plain list that scrolls sideways (swipe, wheel, keyboard), so it works
+// without script and reads in order in a screen reader. The script adds only the turn, the
+// arrows, the rail and the autoplay. Autoplay runs only while the section is on screen, stops
+// on hover, focus or any touch, and never starts for visitors who prefer reduced motion, who
+// also get flat plaques.
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { VenturesData } from '@elections/data';
+interface Props { ctx: PageContext; id?: string; ventures: VenturesData }
+const { id = 'ventures', ventures: v } = Astro.props;
+const n = v.items.length;
+const arrow = 'M5 12h14M13 6l6 6-6 6';
+---
+<section class="vf st-glass" id={id} aria-labelledby={`${id}-title`} data-vf data-nums={JSON.stringify(v.numbers)}
+         data-play={v.labels.play} data-pause={v.labels.pause} data-st-ambient>
+  <span class="glow" aria-hidden="true"></span>
+  <div class="container">
+    <header class="st-title head">
+      <span class="st-sign st-rivets"><h2 id={`${id}-title`}>{v.title}</h2></span>
+      {v.lead && <p>{v.lead}</p>}
+    </header>
+    {v.stats.length > 0 && (
+      <dl class="stats" data-st-flaps>
+        {v.stats.map((s) => (
+          <div class="stat">
+            <dt>{s.label}</dt>
+            <dd><span class="st-flap" data-st-digits>{s.value}</span></dd>
+          </div>
+        ))}
+      </dl>
+    )}
+  </div>
+
+  <ol class="track" role="list" tabindex="0" aria-label={v.labels.list} data-vf-track data-st-train id={`${id}-track`}>
+    {v.items.map((it, i) => (
+      <li class="slot" data-vf-card style={`--i:${i}${it.color ? `;--brand:${it.color}` : ''}`}>
+        <article class="card" aria-labelledby={`${id}-${it.slug}`}>
+          <div class="plaque">
+            {it.logo
+              ? <Image class="logo" src={it.logo} alt={`شعار ${it.name}`} widths={[360, 600, 900]} sizes="(max-width: 600px) 66vw, 340px" />
+              : <span class="wordmark" aria-hidden="true">{it.name}</span>}
+            <span class="shine" aria-hidden="true"></span>
+          </div>
+          <div class="info">
+            <p class="sector">{it.sector}</p>
+            <h3 id={`${id}-${it.slug}`}>{it.name}{it.nameLatin && <span class="latin" lang="en" dir="ltr">{it.nameLatin}</span>}</h3>
+            <p class="text">{it.text}</p>
+            {it.highlights.length > 0 && <ul class="tags" role="list">{it.highlights.map((h) => <li>{h}</li>)}</ul>}
+          </div>
+        </article>
+      </li>
+    ))}
+  </ol>
+
+  <div class="container">
+    <div class="controls" data-vf-ui hidden>
+      <button class="round" type="button" data-vf-step="-1" aria-controls={`${id}-track`} aria-label={v.labels.prev}>
+        <svg class="flip-rtl" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d={arrow} transform="rotate(180 12 12)" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <p class="count" aria-hidden="true"><span class="st-flap" data-vf-now>{v.numbers[0]}</span><span class="of">/</span><span class="st-flap">{v.numbers[n - 1]}</span></p>
+      <button class="round" type="button" data-vf-step="1" aria-controls={`${id}-track`} aria-label={v.labels.next}>
+        <svg class="flip-rtl" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d={arrow} fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="round pause" type="button" data-vf-pause aria-pressed="false" aria-label={v.labels.pause}>
+        <svg class="ring" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="23" pathLength="100" /></svg>
+        <svg class="icon-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></svg>
+        <svg class="icon-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" /></svg>
+      </button>
+    </div>
+    <ul class="rail" role="list" aria-label={v.labels.pick} data-vf-ui hidden>
+      {v.items.map((it, i) => (
+        <li>
+          <button type="button" data-vf-go={i} aria-controls={`${id}-track`} aria-label={it.name}>
+            {it.logoMono
+              ? <Image src={it.logoMono} alt="" widths={[180, 360]} sizes="120px" />
+              : <span aria-hidden="true">{it.name}</span>}
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<script>
+  const DWELL = 5200;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function turntable(root: HTMLElement) {
+    const track = root.querySelector<HTMLElement>('[data-vf-track]')!;
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-vf-card]')];
+    const rail = [...root.querySelectorAll<HTMLButtonElement>('[data-vf-go]')];
+    const now = root.querySelector<HTMLElement>('[data-vf-now]');
+    const pauseBtn = root.querySelector<HTMLButtonElement>('[data-vf-pause]')!;
+    const nums: string[] = JSON.parse(root.dataset.nums || '[]');
+    const n = cards.length;
+    if (!n) return;
+
+    root.querySelectorAll<HTMLElement>('[data-vf-ui]').forEach((el) => (el.hidden = false));
+    root.classList.add('is-live');
+
+    // ---- the turn: each plaque's distance from the middle, in plaque widths ----
+    let active = -1;
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const t = track.getBoundingClientRect();
+      const mid = t.left + t.width / 2;
+      let best = 0;
+      let bestD = Infinity;
+      cards.forEach((c, i) => {
+        const r = c.getBoundingClientRect();
+        const d = (r.left + r.width / 2 - mid) / r.width;
+        const cd = Math.max(-2, Math.min(2, d));
+        c.style.setProperty('--d', cd.toFixed(3));
+        c.style.setProperty('--ad', Math.abs(cd).toFixed(3));
+        c.style.zIndex = String(10 - Math.round(Math.abs(cd) * 2));
+        if (Math.abs(d) < bestD) { bestD = Math.abs(d); best = i; }
+      });
+      if (best !== active) select(best);
+    };
+    const queue = () => { if (!frame) frame = requestAnimationFrame(measure); };
+    track.addEventListener('scroll', queue, { passive: true });
+    // Plaques pull in from the side on arrival: measure again once they have stopped.
+    track.addEventListener('animationend', queue);
+    addEventListener('resize', queue, { passive: true });
+
+    function select(i: number) {
+      const first = active === -1;
+      active = i;
+      cards.forEach((c, k) => c.classList.toggle('is-front', k === i));
+      rail.forEach((b, k) => (k === i ? b.setAttribute('aria-current', 'true') : b.removeAttribute('aria-current')));
+      if (now) {
+        now.textContent = nums[i] ?? String(i + 1);
+        if (!first && !reduce) {
+          now.animate(
+            [{ transform: 'perspective(420px) rotateX(0)' }, { transform: 'perspective(420px) rotateX(-80deg)', offset: 0.4 }, { transform: 'perspective(420px) rotateX(0)' }],
+            { duration: 460, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' },
+          );
+        }
+      }
+      schedule();
+    }
+
+    // Bring a plaque to the middle. scrollBy works in physical pixels, so it is the same in
+    // right-to-left and left-to-right pages.
+    function go(i: number) {
+      const c = cards[((i % n) + n) % n];
+      const t = track.getBoundingClientRect();
+      const r = c.getBoundingClientRect();
+      track.scrollBy({ left: r.left + r.width / 2 - (t.left + t.width / 2), behavior: reduce ? 'auto' : 'smooth' });
+    }
+
+    // ---- autoplay: on screen, not held (hover, focus), not paused by the visitor ----
+    let timer = 0;
+    let inView = false;
+    let held = false;
+    let paused = reduce;
+    function schedule() {
+      clearTimeout(timer);
+      root.classList.remove('is-ticking');
+      if (paused || held || !inView || document.hidden) return;
+      void root.offsetWidth; // restart the ring's fill
+      root.classList.add('is-ticking');
+      timer = window.setTimeout(() => go(active + 1), DWELL);
+    }
+    function setPaused(p: boolean) {
+      paused = p;
+      pauseBtn.setAttribute('aria-pressed', String(p));
+      pauseBtn.setAttribute('aria-label', (p ? root.dataset.play : root.dataset.pause) ?? '');
+      root.classList.toggle('is-paused', p);
+      schedule();
+    }
+    setPaused(paused);
+
+    new IntersectionObserver(([e]) => { inView = e.isIntersecting; queue(); schedule(); }, { threshold: 0.45 }).observe(track);
+    document.addEventListener('visibilitychange', schedule);
+    root.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { held = true; schedule(); } });
+    root.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { held = false; schedule(); } });
+    root.addEventListener('focusin', () => { held = true; schedule(); });
+    root.addEventListener('focusout', (e) => { if (!root.contains(e.relatedTarget as Node)) { held = false; schedule(); } });
+    // The visitor took the wheel: stop for good (they can press play again).
+    const takeOver = () => { if (!paused) setPaused(true); };
+    track.addEventListener('pointerdown', takeOver, { passive: true });
+    track.addEventListener('wheel', (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) takeOver(); }, { passive: true });
+    track.addEventListener('keydown', takeOver);
+
+    root.querySelectorAll<HTMLButtonElement>('[data-vf-step]').forEach((b) =>
+      b.addEventListener('click', () => { takeOver(); go(active + Number(b.dataset.vfStep)); }));
+    rail.forEach((b) => b.addEventListener('click', () => { takeOver(); go(Number(b.dataset.vfGo)); }));
+    pauseBtn.addEventListener('click', () => setPaused(!paused));
+
+    measure();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-vf]').forEach(turntable);
+</script>
+
+<style>
+  .vf {
+    position: relative; overflow: hidden; isolation: isolate;
+    padding-block: var(--space-8);
+    background-color: var(--st-night); color: var(--st-enamel-ink);
+  }
+  /* A pool of lamplight on the platform, behind the plaque in front. */
+  .glow {
+    position: absolute; z-index: -1; inset-inline: 0; inset-block-end: 6%; block-size: 70%;
+    background: radial-gradient(ellipse 42% 55% at 50% 60%, color-mix(in oklab, var(--st-brass-hi) 26%, transparent), transparent 70%);
+    pointer-events: none;
+  }
+  .head .st-sign h2 { color: inherit; }
+  .head p { color: color-mix(in oklab, var(--st-enamel-ink) 84%, transparent); }
+
+  /* ---- the numbers board ---- */
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); gap: var(--space-5);
+    max-inline-size: 60rem; margin: var(--space-7) auto 0;
+  }
+  .stat { display: flex; flex-direction: column-reverse; align-items: center; gap: var(--space-2); text-align: center; }
+  .stat dd { margin: 0; }
+  .stat .st-flap { font-size: var(--step-4); padding: 0.06em 0.45em; }
+  .stat dt { font-family: var(--font-body); font-weight: 700; font-size: var(--step-0); color: color-mix(in oklab, var(--st-enamel-ink) 84%, transparent); max-inline-size: 16ch; }
+
+  /* ---- the turntable ---- */
+  .track {
+    --w: min(80vw, 24rem);
+    display: flex; gap: var(--space-4);
+    margin: var(--space-7) 0 0; padding: var(--space-5) calc(50% - var(--w) / 2) var(--space-7);
+    list-style: none;
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+    scrollbar-color: var(--st-brass) transparent;
+  }
+  .track:focus-visible { outline-offset: -6px; }
+  .is-live .track { scrollbar-width: none; }
+  .is-live .track::-webkit-scrollbar { display: none; }
+  .slot { position: relative; flex: 0 0 var(--w); scroll-snap-align: center; --d: 0; --ad: 0; }
+  /* Its shadow on the platform floor. */
+  .slot::after {
+    content: ''; position: absolute; z-index: -1; inset-inline: 10%; inset-block-end: calc(-1 * var(--space-5)); block-size: 28px;
+    background: radial-gradient(ellipse 50% 50% at 50% 50%, color-mix(in oklab, var(--c-ink) 70%, transparent), transparent 70%);
+    opacity: calc(0.9 - var(--ad) * 0.4);
+  }
+  .card {
+    position: relative; display: flex; flex-direction: column; block-size: 100%;
+    padding: 10px; border-radius: var(--radius-l);
+    background: linear-gradient(150deg, var(--st-brass-hi), var(--st-brass) 45%, var(--st-brass-lo));
+    box-shadow: 0 30px 50px -28px color-mix(in oklab, var(--c-ink) 85%, transparent);
+    transform-origin: 50% 60%;
+  }
+  .is-live .card {
+    transform: perspective(1100px) translateX(calc(var(--d) * -14%)) rotateY(calc(var(--d) * 34deg)) scale(calc(1 - var(--ad) * 0.13));
+    will-change: transform;
+  }
+  /* Plaques further from the front sink into the dark (an overlay, so only opacity changes). */
+  .card::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: var(--st-night); opacity: 0;
+  }
+  .is-live .card::after { opacity: calc(var(--ad) * 0.42); }
+  .is-live .slot.is-front .card {
+    box-shadow: 0 0 0 1px var(--st-brass-hi), 0 0 56px -12px color-mix(in oklab, var(--st-brass-hi) 70%, transparent), 0 34px 54px -26px color-mix(in oklab, var(--c-ink) 90%, transparent);
+  }
+
+  .plaque {
+    position: relative; overflow: hidden; display: grid; place-items: center;
+    aspect-ratio: 3 / 2; padding: var(--space-4);
+    border-radius: calc(var(--radius-l) - 6px) calc(var(--radius-l) - 6px) 0 0;
+    background: #fff;
+    border-block-start: 5px solid var(--brand, var(--st-enamel));
+  }
+  .plaque :global(.logo) { inline-size: 100%; block-size: 100%; object-fit: contain; }
+  .wordmark { font-family: var(--font-display); font-size: var(--step-3); line-height: 1.3; text-align: center; color: var(--brand, var(--st-enamel)); text-wrap: balance; }
+  /* A glint that crosses the plaque once as it comes to the front. */
+  .shine {
+    position: absolute; inset: -20% -60%; pointer-events: none; opacity: 0;
+    background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 0.75) 50%, transparent 62%);
+    transform: translateX(-60%);
+  }
+  .is-live .is-front .shine { animation: vf-glint 1.5s cubic-bezier(0.3, 0.6, 0.3, 1) 0.25s both; }
+  @keyframes vf-glint { 0% { opacity: 1; transform: translateX(-60%); } 100% { opacity: 1; transform: translateX(60%); } }
+
+  .info {
+    flex: 1; display: flex; flex-direction: column; gap: var(--space-2);
+    padding: var(--space-4) var(--space-5) var(--space-5);
+    border-radius: 0 0 calc(var(--radius-l) - 6px) calc(var(--radius-l) - 6px);
+    background: var(--c-surface); color: var(--c-ink);
+  }
+  @media (max-width: 600px) { .info { padding-inline: var(--space-4); } }
+  .sector { align-self: flex-start; padding: 2px var(--space-3); border-radius: var(--radius-s); background: var(--st-enamel); color: var(--st-enamel-ink); font-weight: 700; font-size: var(--step--1); }
+  h3 { font-size: var(--step-1); line-height: 1.4; }
+  .latin { display: block; font-family: var(--font-body); font-size: var(--step--1); font-weight: 400; color: var(--c-muted); letter-spacing: 0.04em; }
+  .text { color: var(--c-muted); line-height: 1.85; }
+  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: auto 0 0; padding: var(--space-2) 0 0; list-style: none; }
+  .tags li {
+    padding: 3px var(--space-3); border-radius: var(--radius-s);
+    border: 1px solid color-mix(in oklab, var(--brand, var(--st-enamel)) 40%, var(--c-line));
+    background: color-mix(in oklab, var(--brand, var(--st-enamel)) 9%, var(--c-surface));
+    font-size: var(--step--1); font-weight: 700;
+  }
+
+  /* ---- controls ---- */
+  .controls { display: flex; align-items: center; justify-content: center; gap: var(--space-4); }
+  .controls[hidden], .rail[hidden] { display: none; }
+  .round {
+    position: relative; display: grid; place-items: center; inline-size: var(--st-tap); block-size: var(--st-tap);
+    border: 0; border-radius: 50%; cursor: pointer; color: var(--c-ink);
+    background: radial-gradient(circle at 35% 30%, var(--st-brass-hi), var(--st-brass) 62%, var(--st-brass-lo));
+    box-shadow: 0 3px 0 var(--st-brass-lo), 0 10px 20px -10px color-mix(in oklab, var(--c-ink) 80%, transparent);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .round:hover { transform: translateY(-1px); }
+  .round:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--st-brass-lo); }
+  .count { display: flex; align-items: center; gap: var(--space-2); font-size: var(--step-2); }
+  .count .of { color: color-mix(in oklab, var(--st-enamel-ink) 70%, transparent); font-family: var(--font-display); }
+  .pause { margin-inline-start: var(--space-3); }
+  .pause .ring { position: absolute; inset: -5px; inline-size: calc(100% + 10px); block-size: calc(100% + 10px); transform: rotate(-90deg); }
+  .pause .ring circle { fill: none; stroke: var(--st-brass-hi); stroke-width: 3; stroke-dasharray: 100; stroke-dashoffset: 100; }
+  .is-ticking .pause .ring circle { animation: vf-ring 5.2s linear both; }
+  @keyframes vf-ring { to { stroke-dashoffset: 0; } }
+  .icon-play { display: none; }
+  .is-paused .icon-play { display: block; }
+  .is-paused .icon-pause { display: none; }
+
+  /* The rail: every logo in white; the one in front lit, with a brass bar under it. */
+  .rail { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-4); margin: var(--space-6) 0 0; padding: 0; list-style: none; }
+  .rail button {
+    position: relative; display: grid; place-items: center; min-block-size: 56px; min-inline-size: 56px; padding: var(--space-2) var(--space-3);
+    border: 0; background: none; cursor: pointer; color: var(--st-enamel-ink);
+    opacity: 0.55; transition: opacity var(--dur-fast) var(--ease-out);
+    font-family: var(--font-body); font-weight: 700; font-size: var(--step--1);
+  }
+  .rail button :global(img) { inline-size: 96px; block-size: 64px; object-fit: contain; }
+  .rail button::after {
+    content: ''; position: absolute; inset-inline: 22%; inset-block-end: 0; block-size: 3px; border-radius: 2px;
+    background: var(--st-brass); transform: scaleX(0); transition: transform var(--dur-base) var(--ease-out);
+  }
+  .rail button:hover { opacity: 0.85; }
+  .rail button[aria-current] { opacity: 1; }
+  .rail button[aria-current]::after { transform: scaleX(1); }
+
+  /* Lamplight breathes slowly while the platform is on screen (capable devices only). */
+  :global(.st-rich) .vf.st-live .glow { animation: vf-breathe 6s ease-in-out infinite alternate; }
+  @keyframes vf-breathe { from { opacity: 0.75; } to { opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .is-live .card { transform: none; }
+    .is-live .card::after { opacity: 0; }
+    .shine, .glow { animation: none !important; }
+    .pause { display: none; }
+  }
+</style>

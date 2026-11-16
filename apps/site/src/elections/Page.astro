@@ -16,7 +16,7 @@ import ComplaintForm from './ComplaintForm.astro';
 import {
   action, ballotGroups, candidate, candidateGroups, candidateRaw, candidates, clipsForCandidate, clipsForFile,
   complaints, countdown, crest, fileRaw, filesPage, home, list, programFiles, shareImage, supporters, teamPage,
-  timeLabel, ui, video, vote, election,
+  timeLabel, ui, ventures, video, vote, election,
 } from './data';
 import { media } from '@engine/media';
 import type { ImageMetadata } from 'astro';
@@ -125,8 +125,20 @@ if (entry.template === 'candidates') {
     itemListElement: candidates.map((x, i) => ({ '@type': 'ListItem', position: i + 1, url: abs(x.href), name: x.name })),
   });
 }
+const vf = entry.template === 'candidate' && c ? ventures(c.slug) : null;
 if (entry.template === 'candidate' && c) {
   jsonLd.push({ '@type': 'ProfilePage', url: abs(entry.href), name: entry.title, mainEntity: person(c, entry.description) });
+  // The companies the candidate founded, each pointing back at them as its founder.
+  for (const it of vf?.items ?? []) {
+    jsonLd.push({
+      '@type': 'Organization',
+      name: it.name,
+      ...(it.nameLatin ? { alternateName: it.nameLatin } : {}),
+      ...(it.text ? { description: it.text } : {}),
+      ...(it.logo ? { logo: abs(it.logo.src) } : {}),
+      founder: { '@id': `${abs(c.href)}#person` },
+    });
+  }
 }
 const ogType = entry.template === 'candidate' ? 'profile' : 'website';
 ---
@@ -168,6 +180,7 @@ const ogType = entry.template === 'candidate' ? 'profile' : 'website';
       <E.CandidateHero ctx={ctx} candidate={c} kicker={action(cr.kicker)} numberLabel={`${ui.number} ${c.number}`} />
       {cr.word && <E.MediaFrame ctx={ctx} video={video(cr.word)!} label={cr.word.title ?? cr.word.label} />}
       <E.Panel ctx={ctx}><Content /></E.Panel>
+      {vf && <E.Ventures ctx={ctx} ventures={vf} />}
       {cr.interview && (
         <E.InterviewPlayer ctx={ctx} id="interview" title={cr.interview.title} video={video(cr.interview)!}
           summary={cr.interview.summary}
