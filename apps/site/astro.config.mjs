@@ -13,34 +13,42 @@ const env = process.env;
 
 const CLIENT = env.CLIENT || 'lfis';
 const SYSTEM = env.SYSTEM || 'baseline';
-const parts = {
-  palette: env.DS_PALETTE || SYSTEM,
-  type: env.DS_TYPE || SYSTEM,
-  layout: env.DS_LAYOUT || SYSTEM,
-  motion: env.DS_MOTION || SYSTEM,
-};
+const mode = env.FSS_MODE || 'site';
 
 const clientDir = path.join(root, 'clients', CLIENT);
 if (!existsSync(path.join(clientDir, 'client.json'))) {
   throw new Error(`Unknown client "${CLIENT}": clients/${CLIENT}/client.json not found`);
 }
+const client = JSON.parse(readFileSync(path.join(clientDir, 'client.json'), 'utf8'));
+
+// The design the client chose for its live site: client.json "live" names one of its samples.
+// It fills every part (and the hero clip) that the environment leaves unset, so the live
+// build needs only CLIENT, and a design change in the repository reaches the live site
+// without touching the hosting's build command. Order: DS_* > the live sample > SYSTEM.
+const live = mode === 'site' && client.live ? client.samples?.find((s) => s.id === client.live) : null;
+if (mode === 'site' && client.live && !live) throw new Error(`client.json "live": no sample with id "${client.live}"`);
+const parts = {
+  palette: env.DS_PALETTE || live?.palette || SYSTEM,
+  type: env.DS_TYPE || live?.type || SYSTEM,
+  layout: env.DS_LAYOUT || live?.layout || SYSTEM,
+  motion: env.DS_MOTION || live?.motion || SYSTEM,
+};
+const heroVideo = env.HERO_VIDEO ?? live?.heroVideo ?? '';
 for (const [part, system] of Object.entries(parts)) {
   if (!existsSync(path.join(root, 'design-systems', system))) {
     throw new Error(`Unknown design system "${system}" for ${part} (design-systems/${system} not found)`);
   }
 }
 
-const client = JSON.parse(readFileSync(path.join(clientDir, 'client.json'), 'utf8'));
 const used = [...new Set(Object.values(parts))];
-const sampleId = env.SAMPLE_ID || (used.length === 1 ? used[0] : `mix-${parts.palette}-${parts.type}-${parts.layout}-${parts.motion}`);
+const sampleId = env.SAMPLE_ID || live?.id || (used.length === 1 ? used[0] : `mix-${parts.palette}-${parts.type}-${parts.layout}-${parts.motion}`);
 const ds = (system, file) => path.join(root, 'design-systems', system, file);
 const base = env.BASE || '/';
-const mode = env.FSS_MODE || 'site';
 const stockClips = path.join(root, 'stock', 'clips');
 // Files the hero clips use from the shared library ("/media/stock/<file>" in client.json):
 // only the sample's own clip when one is chosen (HERO_VIDEO), else every clip the client lists.
 const heroVideos = client.heroVideos ?? {};
-const heroClipFiles = [...new Set((env.HERO_VIDEO && heroVideos[env.HERO_VIDEO] ? [heroVideos[env.HERO_VIDEO]] : Object.values(heroVideos))
+const heroClipFiles = [...new Set((heroVideo && heroVideos[heroVideo] ? [heroVideos[heroVideo]] : Object.values(heroVideos))
   .flatMap((v) => [v.src, v.webm])
   .filter((src) => typeof src === 'string' && src.startsWith('/media/stock/'))
   .map((src) => src.slice('/media/stock/'.length)))];
@@ -119,7 +127,7 @@ export default defineConfig({
       'import.meta.env.FSS_SHOW_DRAFTS': JSON.stringify(env.SHOW_DRAFTS === '1'),
       'import.meta.env.FSS_SHOW_TODO': JSON.stringify(env.SHOW_TODO !== '0'),
       'import.meta.env.FSS_NOINDEX': JSON.stringify(env.NOINDEX === '1'),
-      'import.meta.env.FSS_HERO_VIDEO': JSON.stringify(env.HERO_VIDEO || ''),
+      'import.meta.env.FSS_HERO_VIDEO': JSON.stringify(heroVideo),
       'import.meta.env.FSS_PUBLIC_DIR': JSON.stringify(path.join(clientDir, 'public')),
     },
     resolve: {

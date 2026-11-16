@@ -58,11 +58,12 @@
     },
     "href": "https://syncology.tech"
   },
+  "live": "station",
   "samples": [
     {
       "id": "station",
       "palette": "royal-blue",
-      "type": "station",
+      "type": "cairo",
       "layout": "station",
       "motion": "station"
     }

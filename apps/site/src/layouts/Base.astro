@@ -61,6 +61,8 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 // Google Fonts load without blocking first paint (display=swap shows fallback text at once).
 // Any other fontsHref, such as a system's inline data: stylesheet for self-hosted fonts, loads as is.
 const googleFonts = typography.fontsHref.startsWith('https://fonts.googleapis.com/');
+// The type part's own files for this language, with the base path added for gallery builds.
+const fontPreloads = (typography.preload?.[ctx.locale] ?? []).map((u) => (base && !u.startsWith(`${base}/`) ? `${base}${u}` : u));
 ---
 <!doctype html>
 <html lang={ctx.locale} dir={ctx.dir}>
@@ -104,6 +106,7 @@ const googleFonts = typography.fontsHref.startsWith('https://fonts.googleapis.co
         <noscript><link rel="stylesheet" href={typography.fontsHref} /></noscript>
       </>
     ) : typography.fontsHref && <link rel="stylesheet" href={typography.fontsHref} />}
+    {fontPreloads.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
     <style is:inline set:html={css}></style>
     {graph.length > 0 && <script type="application/ld+json" set:html={ldJson(graph)} />}
   </head>

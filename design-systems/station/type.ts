@@ -1,6 +1,10 @@
 import type { Typography } from '@engine/contract';
 // The @font-face rules live in a real stylesheet so their URLs follow the build's base path.
 import './type-fonts/fonts.css';
+import kufiArabic from './type-fonts/reem-kufi-arabic.woff2?url';
+import naskhArabic from './type-fonts/noto-naskh-arabic.woff2?url';
+import kufiLatin from './type-fonts/reem-kufi-latin.woff2?url';
+import naskhLatin from './type-fonts/noto-naskh-latin.woff2?url';
 
 // - Reem Kufi (Arabic and Latin, variable 400–700): a calm geometric Kufi with the
 //   upright, even strokes of hand-painted enamel station signs. Headings, numbers, boards.
@@ -29,4 +33,6 @@ export const typography: Typography = {
   weights: { body: 400, strong: 700, display: 600 },
   lineHeights: { body: 1.9, heading: 1.4 },
   labelTracking: '0.12em',
+  // The page's two faces at once (the same files fonts.css bundles).
+  preload: { ar: [kufiArabic, naskhArabic], en: [kufiLatin, naskhLatin] },
 };

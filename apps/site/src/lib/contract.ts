@@ -35,6 +35,12 @@ export interface Typography {
   lineHeights: { body: number; heading: number };
   /** Latin-only letter-spacing for uppercase labels. Arabic never gets letter-spacing. */
   labelTracking: string;
+  /**
+   * Self-hosted font files to preload, per page language (URLs from `?url` imports, without
+   * the base path: the engine adds it). In hand before the first paint, so headings never
+   * re-wrap when the face swaps in. Optional; Google Fonts systems leave it out.
+   */
+  preload?: Partial<Record<string, string[]>>;
 }
 
 /** layout/tokens.ts */

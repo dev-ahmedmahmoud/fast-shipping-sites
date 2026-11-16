@@ -3,19 +3,9 @@
 // platform direction signs under a brass rail, and the main call to action.
 import { Image } from 'astro:assets';
 import type { PageContext, NavItem } from '@engine/context';
-import kufiArabic from '../type-fonts/reem-kufi-arabic.woff2?url';
-import naskhArabic from '../type-fonts/noto-naskh-arabic.woff2?url';
-import kufiLatin from '../type-fonts/reem-kufi-latin.woff2?url';
-import naskhLatin from '../type-fonts/noto-naskh-latin.woff2?url';
 interface Props { ctx: PageContext }
 const { ctx } = Astro.props;
 const other = ctx.languages.find((l) => !l.current);
-// Ask for the page's two faces at once (the same files fonts.css bundles), so they are in hand
-// before the first paint and the headings never re-wrap when the font swaps in. These URLs
-// come without the build's base path (gallery samples live under /<client>/<sample>/), so add it.
-const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
-const withBase = (u: string) => (base && !u.startsWith(`${base}/`) ? `${base}${u}` : u);
-const preload = (ctx.locale === 'ar' ? [kufiArabic, naskhArabic] : [kufiLatin, naskhLatin]).map(withBase);
 const linkAttrs = (item: NavItem) => ({
   href: item.href,
   'aria-current': item.current ? 'page' : undefined,
@@ -23,7 +13,6 @@ const linkAttrs = (item: NavItem) => ({
   rel: item.external ? 'noopener' : undefined,
 });
 ---
-{preload.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
 <header class="header">
   <div class="rail" aria-hidden="true"></div>
   <div class="container bar">

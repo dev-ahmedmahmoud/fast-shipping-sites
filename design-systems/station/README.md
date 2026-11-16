@@ -45,7 +45,7 @@ All body text passes AAA (7:1 or more).
 
 Both are variable (400–700). They are **self-hosted** in `type-fonts/`, with Arabic and Latin subsets (146 KB in total) and the SIL OFL licence files. `type.ts` imports `type-fonts/fonts.css`, and `fontsHref` is `data:text/css,`, so the engine's font link costs nothing and visitors never contact Google.
 
-`Header.astro` preloads the two subsets the page's language needs, with the base path added for gallery builds. Without that, the hero buttons moved as the font swapped in (a CLS of 0.16, Performance 89). With it, CLS is 0.005.
+`type.ts` lists the two subsets each language needs in `preload`, and the engine preloads them (with the base path added for gallery builds). Without that, the hero buttons moved as the font swapped in (a CLS of 0.16, Performance 89). With it, CLS is 0.005.
 
 Sizes are large for readers over 40. Body text is 18–20px (`step0`) and line height is 1.9. The smallest text, `stepMinus1`, is never below 16px.
 
