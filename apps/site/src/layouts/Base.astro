@@ -95,7 +95,7 @@ const fontPreloads = (typography.preload?.[ctx.locale] ?? []).map((u) => (base &
     {verification.bing && <meta name="msvalidate.01" content={verification.bing} />}
     {ctx.languages.map((l) => <link rel="alternate" hreflang={l.locale} href={abs(l.href)} />)}
     {xDefault && <link rel="alternate" hreflang="x-default" href={abs(xDefault.href)} />}
-    <meta name="generator" content={`fast-shipping-sites ${import.meta.env.FSS_SAMPLE}`} />
+    <meta name="generator" content={`fast-shipping-sites ${import.meta.env.FSS_SAMPLE}${import.meta.env.FSS_COMMIT ? ` ${import.meta.env.FSS_COMMIT}` : ''}`} />
     {ctx.site.favicon && <link rel="icon" type="image/png" href={ctx.site.favicon} />}
     {ctx.site.favicon && <link rel="apple-touch-icon" href={ctx.site.favicon} />}
     {googleFonts ? (

@@ -10,4 +10,6 @@ interface ImportMetaEnv {
   readonly FSS_SHOW_DRAFTS: boolean;
   readonly FSS_HERO_VIDEO: string;
   readonly FSS_PUBLIC_DIR: string;
+  /** Short commit of a hosted build (CF_PAGES_COMMIT_SHA), or "". */
+  readonly FSS_COMMIT: string;
 }

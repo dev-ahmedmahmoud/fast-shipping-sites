@@ -73,7 +73,7 @@
     "program files: the four pages wait for the client's text.",
     "election date/time: still the template's (Friday 20 Nov 2026, 8 PM) until the client confirms.",
     "membership number rule (6 digits) is the template's; confirm Tanta's format.",
-    "social links: to come. Live at https://husseindawoudlist.com (own Cloudflare Pages project site-tantasportsclubelections, set up by the Infra Agent; www redirects to the apex).",
+    "social links: to come. Live at https://husseindawoudlist.com (own Cloudflare Pages project site-tantasportsclubelections, set up by the Infra Agent; www redirects to the apex; no build watch paths, so every push to the branch rebuilds it). The live page's generator meta ends with the commit it was built from.",
     "api: supporters and complaints run in demo mode (this browser only, nothing sent). Live needs the backend in API.md, a WhatsApp sender for the codes, and a Turnstile site key.",
     "El-Shamkawy: CV hasn't arrived; his page has placeholder text.",
     "leader: CV in (age left out, as for the other candidates). Company logos from the media agent: 4 of 5 in (co-<slug>.webp and -mono.webp); Friends (فريندز للمقاولات العامة) has no logo yet, so its plaque shows the name. Add it as co-friends.webp / co-friends-mono.webp and set logo/logoMono/color in elections.json.",

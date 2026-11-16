@@ -122,6 +122,9 @@ export default defineConfig({
     define: {
       'import.meta.env.FSS_CLIENT': JSON.stringify(CLIENT),
       'import.meta.env.FSS_SAMPLE': JSON.stringify(sampleId),
+      // The commit a hosted build came from (Cloudflare Pages sets CF_PAGES_COMMIT_SHA), shown
+      // in the generator meta so anyone can tell from outside which version is live.
+      'import.meta.env.FSS_COMMIT': JSON.stringify((env.CF_PAGES_COMMIT_SHA || env.COMMIT_SHA || '').slice(0, 7)),
       'import.meta.env.FSS_PARTS': JSON.stringify(parts),
       'import.meta.env.FSS_MODE': JSON.stringify(mode),
       'import.meta.env.FSS_SHOW_DRAFTS': JSON.stringify(env.SHOW_DRAFTS === '1'),
