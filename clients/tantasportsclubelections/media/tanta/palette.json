@@ -15,7 +15,7 @@
   "accent": {
     "yellow": {"hex": "#fbe107", "note": "Bright yellow: the members' ties, the lower half of the crest shield, the slogan text."},
     "gold": {"hex": "#edd427", "note": "Softer gold-yellow: underline under the headline and warmer text/pocket-square tones."},
-    "frame_gold": {"hex": "#d9a21f", "note": "Approximate orange-gold of the vertical frame bars either side of the crest at the top (poster art, estimated)."}
+    "frame_gold": {"hex": "#d1972e", "note": "Approximate orange-gold of the vertical frame bars either side of the crest at the top (sampled)."}
   },
   "secondary": {
     "white": {"hex": "#f7f6fa", "note": "White shirts, the crest's white rim and the white band across the shield."},
