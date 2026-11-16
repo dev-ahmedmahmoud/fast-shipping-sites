@@ -92,6 +92,7 @@
           {
             "slug": "style-home",
             "name": "ستايل هوم العقارية",
+            "nameLatin": "StyleHome Development",
             "sector": "تطوير عقاري",
             "text": "بدأت من طنطا حتى امتدت إلى سوق القاهرة، وبالتحديد القاهرة الجديدة، وتملك مجموعة من الكمبوندات.",
             "highlights": [
@@ -99,28 +100,39 @@
               "ايكون ريزيدنس 2",
               "ايكون جاردن 1",
               "ايكون جاردن 2"
-            ]
+            ],
+            "logo": "co-style-home.webp",
+            "logoMono": "co-style-home-mono.webp",
+            "color": "#0E2A4E"
           },
           {
             "slug": "kleek",
             "name": "كلييك للتطوير العقاري",
+            "nameLatin": "Kleek Developments",
             "sector": "تطوير عقاري — القاهرة",
             "text": "شركة ناشئة مقرها القاهرة، تطوّر مشروعها الأول: كمبوند NOLL، مشروع سكني تجاري إداري على مساحة 90 فدانًا بالتجمع السادس، ومعه فندق خمس نجوم يحمل علامة كراون بلازا.",
             "highlights": [
               "كمبوند NOLL",
               "90 فدانًا",
               "فندق كراون بلازا"
-            ]
+            ],
+            "logo": "co-kleek.webp",
+            "logoMono": "co-kleek-mono.webp",
+            "color": "#5A0A0E"
           },
           {
             "slug": "tanta-modern-school",
             "name": "مدارس طنطا مودرن سكول",
+            "nameLatin": "Tanta Modern School",
             "sector": "تعليم",
             "text": "صاحب ومؤسس مدارس طنطا مودرن سكول بقسميها: الناشيونال والبريطاني.",
             "highlights": [
               "القسم الناشيونال",
               "القسم البريطاني"
-            ]
+            ],
+            "logo": "co-tanta-modern-school.webp",
+            "logoMono": "co-tanta-modern-school-mono.webp",
+            "color": "#2F3A63"
           },
           {
             "slug": "friends",
@@ -135,13 +147,16 @@
           {
             "slug": "syncology",
             "name": "سنكولوچي",
-            "nameLatin": "Syncology",
+            "nameLatin": "Syncology e-services",
             "sector": "تكنولوجيا التعليم",
             "text": "تطوّر برامج وتطبيقات رقمية لإدارة جميع المنشآت التعليمية، ولها عملاء كثيرون داخل مصر وخارجها.",
             "highlights": [
               "برامج إدارة المدارس",
               "عملاء داخل مصر وخارجها"
-            ]
+            ],
+            "logo": "co-syncology.webp",
+            "logoMono": "co-syncology-mono.webp",
+            "color": "#0078CC"
           }
         ]
       }

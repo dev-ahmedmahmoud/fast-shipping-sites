@@ -50,7 +50,7 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
           </div>
           <div class="info">
             <p class="sector">{it.sector}</p>
-            <h3 id={`${id}-${it.slug}`}>{it.name}{it.nameLatin && <span class="latin" lang="en" dir="ltr">{it.nameLatin}</span>}</h3>
+            <h3 id={`${id}-${it.slug}`}>{it.name}{it.nameLatin && <span class="latin" lang="en">{it.nameLatin}</span>}</h3>
             <p class="text">{it.text}</p>
             {it.highlights.length > 0 && <ul class="tags" role="list">{it.highlights.map((h) => <li>{h}</li>)}</ul>}
           </div>
@@ -79,7 +79,7 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
         <li>
           <button type="button" data-vf-go={i} aria-controls={`${id}-track`} aria-label={it.name}>
             {it.logoMono
-              ? <Image src={it.logoMono} alt="" widths={[180, 360]} sizes="120px" />
+              ? <Image src={it.logoMono} alt="" widths={[120, 240, 360]} sizes="120px" />
               : <span aria-hidden="true">{it.name}</span>}
           </button>
         </li>
@@ -328,14 +328,15 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
   .is-paused .icon-pause { display: none; }
 
   /* The rail: every logo in white; the one in front lit, with a brass bar under it. */
-  .rail { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-4); margin: var(--space-6) 0 0; padding: 0; list-style: none; }
+  .rail { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2) var(--space-4); margin: var(--space-6) 0 0; padding: 0; list-style: none; }
   .rail button {
     position: relative; display: grid; place-items: center; min-block-size: 56px; min-inline-size: 56px; padding: var(--space-2) var(--space-3);
     border: 0; background: none; cursor: pointer; color: var(--st-enamel-ink);
-    opacity: 0.55; transition: opacity var(--dur-fast) var(--ease-out);
+    opacity: 0.6; transition: opacity var(--dur-fast) var(--ease-out);
     font-family: var(--font-body); font-weight: 700; font-size: var(--step--1);
   }
-  .rail button :global(img) { inline-size: 96px; block-size: 64px; object-fit: contain; }
+  .rail button :global(img) { inline-size: 120px; block-size: 80px; object-fit: contain; }
+  @media (max-width: 600px) { .rail button :global(img) { inline-size: 96px; block-size: 64px; } }
   .rail button::after {
     content: ''; position: absolute; inset-inline: 22%; inset-block-end: 0; block-size: 3px; border-radius: 2px;
     background: var(--st-brass); transform: scaleX(0); transition: transform var(--dur-base) var(--ease-out);
