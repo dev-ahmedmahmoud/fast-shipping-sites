@@ -2,7 +2,7 @@
 id: "candidate-ashoush"
 locale: "ar"
 slug: "team/ashoush"
-title: "حمد رضا عشوش — عضو مجلس الإدارة — تحت السن"
+title: "أ. محمد رضا عشوش — عضو مجلس الإدارة — فوق السن"
 template: "candidate"
 candidate: "ashoush"
 description: "حاصل على ليسانس الحقوق من جامعة طنطا، وصاحب شركات في التجارة والاستثمار السياحي والعقاري، وأحد أبناء نادي طنطا الرياضي."

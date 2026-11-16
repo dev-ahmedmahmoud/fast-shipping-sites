@@ -2,13 +2,13 @@
   "slug": "tantasportsclubelections",
   "kind": "elections",
   "name": {
-    "ar": "قائمة حسين داوود"
+    "ar": "قائمة المهندس حسين داود"
   },
   "shortName": {
-    "ar": "قائمة حسين داوود"
+    "ar": "قائمة المهندس حسين داود"
   },
   "motto": {
-    "ar": "معًا.. لنادي طنطا يليق بتاريخه"
+    "ar": "تاريخ نحترمه .. ومستقبل نصنعه"
   },
   "logo": "crest.webp",
   "favicon": "favicon.png",
@@ -49,7 +49,7 @@
   },
   "social": {},
   "copyright": {
-    "ar": "© 2026 قائمة حسين داوود. جميع الحقوق محفوظة."
+    "ar": "© 2026 قائمة المهندس حسين داود. جميع الحقوق محفوظة."
   },
   "footerCredit": {
     "show": true,
@@ -68,16 +68,15 @@
     }
   ],
   "todo": [
-    "leader: Hussein Dawood's CV hasn't arrived; his page has placeholder text.",
-    "seats and ballot numbers: placeholders (1–11). Given by the client: Waleed Afify treasurer; Karim Abu El-Azm and Ahmed Sweilem over-age; Mohamed El-Menshawy under-age. Assumed: Mohamed Sedky vice president; Attia, Hamza, Mabrouk, Fathy Selim over-age; Ashoush under-age.",
-    "names to confirm: 'حمد رضا عشوش' (أحمد؟); Hussein Dawood's title.",
-    "photos: placeholder silhouettes, crest and share image until the media agent delivers clients/tantasportsclubelections/media/tanta/ (spec sent to session_01CG4akosFw9qSsqNFZdRDtz).",
     "videos: none yet (leader's word, interviews, program clips); sections stay hidden until the client sends them.",
     "program files: the four pages wait for the client's text.",
     "election date/time: still the template's (Friday 20 Nov 2026, 8 PM) until the client confirms.",
-    "slogan 'معًا.. لنادي طنطا يليق بتاريخه' is a placeholder drawn from the candidates' own wording.",
     "membership number rule (6 digits) is the template's; confirm Tanta's format.",
     "social links, production domain and the site name printed on the ballot card: to come.",
-    "api: supporters and complaints run in demo mode (this browser only, nothing sent). Live needs the backend in API.md, a WhatsApp sender for the codes, and a Turnstile site key."
+    "api: supporters and complaints run in demo mode (this browser only, nothing sent). Live needs the backend in API.md, a WhatsApp sender for the codes, and a Turnstile site key.",
+    "leader and El-Shamkawy: CVs haven't arrived; their pages have placeholder text.",
+    "seats: from the campaign poster (via the media agent). Ballot numbers are placeholders (1–12) until the client sends the real ones.",
+    "names to confirm: Fathy Selim's title (CV: الكابتن, poster: الدكتور); the poster spells the leader 'داود'.",
+    "photos: client photos cut out by the media agent and matched to names by face (needs one human confirmation, see media-manifest.json). Crest is upscaled from the poster: ask the club for the original file."
   ]
 }

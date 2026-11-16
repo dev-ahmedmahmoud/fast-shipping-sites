@@ -1,0 +1,24 @@
+{
+  "source": "Client photos + campaign poster (names/seats read from the poster; photos matched to names by face). Needs one human confirmation.",
+  "slogan_ar": "تاريخ نحترمه .. ومستقبل نصنعه",
+  "list_ar": "قائمة المهندس / حسين داود",
+  "people": [
+    {"slug": "leader-hussein-dawoud", "name_ar": "المهندس حسين داود", "seat_ar": "رئيس مجلس الإدارة"},
+    {"slug": "mohamed-sedky", "name_ar": "المستشار محمد صدقي", "seat_ar": "نائب رئيس مجلس الإدارة"},
+    {"slug": "waleed-afify", "name_ar": "الأستاذ الدكتور وليد محمد عفيفي", "seat_ar": "أمين الصندوق"},
+    {"slug": "mohamed-attia", "name_ar": "المهندس محمد السيد عطية", "seat_ar": "عضو مجلس الإدارة (تحت السن)"},
+    {"slug": "mohamed-el-menshawy", "name_ar": "الدكتور محمد رياض المنشاوي", "seat_ar": "عضو مجلس الإدارة (تحت السن)"},
+    {"slug": "karim-abu-elazm", "name_ar": "المحاسب كريم ممدوح أبو العزم", "seat_ar": "عضو مجلس الإدارة (فوق السن)"},
+    {"slug": "mohamed-mabrouk", "name_ar": "الدكتور محمد مختار مبروك", "seat_ar": "عضو مجلس الإدارة (فوق السن)"},
+    {"slug": "fathy-selim", "name_ar": "الدكتور فتحي سليم", "seat_ar": "عضو مجلس الإدارة (فوق السن)"},
+    {"slug": "ashoush", "name_ar": "الأستاذ محمد رضا عشوش", "seat_ar": "عضو مجلس الإدارة (فوق السن)"},
+    {"slug": "ahmed-sweilem", "name_ar": "الدكتور أحمد إبراهيم سويلم", "seat_ar": "عضو مجلس الإدارة (فوق السن)"},
+    {"slug": "khaled-hamza", "name_ar": "المهندس خالد عادل حمزة", "seat_ar": "عضو مجلس الإدارة (فوق السن)"},
+    {"slug": "mostafa-el-shamkawy", "name_ar": "اللواء مصطفى الشمقاوي", "seat_ar": "عضو مجلس الإدارة (فوق السن)", "extra_poses": ["mostafa-el-shamkawy-1.webp", "mostafa-el-shamkawy-2.webp"]}
+  ],
+  "notes": [
+    "team.webp: composed from the 12 individual cut-outs (not the night group photo), leader at the apex.",
+    "crest.webp/logo.webp: extracted from the poster (only source, ~150px) and upscaled, so slightly soft; no vector available. Ask the club for the original crest file.",
+    "No videos supplied. No -share images made."
+  ]
+}

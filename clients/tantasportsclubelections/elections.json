@@ -17,8 +17,8 @@
     }
   },
   "list": {
-    "name": "قائمة حسين داوود",
-    "slogan": "معًا.. لنادي طنطا يليق بتاريخه",
+    "name": "قائمة المهندس حسين داود",
+    "slogan": "تاريخ نحترمه .. ومستقبل نصنعه",
     "leader": "hussein-dawood",
     "crest": "crest.webp",
     "logo": "logo.webp",
@@ -43,22 +43,22 @@
   "candidates": [
     {
       "slug": "hussein-dawood",
-      "name": "حسين داوود",
+      "name": "م. حسين داود",
       "seat": "لمقعد رئيس مجلس الإدارة",
       "group": "presidency",
       "number": 1,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
-      "photoAlt": "حسين داوود",
+      "card": "hussein-dawood-card.webp",
+      "photo": "hussein-dawood-card.webp",
+      "photoAlt": "م. حسين داود",
       "kicker": {
         "label": "تعرّف على القائمة",
         "href": "page:team"
       },
       "galleryLabel": "صور",
-      "filesTitle": "حسين داوود يتحدث عن الملفات الأربعة",
+      "filesTitle": "م. حسين داود يتحدث عن الملفات الأربعة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "share.jpg",
-      "description": "يقود حسين داوود قائمة من أحد عشر مرشحًا تجمعهم رؤية واحدة: تطوير نادي طنطا الرياضي والارتقاء بمنشآته وخدماته بما يليق بتاريخه ومكانته."
+      "description": "يقود م. حسين داود قائمة من اثني عشر مرشحًا تجمعهم رؤية واحدة: تاريخ نحترمه .. ومستقبل نصنعه."
     },
     {
       "slug": "mohamed-sedky",
@@ -66,8 +66,8 @@
       "seat": "لمقعد نائب رئيس مجلس الإدارة",
       "group": "presidency",
       "number": 2,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
+      "card": "mohamed-sedky-card.webp",
+      "photo": "mohamed-sedky-card.webp",
       "photoAlt": "المستشار محمد صدقي",
       "kicker": {
         "label": "تعرّف على القائمة",
@@ -85,8 +85,8 @@
       "seat": "لمقعد أمين الصندوق",
       "group": "presidency",
       "number": 3,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
+      "card": "waleed-afify-card.webp",
+      "photo": "waleed-afify-card.webp",
       "photoAlt": "أ.د. وليد محمد عفيفي",
       "kicker": {
         "label": "تعرّف على القائمة",
@@ -104,8 +104,8 @@
       "seat": "عضو مجلس الإدارة — فوق السن",
       "group": "board-over",
       "number": 4,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
+      "card": "karim-abu-elazm-card.webp",
+      "photo": "karim-abu-elazm-card.webp",
       "photoAlt": "المحاسب كريم ممدوح أبو العزم",
       "kicker": {
         "label": "تعرّف على القائمة",
@@ -118,70 +118,13 @@
       "description": "شريك ومدير تنفيذي لشركتي B&K لتوريدات المطاعم وEgy Mak Pharma، وعضو مجلس إدارة حالي (تحت السن)، ولاعب سباحة سابق بالنادي."
     },
     {
-      "slug": "ahmed-sweilem",
-      "name": "د. أحمد إبراهيم سويلم",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 5,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
-      "photoAlt": "د. أحمد إبراهيم سويلم",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "galleryLabel": "صور",
-      "filesTitle": "د. أحمد إبراهيم سويلم يتحدث عن الملفات الأربعة",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "share.jpg",
-      "description": "مدير المستشفى الرئيسي ومستشفى الجراحات الجديدة بجامعة طنطا، وأستاذ مساعد الجراحة العامة بكلية الطب – جامعة طنطا."
-    },
-    {
-      "slug": "mohamed-attia",
-      "name": "م. محمد السيد عطية",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 6,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
-      "photoAlt": "م. محمد السيد عطية",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "galleryLabel": "صور",
-      "filesTitle": "م. محمد السيد عطية يتحدث عن الملفات الأربعة",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "share.jpg",
-      "description": "مهندس معماري، وصاحب شركة المدينة المنورة للمقاولات وشركة Creative Line Construction (CLC) للتشطيبات والاستثمار العقاري."
-    },
-    {
-      "slug": "khaled-hamza",
-      "name": "م. خالد عادل حمزة",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 7,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
-      "photoAlt": "م. خالد عادل حمزة",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "galleryLabel": "صور",
-      "filesTitle": "م. خالد عادل حمزة يتحدث عن الملفات الأربعة",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "share.jpg",
-      "description": "مدير قطاع تجارة ونقل المواد البترولية بشركة غاز الشرق، ولاعب تنس طاولة سابق بنادي طنطا، من عائلة رياضية ارتبط اسمها بتاريخ النادي."
-    },
-    {
       "slug": "mohamed-mabrouk",
       "name": "د. محمد مختار مبروك",
       "seat": "عضو مجلس الإدارة — فوق السن",
       "group": "board-over",
-      "number": 8,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
+      "number": 5,
+      "card": "mohamed-mabrouk-card.webp",
+      "photo": "mohamed-mabrouk-card.webp",
       "photoAlt": "د. محمد مختار مبروك",
       "kicker": {
         "label": "تعرّف على القائمة",
@@ -198,9 +141,9 @@
       "name": "الكابتن فتحي محمد سليم",
       "seat": "عضو مجلس الإدارة — فوق السن",
       "group": "board-over",
-      "number": 9,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
+      "number": 6,
+      "card": "fathy-selim-card.webp",
+      "photo": "fathy-selim-card.webp",
       "photoAlt": "الكابتن فتحي محمد سليم",
       "kicker": {
         "label": "تعرّف على القائمة",
@@ -213,13 +156,112 @@
       "description": "لاعب سابق بالفريق الأول لكرة القدم بنادي طنطا الرياضي منذ عام 1966، ومديره الفني لاحقًا، ومدرب كرة قدم محترف بخبرات دولية."
     },
     {
+      "slug": "ashoush",
+      "name": "أ. محمد رضا عشوش",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 7,
+      "card": "ashoush-card.webp",
+      "photo": "ashoush-card.webp",
+      "photoAlt": "أ. محمد رضا عشوش",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "أ. محمد رضا عشوش يتحدث عن الملفات الأربعة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "share.jpg",
+      "description": "حاصل على ليسانس الحقوق من جامعة طنطا، وصاحب شركات في التجارة والاستثمار السياحي والعقاري، وأحد أبناء نادي طنطا الرياضي."
+    },
+    {
+      "slug": "ahmed-sweilem",
+      "name": "د. أحمد إبراهيم سويلم",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 8,
+      "card": "ahmed-sweilem-card.webp",
+      "photo": "ahmed-sweilem-card.webp",
+      "photoAlt": "د. أحمد إبراهيم سويلم",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "د. أحمد إبراهيم سويلم يتحدث عن الملفات الأربعة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "share.jpg",
+      "description": "مدير المستشفى الرئيسي ومستشفى الجراحات الجديدة بجامعة طنطا، وأستاذ مساعد الجراحة العامة بكلية الطب – جامعة طنطا."
+    },
+    {
+      "slug": "khaled-hamza",
+      "name": "م. خالد عادل حمزة",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 9,
+      "card": "khaled-hamza-card.webp",
+      "photo": "khaled-hamza-card.webp",
+      "photoAlt": "م. خالد عادل حمزة",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "م. خالد عادل حمزة يتحدث عن الملفات الأربعة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "share.jpg",
+      "description": "مدير قطاع تجارة ونقل المواد البترولية بشركة غاز الشرق، ولاعب تنس طاولة سابق بنادي طنطا، من عائلة رياضية ارتبط اسمها بتاريخ النادي."
+    },
+    {
+      "slug": "mostafa-el-shamkawy",
+      "name": "اللواء مصطفى الشمقاوي",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 10,
+      "card": "mostafa-el-shamkawy-card.webp",
+      "photo": "mostafa-el-shamkawy-card.webp",
+      "photoAlt": "اللواء مصطفى الشمقاوي",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "اللواء مصطفى الشمقاوي يتحدث عن الملفات الأربعة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "share.jpg",
+      "description": "اللواء مصطفى الشمقاوي، مرشح القائمة لعضوية مجلس إدارة نادي طنطا الرياضي (فوق السن).",
+      "gallery": [
+        "mostafa-el-shamkawy-1.webp",
+        "mostafa-el-shamkawy-2.webp"
+      ]
+    },
+    {
+      "slug": "mohamed-attia",
+      "name": "م. محمد السيد عطية",
+      "seat": "عضو مجلس الإدارة — تحت السن",
+      "group": "board-under",
+      "number": 11,
+      "card": "mohamed-attia-card.webp",
+      "photo": "mohamed-attia-card.webp",
+      "photoAlt": "م. محمد السيد عطية",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "م. محمد السيد عطية يتحدث عن الملفات الأربعة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "share.jpg",
+      "description": "مهندس معماري، وصاحب شركة المدينة المنورة للمقاولات وشركة Creative Line Construction (CLC) للتشطيبات والاستثمار العقاري."
+    },
+    {
       "slug": "mohamed-el-menshawy",
       "name": "د. محمد رياض المنشاوي",
       "seat": "عضو مجلس الإدارة — تحت السن",
       "group": "board-under",
-      "number": 10,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
+      "number": 12,
+      "card": "mohamed-el-menshawy-card.webp",
+      "photo": "mohamed-el-menshawy-card.webp",
       "photoAlt": "د. محمد رياض المنشاوي",
       "kicker": {
         "label": "تعرّف على القائمة",
@@ -230,25 +272,6 @@
       "restTitle": "باقي فريق القائمة",
       "shareImage": "share.jpg",
       "description": "دكتوراه في التدريب الرياضي ومدرس بقسم الرياضات المائية بكلية علوم الرياضة – جامعة طنطا، وأحد أبناء النادي ومديره الفني للسباحة سابقًا."
-    },
-    {
-      "slug": "ashoush",
-      "name": "حمد رضا عشوش",
-      "seat": "عضو مجلس الإدارة — تحت السن",
-      "group": "board-under",
-      "number": 11,
-      "card": "placeholder-card.webp",
-      "photo": "placeholder-card.webp",
-      "photoAlt": "حمد رضا عشوش",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "galleryLabel": "صور",
-      "filesTitle": "حمد رضا عشوش يتحدث عن الملفات الأربعة",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "share.jpg",
-      "description": "حاصل على ليسانس الحقوق من جامعة طنطا، وصاحب شركات في التجارة والاستثمار السياحي والعقاري، وأحد أبناء نادي طنطا الرياضي."
     }
   ],
   "files": [
@@ -305,7 +328,7 @@
   "vote": {
     "title": "انتخب القائمة كاملة",
     "text": "فريق واحد.. وهدف واحد. احفظ الأرقام وشاركها مع أصدقائك من أعضاء النادي.",
-    "shareText": "قائمة حسين داوود كاملة — الأرقام هنا:",
+    "shareText": "قائمة المهندس حسين داود كاملة — الأرقام هنا:",
     "share": {
       "label": "شارك على واتساب"
     },
@@ -329,8 +352,8 @@
   },
   "home": {
     "hero": {
-      "title": "قائمة حسين داوود",
-      "slogan": "معًا.. لنادي طنطا يليق بتاريخه",
+      "title": "قائمة المهندس حسين داود",
+      "slogan": "تاريخ نحترمه .. ومستقبل نصنعه",
       "sub": "انتخابات نادي طنطا الرياضي 2026",
       "actions": [
         {
@@ -347,13 +370,13 @@
         }
       ],
       "image": "team.webp",
-      "imageAlt": "مرشحو قائمة حسين داوود"
+      "imageAlt": "مرشحو قائمة المهندس حسين داود"
     },
     "filesTitle": "ملفات القائمة",
     "leader": {
       "kicker": "لمقعد رئيس مجلس الإدارة",
       "more": "الملف الشخصي",
-      "text": "يقود حسين داوود قائمة من أحد عشر مرشحًا تجمعهم رؤية واحدة: تطوير نادي طنطا الرياضي والارتقاء بمنشآته وخدماته بما يليق بتاريخه ومكانته."
+      "text": "يقود م. حسين داود قائمة من اثني عشر مرشحًا تجمعهم رؤية واحدة: تاريخ نحترمه .. ومستقبل نصنعه."
     },
     "team": {
       "title": "فريق القائمة",
@@ -418,7 +441,7 @@
       "copy": "نسخ اللينك",
       "copied": "تم النسخ",
       "share": "مشاركة على واتساب",
-      "shareText": "ادعم قائمة حسين داوود في انتخابات نادي طنطا الرياضي",
+      "shareText": "ادعم قائمة المهندس حسين داود في انتخابات نادي طنطا الرياضي",
       "countLabel": "عدد من دخلوا من اللينك الخاص بيك",
       "countOf": "من %d",
       "goalText": "وصّل %d أصدقاء واستنى مفاجأة من القائمة، تقديرًا لدعمك.",
@@ -539,6 +562,6 @@
     "crestSmall": "crest.webp",
     "footerLogo": "logo.webp",
     "social": {},
-    "copyright": "© 2026 قائمة حسين داوود. جميع الحقوق محفوظة."
+    "copyright": "© 2026 قائمة المهندس حسين داود. جميع الحقوق محفوظة."
   }
 }
