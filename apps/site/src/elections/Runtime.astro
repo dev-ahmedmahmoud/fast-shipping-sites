@@ -33,7 +33,7 @@ const config = {
     text: vote.text,
     groups: ballotGroups,
     logo: cardLogo?.src ?? null,
-    site: list.site ?? site.host,
+    site: list.site || site.host,
     filename: vote.download?.filename ?? 'list.png',
   },
   supporters: { words: { ...supporters.words, ...DEMO_WORDS }, goal: supporters.goal ?? 5 },
