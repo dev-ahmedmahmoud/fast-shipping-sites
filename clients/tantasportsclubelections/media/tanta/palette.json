@@ -1,0 +1,33 @@
+{
+  "source": "Sampled from the client campaign poster (poster.jpg in this folder). Values are medians of the named regions.",
+  "background": {
+    "darkest": {"hex": "#242563", "note": "Deep navy at the bottom-left corner of the poster and the shaded edges of the gradient."},
+    "dark": {"hex": "#293179", "note": "Darker navy behind the lower rows of members and around the edges."},
+    "main": {"hex": "#23449a", "note": "Main royal blue: left/right margins and most of the poster background (the dominant colour)."},
+    "main_alt": {"hex": "#2757a6", "note": "Slightly brighter blue at the bottom-right and mid-gradient areas."},
+    "lighter": {"hex": "#5375b7", "note": "Mid highlight where the gradient lightens, toward the top-centre."},
+    "highlight": {"hex": "#70a8db", "note": "Light sky-blue glow at the top-right corner and behind the title area."}
+  },
+  "text": {
+    "on_blue_primary": {"hex": "#f7f6fa", "note": "White, used for the 'انتخابات 2026' headline and the member names."},
+    "on_blue_accent": {"hex": "#fbe107", "note": "Bright yellow, used for the slogan line and the club name/title strokes."}
+  },
+  "accent": {
+    "yellow": {"hex": "#fbe107", "note": "Bright yellow: the members' ties, the lower half of the crest shield, the slogan text."},
+    "gold": {"hex": "#edd427", "note": "Softer gold-yellow: underline under the headline and warmer text/pocket-square tones."},
+    "frame_gold": {"hex": "#d9a21f", "note": "Approximate orange-gold of the vertical frame bars either side of the crest at the top (poster art, estimated)."}
+  },
+  "secondary": {
+    "white": {"hex": "#f7f6fa", "note": "White shirts, the crest's white rim and the white band across the shield."},
+    "silver": {"hex": "#d9dde6", "note": "Pale grey-silver panel behind the crest (approximate)."},
+    "suit_navy": {"hex": "#1c2548", "note": "Near-black navy of the members' suits (approximate); also works for dark text on light surfaces."}
+  },
+  "suggested_css": {
+    "--bg-darkest": "#242563",
+    "--bg": "#23449a",
+    "--bg-lighter": "#5375b7",
+    "--bg-highlight": "#70a8db",
+    "--accent": "#fbe107",
+    "--text": "#f7f6fa"
+  }
+}
