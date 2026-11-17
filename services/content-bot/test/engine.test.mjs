@@ -88,3 +88,23 @@ test('commands in English and Arabic', () => {
   assert.deepEqual(parseCommand('yes'), { cmd: 'approve', id: undefined });
   assert.equal(parseCommand('yes please change the slogan'), null);
 });
+
+test('GitHub: all client text files come back in ONE GraphQL call', async () => {
+  const { GitHub } = await import('../src/github.js');
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, body: JSON.parse(init.body) });
+    return new Response(JSON.stringify({ data: { repository: {
+      a: { text: '{}' }, b: { text: '{}' },
+      c: { entries: [{ name: 'ar', type: 'tree', object: { entries: [
+        { name: 'home.md', type: 'blob', object: { text: 'H' } },
+        { name: 'team', type: 'tree', object: { entries: [{ name: 'x.md', type: 'blob', object: { text: 'X' } }, { name: 'p.png', type: 'blob', object: { text: null } }] } },
+      ] } }] },
+    } } }), { status: 200 });
+  };
+  const gh = new GitHub({ token: 't', repo: 'o/r', clientDir: 'clients/c', pathAllowed: () => true, fetchImpl });
+  const files = await gh.readClientFiles('abc');
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].body.variables.c, 'abc:clients/c/content');
+  assert.deepEqual([...files.keys()].sort(), ['client.json', 'content/ar/home.md', 'content/ar/team/x.md', 'elections.json']);
+});

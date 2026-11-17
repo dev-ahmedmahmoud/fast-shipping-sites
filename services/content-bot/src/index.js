@@ -45,11 +45,22 @@ export default {
     let payload;
     try { payload = JSON.parse(raw); } catch { return new Response('bad json', { status: 400 }); }
     const messages = parseWebhook(payload, env.PHONE_NUMBER_ID);
-    if (messages.length) ctx.waitUntil(processMessages(env, messages));
+    // Heavy work (AI + GitHub) runs in the queue consumer: no 30-second cut-off, its own call budget.
+    if (messages.length) {
+      if (env.INBOX) await env.INBOX.sendBatch(messages.map((body) => ({ body })));
+      else ctx.waitUntil(processMessages(env, messages));
+    }
     return new Response('ok');
   },
 
+  async queue(batch, env) {
+    for (const m of batch.messages) {
+      await processMessages(env, [m.body]);   // never throws; WhatsApp retries are de-duplicated anyway
+      m.ack();
+    }
+  },
+
   async scheduled(_event, env, ctx) {
-    ctx.waitUntil((async () => { await makeBot(env).expireAll(); await housekeeping(env.DB); })());
+    ctx.waitUntil((async () => { const bot = makeBot(env); await bot.recoverStuck(); await bot.expireAll(); await housekeeping(env.DB); })());
   },
 };

@@ -43,6 +43,7 @@ export class FakeGH {
   async tip(b) { if (!this.branches.has(b)) throw new Error('no branch ' + b); return this.branches.get(b); }
   async listFiles(sha) { return [...this.commits.get(sha).files.keys()]; }
   async readFile(rel, sha) { return this.commits.get(sha).files.get(rel); }
+  async readClientFiles(sha) { return new Map([...this.commits.get(sha).files].filter(([k]) => k === 'elections.json' || k === 'client.json' || k.startsWith('content/'))); }
   async makeCommit(base, files, message) {
     for (const rel of Object.keys(files)) if (!pathAllowed(DIR, `${DIR}/${rel}`)) throw new Error('path not allowed');
     const m = new Map(this.commits.get(base).files);

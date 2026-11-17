@@ -208,3 +208,47 @@ test('worker: bad signature 401, good signature 200, verify handshake', async ()
   assert.equal(no.status, 403);
   assert.ok(s.audit().some((a) => a.event === 'bad_signature') === false || true);
 });
+
+test('plain YES approves when exactly one change is waiting; asks for the ID when two are waiting', async () => {
+  const s = await setup({ script: [propose(SLOGAN, 'شعار جديد للقائمة'), propose(refOf('elections.json', '/support/words/copy'), 'انسخ')] });
+  await s.msg(CAB_PHONE, 'غير الشعار الى شعار جديد للقائمة');
+  await s.msg(CAB_PHONE, 'YES');
+  assert.match(s.wa.to(CAB_PHONE).at(-1).text, /Only/);                 // cabinet still cannot
+  await s.msg(CAB_PHONE, 'غير نسخ اللينك الى انسخ');
+  await s.msg(CLIENT_PHONE, 'نعم');
+  assert.match(s.wa.to(CLIENT_PHONE).at(-1).text, /رقم التعديل/);     // two waiting -> asks which
+  const ids = s.db.raw.prepare("SELECT id FROM changes ORDER BY created_at").all().map((r) => r.id);
+  await s.msg(CLIENT_PHONE, `NO ${ids[1]}`);
+  await s.msg(CLIENT_PHONE, 'نعم');
+  assert.match(s.gh.liveFile('elections.json'), /شعار جديد للقائمة/);
+});
+
+test('a file the bot cannot rewrite safely is skipped; the rest keeps working', async () => {
+  const s = await setup({ script: [propose(SLOGAN, 'شعار جديد للقائمة')] });
+  s.gh.push({ 'client.json': JSON.stringify(JSON.parse(s.gh.liveFile('client.json'))) });   // reformatted to one line
+  await s.msg(CAB_PHONE, 'غير الشعار الى شعار جديد للقائمة');
+  assert.match(s.wa.to(CAB_PHONE).at(-1).text, /(Change|تعديل) [A-Z2-9]{6}/);
+  assert.ok(s.audit().some((a) => a.event === 'file_skipped' && /client\.json/.test(a.detail)));
+});
+
+test('a change stuck in "applying" (worker died) is set to what the live site really shows', async () => {
+  const s = await setup({ script: [propose(SLOGAN, 'شعار جديد للقائمة')] });
+  await s.msg(CAB_PHONE, 'غير الشعار الى شعار جديد للقائمة');
+  const id = s.db.raw.prepare('SELECT id FROM changes').get().id;
+  s.db.raw.prepare("UPDATE changes SET status='applying', applying_op='approve', applying_since=1 WHERE id=?").run(id);
+  assert.equal(await s.bot.recoverStuck(), 1);
+  assert.equal(s.db.raw.prepare('SELECT status FROM changes WHERE id=?').get(id).status, 'failed');   // never reached the site
+});
+
+test('worker queue: webhook enqueues, consumer handles and acks', async () => {
+  const s = await setup();
+  const sent = [];
+  const env = { ...s.env, INBOX: { sendBatch: async (b) => sent.push(...b) } };
+  const body = JSON.stringify({ object: 'whatsapp_business_account', entry: [{ changes: [{ value: { metadata: { phone_number_id: 'PN1' }, messages: [{ from: STRANGER, id: 'wq1', type: 'text', text: { body: 'hi' } }] } }] }] });
+  const r = await makeWorker.fetch(new Request('https://x/webhook', { method: 'POST', body, headers: { 'x-hub-signature-256': 'sha256=' + await hmacSha256Hex(env.META_APP_SECRET, body) } }), env, { waitUntil() {} });
+  assert.equal(r.status, 200); assert.equal(sent.length, 1); assert.equal(sent[0].body.from, STRANGER);
+  let acked = 0;
+  await makeWorker.queue({ messages: [{ body: sent[0].body, ack: () => acked++ }] }, { ...env, GITHUB_TOKEN: 'g', WHATSAPP_TOKEN: 'w', ANTHROPIC_API_KEY: 'k' });
+  assert.equal(acked, 1);
+  assert.ok(s.audit().some((a) => a.event === 'ignored_unknown_sender'));
+});

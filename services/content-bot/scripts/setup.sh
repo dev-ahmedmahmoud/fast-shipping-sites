@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # One-shot setup. NOT RUN YET: it creates real Cloudflare resources, so it needs Ahmed's yes first.
-# Needs: CLOUDFLARE_API_TOKEN (Workers + D1 edit, Syncology account) and CLOUDFLARE_ACCOUNT_ID in your shell.
+# Needs: CLOUDFLARE_API_TOKEN (Workers Scripts, D1, Queues: Edit; Syncology account) and CLOUDFLARE_ACCOUNT_ID.
 # Secrets are read from the environment names below and piped straight into Cloudflare. They are never printed or stored.
 #   ANTHROPIC_API_KEY  GITHUB_TOKEN  (WhatsApp ones can be added later with: ./scripts/setup.sh whatsapp)
 set -euo pipefail
@@ -21,6 +21,7 @@ if grep -q REPLACE_AFTER_D1_CREATE wrangler.toml; then
   echo "D1 created. Commit the database_id in wrangler.toml (it is not a secret)."
 fi
 npx wrangler d1 migrations apply tanta-content-bot --remote
+npx wrangler queues create tanta-content-bot-inbox 2>/dev/null || echo "queue exists"
 npx wrangler deploy
 secret ANTHROPIC_API_KEY; secret GITHUB_TOKEN
 echo "Worker URL is printed above. Webhook URL = <worker url>/webhook"

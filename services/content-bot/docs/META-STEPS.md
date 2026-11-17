@@ -5,7 +5,7 @@ Use the free test number first. Go live only after testing.
 ## A. Create the app (about 10 minutes)
 1. Open https://developers.facebook.com/apps -> **Create app** -> use case **Other** -> type **Business** -> pick Ahmed's Business portfolio.
 2. In the app dashboard: **Add product -> WhatsApp -> Set up**.
-3. Left menu **WhatsApp -> API Setup**. You see a free **test number**, its **Phone number ID**, and a 24-hour temporary token.
+3. Left menu **WhatsApp -> API Setup**. You see a free **test number**, its **Phone number ID**, and a 24-hour temporary token. Note the API version in the sample (e.g. `v26.0`).
 4. "To" box -> **Manage phone number list** -> add the client and cabinet numbers (each gets a code on WhatsApp). The test number can only message these.
 5. **App settings -> Basic -> App secret -> Show**. This is `META_APP_SECRET`.
 
@@ -31,6 +31,8 @@ Put the three secrets into Cloudflare yourself or give them to the person who ru
 - Approval usually takes minutes to a day. Meta may re-classify it as Marketing; if so, edit the wording to be purely about a pending task.
 
 ## E. Going live with the real number
+Important: a number used by the WhatsApp phone app cannot also be the API number (unless Meta's "coexistence" works for a WhatsApp **Business** app number). Choose: a new SIM for the bot (easiest), or delete WhatsApp on the old number first (its chat history is lost). Never the client's own number: he must message the bot from it.
+
 1. **Business settings -> Security center -> Start verification** (documents; can take days).
 2. **WhatsApp Manager -> Phone numbers -> Add phone number**. The number must NOT be active on the normal WhatsApp app (or delete that account first). Choose a display name (Meta reviews it).
 3. Add a payment method (needed for templates outside the free window).

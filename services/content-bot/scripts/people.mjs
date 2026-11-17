@@ -26,7 +26,7 @@ function run(sql) {
 const [cmd, a, b, c, d] = args;
 const now = Math.floor(Date.now() / 1000);
 switch (cmd) {
-  case 'list': run('SELECT name, role, lang, active, substr(phone,1,5) || "******" AS phone_hint FROM people ORDER BY role, name'); break;
+  case 'list': run("SELECT name, role, lang, active, substr(phone,1,5) || '******' AS phone_hint FROM people ORDER BY role, name"); break;
   case 'add':
     if (!['cabinet', 'client'].includes(c)) die('Role must be cabinet or client (use set-client to replace the client)');
     if (c === 'client') die('Use set-client for the client');

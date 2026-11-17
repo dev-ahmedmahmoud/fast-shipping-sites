@@ -89,16 +89,20 @@ export class Bot {
   async command(person, c, lang) {
     const { db } = this;
     const client = await activeClient(db);
+    if ((c.cmd === 'approve' || c.cmd === 'undo') && person.role !== 'client') {
+      await audit(db, { actor: person.name, event: `${c.cmd}_denied`, changeId: c.id || null, detail: 'not the client' });
+      return this.say(person, t('onlyClient', lang, { client: client?.name || '' }));
+    }
+    if (!c.id && c.cmd === 'approve') {
+      const only = await db.prepare("SELECT id FROM changes WHERE status = 'pending' AND expires_at > ? LIMIT 2").bind(nowSec()).all();
+      if (only.results.length === 1) c = { ...c, id: only.results[0].id };   // one change waiting: plain YES approves it
+    }
     if (!c.id) {
       const pend = await db.prepare("SELECT id FROM changes WHERE status = 'pending' ORDER BY created_at DESC LIMIT 3").all();
       const ids = pend.results.map((r) => r.id).join(', ');
       return this.say(person, lang === 'ar' ? `اكتب رقم التعديل مع الرد. ${ids ? 'المعلّق الآن: ' + ids : 'لا توجد تعديلات معلّقة.'}` : `Please include the change id. ${ids ? 'Waiting now: ' + ids : 'Nothing is waiting.'}`);
     }
     const ch = await db.prepare('SELECT * FROM changes WHERE id = ?').bind(c.id).first();
-    if ((c.cmd === 'approve' || c.cmd === 'undo') && person.role !== 'client') {
-      await audit(db, { actor: person.name, event: `${c.cmd}_denied`, changeId: c.id, detail: 'not the client' });
-      return this.say(person, t('onlyClient', lang, { client: client?.name || '' }));
-    }
     if (!ch) return this.say(person, t('unknownChange', lang, { id: c.id }));
     if (c.cmd === 'approve') return this.approve(person, ch, lang);
     if (c.cmd === 'undo') return this.undo(person, ch, lang);
@@ -108,8 +112,8 @@ export class Bot {
   async approve(client, ch, lang) {
     const { db, env } = this;
     if (ch.status === 'pending' && ch.expires_at <= nowSec()) await this.expireOne(ch);
-    const claim = await db.prepare("UPDATE changes SET status = 'applying', approver_id = ?, decided_at = ? WHERE id = ? AND status = 'pending' AND expires_at > ?")
-      .bind(client.id, nowSec(), ch.id, nowSec()).run();
+    const claim = await db.prepare("UPDATE changes SET status = 'applying', applying_op = 'approve', applying_since = ?, approver_id = ?, decided_at = ? WHERE id = ? AND status = 'pending' AND expires_at > ?")
+      .bind(nowSec(), client.id, nowSec(), ch.id, nowSec()).run();
     if (claim.meta.changes !== 1) {
       const cur = await db.prepare('SELECT status FROM changes WHERE id = ?').bind(ch.id).first();
       return this.say(client, t('notPending', lang, { id: ch.id, status: cur.status }));
@@ -152,7 +156,7 @@ export class Bot {
 
   async undo(client, ch, lang) {
     const { db, env } = this;
-    const claim = await db.prepare("UPDATE changes SET status = 'applying' WHERE id = ? AND status = 'live'").bind(ch.id).run();
+    const claim = await db.prepare("UPDATE changes SET status = 'applying', applying_op = 'undo', applying_since = ? WHERE id = ? AND status = 'live'").bind(nowSec(), ch.id).run();
     if (claim.meta.changes !== 1) return this.say(client, t('notLive', lang, { id: ch.id }));
     const requester = await personById(db, ch.requester_id);
     const inverse = JSON.parse(ch.edits_json).map((e) => ({ ...e, old: e.new, new: e.old }));
@@ -180,13 +184,20 @@ export class Bot {
     const { gh, env } = this;
     for (let attempt = 0; attempt < 4; attempt++) {
       const tip = await gh.tip(env.LIVE_BRANCH);
-      const store = await this.loadStore(tip);
+      const store = await this.snapshot(tip);
       const plan = store.build(edits);
       if (!plan.ok) { const e = new Error(`cannot apply: ${plan.code}`); e.code = plan.code === 'structure' ? 'structure' : 'stale'; throw e; }
       const sha = await gh.makeCommit(tip, plan.files, makeMessage(store));
       if (await gh.fastForward(env.LIVE_BRANCH, sha)) return sha;
     }
     throw new Error('branch kept moving');
+  }
+
+  /** Load the client's text at a commit; log (once per load) any file that had to be skipped. */
+  async snapshot(tip) {
+    const store = await this.loadStore(tip);
+    if (store.skipped?.length) await audit(this.db, { actor: 'bot', event: 'file_skipped', detail: store.skipped.join('; ') });
+    return store;
   }
 
   async dropPreview(ch) {
@@ -205,7 +216,7 @@ export class Bot {
     const requestTexts = [...history.filter((h) => h.role === 'user').map((h) => h.content), text];
     await addConvo(db, person.id, 'user', text);
     const tip = await this.gh.tip(env.LIVE_BRANCH);
-    const store = await this.loadStore(tip);
+    const store = await this.snapshot(tip);
     // Only words typed by this person count as "their words". The wrapper keeps their text as data.
     const out = await runAgent({
       callModel: this.callModel, store,
@@ -282,6 +293,28 @@ export class Bot {
     const req = await personById(this.db, ch.requester_id);
     if (req && this.env.BOT_MODE !== 'off') await this.say(req, t('expired', req.lang, { id: ch.id }), { changeId: ch.id });
   }
+  /**
+   * If the Worker died in the middle of YES or UNDO, the change stays 'applying'. After 15 minutes, look at the live
+   * site and set the status to what is really there.
+   */
+  async recoverStuck() {
+    const { db, env } = this;
+    const r = await db.prepare("SELECT * FROM changes WHERE status = 'applying' AND applying_since < ?").bind(nowSec() - 900).all();
+    if (!r.results.length) return 0;
+    const store = await this.snapshot(await this.gh.tip(env.LIVE_BRANCH));
+    for (const ch of r.results) {
+      const edits = JSON.parse(ch.edits_json);
+      const newIsLive = store.build(edits.map((e) => ({ ...e, old: e.new, new: e.old }))).ok;   // site shows the NEW text
+      let status;
+      if (ch.applying_op === 'approve') status = newIsLive ? 'live' : 'failed';
+      else status = newIsLive ? 'live' : 'reverted';
+      await db.prepare("UPDATE changes SET status = ? WHERE id = ? AND status = 'applying'").bind(status, ch.id).run();
+      await audit(db, { actor: 'bot', event: 'stuck_recovered', changeId: ch.id, detail: `${ch.applying_op} -> ${status}` });
+      if (ch.applying_op === 'approve') await this.dropPreview(ch);
+    }
+    return r.results.length;
+  }
+
   async expireAll() {
     const r = await this.db.prepare("SELECT * FROM changes WHERE status = 'pending' AND expires_at <= ?").bind(nowSec()).all();
     for (const ch of r.results) await this.expireOne(ch);

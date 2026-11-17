@@ -30,6 +30,7 @@ For Ahmed. Simple English. Nothing is created yet. I need your YES first (list a
 | Piece | Name | Notes |
 |---|---|---|
 | Worker | `tanta-content-bot` | Webhook at `https://tanta-content-bot.<account>.workers.dev/webhook`. Separate from the Pages site, so the site build is not touched. |
+| Queue | `tanta-content-bot-inbox` | Webhook drops each message here; the slow work (AI + GitHub) runs from the queue, so no 30-second cut-off. |
 | D1 database | `tanta-content-bot` | people, changes, audit, rate limits |
 | Cron | hourly | drops changes older than 24 h |
 | Secrets | `WHATSAPP_TOKEN`, `META_APP_SECRET`, `WEBHOOK_VERIFY_TOKEN`, `ANTHROPIC_API_KEY`, `GITHUB_TOKEN` | set with `wrangler secret put` |
@@ -45,12 +46,17 @@ Short list here; full click-by-click is in `META-STEPS.md`.
 4. Create the approval template `change_approval_request` (Utility, Arabic). Text is ready in `META-STEPS.md`.
 5. For the real number: Business verification (can take days), add the number, display name approval.
 
-## Monthly cost (estimate)
-- Cloudflare Workers Paid: **$5**. (Free plan may work, but each request needs ~40 outbound calls and the free limit is 50. Paid is safer.) D1: included.
-- Claude (claude-sonnet-5-5, $2 / $10 per million tokens): about **$0.03-0.08 per request** -> **$2-10** for 30-150 requests.
-- WhatsApp: replies inside 24 h of the client's message are free. A template outside the window costs about $0.01-0.03 each (check Meta's Egypt rate card) -> **under $1**.
-- GitHub: free. Pages builds: each change = 2 builds (preview + live). Free plan = 500 builds/month per account.
-- **Total about $7-16 per month.**
+## Monthly cost (Workers FREE plan, as Ahmed chose)
+| Item | Cost |
+|---|---|
+| Cloudflare Worker + Queue + D1 + cron (free plan) | $0 |
+| Claude Sonnet 5.5: about 4 cents per request | about $4 per 100 requests |
+| WhatsApp: replies when the person wrote first | $0 |
+| WhatsApp template (client silent > 24 h) | about $0.01-0.03 each (check Meta's Egypt rate card) |
+| GitHub, Pages builds (2 per change, 500/month free) | $0 |
+| **Total** | **about $2-10 / month** |
+
+Risk on the free plan: Cloudflare allows 10 ms of CPU per run. Measured: about 5-10 ms. If logs show "exceeded CPU" (error 1102), switch to Workers Paid ($5/month). No code change needed.
 
 ## Things you should know
 - Preview links are public if someone has the link (random 6 letters). Option: protect previews with Cloudflare Access.
@@ -59,4 +65,4 @@ Short list here; full click-by-click is in `META-STEPS.md`.
 - Pages preview builds must use the same build settings/variables as production, or previews will look broken.
 
 ## I need your YES for
-1. Creating Worker `tanta-content-bot` + D1 `tanta-content-bot` (+ cron). 2. Workers Paid ($5). 3. Preview builds for `content/*` on the Pages project. 4. A fine-grained GitHub token (this repo, Contents write). 5. A Meta app + test number. 6. Names and numbers: the client, and each cabinet member.
+1. Creating Worker `tanta-content-bot` + D1 + Queue (+ cron), free plan. 2. (no paid plan) 3. Preview builds for `content/*` on the Pages project. 4. A fine-grained GitHub token (this repo, Contents write). 5. A Meta app + test number. 6. Names and numbers: the client, and each cabinet member.

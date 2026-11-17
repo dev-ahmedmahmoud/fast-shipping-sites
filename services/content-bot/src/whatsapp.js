@@ -33,7 +33,7 @@ export function parseWebhook(payload, phoneNumberId) {
 }
 
 export class WhatsApp {
-  constructor({ token, phoneNumberId, graphVersion = 'v21.0', fetchImpl = fetch }) {
+  constructor({ token, phoneNumberId, graphVersion = 'v26.0', fetchImpl = fetch }) {
     Object.assign(this, { token, phoneNumberId, graphVersion, fetchImpl });
   }
   async post(body) {

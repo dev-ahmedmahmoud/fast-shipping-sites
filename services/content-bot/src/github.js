@@ -39,6 +39,39 @@ export class GitHub {
     return r.tree.filter((x) => x.type === 'blob' && x.path.startsWith(prefix)).map((x) => x.path.slice(prefix.length));
   }
 
+  /**
+   * ALL the client's text files at one commit in ONE call (GraphQL), to stay far under the free plan's
+   * 50 outside-calls limit. Returns Map rel -> text (elections.json, client.json, content/**.md).
+   */
+  async readClientFiles(sha) {
+    const [owner, name] = this.repo.split('/');
+    const blob = '... on Blob { text }';
+    let tree = blob;
+    for (let i = 0; i < 4; i++) tree = `${blob} ... on Tree { entries { name type object { ${tree} } } }`;
+    const query = `query($o:String!,$n:String!,$a:String!,$b:String!,$c:String!){repository(owner:$o,name:$n){
+      a: object(expression:$a){ ${blob} } b: object(expression:$b){ ${blob} } c: object(expression:$c){ ${tree} } } }`;
+    const res = await this.fetchImpl('https://api.github.com/graphql', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json', 'User-Agent': 'tanta-content-bot' },
+      body: JSON.stringify({ query, variables: { o: owner, n: name, a: `${sha}:${this.clientDir}/elections.json`, b: `${sha}:${this.clientDir}/client.json`, c: `${sha}:${this.clientDir}/content` } }),
+    });
+    if (!res.ok) { const e = new Error(`github graphql -> ${res.status}`); e.status = res.status; throw e; }
+    const j = await res.json();
+    if (j.errors?.length) throw new Error('github graphql error');
+    const r = j.data.repository, files = new Map();
+    if (typeof r.a?.text === 'string') files.set('elections.json', r.a.text);
+    if (typeof r.b?.text === 'string') files.set('client.json', r.b.text);
+    const walk = (node, prefix) => {
+      for (const e of node?.entries || []) {
+        const rel = `${prefix}/${e.name}`;
+        if (e.type === 'tree') walk(e.object, rel);
+        else if (e.type === 'blob' && e.name.endsWith('.md') && typeof e.object?.text === 'string') files.set(rel, e.object.text);
+      }
+    };
+    walk(r.c, 'content');
+    return files;
+  }
+
   readFile(rel, sha) {
     return this.api('GET', `/contents/${this.clientDir}/${rel.split('/').map(encodeURIComponent).join('/')}?ref=${sha}`, null, { raw: true });
   }

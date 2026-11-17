@@ -3,11 +3,20 @@
 ## Day to day
 - Anyone on the list sends a message: "Change the slogan to ...". The bot answers with the old and new text, a preview link and an ID (e.g. `K7M2QX`).
 - **Only the client** publishes: `YES K7M2QX` (or `نعم K7M2QX`). Live in about 1 minute.
+- If only ONE change is waiting, a plain `YES` / `نعم` is enough.
 - Client only: `UNDO K7M2QX` puts the old text back (refused if that text was edited again later). `NO K7M2QX` cancels. No answer for 24 hours cancels.
 - Design, layout, images, colours, new sections: refused. Contact Ahmed.
 
 ## Add / remove a number
-Run from `services/content-bot` (needs `wrangler` logged in to the Syncology Cloudflare account):
+Easiest: Cloudflare dashboard -> Storage & Databases -> D1 -> `tanta-content-bot` -> Console. Paste one line:
+```
+INSERT INTO people (name, phone, role, lang, created_at) VALUES ('Mona', '201012345678', 'cabinet', 'ar', unixepoch());
+UPDATE people SET active = 0 WHERE phone = '201012345678';            -- remove
+SELECT name, role, active FROM people;                               -- list
+```
+The client: same INSERT with role 'client' (only one active client allowed).
+
+Or with the script, run from `services/content-bot` (needs `wrangler` logged in to the Syncology Cloudflare account):
 ```
 node scripts/people.mjs list
 node scripts/people.mjs add 201012345678 "Mona" cabinet ar      # country code, no + and no leading 0

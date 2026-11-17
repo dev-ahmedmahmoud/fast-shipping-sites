@@ -4,11 +4,8 @@ import { pathAllowed, LIMITS } from './config.js';
 import { checkNewText, normalize, tokens } from './validate.js';
 
 export async function loadStore(gh, tip, clientDir) {
-  const names = (await gh.listFiles(tip)).filter((rel) => kindOfFile(rel) && pathAllowed(clientDir, `${clientDir}/${rel}`));
-  const files = new Map();
-  for (let i = 0; i < names.length; i += 8) {
-    await Promise.all(names.slice(i, i + 8).map(async (rel) => files.set(rel, await gh.readFile(rel, tip))));
-  }
+  const all = await gh.readClientFiles(tip);
+  const files = new Map([...all].filter(([rel]) => kindOfFile(rel) && pathAllowed(clientDir, `${clientDir}/${rel}`)));
   return new Store(tip, files);
 }
 
@@ -17,7 +14,11 @@ export class Store {
     this.tip = tip;
     this.files = files;
     this.segments = [];
-    for (const [rel, text] of files) this.segments.push(...indexFile(rel, text));
+    this.skipped = [];                 // a file we cannot rewrite safely is skipped, the rest keeps working
+    for (const [rel, text] of files) {
+      try { this.segments.push(...indexFile(rel, text)); } catch (e) { this.skipped.push(`${rel}: ${e.message}`); files.delete(rel); }
+    }
+    for (const s of this.segments) { s.norm = normalize(s.text); s.toks = new Set(tokens(s.text)); }   // once, for fast search
     this.byRef = new Map(this.segments.map((s) => [s.ref, s]));
     if (this.byRef.size !== this.segments.length) throw new Error('duplicate segment refs');
   }
@@ -43,8 +44,7 @@ export class Store {
     const q = normalize(query);
     return this.segments
       .map((s) => {
-        const n = normalize(s.text);
-        const st = new Set(tokens(s.text));
+        const n = s.norm, st = s.toks;
         const score = n.includes(q) ? 1 + q.length / (n.length + 1) : qt.filter((t) => st.has(t) || n.includes(t)).length / qt.length;
         return { s, score };
       })

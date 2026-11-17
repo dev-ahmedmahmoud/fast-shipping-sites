@@ -24,7 +24,9 @@ CREATE TABLE changes (
   revert_commit TEXT,
   created_at INTEGER NOT NULL,
   expires_at INTEGER NOT NULL,
-  decided_at INTEGER
+  decided_at INTEGER,
+  applying_op TEXT,                      -- 'approve' or 'undo' while status = 'applying'
+  applying_since INTEGER
 );
 CREATE INDEX changes_status ON changes(status, expires_at);
 

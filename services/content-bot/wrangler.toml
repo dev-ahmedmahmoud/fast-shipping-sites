@@ -12,7 +12,8 @@ SITE_URL = "https://husseindawoudlist.com"
 # Cloudflare Pages branch preview. Branch content/<id> becomes content-<id> (lowercase).
 PREVIEW_URL_TEMPLATE = "https://content-{id}.site-tantasportsclubelections.pages.dev"
 ANTHROPIC_MODEL = "claude-sonnet-5-5"
-GRAPH_VERSION = "v21.0"
+# Use the version shown on Meta's "API Setup" page.
+GRAPH_VERSION = "v26.0"
 # Filled in when Ahmed creates the Meta app (test number first).
 PHONE_NUMBER_ID = ""
 # Approved WhatsApp utility template used when the client's 24h window is closed.
@@ -23,6 +24,17 @@ BOT_MODE = "on"
 
 [triggers]
 crons = ["17 * * * *"]   # hourly: drop changes older than 24 hours
+
+# Queue: the webhook only checks the signature and drops the message here; the consumer does the work.
+# Queues are on the Workers Free plan (10,000 operations/day; about 3 per WhatsApp message).
+[[queues.producers]]
+queue = "tanta-content-bot-inbox"
+binding = "INBOX"
+
+[[queues.consumers]]
+queue = "tanta-content-bot-inbox"
+max_batch_size = 1
+max_retries = 1
 
 [[d1_databases]]
 binding = "DB"
