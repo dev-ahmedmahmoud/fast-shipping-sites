@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { indexFile, applyEdits, verifyEdits } from '../src/segments.js';
 import { checkNewText, wordsComeFromRequest } from '../src/validate.js';
 import { pathAllowed } from '../src/config.js';
-import { verifySignature, hmacSha256Hex, parseWebhook } from '../src/whatsapp.js';
 import { parseCommand } from '../src/flow.js';
 import { ELECTIONS, CLIENT, MD } from './helpers.mjs';
 
@@ -65,22 +64,7 @@ test('path guard allows only the client text files', () => {
   for (const p of [`${d}/media/logo.webp`, `${d}/content/../API.md`, 'clients/genesis/client.json', 'apps/site/src/layouts/Base.astro', `${d}/API.md`, `/${d}/client.json`]) assert.equal(pathAllowed(d, p), false, p);
 });
 
-test('webhook signature (X-Hub-Signature-256)', async () => {
-  const body = '{"a":1}', sig = 'sha256=' + await hmacSha256Hex('secret', body);
-  assert.equal(await verifySignature('secret', sig, body), true);
-  assert.equal(await verifySignature('secret', sig, body + ' '), false);
-  assert.equal(await verifySignature('other', sig, body), false);
-  assert.equal(await verifySignature('secret', null, body), false);
-  assert.equal(await verifySignature('secret', 'sha256=' + 'a'.repeat(64), body), false);
-});
-
-test('webhook parsing keeps only our number and texts', () => {
-  const p = { object: 'whatsapp_business_account', entry: [{ changes: [{ value: { metadata: { phone_number_id: 'PN1' }, messages: [{ from: '2010', id: 'w1', type: 'text', text: { body: 'hi' }, timestamp: '1' }] } }, { value: { metadata: { phone_number_id: 'OTHER' }, messages: [{ from: '1', id: 'w2', type: 'text', text: { body: 'x' } }] } }] }] };
-  const m = parseWebhook(p, 'PN1');
-  assert.equal(m.length, 1); assert.equal(m[0].text, 'hi');
-});
-
-test('commands in English and Arabic', () => {
+test('typed commands in Arabic and English', () => {
   assert.deepEqual(parseCommand('YES k7m2qx'), { cmd: 'approve', id: 'K7M2QX' });
   assert.deepEqual(parseCommand('نعم ab3k7q'), { cmd: 'approve', id: 'AB3K7Q' });
   assert.deepEqual(parseCommand('no AB3K7Q.'), { cmd: 'reject', id: 'AB3K7Q' });

@@ -1,9 +1,16 @@
-# Worker: tanta-content-bot  (NOT created yet: waiting for Ahmed's yes)
+# Worker: tanta-content-bot = the chat app (public/) + its API + the AI worker. Workers FREE plan.
 name = "tanta-content-bot"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
 
-# Non-secret settings. Secrets are set with `wrangler secret put` (see docs/SETUP.md).
+# The app files. /api/* always goes to the Worker; everything else is a static file.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+# Non-secret settings. Secrets: ANTHROPIC_API_KEY, GITHUB_TOKEN, ADMIN_KEY, VAPID_PRIVATE_JWK (see docs/SETUP.md).
 [vars]
 GITHUB_REPO = "dev-ahmedmahmoud/fast-shipping-sites"
 LIVE_BRANCH = "claude/islamic-website-design-systems-wfyy85"
@@ -12,21 +19,14 @@ SITE_URL = "https://husseindawoudlist.com"
 # Cloudflare Pages branch preview. Branch content/<id> becomes content-<id> (lowercase).
 PREVIEW_URL_TEMPLATE = "https://content-{id}.site-tantasportsclubelections.pages.dev"
 ANTHROPIC_MODEL = "claude-sonnet-5-5"
-# Use the version shown on Meta's "API Setup" page.
-GRAPH_VERSION = "v26.0"
-# Filled in when Ahmed creates the Meta app (test number first).
-PHONE_NUMBER_ID = ""
-# Approved WhatsApp utility template used when the client's 24h window is closed.
-APPROVAL_TEMPLATE = "change_approval_request"
-APPROVAL_TEMPLATE_LANG = "ar"
-# Set to "off" to stop the bot from sending anything except audit logging (kill switch).
+VAPID_SUBJECT = "https://husseindawoudlist.com"
+# Set to "off" to stop new messages and approvals (kill switch).
 BOT_MODE = "on"
 
 [triggers]
-crons = ["17 * * * *"]   # hourly: drop changes older than 24 hours
+crons = ["17 * * * *"]   # hourly: drop changes older than 24 hours, fix stuck ones
 
-# Queue: the webhook only checks the signature and drops the message here; the consumer does the work.
-# Queues are on the Workers Free plan (10,000 operations/day; about 3 per WhatsApp message).
+# Queue: the API saves the message and drops a job here; the consumer runs the AI (no 30-second limit).
 [[queues.producers]]
 queue = "tanta-content-bot-inbox"
 binding = "INBOX"
@@ -34,6 +34,7 @@ binding = "INBOX"
 [[queues.consumers]]
 queue = "tanta-content-bot-inbox"
 max_batch_size = 1
+max_batch_timeout = 1
 max_retries = 1
 
 [[d1_databases]]

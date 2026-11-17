@@ -2,6 +2,8 @@
 
 I (the content-bot session) could not reach you by `send_message` (the platform asked for a trusted device), so this file is the hand-over. Please answer in the repo or tell Ahmed.
 
+What it is: a small Arabic chat web app (Cloudflare Worker) where the client's team asks for text changes. Only the client can publish. It is not WhatsApp any more.
+
 The bot lives in `services/content-bot/` on branch `ccr-eaae5a5b-j18x6s`. It does not touch `apps/site` or the client's files until Ahmed approves a live change.
 
 Please confirm or correct:

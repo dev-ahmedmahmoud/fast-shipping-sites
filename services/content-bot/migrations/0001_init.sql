@@ -1,19 +1,52 @@
--- People allowed to talk to the bot. Phone numbers live ONLY here (never in git, never in commit messages).
+-- People allowed to use the app. No phone numbers are stored.
 CREATE TABLE people (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
-  phone TEXT NOT NULL UNIQUE,            -- digits only, with country code, e.g. 201012345678
   role TEXT NOT NULL CHECK (role IN ('client','cabinet')),
-  lang TEXT NOT NULL DEFAULT 'ar' CHECK (lang IN ('ar','en')),
   active INTEGER NOT NULL DEFAULT 1,
-  last_inbound_at INTEGER,               -- unix seconds, for the 24h WhatsApp window
   created_at INTEGER NOT NULL
 );
--- Exactly one active client.
+-- Exactly one active client (the only one who can publish or undo).
 CREATE UNIQUE INDEX one_active_client ON people(role) WHERE role = 'client' AND active = 1;
 
+-- One-time invite links. Only a hash of the token is stored.
+CREATE TABLE invites (
+  token_hash TEXT PRIMARY KEY,
+  person_id INTEGER NOT NULL REFERENCES people(id),
+  created_at INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL,
+  used_at INTEGER
+);
+
+-- Logged-in devices. Only a hash of the cookie is stored.
+CREATE TABLE sessions (
+  token_hash TEXT PRIMARY KEY,
+  person_id INTEGER NOT NULL REFERENCES people(id),
+  created_at INTEGER NOT NULL,
+  last_seen INTEGER NOT NULL,
+  revoked INTEGER NOT NULL DEFAULT 0
+);
+
+-- Phone push-alert subscriptions.
+CREATE TABLE push_subs (
+  endpoint TEXT PRIMARY KEY,
+  person_id INTEGER NOT NULL REFERENCES people(id),
+  created_at INTEGER NOT NULL
+);
+
+-- The chat. kind: user = typed by the person, reply = bot answer, notice = change card / status note.
+CREATE TABLE chat (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  person_id INTEGER NOT NULL REFERENCES people(id),
+  kind TEXT NOT NULL CHECK (kind IN ('user','reply','notice')),
+  text TEXT NOT NULL,
+  change_id TEXT,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX chat_person ON chat(person_id, id);
+
 CREATE TABLE changes (
-  id TEXT PRIMARY KEY,                   -- short id shown on WhatsApp, e.g. K7M2QX
+  id TEXT PRIMARY KEY,                   -- short id, e.g. K7M2QX
   status TEXT NOT NULL CHECK (status IN ('pending','applying','live','rejected','expired','reverted','failed')),
   requester_id INTEGER NOT NULL REFERENCES people(id),
   approver_id INTEGER REFERENCES people(id),
@@ -30,19 +63,9 @@ CREATE TABLE changes (
 );
 CREATE INDEX changes_status ON changes(status, expires_at);
 
--- Short memory so the bot can ask a question and understand the answer.
-CREATE TABLE convo (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  person_id INTEGER NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('user','assistant')),
-  content TEXT NOT NULL,
-  created_at INTEGER NOT NULL
-);
-CREATE INDEX convo_person ON convo(person_id, created_at);
-
--- WhatsApp retries webhooks: remember message ids already handled.
-CREATE TABLE seen_messages (
-  wamid TEXT PRIMARY KEY,
+-- Queue jobs already handled (a retried job is ignored).
+CREATE TABLE seen_jobs (
+  key TEXT PRIMARY KEY,
   created_at INTEGER NOT NULL
 );
 
@@ -57,7 +80,7 @@ CREATE TABLE rate (
 CREATE TABLE audit (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   ts INTEGER NOT NULL,
-  actor TEXT NOT NULL,                   -- person name, or "unknown:<8 hex of salted hash>" (never a raw number)
+  actor TEXT NOT NULL,                   -- person name, 'bot', 'admin' or 'unknown'
   event TEXT NOT NULL,
   change_id TEXT,
   detail TEXT,

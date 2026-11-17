@@ -1,12 +1,10 @@
 # tanta-content-bot
 
-WhatsApp bot (Cloudflare Worker + D1) that changes only the TEXT of `clients/tantasportsclubelections`, after the client says YES.
+A small Arabic chat web app (Cloudflare Worker + Queue + D1). The client's team asks for TEXT changes to `clients/tantasportsclubelections`. Only the client can publish.
 
-- `docs/PLAN.md` plan and cost, for Ahmed
-- `docs/META-STEPS.md` Meta clicks and the approval template
-- `docs/HANDOVER.md` how to run it
-- `docs/FOR-SITE-BUILDER.md` questions for the site-builder agent
-- `src/config.js` the list of editable text (the safety boundary)
-- `npm test` runs 23 tests (no network, no secrets)
+- `public/`: the app (chat) and `admin.html` (people, invite links, logs)
+- `src/`: the API, the AI tools and the text-only checks. `src/config.js` lists what counts as text.
+- `docs/PLAN.md` plan and cost · `docs/HANDOVER.md` how to run it · `docs/FOR-SITE-BUILDER.md` questions for the site agent
+- `npm test`: 21 tests, offline, no secrets
 
-Status: code and tests done. No Cloudflare or Meta resource has been created yet.
+Status: code and tests done. No Cloudflare resource has been created yet.

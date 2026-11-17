@@ -2,8 +2,8 @@ import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import { pathAllowed } from '../src/config.js';
 import { hash8 } from '../src/segments.js';
-import { Bot } from '../src/flow.js';
-import { loadStore } from '../src/store.js';
+import { createApp } from '../src/index.js';
+import { createInvite } from '../src/auth.js';
 
 export const DIR = 'clients/tantasportsclubelections';
 export const LIVE = 'claude/live';
@@ -21,7 +21,6 @@ export function makeDb() {
   return { prepare: (q) => wrap(q), raw: sql };
 }
 
-// --- in-memory GitHub ---
 export const ELECTIONS = JSON.stringify({
   election: { title: 'انتخابات النادي', at: '2026-11-20T20:00:00+02:00' },
   list: { name: 'قائمة المهندس حسين داود', slogan: 'تاريخ نحترمه .. ومستقبل نصنعه', crest: 'crest.webp' },
@@ -33,16 +32,12 @@ export const MD = '---\nid: "team"\nlocale: "ar"\nslug: "team"\ntitle: "تعرّ
 
 export class FakeGH {
   constructor() {
-    this.n = 0; this.commits = new Map(); this.branches = new Map(); this.log = [];
-    const root = this.addCommit(null, new Map([
-      ['elections.json', ELECTIONS], ['client.json', CLIENT], ['content/ar/team.md', MD], ['public/favicon.png', 'PNG'],
-    ]));
+    this.n = 0; this.commits = new Map(); this.branches = new Map();
+    const root = this.addCommit(null, new Map([['elections.json', ELECTIONS], ['client.json', CLIENT], ['content/ar/team.md', MD], ['public/favicon.png', 'PNG']]));
     this.branches.set(LIVE, root);
   }
   addCommit(parent, files, message = '') { const sha = `c${++this.n}`; this.commits.set(sha, { parent, files, message }); return sha; }
   async tip(b) { if (!this.branches.has(b)) throw new Error('no branch ' + b); return this.branches.get(b); }
-  async listFiles(sha) { return [...this.commits.get(sha).files.keys()]; }
-  async readFile(rel, sha) { return this.commits.get(sha).files.get(rel); }
   async readClientFiles(sha) { return new Map([...this.commits.get(sha).files].filter(([k]) => k === 'elections.json' || k === 'client.json' || k.startsWith('content/'))); }
   async makeCommit(base, files, message) {
     for (const rel of Object.keys(files)) if (!pathAllowed(DIR, `${DIR}/${rel}`)) throw new Error('path not allowed');
@@ -51,44 +46,67 @@ export class FakeGH {
     return this.addCommit(base, m, message);
   }
   async fastForward(b, sha) {
-    let c = sha; while (c) { if (c === this.branches.get(b)) { this.branches.set(b, sha); this.log.push(['ff', b, sha]); return true; } c = this.commits.get(c).parent; }
+    let c = sha; while (c) { if (c === this.branches.get(b)) { this.branches.set(b, sha); return true; } c = this.commits.get(c).parent; }
     return false;
   }
   async createBranch(b, sha) { this.branches.set(b, sha); }
   async deleteBranch(b) { if (!b.startsWith('content/')) throw new Error('refused'); this.branches.delete(b); }
-  // test helper: someone else (the site builder) pushes to live
   push(files, message = 'site builder') { const sha = this.addCommit(this.branches.get(LIVE), new Map([...this.commits.get(this.branches.get(LIVE)).files, ...Object.entries(files)]), message); this.branches.set(LIVE, sha); return sha; }
   liveFile(rel) { return this.commits.get(this.branches.get(LIVE)).files.get(rel); }
-}
-
-export class FakeWA {
-  constructor() { this.sent = []; this.failFree = false; }
-  async sendText(to, text) { if (this.failFree) { const e = new Error('window'); e.code = 131047; e.status = 400; throw e; } this.sent.push({ to, text, kind: 'text' }); }
-  async sendTemplate(to, name, lang, params) { this.sent.push({ to, name, lang, params, kind: 'template' }); }
-  to(phone) { return this.sent.filter((s) => s.to === phone); }
 }
 
 export const refOf = (file, locator) => hash8(`${file}|${locator}`);
 export const toolUse = (name, input) => ({ stop_reason: 'tool_use', content: [{ type: 'tool_use', id: 'tu_' + Math.random().toString(36).slice(2), name, input }] });
 export const say = (text) => ({ stop_reason: 'end_turn', content: [{ type: 'text', text }] });
+export const propose = (ref, new_text) => toolUse('propose_change', { edits: [{ ref, new_text }] });
+export const SLOGAN = refOf('elections.json', '/list/slogan');
+export const ADMIN_KEY = 'admin-key-0123456789-abcdefghij';
+export const ORIGIN = 'https://app.test';
 
-export const CLIENT_PHONE = '201000000001', CAB_PHONE = '201000000002', STRANGER = '201999999999';
-
-export async function setup({ script } = {}) {
-  const db = makeDb(), gh = new FakeGH(), wa = new FakeWA();
-  const t0 = Math.floor(Date.now() / 1000);
-  db.raw.prepare("INSERT INTO people (name, phone, role, lang, created_at, last_inbound_at) VALUES ('حسين','" + CLIENT_PHONE + "','client','ar',?,?)").run(t0, t0);
-  db.raw.prepare("INSERT INTO people (name, phone, role, lang, created_at) VALUES ('Mona','" + CAB_PHONE + "','cabinet','en',?)").run(t0);
+/** A full app (API + bot) on fakes. Each person gets a real login cookie through an invite link. */
+export async function setup({ script = [] } = {}) {
+  const db = makeDb(), gh = new FakeGH();
+  const pushes = [];
+  const state = { script };
   const calls = [];
-  const state = { script: script || [] };
   const callModel = async (params) => { calls.push(params); const n = state.script.shift(); if (!n) throw new Error('script exhausted'); return typeof n === 'function' ? n(params) : n; };
+  const app = createApp({ gh, callModel, push: { notify: async (pid) => pushes.push(pid) } });
+  const pending = [];
   const env = {
-    DB: db, GITHUB_REPO: 'x/y', LIVE_BRANCH: LIVE, CLIENT_DIR: DIR, PREVIEW_URL_TEMPLATE: 'https://content-{id}.site.pages.dev',
-    PHONE_NUMBER_ID: 'PN1', APPROVAL_TEMPLATE: 'change_approval_request', APPROVAL_TEMPLATE_LANG: 'ar', WEBHOOK_VERIFY_TOKEN: 'verify-secret-token', META_APP_SECRET: 'app-secret-xyz',
+    DB: db, GITHUB_REPO: 'x/y', LIVE_BRANCH: LIVE, CLIENT_DIR: DIR, PREVIEW_URL_TEMPLATE: 'https://content-{id}.site.pages.dev', ADMIN_KEY,
   };
-  const bot = new Bot({ env, db, gh, wa, callModel, loadStore: (tip) => loadStore(gh, tip, DIR) });
-  let seq = 0;
-  const msg = (from, text, extra = {}) => bot.handle({ from, id: 'wamid.' + (++seq), type: 'text', text, ts: 0, ...extra });
+  const ctx = { waitUntil: (p) => pending.push(p) };
+  const settle = async () => { while (pending.length) await pending.shift(); };
+
+  async function req(path, { body, cookie, headers = {}, method } = {}) {
+    const init = { method: method || (body !== undefined ? 'POST' : 'GET'), headers: { ...headers } };
+    if (body !== undefined) { init.body = JSON.stringify(body); init.headers['content-type'] = 'application/json'; init.headers.origin = ORIGIN; }
+    if (cookie) init.headers.cookie = cookie;
+    const res = await app.fetch(new Request(ORIGIN + path, init), env, ctx);
+    await settle();
+    const text = await res.text();
+    let json = null; try { json = JSON.parse(text); } catch { /* */ }
+    return { status: res.status, json, headers: res.headers };
+  }
+  const adminCall = (body) => req('/api/admin', { body, headers: { 'x-admin-key': ADMIN_KEY } });
+
+  async function person(name, role) {
+    const a = await adminCall({ action: 'add', name, role });
+    const inv = await adminCall({ action: 'invite', personId: a.json.personId });
+    const token = new URL(inv.json.link).hash.slice(6);
+    const j = await req('/api/join', { body: { token } });
+    const cookie = j.headers.get('set-cookie').split(';')[0];
+    return {
+      id: a.json.personId, name, cookie, token,
+      say: (text) => req('/api/message', { body: { text }, cookie }),
+      act: (id, action) => req(`/api/changes/${id}/${action}`, { body: {}, cookie }),
+      chat: async () => (await req('/api/messages?after=0', { cookie })).json,
+      last: async () => (await req('/api/messages?after=0', { cookie })).json.messages.at(-1),
+    };
+  }
+  const client = await person('حسين', 'client');
+  const cab = await person('Mona', 'cabinet');
   const audit = () => db.raw.prepare('SELECT * FROM audit ORDER BY id').all();
-  return { db, gh, wa, bot, env, msg, audit, state, calls };
+  const lastChange = () => db.raw.prepare('SELECT * FROM changes ORDER BY created_at DESC, rowid DESC LIMIT 1').get();
+  return { db, gh, app, env, ctx, settle, req, adminCall, person, client, cab, audit, state, calls, pushes, lastChange };
 }

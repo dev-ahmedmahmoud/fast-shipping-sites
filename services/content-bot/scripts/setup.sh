@@ -1,18 +1,9 @@
 #!/usr/bin/env bash
-# One-shot setup. NOT RUN YET: it creates real Cloudflare resources, so it needs Ahmed's yes first.
-# Needs: CLOUDFLARE_API_TOKEN (Workers Scripts, D1, Queues: Edit; Syncology account) and CLOUDFLARE_ACCOUNT_ID.
-# Secrets are read from the environment names below and piped straight into Cloudflare. They are never printed or stored.
-#   ANTHROPIC_API_KEY  GITHUB_TOKEN  (WhatsApp ones can be added later with: ./scripts/setup.sh whatsapp)
+# One-shot setup on the Syncology Cloudflare account (Workers FREE plan). Creates: D1, Queue, Worker, push key.
+# Needs CLOUDFLARE_API_TOKEN (Workers Scripts, D1, Queues: Edit) and CLOUDFLARE_ACCOUNT_ID.
+# It never sees ANTHROPIC_API_KEY, GITHUB_TOKEN or ADMIN_KEY: Ahmed types those into the Cloudflare dashboard.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-secret() { # secret NAME  (value comes from the env var of the same name)
-  [ -n "${!1:-}" ] || { echo "skip $1 (not set in environment)"; return 0; }
-  printf '%s' "${!1}" | npx wrangler secret put "$1" >/dev/null && echo "set secret $1"
-}
-if [ "${1:-}" = "whatsapp" ]; then
-  secret WHATSAPP_TOKEN; secret META_APP_SECRET; secret WEBHOOK_VERIFY_TOKEN
-  echo "Now put PHONE_NUMBER_ID in wrangler.toml [vars] and run: npx wrangler deploy"; exit 0
-fi
 npm ci
 if grep -q REPLACE_AFTER_D1_CREATE wrangler.toml; then
   out=$(npx wrangler d1 create tanta-content-bot)
@@ -23,5 +14,7 @@ fi
 npx wrangler d1 migrations apply tanta-content-bot --remote
 npx wrangler queues create tanta-content-bot-inbox 2>/dev/null || echo "queue exists"
 npx wrangler deploy
-secret ANTHROPIC_API_KEY; secret GITHUB_TOKEN
-echo "Worker URL is printed above. Webhook URL = <worker url>/webhook"
+# Push-alert key: made here and piped straight into Cloudflare (never printed, never stored).
+node scripts/vapid.mjs | npx wrangler secret put VAPID_PRIVATE_JWK >/dev/null && echo "set secret VAPID_PRIVATE_JWK"
+echo "Done. App = the workers.dev URL above. Admin page = <that URL>/admin"
+echo "Ahmed sets in the dashboard: ANTHROPIC_API_KEY, GITHUB_TOKEN, ADMIN_KEY (Workers > tanta-content-bot > Settings > Variables and Secrets)"
