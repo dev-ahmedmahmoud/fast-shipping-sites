@@ -144,7 +144,8 @@ const ribs = Array.from({ length: 9 }, (_, i) => i);
     .platform { order: 4; inline-size: calc(100% + 2 * var(--gutter)); margin-inline: calc(-1 * var(--gutter)); margin-block-start: var(--space-2); }
     .platform :global(.team) { padding-block-start: 9%; }
     .arch :global(.keystone) { block-size: 56px; }
-    .actions { order: 5; inline-size: 100%; justify-content: center; margin: 0; padding-block: var(--space-4) var(--space-6); }
+    /* The countdown below rises into the hall by --space-6, so leave that plus a real gap. */
+    .actions { order: 5; inline-size: 100%; justify-content: center; margin: 0; padding-block: var(--space-4) calc(var(--space-6) * 2); }
     .actions .btn { flex: 1 1 15rem; }
   }
 </style>
