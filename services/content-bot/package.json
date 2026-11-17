@@ -1,0 +1,19 @@
+{
+  "name": "tanta-content-bot",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "WhatsApp bot: text-only edits for the tantasportsclubelections site, client approves with YES.",
+  "scripts": {
+    "test": "node --test --no-warnings test/*.test.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "people": "node scripts/people.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.100.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

@@ -1,0 +1,31 @@
+# Worker: tanta-content-bot  (NOT created yet: waiting for Ahmed's yes)
+name = "tanta-content-bot"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# Non-secret settings. Secrets are set with `wrangler secret put` (see docs/SETUP.md).
+[vars]
+GITHUB_REPO = "dev-ahmedmahmoud/fast-shipping-sites"
+LIVE_BRANCH = "claude/islamic-website-design-systems-wfyy85"
+CLIENT_DIR = "clients/tantasportsclubelections"
+SITE_URL = "https://husseindawoudlist.com"
+# Cloudflare Pages branch preview. Branch content/<id> becomes content-<id> (lowercase).
+PREVIEW_URL_TEMPLATE = "https://content-{id}.site-tantasportsclubelections.pages.dev"
+ANTHROPIC_MODEL = "claude-sonnet-5-5"
+GRAPH_VERSION = "v21.0"
+# Filled in when Ahmed creates the Meta app (test number first).
+PHONE_NUMBER_ID = ""
+# Approved WhatsApp utility template used when the client's 24h window is closed.
+APPROVAL_TEMPLATE = "change_approval_request"
+APPROVAL_TEMPLATE_LANG = "ar"
+# Set to "off" to stop the bot from sending anything except audit logging (kill switch).
+BOT_MODE = "on"
+
+[triggers]
+crons = ["17 * * * *"]   # hourly: drop changes older than 24 hours
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tanta-content-bot"
+database_id = "REPLACE_AFTER_D1_CREATE"
+migrations_dir = "migrations"
