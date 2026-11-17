@@ -105,8 +105,15 @@ const { id, title, text, groups, share, support, download } = Astro.props;
     padding-block-start: var(--space-5); border-block-start: 3px dashed color-mix(in oklab, var(--st-enamel) 35%, var(--c-line));
   }
   @media (max-width: 560px) {
-    .ticket { padding: var(--space-7) var(--space-3) var(--space-5); }
-    .board { padding: var(--space-4) var(--space-3); }
+    .ticket { padding: var(--space-7) var(--space-2) var(--space-5); }
+    .board { padding: var(--space-4) var(--space-2); }
     .actions .btn { flex: 1 1 100%; }
+    /* Each name on one line beside its number on phones: a slimmer number tile, and a name size
+       that follows the screen width (about 15px at 360px wide, 18px from about 410px). */
+    li { gap: var(--space-2); }
+    .num { font-size: var(--step-1); min-inline-size: 1.9em; }
+    .who { font-size: clamp(0.75rem, calc(6.6vw - 0.6rem), 1.125rem); }
+    .name { font-size: 1em; padding-inline: 0.5em; }
+    small { font-size: max(0.72rem, 0.85em); }
   }
 </style>
