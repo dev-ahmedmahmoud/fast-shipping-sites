@@ -6,6 +6,13 @@ import type { PageContext, NavItem } from '@engine/context';
 interface Props { ctx: PageContext }
 const { ctx } = Astro.props;
 const other = ctx.languages.find((l) => !l.current);
+// The call-to-action button (Tanta: complaints) shows on every page except its own, at every
+// width. Wherever it shows, the desktop menu leaves out the item for the same page, so the link
+// isn't there twice; on that page itself the button hides and the menu item shows (current).
+const trim = (h: string) => h.replace(/[?#].*$/, '').replace(/\/+$/, '');
+const ctaHere = !!ctx.cta && !ctx.cta.external && trim(ctx.cta.href) === trim(Astro.url.pathname);
+const cta = ctaHere ? null : ctx.cta;
+const deskNav = cta && !cta.external ? ctx.nav.filter((n) => trim(n.href) !== trim(cta.href)) : ctx.nav;
 const linkAttrs = (item: NavItem) => ({
   href: item.href,
   'aria-current': item.current ? 'page' : undefined,
@@ -27,16 +34,16 @@ const linkAttrs = (item: NavItem) => ({
       {other && (
         <a class="lang" href={other.href} hreflang={other.locale} lang={other.locale}>{other.name}</a>
       )}
-      {ctx.cta && (
-        <a class="btn btn--primary cta" href={ctx.cta.href}
-           target={ctx.cta.external ? '_blank' : undefined} rel={ctx.cta.external ? 'noopener' : undefined}>
-          {ctx.cta.label}
+      {cta && (
+        <a class="btn btn--primary cta" href={cta.href}
+           target={cta.external ? '_blank' : undefined} rel={cta.external ? 'noopener' : undefined}>
+          {cta.label}
         </a>
       )}
       <details class="nav-mobile">
         <summary class="btn btn--ghost">
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
-          {ctx.ui.menu}
+          <span class="menu-label">{ctx.ui.menu}</span>
         </summary>
         <nav aria-label={ctx.ui.menu}>
           <ul role="list">
@@ -50,7 +57,6 @@ const linkAttrs = (item: NavItem) => ({
                 )}
               </li>
             ))}
-            {ctx.cta && <li class="cta-mobile"><a class="btn btn--primary" href={ctx.cta.href}>{ctx.cta.label}</a></li>}
           </ul>
         </nav>
       </details>
@@ -59,7 +65,7 @@ const linkAttrs = (item: NavItem) => ({
 
   <nav class="nav-desktop" aria-label={ctx.ui.menu}>
     <ul role="list" class="container">
-      {ctx.nav.map((item) => (
+      {deskNav.map((item) => (
         <li class:list={[{ 'has-sub': item.children.length > 0 }]}>
           <a {...linkAttrs(item)}>{item.label}</a>
           {item.children.length > 0 && (
@@ -133,20 +139,25 @@ const linkAttrs = (item: NavItem) => ({
   .nav-mobile a { white-space: normal; }
   .nav-mobile a[aria-current='page'] { color: var(--st-enamel); background: var(--c-accent-soft); }
   .sub-mobile { padding-inline-start: var(--space-4); }
-  .cta-mobile { display: none; padding: var(--space-2); }
-  .cta-mobile .btn { inline-size: 100%; color: var(--st-enamel-ink); }
 
   @media (max-width: 1080px) {
     .nav-desktop { display: none; }
     .nav-mobile { display: block; }
   }
+  /* Phones: the button stays in the bar beside the menu, made compact; the menu button keeps
+     its word where there is room and becomes the icon alone on narrow screens. */
   @media (max-width: 720px) {
-    .cta { display: none; }
-    .cta-mobile { display: block; }
     .name { font-size: var(--step-0); }
     .logo { block-size: 48px; }
+    .actions { gap: var(--space-2); }
+    .cta { padding-inline: var(--space-3); font-size: var(--step--1); white-space: nowrap; }
+    .nav-mobile summary { padding-inline: var(--space-3); }
   }
-  @media (max-width: 400px) {
+  @media (max-width: 560px) {
     .name { display: none; }
+  }
+  @media (max-width: 440px) {
+    .menu-label { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .nav-mobile summary { inline-size: var(--st-tap); padding-inline: 0; }
   }
 </style>
