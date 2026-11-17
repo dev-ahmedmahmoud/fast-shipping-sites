@@ -221,6 +221,8 @@ export interface Venture {
   logoMono: ImageMetadata | null;
   /** The brand's main colour (any CSS colour), for small accents. */
   color?: string;
+  /** The company's own website, when it has one: the card links there. */
+  url?: string;
 }
 
 export interface VenturesData {
@@ -231,7 +233,7 @@ export interface VenturesData {
   items: Venture[];
   /** 1…n in the client's numerals, for a "٢ / ٥" counter. */
   numbers: string[];
-  labels: { list: string; prev: string; next: string; pause: string; play: string; pick: string };
+  labels: { list: string; prev: string; next: string; pause: string; play: string; pick: string; visit: string };
 }
 
 /** A candidate's companies or affiliations (elections.json → candidates[].ventures), or null. */
@@ -248,6 +250,7 @@ export function ventures(slug: string): VenturesData | null {
     logo: it.logo ? media(it.logo) : null,
     logoMono: it.logoMono ? media(it.logoMono) : null,
     color: it.color || undefined,
+    url: it.url || undefined,
   }));
   return {
     title: v.title,
@@ -261,6 +264,7 @@ export function ventures(slug: string): VenturesData | null {
     labels: {
       list: v.listLabel ?? v.title,
       prev: ui.prev ?? '', next: ui.next ?? '', pause: ui.pause ?? '', play: ui.resume ?? '', pick: ui.pick ?? '',
+      visit: ui.visit ?? '',
     },
   };
 }

@@ -14,7 +14,7 @@ import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
 import type { VenturesData } from '@elections/data';
 interface Props { ctx: PageContext; id?: string; ventures: VenturesData }
-const { id = 'ventures', ventures: v } = Astro.props;
+const { ctx, id = 'ventures', ventures: v } = Astro.props;
 const n = v.items.length;
 const arrow = 'M5 12h14M13 6l6 6-6 6';
 ---
@@ -50,9 +50,19 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
           </div>
           <div class="info">
             <p class="sector">{it.sector}</p>
-            <h3 id={`${id}-${it.slug}`}>{it.name}{it.nameLatin && <span class="latin" lang="en">{it.nameLatin}</span>}</h3>
+            <h3 id={`${id}-${it.slug}`}>
+              {it.url
+                ? <a class="go" href={it.url} target="_blank" rel="noopener" data-vf-link>{it.name}<span class="sr-only"> {ctx.ui.newTab}</span></a>
+                : it.name}
+              {it.nameLatin && <span class="latin" lang="en">{it.nameLatin}</span>}
+            </h3>
             <p class="text">{it.text}</p>
             {it.highlights.length > 0 && <ul class="tags" role="list">{it.highlights.map((h) => <li>{h}</li>)}</ul>}
+            {it.url && (
+              <span class="visit" aria-hidden="true">{v.labels.visit}
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </span>
+            )}
           </div>
         </article>
       </li>
@@ -194,6 +204,14 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
     root.querySelectorAll<HTMLButtonElement>('[data-vf-step]').forEach((b) =>
       b.addEventListener('click', () => { takeOver(); go(active + Number(b.dataset.vfStep)); }));
     rail.forEach((b) => b.addEventListener('click', () => { takeOver(); go(Number(b.dataset.vfGo)); }));
+    // Tapping a card at the side brings it to the front. A company's card links to its website,
+    // and only the card in front opens it.
+    cards.forEach((c, k) => c.addEventListener('click', (e) => {
+      if (k === active) return;
+      e.preventDefault();
+      takeOver();
+      go(k);
+    }));
     pauseBtn.addEventListener('click', () => setPaused(!paused));
 
     measure();
@@ -296,6 +314,17 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
   h3 { font-size: var(--step-1); line-height: 1.4; }
   .latin { display: block; font-family: var(--font-body); font-size: var(--step--1); font-weight: 400; color: var(--c-muted); letter-spacing: 0.04em; }
   .text { color: var(--c-muted); line-height: 1.85; }
+  /* The whole card is the link (its name is the link text; the hit area stretches over the card). */
+  .go { color: inherit; text-decoration: none; }
+  .go::after { content: ''; position: absolute; z-index: 2; inset: 0; border-radius: var(--radius-l); }
+  .go:focus-visible { outline: none; }
+  .go:focus-visible::after { outline: 3px solid var(--st-brass-hi); outline-offset: 4px; }
+  .visit {
+    display: inline-flex; align-items: center; gap: var(--space-2); align-self: flex-start;
+    margin-block-start: var(--space-2); color: var(--st-enamel); font-weight: 700; font-size: var(--step--1);
+  }
+  .card:has(.go:hover) .visit { text-decoration: underline; text-underline-offset: 0.25em; }
+  .is-live .slot:not(.is-front) .card, .card:has(.go) { cursor: pointer; }
   .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: auto 0 0; padding: var(--space-2) 0 0; list-style: none; }
   .tags li {
     padding: 3px var(--space-3); border-radius: var(--radius-s);

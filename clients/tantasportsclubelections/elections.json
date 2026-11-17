@@ -109,7 +109,8 @@
             ],
             "logo": "co-style-home.webp",
             "logoMono": "co-style-home-mono.webp",
-            "color": "#0E2A4E"
+            "color": "#0E2A4E",
+            "url": "https://stylehome-egypt.com/"
           },
           {
             "slug": "kleek",
@@ -124,7 +125,8 @@
             ],
             "logo": "co-kleek.webp",
             "logoMono": "co-kleek-mono.webp",
-            "color": "#5A0A0E"
+            "color": "#5A0A0E",
+            "url": "https://kleekdevelopments.com/"
           },
           {
             "slug": "tanta-modern-school",
@@ -138,17 +140,8 @@
             ],
             "logo": "co-tanta-modern-school.webp",
             "logoMono": "co-tanta-modern-school-mono.webp",
-            "color": "#2F3A63"
-          },
-          {
-            "slug": "friends",
-            "name": "فريندز للمقاولات العامة",
-            "sector": "مقاولات عامة",
-            "text": "تنفّذ العديد من مشروعات ستايل هوم وكلييك، وتعمل في إنشاء مجموعة من المشروعات العملاقة.",
-            "highlights": [
-              "مشروعات ستايل هوم",
-              "مشروعات كلييك"
-            ]
+            "color": "#2F3A63",
+            "url": "https://tms-egypt.com/"
           },
           {
             "slug": "syncology",
@@ -162,7 +155,8 @@
             ],
             "logo": "co-syncology.webp",
             "logoMono": "co-syncology-mono.webp",
-            "color": "#0078CC"
+            "color": "#0078CC",
+            "url": "https://syncology.tech/"
           }
         ]
       }
@@ -460,7 +454,8 @@
     "next": "الشركة التالية",
     "pause": "إيقاف العرض التلقائي",
     "resume": "تشغيل العرض التلقائي",
-    "pick": "اختر شركة"
+    "pick": "اختر شركة",
+    "visit": "زيارة موقع الشركة"
   },
   "home": {
     "hero": {

@@ -136,6 +136,7 @@ if (entry.template === 'candidate' && c) {
       '@type': 'Organization',
       name: it.name,
       ...(it.nameLatin ? { alternateName: it.nameLatin } : {}),
+      ...(it.url ? { url: it.url } : {}),
       ...(it.text ? { description: it.text } : {}),
       ...(it.logo ? { logo: abs(it.logo.src) } : {}),
       founder: { '@id': `${abs(c.href)}#person` },
