@@ -94,8 +94,9 @@ const { id, title, text, groups, share, support, download } = Astro.props;
   .group { display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; }
   h3 { font-size: var(--step-0); color: var(--st-brass-hi); padding-block-end: var(--space-2); border-block-end: 1px solid color-mix(in oklab, var(--st-brass) 45%, transparent); }
   ol { display: flex; flex-direction: column; gap: var(--space-2); }
-  li { display: flex; align-items: center; gap: var(--space-3); }
-  .num { flex: 0 0 auto; min-inline-size: 2.4em; font-size: var(--step-2); padding-block: 0.1em; }
+  /* The number tile is as tall as the name and seat beside it (names wrap on phones). */
+  li { display: flex; align-items: stretch; gap: var(--space-3); }
+  .num { flex: 0 0 auto; align-self: stretch; min-inline-size: 2.4em; font-size: var(--step-2); padding-block: 0.1em; }
   .who { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-inline-size: 0; }
   .name { font-family: var(--font-body); font-weight: 700; font-size: var(--step-0); line-height: 1.6; padding: 0.1em 0.7em; justify-items: start; }
   small { font-size: var(--step--1); color: color-mix(in oklab, var(--st-enamel-ink) 85%, var(--st-night-2)); }
