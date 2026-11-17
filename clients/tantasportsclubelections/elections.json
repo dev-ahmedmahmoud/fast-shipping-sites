@@ -17,9 +17,15 @@
     },
     "location": {
       "name": "نادي طنطا الرياضي",
+      "street": "شارع النادي، أمام مديرية أمن الغربية",
       "locality": "طنطا",
       "region": "الغربية",
-      "country": "EG"
+      "country": "EG",
+      "postalCode": "31515",
+      "geo": {
+        "lat": 30.7968,
+        "lon": 30.9949
+      }
     }
   },
   "list": {

@@ -58,8 +58,9 @@ export function organizationLd(homeUrl: string, abs: (href: string) => string): 
   const phones = (contact?.phones as { number: string }[] | undefined) ?? [];
   const emails = Object.values((contact?.emails as Record<string, { address: string | null }>) ?? {})
     .map((e) => e.address).filter(Boolean);
-  const social = Object.values(((client as Json).social as Record<string, { href: string | null }>) ?? {})
-    .map((s) => s.href).filter(Boolean);
+  // A link marked "placeholder" (the page doesn't exist yet) shows on the site but never in search data.
+  const social = Object.values(((client as Json).social as Record<string, { href: string | null; placeholder?: boolean }>) ?? {})
+    .filter((s) => !s.placeholder).map((s) => s.href).filter(Boolean);
   const logo = typeof (client as Json).logo === 'string' ? media((client as Json).logo as string) : null;
   const org: Json = {
     '@type': seo.orgType ?? (isElections ? 'Organization' : 'School'),

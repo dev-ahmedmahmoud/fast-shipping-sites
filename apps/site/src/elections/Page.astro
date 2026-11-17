@@ -89,7 +89,7 @@ const person = (cand: ReturnType<typeof candidate>, description?: string) => {
     memberOf: orgRef,
   };
 };
-const loc = (election as { location?: { name: string; locality?: string; region?: string; country?: string; street?: string } }).location;
+const loc = (election as { location?: { name: string; locality?: string; region?: string; country?: string; street?: string; postalCode?: string; geo?: { lat: number; lon: number } } }).location;
 const jsonLd: Record<string, unknown>[] = [];
 if (entry.template === 'home') {
   jsonLd.push({ ...orgRef, member: candidates.map((x) => ({ '@id': `${abs(x.href)}#person`, name: x.name })) });
@@ -108,8 +108,10 @@ if (entry.template === 'home') {
           ...(loc.street ? { streetAddress: loc.street } : {}),
           ...(loc.locality ? { addressLocality: loc.locality } : {}),
           ...(loc.region ? { addressRegion: loc.region } : {}),
+          ...(loc.postalCode ? { postalCode: loc.postalCode } : {}),
           ...(loc.country ? { addressCountry: loc.country } : {}),
         },
+        ...(loc.geo ? { geo: { '@type': 'GeoCoordinates', latitude: loc.geo.lat, longitude: loc.geo.lon } } : {}),
       },
       organizer: { '@type': 'SportsOrganization', name: loc.name },
       ...(image ? { image: [abs(typeof image === 'string' ? image : image.src)] } : {}),
