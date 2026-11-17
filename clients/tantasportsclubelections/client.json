@@ -60,9 +60,11 @@
   "footerCredit": {
     "show": true,
     "text": {
-      "ar": "بواسطة سينكولوجي"
+      "ar": "صُمّم وطُوّر بواسطة"
     },
-    "href": "https://syncology.tech"
+    "href": "https://syncology.tech",
+    "logo": "stock/syncology-white.webp",
+    "name": "Syncology"
   },
   "live": "station",
   "samples": [

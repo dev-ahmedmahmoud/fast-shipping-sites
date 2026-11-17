@@ -33,3 +33,7 @@ are the posters here. Stills are single frames from the 720p sources.
 | `lab-pipette.jpg` | https://mixkit.co/free-stock-video/drops-filling-a-lab-tube-17456/ | pool |
 | `teen-studying.jpg` | https://mixkit.co/free-stock-video/concentrated-boy-studying-at-home-4761/ | pool |
 | `teen-reading-lamp.jpg` | https://mixkit.co/free-stock-video/a-young-student-wearing-a-hoodie-hilight-texts-on-a-50126/ | pool |
+
+## Syncology marks
+
+`syncology-white.webp` and `syncology-colour.webp` are Syncology's own logo (white for dark footers, colour for light ones), used in the "built by Syncology" footer credit (`client.json` → `footerCredit.logo`). Not stock: owned by Syncology.

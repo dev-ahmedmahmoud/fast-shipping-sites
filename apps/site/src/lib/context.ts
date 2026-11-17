@@ -45,7 +45,7 @@ export interface PageContext {
   };
   social: { network: string; label: string; href: string }[];
   /** Footer legal line and optional site credit, as the client wants them. */
-  legal: { copyright: string | null; credit: { text: string; href: string | null } | null };
+  legal: { copyright: string | null; credit: { text: string; href: string | null; logo: ImageMetadata | null; name: string | null } | null };
   year: string;
   fmt: {
     number: (n: number) => string;
@@ -119,8 +119,14 @@ export function buildContext(entry: Pick<Entry, 'id' | 'locale'> & Partial<Entry
     .map((v) => ({ label: pick(v.label, locale) ?? '', address: v.address as string }));
   const phones = (client.contact.phones as { label: unknown; number: string }[]).map((p) => ({ label: pick(p.label, locale) ?? '', number: p.number }));
 
+  // footerCredit.logo (optional): a media name, e.g. "stock/syncology-white.webp"; name is its alt text.
   const credit = client.footerCredit?.show
-    ? { text: pick(client.footerCredit.text, locale) ?? '', href: client.footerCredit.href ?? null }
+    ? {
+        text: pick(client.footerCredit.text, locale) ?? '',
+        href: client.footerCredit.href ?? null,
+        logo: client.footerCredit.logo ? media(client.footerCredit.logo) : null,
+        name: client.footerCredit.name ?? null,
+      }
     : null;
 
   return {
