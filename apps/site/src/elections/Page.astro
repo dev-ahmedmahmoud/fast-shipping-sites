@@ -16,7 +16,7 @@ import ComplaintForm from './ComplaintForm.astro';
 import {
   action, ballotGroups, candidate, candidateGroups, candidateRaw, candidates, clipsForCandidate, clipsForFile,
   complaints, countdown, crest, fileRaw, filesPage, home, list, programFiles, shareImage, supporters, teamPage,
-  timeLabel, ui, ventures, video, vote, election, shareKit,
+  timeLabel, ui, ventures, video, vote, election, shareKit, vision,
 } from './data';
 import { media } from '@engine/media';
 import type { ImageMetadata } from 'astro';
@@ -169,7 +169,9 @@ const kit = entry.template === 'support'
       {home.interviews.items.length > 0 && <E.InterviewStrip ctx={ctx} title={home.interviews.title} lead={home.interviews.lead}
         items={home.interviews.items.map((it: any) => {
           const who = candidate(it.candidate);
-          return { name: who.name, seat: who.seat, href: `${who.href}#interview`, poster: media(it.poster), cta: ui.watch };
+          return it.placeholder
+            ? { name: who.name, seat: who.seat, href: who.href, poster: media(it.poster), cta: ui.profileShort ?? ui.watch, soon: typeof it.placeholder === 'string' ? it.placeholder : (ui.soon ?? 'قريبًا') }
+            : { name: who.name, seat: who.seat, href: `${who.href}#interview`, poster: media(it.poster), cta: ui.watch };
         })} />}
       <E.BallotCard ctx={ctx} {...ballot} support={action(vote.support)} />
       <CTA ctx={ctx} title={home.cta.title} text={home.cta.text} action={action(home.cta.action)} />
@@ -214,6 +216,15 @@ const kit = entry.template === 'support'
       <E.Panel ctx={ctx}><Content /></E.Panel>
       {clipsForFile(file.slug).length > 0 && <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} />}
       <E.ProgramFiles ctx={ctx} title={file.othersTitle} files={programFiles.filter((f) => f.slug !== file.slug)} layout="strip" />
+    </>
+  )}
+
+  {entry.template === 'vision' && vision && (
+    <>
+      <E.PageBand ctx={ctx} title={vision.title ?? entry.title} lead={vision.lead} crest={crest} />
+      <E.Vision ctx={ctx} vision={vision}
+        share={vision.board?.share ? { label: vision.board.share.label, href: `https://wa.me/?text=${encodeURIComponent(String(vision.board.share.text).replaceAll('{url}', abs(entry.href)))}` } : null}
+        more={action(vision.board?.more)} />
     </>
   )}
 

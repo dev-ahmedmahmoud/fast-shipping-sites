@@ -1,0 +1,303 @@
+---
+// The list's vision as a journey along one railway line: each chapter is a stop, its number on a
+// brass plate riding the track, with its own picture of the idea:
+//   cards     three principles; the balance one with a scale that sways to rest
+//   flow      cost centres and revenue centres, money flowing from one into the other
+//   grid      four growth axes as numbered tiles
+//   branches  the returns at a hub, branching into the three areas they fund
+//   rules     three safeguards as seals; the 100% one on a split-flap board
+// It ends at the terminus: the summary as a departures board whose words flip into place one
+// after the other, with a share-on-WhatsApp button.
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+interface Item { title: string; text: string; icon?: string; tag?: string; badge?: string; feature?: boolean }
+interface Chapter { id: string; kicker: string; title: string; sub?: string; kind: string; intro?: string; flowLabel?: string; hub?: string; items: Item[] }
+interface Props {
+  ctx: PageContext;
+  vision: { navLabel?: string; chapters: Chapter[]; board?: { label: string; lines: string[] } };
+  share: { label: string; href: string } | null;
+  more: Action | null;
+}
+const { ctx, vision: v, share, more } = Astro.props;
+const n = (i: number) => ctx.fmt.number(i);
+const S = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;
+const ICONS: Record<string, string> = {
+  identity: S('<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 19c.6-3.3 2.9-5 5.5-5s4.9 1.7 5.5 5M14.5 14.2c.8-.5 1.6-.7 2.5-.7 2 0 3.6 1.3 4 4"/>'),
+  means: S('<circle cx="12" cy="12" r="4"/><path d="M12 10.3v3.4M4 12a8 8 0 0 1 13.7-5.6M20 12a8 8 0 0 1-13.7 5.6M17.7 3.5v3h-3M6.3 20.5v-3h3"/>'),
+  balance: S('<path d="M12 4v16M8 20h8M5 7h14"/><path d="M5 7l-2.5 5a2.5 2.5 0 0 0 5 0Z"/><path d="M19 7l-2.5 5a2.5 2.5 0 0 0 5 0Z"/>'),
+  service: S('<path d="M12 7.5c-1-1.6-3.6-1.6-4.3.3-.7 1.8 1.3 3.5 4.3 5.4 3-1.9 5-3.6 4.3-5.4-.7-1.9-3.3-1.9-4.3-.3Z"/><path d="M3 15h3.5l2.5 2h5a1.5 1.5 0 0 0 0-3h-3M3 15v5"/>'),
+  revenue: S('<ellipse cx="12" cy="6" rx="6" ry="2.5"/><path d="M6 6v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V6M6 10v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-4M6 14v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-4"/>'),
+  assets: S('<path d="M4 10v10h16V10M3 6l2-3h14l2 3v1.5a2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-4 0 2.5 2.5 0 0 1-5 0Z"/><path d="M10 20v-5h4v5"/>'),
+  handshake: S('<path d="M2.5 11.5 6 8l4 1.5L13 8l4.5 1 4 2.5"/><path d="M6 8l-3.5 3.5 6 6a1.8 1.8 0 0 0 2.6 0l.4-.4a1.8 1.8 0 0 0 2.6 0l3.4-3.4"/><path d="M13 8 9.5 11.5a1.5 1.5 0 0 0 2.1 2.1L14 11.2l3.5 3.3"/>'),
+  academy: S('<path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 3M16 6h3a3 3 0 0 1-3 3M12 13v4M8 20h8M10 17h4"/>'),
+  digital: S('<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M10 8.5v5l4-2.5Z"/><path d="M8 20h8"/>'),
+  sports: S('<circle cx="12" cy="12" r="8"/><path d="M4.5 9.5c3 1 12 1 15 0M4.5 14.5c3-1 12-1 15 0M12 4c-2.5 3-2.5 13 0 16M12 4c2.5 3 2.5 13 0 16"/>'),
+  social: S('<path d="M12 3c-3 0-5 2.2-5 5 0 1.3.5 2.4 1.3 3.3A3.5 3.5 0 0 0 10 18h4a3.5 3.5 0 0 0 1.7-6.7c.8-.9 1.3-2 1.3-3.3 0-2.8-2-5-5-5Z"/><path d="M12 11v10"/>'),
+  culture: S('<path d="M3 5c3-1 6-.5 9 1.5C15 4.5 18 4 21 5v14c-3-1-6-.5-9 1.5C9 18.5 6 18 3 19Z"/><path d="M12 6.5v14"/>'),
+  shield: S('<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6Z"/><path d="M9 12l2 2 4-4"/>'),
+  kpi: S('<path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/><path d="M4 20h16"/>'),
+  member: S('<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9Z"/>'),
+};
+const icon = (k?: string) => (k && ICONS[k]) || '';
+const words = (line: string) => line.split(/\s+/).filter(Boolean);
+---
+<div class="vision">
+  <nav class="container chapters" aria-label={v.navLabel}>
+    <ol role="list">
+      {v.chapters.map((c, i) => <li><a href={`#${c.id}`}><span class="st-plate" aria-hidden="true">{n(i + 1)}</span>{c.title}</a></li>)}
+    </ol>
+  </nav>
+
+  <div class="container line">
+    {v.chapters.map((c, ci) => (
+      <section class:list={['stop', `is-${c.kind}`]} id={c.id} aria-labelledby={`${c.id}-t`}>
+        <span class="marker st-plate" aria-hidden="true">{n(ci + 1)}</span>
+        <header class="head" data-st-reveal>
+          <p class="kicker">{c.kicker}{c.sub && <span> · {c.sub}</span>}</p>
+          <h2 id={`${c.id}-t`}>{c.title}</h2>
+          {c.intro && <p class="intro">{c.intro}</p>}
+        </header>
+
+        {c.kind === 'cards' && (
+          <ul class="cards" role="list">
+            {c.items.map((it, i) => (
+              <li class:list={['card', it.feature && 'feature']} data-st-reveal style={`--i:${i}`}>
+                <span class:list={['ic', it.icon === 'balance' && 'scale']} set:html={icon(it.icon)} />
+                <h3>{it.title}</h3>
+                <p>{it.text}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {c.kind === 'flow' && (
+          <div class="flow" data-st-ambient>
+            {c.items.map((it, i) => (
+              <>
+                {i === 1 && (
+                  <div class="pipe" aria-hidden="true">
+                    <span class="pipe-label">{c.flowLabel}</span>
+                    <span class="track"><i></i><i></i><i></i><i></i></span>
+                    <svg class="head-arrow flip-rtl" viewBox="0 0 24 24" width="30" height="30"><path d="M19 12H5m6-6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                  </div>
+                )}
+                <article class:list={['panel', i === 0 ? 'cost' : 'income']} data-st-reveal style={`--i:${i}`}>
+                  <span class="ic" set:html={icon(it.icon)} />
+                  {it.tag && <span class="tag">{it.tag}</span>}
+                  <h3>{it.title}</h3>
+                  <p>{it.text}</p>
+                </article>
+              </>
+            ))}
+          </div>
+        )}
+
+        {c.kind === 'grid' && (
+          <ol class="tiles" role="list">
+            {c.items.map((it, i) => (
+              <li class="tile" data-st-reveal style={`--i:${i}`}>
+                <span class="tno" aria-hidden="true">{n(i + 1)}</span>
+                <span class="ic" set:html={icon(it.icon)} />
+                <h3>{it.title}</h3>
+                <p>{it.text}</p>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {c.kind === 'branches' && (
+          <div class="branches">
+            {c.hub && <p class="hub st-sign st-rivets" data-st-reveal>{c.hub}</p>}
+            <ul class="twigs" role="list">
+              {c.items.map((it, i) => (
+                <li class="twig" data-st-reveal style={`--i:${i + 1}`}>
+                  <span class="ic" set:html={icon(it.icon)} />
+                  <h3>{it.title}</h3>
+                  <p>{it.text}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {c.kind === 'rules' && (
+          <ul class="seals" role="list">
+            {c.items.map((it, i) => (
+              <li class="seal" data-st-reveal style={`--i:${i}`}>
+                {it.badge
+                  ? <p class="badge" data-st-flaps aria-hidden="true"><span class="st-flap" data-st-digits={/[٠-٩0-9]/.test(it.badge) ? '' : undefined} data-st-flap={/[٠-٩0-9]/.test(it.badge) ? undefined : ''}>{it.badge}</span></p>
+                  : <span class="ring" set:html={icon(it.icon)} />}
+                <h3>{it.title}</h3>
+                <p>{it.text}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ))}
+  </div>
+
+  {v.board && (
+    <section class="terminus st-glass" aria-labelledby="vision-board" data-st-ambient>
+      <span class="beam" aria-hidden="true"></span>
+      <div class="container">
+        <p class="board-label st-sign st-rivets" id="vision-board">{v.board.label}</p>
+        <p class="sr-only">{v.board.lines.join(' ')}</p>
+        <div class="board" data-st-flaps aria-hidden="true">
+          {v.board.lines.map((line, li) => (
+            <p class:list={['row', li > 0 && 'hot']}>{words(line).map((w) => <span class="st-flap" data-st-flap>{w}</span>)}</p>
+          ))}
+        </div>
+        {(share || more) && (
+          <p class="acts">
+            {share && (
+              <a class="wa" href={share.href} target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M9 8.5c0 3.5 2.5 6.5 6.5 6.5l1-1.6-2-1-1 1c-1.2-.4-2.6-1.8-3-3l1-1-1-2Z" fill="currentColor" /></svg>
+                {share.label}<span class="sr-only"> {ctx.ui.newTab}</span>
+              </a>
+            )}
+            {more && <a class="btn btn--brass" href={more.href}>{more.label}</a>}
+          </p>
+        )}
+      </div>
+    </section>
+  )}
+</div>
+
+<style>
+  /* ---- chapter index ---- */
+  .chapters { padding-block: var(--space-6) 0; }
+  .chapters ol { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-3); padding: 0; margin: 0; list-style: none; }
+  .chapters a {
+    display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 48px; padding: 4px var(--space-4) 4px var(--space-3);
+    border-radius: 999px; border: 2px solid var(--c-line); background: var(--c-surface); color: var(--c-ink); text-decoration: none; font-weight: 700;
+    transition: border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  .chapters a:hover { border-color: var(--st-enamel); transform: translateY(-1px); }
+  .chapters .st-plate { font-size: var(--step--1); }
+
+  /* ---- the line: a brass track down the start side, a stop per chapter ---- */
+  .line { position: relative; padding-block: var(--space-7) var(--space-8); }
+  .line::before {
+    content: ''; position: absolute; inset-block: var(--space-8) var(--space-8); inset-inline-start: calc(var(--gutter) + 22px); inline-size: 14px;
+    background:
+      linear-gradient(90deg, var(--st-brass) 0 3px, transparent 3px calc(100% - 3px), var(--st-brass) calc(100% - 3px)),
+      repeating-linear-gradient(to bottom, color-mix(in oklab, var(--st-brass-lo) 70%, transparent) 0 3px, transparent 3px 14px);
+    opacity: 0.85;
+  }
+  .stop { position: relative; padding-inline-start: 84px; padding-block: var(--space-6); scroll-margin-block-start: 110px; }
+  .marker { position: absolute; inset-inline-start: 6px; inset-block-start: var(--space-6); font-size: var(--step-1); box-shadow: 0 0 0 6px var(--c-bg), 0 3px 0 var(--st-brass-lo), 0 8px 18px -8px color-mix(in oklab, var(--c-ink) 60%, transparent); }
+  .head { display: flex; flex-direction: column; gap: var(--space-2); margin-block-end: var(--space-5); max-inline-size: 52rem; }
+  .kicker { color: var(--st-brass-lo); font-weight: 800; font-size: var(--step-0); }
+  .kicker span { color: var(--c-muted); font-weight: 700; }
+  .head h2 { font-size: var(--step-4); line-height: 1.2; color: var(--st-enamel); }
+  .intro { font-size: var(--step-1); color: var(--c-muted); }
+
+  .ic { display: grid; place-items: center; inline-size: 56px; block-size: 56px; padding: 12px; border-radius: 50%; border: 2px solid var(--st-brass); color: var(--st-enamel); background: color-mix(in oklab, var(--st-brass) 12%, var(--c-surface)); flex: 0 0 auto; }
+  .ic :global(svg) { inline-size: 100%; block-size: 100%; }
+  h3 { font-size: var(--step-1); line-height: 1.4; }
+  .stop p:not(.kicker):not(.intro):not(.hub) { line-height: 1.85; }
+
+  /* cards */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--space-4); padding: 0; margin: 0; list-style: none; }
+  .card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-l); background: var(--c-surface); border: 2px solid var(--c-line); box-shadow: var(--st-shadow); }
+  .card.feature { background: var(--st-night); color: var(--st-enamel-ink); border-color: var(--st-brass); }
+  .card.feature .ic { color: var(--st-brass-hi); background: color-mix(in oklab, var(--st-brass) 18%, var(--st-night)); }
+  .card.feature p { color: color-mix(in oklab, var(--st-enamel-ink) 88%, transparent); }
+  .card p { color: var(--c-muted); }
+  .scale :global(svg) { transform-origin: 50% 30%; }
+  :global(.st-motion) .scale :global(svg) { animation: v-sway 3.2s cubic-bezier(0.4, 0, 0.3, 1) 0.6s both; }
+  @keyframes v-sway { 0% { transform: rotate(-14deg); } 30% { transform: rotate(9deg); } 55% { transform: rotate(-4deg); } 78% { transform: rotate(1.5deg); } 100% { transform: rotate(0); } }
+
+  /* flow: cost centre <— money — revenue centre */
+  .flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: stretch; gap: var(--space-4); }
+  .panel { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6) var(--space-5); border-radius: var(--radius-l); box-shadow: var(--st-shadow); }
+  .panel.cost { background: var(--st-enamel); color: var(--st-enamel-ink); box-shadow: inset 0 0 0 4px var(--st-enamel), inset 0 0 0 6px color-mix(in oklab, var(--st-enamel-ink) 70%, transparent), var(--st-shadow); }
+  .panel.cost .ic { color: var(--st-brass-hi); background: color-mix(in oklab, var(--st-enamel) 70%, var(--c-ink)); }
+  .panel.cost p { color: color-mix(in oklab, var(--st-enamel-ink) 90%, transparent); }
+  .panel.income { background: linear-gradient(150deg, var(--st-brass-hi), var(--st-brass) 55%, color-mix(in oklab, var(--st-brass) 80%, var(--st-brass-lo))); color: var(--c-ink); }
+  .panel.income .ic { color: var(--c-ink); border-color: var(--c-ink); background: color-mix(in oklab, var(--st-brass-hi) 60%, #fff); }
+  .tag { align-self: flex-start; padding: 2px var(--space-3); border-radius: var(--radius-s); font-weight: 800; font-size: var(--step--1); background: color-mix(in oklab, currentColor 14%, transparent); }
+  .pipe { position: relative; display: grid; place-items: center; align-content: center; gap: var(--space-2); inline-size: 150px; color: var(--st-brass-lo); }
+  .pipe-label { font-weight: 800; font-size: var(--step--1); color: var(--st-enamel); text-align: center; }
+  .track { position: relative; display: block; inline-size: 100%; block-size: 10px; border-radius: 99px; background: color-mix(in oklab, var(--st-brass) 30%, var(--c-sunk)); overflow: hidden; }
+  .track i { position: absolute; inset-block-start: 1px; inline-size: 8px; block-size: 8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff8c4, var(--st-brass) 60%, var(--st-brass-lo)); inset-inline-end: 0; opacity: 0; }
+  /* Coins run from the revenue panel (inline end) to the cost panel (inline start). */
+  :global([dir='rtl']) .flow { --toward: 1; }
+  :global([dir='ltr']) .flow { --toward: -1; }
+  :global(.st-motion) .flow.st-live .track i { animation: v-coin 2.4s linear infinite; }
+  .track i:nth-child(2) { animation-delay: -0.6s !important; }
+  .track i:nth-child(3) { animation-delay: -1.2s !important; }
+  .track i:nth-child(4) { animation-delay: -1.8s !important; }
+  @keyframes v-coin { 0% { opacity: 0; transform: translateX(0); } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; transform: translateX(calc(var(--toward) * 142px)); } }
+  .head-arrow { color: var(--st-enamel); }
+
+  /* grid: four numbered tiles */
+  .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); padding: 0; margin: 0; list-style: none; }
+  .tile { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-l); background: var(--c-surface); border: 2px solid var(--c-line); box-shadow: var(--st-shadow); }
+  .tno { position: absolute; inset-block-start: -0.25em; inset-inline-end: var(--space-3); font-family: var(--font-display); font-weight: 900; font-size: 6rem; line-height: 1; color: color-mix(in oklab, var(--st-brass) 22%, transparent); pointer-events: none; }
+  .tile p { color: var(--c-muted); }
+
+  /* branches: a hub sign, then three areas hanging from it */
+  .branches { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .hub { font-weight: 800; font-size: var(--step-1); padding-inline: var(--space-7); position: relative; z-index: 1; }
+  .twigs { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); inline-size: 100%; padding: calc(var(--space-6) + 4px) 0 0; margin: 0; list-style: none; }
+  .twigs::before { content: ''; position: absolute; inset-block-start: var(--space-3); inset-inline: 16.6%; block-size: 3px; background: var(--st-brass); border-radius: 2px; }
+  .twigs::after { content: ''; position: absolute; inset-block-start: calc(-1 * var(--space-2)); inset-inline-start: 50%; translate: -50% 0; inline-size: 3px; block-size: calc(var(--space-3) + var(--space-2)); background: var(--st-brass); }
+  .twig { position: relative; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-l); background: var(--c-surface); border: 2px solid var(--c-line); border-block-start: 5px solid var(--st-brass); box-shadow: var(--st-shadow); }
+  .twig::before { content: ''; position: absolute; inset-block-start: calc(-1 * var(--space-5) - 7px); inset-inline-start: 50%; translate: -50% 0; inline-size: 3px; block-size: calc(var(--space-5) + 4px); background: var(--st-brass); }
+  .twig p { color: var(--c-muted); }
+
+  /* rules: three seals */
+  .seals { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--space-4); padding: 0; margin: 0; list-style: none; }
+  .seal { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-3); padding: var(--space-6) var(--space-5); border-radius: var(--radius-l); background: var(--c-surface); border: 2px solid var(--c-line); box-shadow: var(--st-shadow); }
+  .badge { margin: 0; }
+  .badge .st-flap { font-size: var(--step-5); padding: 0.05em 0.35em; min-inline-size: 2.6em; }
+  .ring { display: grid; place-items: center; inline-size: 96px; block-size: 96px; padding: 22px; border-radius: 50%; color: var(--c-ink); background: radial-gradient(circle at 35% 30%, var(--st-brass-hi), var(--st-brass) 60%, var(--st-brass-lo)); box-shadow: 0 3px 0 var(--st-brass-lo), 0 10px 22px -10px color-mix(in oklab, var(--c-ink) 60%, transparent); }
+  .ring :global(svg) { inline-size: 100%; block-size: 100%; }
+  .seal p { color: var(--c-muted); }
+
+  /* ---- the terminus: the summary on a departures board ---- */
+  .terminus { position: relative; overflow: hidden; isolation: isolate; padding-block: var(--space-8); background-color: var(--st-night); color: var(--st-enamel-ink); text-align: center; }
+  .terminus .container { display: flex; flex-direction: column; align-items: center; gap: var(--space-6); }
+  .beam { position: absolute; z-index: -1; inset-block: -20% 0; left: 50%; translate: -50% 0; inline-size: min(90%, 60rem); background: linear-gradient(to bottom, color-mix(in oklab, var(--st-brass-hi) 22%, transparent), transparent 80%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); opacity: 0.6; pointer-events: none; }
+  .board-label { font-weight: 800; font-size: var(--step-1); padding-inline: var(--space-7); }
+  .board { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-6) var(--space-5); border-radius: var(--radius-l); background: color-mix(in oklab, var(--st-night) 60%, #000); box-shadow: inset 0 0 0 3px var(--st-brass), inset 0 8px 24px rgb(0 0 0 / 0.45); max-inline-size: 64rem; }
+  .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0; }
+  .row .st-flap { font-family: var(--font-display); font-weight: 800; font-size: var(--step-2); padding: 0.1em 0.45em; }
+  .row.hot .st-flap { color: var(--st-brass-hi); }
+  .acts { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin: 0; }
+  .wa { display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: var(--st-tap); padding-inline: var(--space-5); border-radius: var(--radius-m); background: #25D366; color: #052e16; text-decoration: none; font-weight: 800; box-shadow: 0 3px 0 #128C4B; }
+  .wa:hover { transform: translateY(-1px); }
+  :global(.st-rich) .terminus.st-live .beam { animation: v-beam 7s ease-in-out infinite alternate; }
+  @keyframes v-beam { from { opacity: 0.45; } to { opacity: 0.75; } }
+
+  /* ---- phones ---- */
+  @media (max-width: 900px) {
+    .flow { grid-template-columns: minmax(0, 1fr); }
+    .pipe { inline-size: 100%; block-size: 120px; grid-template-columns: auto; }
+    .track { inline-size: 10px; block-size: 92px; }
+    .track i { inset-inline-start: 1px; inset-block-end: 0; inset-block-start: auto; }
+    @keyframes v-coin { 0% { opacity: 0; transform: translateY(0); } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; transform: translateY(-84px); } }
+    .head-arrow { transform: rotate(90deg); order: -1; }
+    .flow .panel.cost { order: -2; }
+    .twigs { grid-template-columns: minmax(0, 1fr); padding-block-start: var(--space-5); }
+    .twigs::before, .twig::before { display: none; }
+    .twigs::after { block-size: var(--space-5); inset-block-start: 0; }
+  }
+  @media (max-width: 700px) {
+    .line::before { inset-inline-start: calc(var(--gutter) + 12px); inline-size: 10px; }
+    .stop { padding-inline-start: 50px; }
+    .marker { inset-inline-start: 0; font-size: var(--step-0); }
+    .head h2 { font-size: var(--step-3); }
+    .tiles { grid-template-columns: minmax(0, 1fr); }
+    .chapters ol { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); }
+    .chapters ol::-webkit-scrollbar { display: none; }
+    .chapters li { flex: 0 0 auto; }
+    .row .st-flap { font-size: var(--step-1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scale :global(svg), .track i, .beam { animation: none !important; }
+    .track i { opacity: 0; }
+  }
+</style>

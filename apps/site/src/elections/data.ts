@@ -25,6 +25,12 @@ export interface VideoData {
   label: string;
   /** Visible caption on the poster, when the source showed one. */
   caption?: string;
+  /**
+   * A video that isn't ready yet: the poster shows with this badge ("قريبًا") instead of a play
+   * button, and nothing plays. Set "placeholder" (true or the badge text) and leave "src" out in
+   * elections.json; adding "src" later makes it a normal video.
+   */
+  soon?: string;
 }
 
 export interface CandidateCard {
@@ -94,10 +100,16 @@ export const home = raw.home ?? {};
 export const teamPage = raw.teamPage ?? {};
 export const filesPage = raw.filesPage ?? {};
 export const supporters = raw.support ?? {};
+/** The list's vision (template "vision"): chapters of cards, a flow, a grid, branches and rules, then a board. */
+export const vision = raw.vision ?? null;
 export const complaints = raw.complaints ?? {};
 
 export function video(v: any): VideoData | null {
-  if (!v || !v.src) return null;
+  if (!v) return null;
+  if (!v.src && v.placeholder && v.poster) {
+    return { src: '', poster: media(v.poster), label: v.label ?? '', caption: v.caption, soon: typeof v.placeholder === 'string' ? v.placeholder : (ui.soon ?? 'قريبًا') };
+  }
+  if (!v.src) return null;
   return { src: v.src, poster: media(v.poster), label: v.label ?? '', caption: v.caption };
 }
 

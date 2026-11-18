@@ -7,7 +7,8 @@ interface Props {
   ctx: PageContext;
   title: string;
   lead?: string;
-  items: { name: string; seat: string; href: string; poster: ImageMetadata; cta: string }[];
+  /** soon: the interview isn't ready (a "قريبًا" badge instead of the play mark). */
+  items: { name: string; seat: string; href: string; poster: ImageMetadata; cta: string; soon?: string }[];
 }
 const { title, lead, items } = Astro.props;
 ---
@@ -21,9 +22,9 @@ const { title, lead, items } = Astro.props;
       {items.map((it) => (
         <li>
           <a class="item" href={it.href}>
-            <span class="media">
+            <span class:list={['media', it.soon && 'is-soon']}>
               <Image src={it.poster} alt="" widths={[384, 768]} sizes="(max-width: 600px) 80vw, 320px" />
-              <span class="play" aria-hidden="true"></span>
+              {it.soon ? <span class="el-video__soon" aria-hidden="true">{it.soon}</span> : <span class="play" aria-hidden="true"></span>}
             </span>
             <h3>{it.name}</h3>
             <p class="seat">{it.seat}</p>
@@ -51,4 +52,6 @@ const { title, lead, items } = Astro.props;
   h3 { font-size: var(--step-1); margin-block-start: var(--space-2); }
   .seat { color: var(--c-muted); font-size: var(--step--1); }
   .more { color: var(--c-accent); font-weight: var(--weight-strong); font-size: var(--step--1); }
+  .media.is-soon :global(img) { filter: brightness(0.6) saturate(0.9); }
+  .media :global(.el-video__soon) { position: absolute; inset-block: 0; inset-inline-end: 7%; margin-block: auto; inline-size: max-content; block-size: max-content; font-size: var(--step--1); padding-inline: var(--space-4); }
 </style>

@@ -1,0 +1,47 @@
+---
+// The list's vision (simple version): each chapter as a heading with its points, then the summary.
+import type { PageContext } from '@engine/context';
+import type { Action } from '@engine/content';
+interface Item { title: string; text: string; tag?: string; badge?: string }
+interface Chapter { id: string; kicker: string; title: string; sub?: string; intro?: string; hub?: string; items: Item[] }
+interface Props {
+  ctx: PageContext;
+  vision: { chapters: Chapter[]; board?: { label: string; lines: string[] } };
+  share: { label: string; href: string } | null;
+  more: Action | null;
+}
+const { ctx, vision: v, share, more } = Astro.props;
+---
+<div class="container wrap">
+  {v.chapters.map((c) => (
+    <section id={c.id} aria-labelledby={`${c.id}-t`}>
+      <p class="kicker">{c.kicker}{c.sub && <> · {c.sub}</>}</p>
+      <h2 id={`${c.id}-t`}>{c.title}</h2>
+      {c.intro && <p class="intro">{c.intro}</p>}
+      <ul class="items">{c.items.map((it) => <li><h3>{it.badge && <span class="badge">{it.badge}</span>}{it.title}{it.tag && <small> ({it.tag})</small>}</h3><p>{it.text}</p></li>)}</ul>
+    </section>
+  ))}
+  {v.board && (
+    <aside class="board">
+      <p class="label">{v.board.label}</p>
+      <blockquote>{v.board.lines.join(' ')}</blockquote>
+      <p class="acts">
+        {share && <a class="btn btn--primary" href={share.href} target="_blank" rel="noopener">{share.label}<span class="sr-only"> {ctx.ui.newTab}</span></a>}
+        {more && <a class="btn btn--ghost" href={more.href}>{more.label}</a>}
+      </p>
+    </aside>
+  )}
+</div>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-7); padding-block: var(--space-7); max-inline-size: 52rem; }
+  .kicker { color: var(--c-muted); font-weight: var(--weight-strong); }
+  h2 { font-size: var(--step-3); }
+  .intro { color: var(--c-muted); }
+  .items { display: flex; flex-direction: column; gap: var(--space-3); padding-inline-start: var(--space-5); }
+  h3 { font-size: var(--step-1); }
+  .badge { margin-inline-end: var(--space-2); color: var(--c-accent); }
+  .board { padding: var(--space-6); border-radius: var(--radius-l); background: var(--c-accent); color: var(--c-accent-ink); text-align: center; }
+  blockquote { margin: var(--space-3) 0; font-size: var(--step-2); font-family: var(--font-display); }
+  .acts { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); }
+</style>

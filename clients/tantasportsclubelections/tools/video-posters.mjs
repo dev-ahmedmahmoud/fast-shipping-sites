@@ -1,0 +1,41 @@
+// Text-free 16:9 video posters, one per candidate: media/<slug>-poster.jpg (1280x720).
+// The candidate stands at the inline start (right in Arabic), the crest small at the top of the
+// other side, the middle left clear for a play button or a "قريبًا" badge, and the site's own
+// caption carrying the words.
+// Usage: node clients/tantasportsclubelections/tools/video-posters.mjs
+import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(here, '../../..');
+const M = path.join(root, 'clients/tantasportsclubelections/media');
+const { chromium } = createRequire(import.meta.url)('playwright');
+const { default: sharp } = await import(createRequire(path.join(root, 'apps/site/package.json')).resolve('sharp'));
+const data = JSON.parse(readFileSync(path.join(root, 'clients/tantasportsclubelections/elections.json'), 'utf8'));
+const img = (f) => `data:image/webp;base64,${readFileSync(path.join(M, f)).toString('base64')}`;
+const crest = img('crest.webp');
+
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
+for (const c of data.candidates) {
+  await p.setContent(`<!doctype html><html dir="rtl"><head><style>
+  *{margin:0}html,body{width:1280px;height:720px;overflow:hidden;background:#141B3A}
+  .s{position:absolute;inset:0;overflow:hidden;background:radial-gradient(70% 110% at 78% 100%,#3d6fd0 0%,#23449A 40%,#1a2f6e 72%,#141B3A 100%)}
+  .rays{position:absolute;inset:0;background:repeating-conic-gradient(from 180deg at 78% 108%,rgba(237,212,39,.10) 0 1deg,transparent 1deg 9deg);
+    -webkit-mask:linear-gradient(to bottom,#000,transparent 80%)}
+  .grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 64px),repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 64px)}
+  .glow{position:absolute;right:60px;bottom:-120px;width:640px;height:560px;border-radius:50%;background:radial-gradient(closest-side,rgba(242,213,69,.32),transparent)}
+  .arch{position:absolute;right:120px;bottom:0;width:440px;height:600px;border:4px solid #EDD427;border-bottom:0;border-radius:50% 50% 0 0/34% 34% 0 0;opacity:.85}
+  .who{position:absolute;right:90px;bottom:0;height:640px}
+  .crest{position:absolute;left:70px;top:56px;height:110px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45))}
+  .ledge{position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(#F5E06A,#EDD427 45%,#B89B12)}
+  </style></head><body><div class="s"><div class="rays"></div><div class="grid"></div><div class="glow"></div><div class="arch"></div>
+  <img class="who" src="${img(c.card)}"><img class="crest" src="${crest}"><div class="ledge"></div></div></body></html>`);
+  await p.waitForTimeout(150);
+  const png = await p.screenshot();
+  await sharp(png).jpeg({ quality: 84, progressive: true, mozjpeg: true }).toFile(path.join(M, `${c.slug}-poster.jpg`));
+  console.log('wrote', `${c.slug}-poster.jpg`);
+}
+await b.close();

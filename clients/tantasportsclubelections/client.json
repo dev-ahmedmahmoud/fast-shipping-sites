@@ -82,7 +82,8 @@
     }
   ],
   "todo": [
-    "videos: none yet (leader's word, interviews, program clips); sections stay hidden until the client sends them.",
+    "videos: none yet. The leader's word (home) and the 12 interviews (home carousel) show as \"قريبًا\" placeholders on text-free posters (media/<slug>-poster.jpg, tools/video-posters.mjs); give each its \"src\" in elections.json and drop \"placeholder\" to make it play. Program-file clips stay hidden until sent.",
+    "vision page (/vision/, template vision, elections.json vision): Ahmed's text, three typos fixed (ثقفي، مساحات الخضراء، المهارت); linked from the home hero only.",
     "program files: seven (المالي والحوكمة، التطوير، الاستثمار والتسويق، الطبي، التحول الرقمي، الأمني والإداري، الرياضي), named by the client; their pages wait for the client's text, and the one-line taglines are ours (placeholders: confirm). The old /files/services and /files/culture redirect to /files/.",
     "election: Friday 18 December 2026 at 9:00 AM Cairo time (from Ahmed). The countdown runs to that moment; from then the day's message shows.",
     "membership number rule (6 digits) is the template's; confirm Tanta's format.",

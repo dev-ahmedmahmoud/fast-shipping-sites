@@ -18,7 +18,7 @@ interface MdModule {
 }
 
 /** Page templates. The election ones render from clients/<slug>/elections.json (see src/elections). */
-export const TEMPLATES = ['home', 'page', 'news', 'candidates', 'candidate', 'files', 'file', 'support', 'complaints'] as const;
+export const TEMPLATES = ['home', 'page', 'news', 'candidates', 'candidate', 'files', 'file', 'support', 'complaints', 'vision'] as const;
 export type Template = (typeof TEMPLATES)[number];
 
 export interface Entry {

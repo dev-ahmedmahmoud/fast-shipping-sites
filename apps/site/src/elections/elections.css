@@ -33,6 +33,15 @@
   border: 4px solid rgb(255 255 255 / 0.35); border-block-start-color: #fff; animation: el-spin 0.9s linear infinite; pointer-events: none;
 }
 @keyframes el-spin { to { rotate: 1turn; } }
+/* A video that isn't ready yet: the poster, dimmed, with a "soon" badge in the middle. */
+:where(.el-video.is-soon) .el-video__poster { filter: brightness(0.62) saturate(0.85); }
+:where(.el-video__soon) {
+  /* On the side away from the candidate (posters put the person at the inline start). */
+  position: absolute; inset-block: 0; inset-inline-end: 9%; margin-block: auto; inline-size: max-content; block-size: max-content;
+  padding: var(--space-2) var(--space-5); border-radius: 999px;
+  background: color-mix(in oklab, var(--c-ink) 70%, transparent); color: #fff; font-weight: var(--weight-strong);
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.5);
+}
 
 /* ---------- supporters' app ---------- */
 :where(.el-sup) { display: block; }

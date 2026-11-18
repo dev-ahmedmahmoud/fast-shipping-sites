@@ -18,8 +18,9 @@ import ClipGrid from './ClipGrid.astro';
 import Panel from './Panel.astro';
 import Ventures from './Ventures.astro';
 import ShareKit from './ShareKit.astro';
+import Vision from './Vision.astro';
 
 export const electionComponents = {
   ElectionHero, Countdown, ProgramFiles, LeaderSpotlight, CandidateGrid, InterviewStrip, BallotCard,
-  PageBand, CandidateHero, MediaFrame, InterviewPlayer, PhotoRow, ClipGrid, Panel, Ventures, ShareKit,
+  PageBand, CandidateHero, MediaFrame, InterviewPlayer, PhotoRow, ClipGrid, Panel, Ventures, ShareKit, Vision,
 };

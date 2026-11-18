@@ -9,6 +9,7 @@
 //   .el-video__poster    the poster image
 //   .el-video__icon      the round play mark
 //   .el-video__label     optional caption on the poster
+//   .el-video.is-soon    a video not ready yet: the poster and an .el-video__soon badge, no button
 import { Image } from 'astro:assets';
 import type { VideoData } from './data';
 import { ui } from './data';
@@ -25,10 +26,18 @@ interface Props {
 const { video, widths = [480, 768, 1024, 1440], sizes = '(max-width: 900px) 100vw, 60vw', class: cls, showCaption = false } = Astro.props;
 const playLabel = `${ui.play ?? 'تشغيل الفيديو'}: ${video.label}`;
 ---
-<div class:list={['el-video', cls]} data-el-video data-src={video.src}>
-  <button class="el-video__play" type="button" aria-label={playLabel}>
+{video.soon ? (
+  <div class:list={['el-video', 'is-soon', cls]} role="img" aria-label={`${video.label} — ${video.soon}`}>
     <Image class="el-video__poster" src={video.poster} alt="" widths={widths} sizes={sizes} loading="lazy" />
-    <span class="el-video__icon" aria-hidden="true"></span>
-    {showCaption && video.caption && <span class="el-video__label">{video.caption}</span>}
-  </button>
-</div>
+    <span class="el-video__soon" aria-hidden="true">{video.soon}</span>
+    {showCaption && video.caption && <span class="el-video__label" aria-hidden="true">{video.caption}</span>}
+  </div>
+) : (
+  <div class:list={['el-video', cls]} data-el-video data-src={video.src}>
+    <button class="el-video__play" type="button" aria-label={playLabel}>
+      <Image class="el-video__poster" src={video.poster} alt="" widths={widths} sizes={sizes} loading="lazy" />
+      <span class="el-video__icon" aria-hidden="true"></span>
+      {showCaption && video.caption && <span class="el-video__label">{video.caption}</span>}
+    </button>
+  </div>
+)}
