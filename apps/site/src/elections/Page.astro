@@ -97,7 +97,8 @@ if (entry.template === 'home') {
     jsonLd.push({
       '@type': 'Event',
       name: election.title,
-      startDate: election.at,
+      // A date alone (election.date) when the voting hours aren't known; else the exact moment.
+      startDate: election.date ?? election.at,
       eventStatus: 'https://schema.org/EventScheduled',
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       location: {

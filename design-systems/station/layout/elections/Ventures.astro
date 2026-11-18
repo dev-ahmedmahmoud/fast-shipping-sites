@@ -2,14 +2,13 @@
 // A candidate's companies, shown as a turntable of brass-framed plaques on the night platform
 // (a "coverflow"). The plaque in front faces the visitor, lit, and its logo catches a glint
 // of light; its neighbours turn away into the dark. Above it, a split-flap board of numbers.
-// Below it, the arrows, a "٢ / ٥" counter, a pause button whose brass ring fills until the
-// next plaque, and a rail of the logos in white that jumps straight to a company.
+// Below it, the arrows and a "٢ / ٥" counter.
 //
 // Underneath it is a plain list that scrolls sideways (swipe, wheel, keyboard), so it works
 // without script and reads in order in a screen reader. The script adds only the turn, the
-// arrows, the rail and the autoplay. Autoplay runs only while the section is on screen, stops
-// on hover, focus or any touch, and never starts for visitors who prefer reduced motion, who
-// also get flat plaques.
+// arrows and the autoplay. Autoplay runs only while the section is on screen, pauses on hover
+// or focus, stops for good on any touch, click or key, and never starts for visitors who prefer
+// reduced motion, who also get flat plaques.
 import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
 import type { VenturesData } from '@elections/data';
@@ -18,8 +17,7 @@ const { ctx, id = 'ventures', ventures: v } = Astro.props;
 const n = v.items.length;
 const arrow = 'M5 12h14M13 6l6 6-6 6';
 ---
-<section class="vf st-glass" id={id} aria-labelledby={`${id}-title`} data-vf data-nums={JSON.stringify(v.numbers)}
-         data-play={v.labels.play} data-pause={v.labels.pause} data-st-ambient>
+<section class="vf st-glass" id={id} aria-labelledby={`${id}-title`} data-vf data-nums={JSON.stringify(v.numbers)} data-st-ambient>
   <span class="glow" aria-hidden="true"></span>
   <div class="container">
     <header class="st-title head">
@@ -78,23 +76,7 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
       <button class="round" type="button" data-vf-step="1" aria-controls={`${id}-track`} aria-label={v.labels.next}>
         <svg class="flip-rtl" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d={arrow} fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
       </button>
-      <button class="round pause" type="button" data-vf-pause aria-pressed="false" aria-label={v.labels.pause}>
-        <svg class="ring" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="23" pathLength="100" /></svg>
-        <svg class="icon-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></svg>
-        <svg class="icon-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" /></svg>
-      </button>
     </div>
-    <ul class="rail" role="list" aria-label={v.labels.pick} data-vf-ui hidden>
-      {v.items.map((it, i) => (
-        <li>
-          <button type="button" data-vf-go={i} aria-controls={`${id}-track`} aria-label={it.name}>
-            {it.logoMono
-              ? <Image src={it.logoMono} alt="" widths={[120, 240, 360]} sizes="120px" />
-              : <span aria-hidden="true">{it.name}</span>}
-          </button>
-        </li>
-      ))}
-    </ul>
   </div>
 </section>
 
@@ -105,9 +87,7 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
   function turntable(root: HTMLElement) {
     const track = root.querySelector<HTMLElement>('[data-vf-track]')!;
     const cards = [...root.querySelectorAll<HTMLElement>('[data-vf-card]')];
-    const rail = [...root.querySelectorAll<HTMLButtonElement>('[data-vf-go]')];
     const now = root.querySelector<HTMLElement>('[data-vf-now]');
-    const pauseBtn = root.querySelector<HTMLButtonElement>('[data-vf-pause]')!;
     const nums: string[] = JSON.parse(root.dataset.nums || '[]');
     const n = cards.length;
     if (!n) return;
@@ -145,7 +125,6 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
       const first = active === -1;
       active = i;
       cards.forEach((c, k) => c.classList.toggle('is-front', k === i));
-      rail.forEach((b, k) => (k === i ? b.setAttribute('aria-current', 'true') : b.removeAttribute('aria-current')));
       if (now) {
         now.textContent = nums[i] ?? String(i + 1);
         if (!first && !reduce) {
@@ -167,27 +146,20 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
       track.scrollBy({ left: r.left + r.width / 2 - (t.left + t.width / 2), behavior: reduce ? 'auto' : 'smooth' });
     }
 
-    // ---- autoplay: on screen, not held (hover, focus), not paused by the visitor ----
+    // ---- autoplay: on screen, not held (hover, focus), not stopped by the visitor ----
     let timer = 0;
     let inView = false;
     let held = false;
     let paused = reduce;
     function schedule() {
       clearTimeout(timer);
-      root.classList.remove('is-ticking');
       if (paused || held || !inView || document.hidden) return;
-      void root.offsetWidth; // restart the ring's fill
-      root.classList.add('is-ticking');
       timer = window.setTimeout(() => go(active + 1), DWELL);
     }
     function setPaused(p: boolean) {
       paused = p;
-      pauseBtn.setAttribute('aria-pressed', String(p));
-      pauseBtn.setAttribute('aria-label', (p ? root.dataset.play : root.dataset.pause) ?? '');
-      root.classList.toggle('is-paused', p);
       schedule();
     }
-    setPaused(paused);
 
     new IntersectionObserver(([e]) => { inView = e.isIntersecting; queue(); schedule(); }, { threshold: 0.45 }).observe(track);
     document.addEventListener('visibilitychange', schedule);
@@ -195,7 +167,7 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
     root.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { held = false; schedule(); } });
     root.addEventListener('focusin', () => { held = true; schedule(); });
     root.addEventListener('focusout', (e) => { if (!root.contains(e.relatedTarget as Node)) { held = false; schedule(); } });
-    // The visitor took the wheel: stop for good (they can press play again).
+    // The visitor took the wheel: stop for good.
     const takeOver = () => { if (!paused) setPaused(true); };
     track.addEventListener('pointerdown', takeOver, { passive: true });
     track.addEventListener('wheel', (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) takeOver(); }, { passive: true });
@@ -203,7 +175,6 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
 
     root.querySelectorAll<HTMLButtonElement>('[data-vf-step]').forEach((b) =>
       b.addEventListener('click', () => { takeOver(); go(active + Number(b.dataset.vfStep)); }));
-    rail.forEach((b) => b.addEventListener('click', () => { takeOver(); go(Number(b.dataset.vfGo)); }));
     // Tapping a card at the side brings it to the front. A company's card links to its website,
     // and only the card in front opens it.
     cards.forEach((c, k) => c.addEventListener('click', (e) => {
@@ -212,7 +183,6 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
       takeOver();
       go(k);
     }));
-    pauseBtn.addEventListener('click', () => setPaused(!paused));
 
     measure();
   }
@@ -335,7 +305,7 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
 
   /* ---- controls ---- */
   .controls { display: flex; align-items: center; justify-content: center; gap: var(--space-4); }
-  .controls[hidden], .rail[hidden] { display: none; }
+  .controls[hidden] { display: none; }
   .round {
     position: relative; display: grid; place-items: center; inline-size: var(--st-tap); block-size: var(--st-tap);
     border: 0; border-radius: 50%; cursor: pointer; color: var(--c-ink);
@@ -347,32 +317,6 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
   .round:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--st-brass-lo); }
   .count { display: flex; align-items: center; gap: var(--space-2); font-size: var(--step-2); }
   .count .of { color: color-mix(in oklab, var(--st-enamel-ink) 70%, transparent); font-family: var(--font-display); }
-  .pause { margin-inline-start: var(--space-3); }
-  .pause .ring { position: absolute; inset: -5px; inline-size: calc(100% + 10px); block-size: calc(100% + 10px); transform: rotate(-90deg); }
-  .pause .ring circle { fill: none; stroke: var(--st-brass-hi); stroke-width: 3; stroke-dasharray: 100; stroke-dashoffset: 100; }
-  .is-ticking .pause .ring circle { animation: vf-ring 5.2s linear both; }
-  @keyframes vf-ring { to { stroke-dashoffset: 0; } }
-  .icon-play { display: none; }
-  .is-paused .icon-play { display: block; }
-  .is-paused .icon-pause { display: none; }
-
-  /* The rail: every logo in white; the one in front lit, with a brass bar under it. */
-  .rail { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2) var(--space-4); margin: var(--space-6) 0 0; padding: 0; list-style: none; }
-  .rail button {
-    position: relative; display: grid; place-items: center; min-block-size: 56px; min-inline-size: 56px; padding: var(--space-2) var(--space-3);
-    border: 0; background: none; cursor: pointer; color: var(--st-enamel-ink);
-    opacity: 0.6; transition: opacity var(--dur-fast) var(--ease-out);
-    font-family: var(--font-body); font-weight: 700; font-size: var(--step--1);
-  }
-  .rail button :global(img) { inline-size: 120px; block-size: 80px; object-fit: contain; }
-  @media (max-width: 600px) { .rail button :global(img) { inline-size: 96px; block-size: 64px; } }
-  .rail button::after {
-    content: ''; position: absolute; inset-inline: 22%; inset-block-end: 0; block-size: 3px; border-radius: 2px;
-    background: var(--st-brass); transform: scaleX(0); transition: transform var(--dur-base) var(--ease-out);
-  }
-  .rail button:hover { opacity: 0.85; }
-  .rail button[aria-current] { opacity: 1; }
-  .rail button[aria-current]::after { transform: scaleX(1); }
 
   /* Lamplight breathes slowly while the platform is on screen (capable devices only). */
   :global(.st-rich) .vf.st-live .glow { animation: vf-breathe 6s ease-in-out infinite alternate; }
@@ -382,6 +326,5 @@ const arrow = 'M5 12h14M13 6l6 6-6 6';
     .is-live .card { transform: none; }
     .is-live .card::after { opacity: 0; }
     .shine, .glow { animation: none !important; }
-    .pause { display: none; }
   }
 </style>

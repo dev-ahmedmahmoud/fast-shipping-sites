@@ -79,7 +79,7 @@
   "todo": [
     "videos: none yet (leader's word, interviews, program clips); sections stay hidden until the client sends them.",
     "program files: seven (المالي والحوكمة، التطوير، الاستثمار والتسويق، الطبي، التحول الرقمي، الأمني والإداري، الرياضي), named by the client; their pages wait for the client's text, and the one-line taglines are ours (placeholders: confirm). The old /files/services and /files/culture redirect to /files/.",
-    "election date/time: still the template's (Friday 20 Nov 2026, 8 PM) until the client confirms.",
+    "election date: Friday 18 December 2026 (from Ahmed). The voting hours are not known yet, so the countdown runs to the start of that day, the date line shows no time, and the search data gives the date only. With the hours, set election.at to the opening time and add it to dateText.",
     "membership number rule (6 digits) is the template's; confirm Tanta's format.",
     "social: Facebook only; the footer icon links to facebook.com until the page exists (\"placeholder\": true keeps it out of search data). Live at https://husseindawoudlist.com (own Cloudflare Pages project site-tantasportsclubelections, set up by the Infra Agent; www redirects to the apex; no build watch paths, so every push to the branch rebuilds it). The live page's generator meta ends with the commit it was built from.",
     "api: supporters and complaints run in demo mode (this browser only, nothing sent). Live needs the backend in API.md, a WhatsApp sender for the codes, and a Turnstile site key.",
