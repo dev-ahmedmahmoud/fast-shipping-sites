@@ -36,7 +36,7 @@
     },
     "href": "share:whatsapp",
     "text": {
-      "ar": "🗳️ الجمعة 18 ديسمبر موعدنا في نادي طنطا الرياضي\nصوتي لقائمة المهندس حسين داود .. وانت معانا؟\nتاريخ نحترمه .. ومستقبل نصنعه 💛💙\nاتعرّف على المرشحين الـ12 وبرنامج القائمة هنا 👇\n{url}"
+      "ar": "🗳️ الجمعة 18 ديسمبر موعدنا في نادي طنطا الرياضي\nصوتي لقائمة المهندس حسين داود .. وانت معانا؟\nتاريخ نحترمه .. ومستقبل نصنعه 💛💙\nاتعرّف على المرشحين الـ12 وبرنامج القائمة هنا 👇\n{url}\n📣 وتابع الحملة الرسمية على فيسبوك:\nhttps://www.facebook.com/profile.php?id=61596208629223"
     },
     "hideOn": [
       "support"
@@ -56,8 +56,7 @@
   "social": {
     "facebook": {
       "label": "Facebook",
-      "href": "https://www.facebook.com/",
-      "placeholder": true
+      "href": "https://www.facebook.com/profile.php?id=61596208629223"
     }
   },
   "copyright": {
@@ -87,12 +86,12 @@
     "program files: seven (المالي والحوكمة، التطوير، الاستثمار والتسويق، الطبي، التحول الرقمي، الأمني والإداري، الرياضي), named by the client; their pages wait for the client's text, and the one-line taglines are ours (placeholders: confirm). The old /files/services and /files/culture redirect to /files/.",
     "election: Friday 18 December 2026 at 9:00 AM Cairo time (from Ahmed). The countdown runs to that moment; from then the day's message shows.",
     "membership number rule (6 digits) is the template's; confirm Tanta's format.",
-    "social: Facebook only. When Ahmed sends the page: set social.facebook.href (drop placeholder) AND add a line with the Facebook link to every WhatsApp message (elections.json support.share.messages and client.json headerCta.text), AFTER the site link: WhatsApp builds the preview from the first link, and the preview must stay the website's. Until then the footer icon links to facebook.com (\"placeholder\": true keeps it out of search data). Live at https://husseindawoudlist.com (own Cloudflare Pages project site-tantasportsclubelections, set up by the Infra Agent; www redirects to the apex; no build watch paths, so every push to the branch rebuilds it). The live page's generator meta ends with the commit it was built from.",
+    "social: Facebook only, the campaign page https://www.facebook.com/profile.php?id=61596208629223 (short form of its /people/… address). It is in the footer, the search data (sameAs) and every WhatsApp message (support.share.messages and headerCta.text), always AFTER the site link: WhatsApp builds the preview from the first link, so the preview stays the website's.",
     "support page: no sign-up any more (Ahmed's call). It is a WhatsApp share kit (elections.json support.share: three ready messages linking to the home page, a live chat preview, share and copy buttons); the link preview is media/share.jpg, made by tools/share-card.mjs. Complaints still run in demo mode (nothing sent); live needs the backend in API.md and a Turnstile site key.",
     "El-Sharkawy (اللواء مصطفى الشرقاوي; first read from the poster as الشمقاوي, corrected from the poster and the official list; the old /team/mostafa-el-shamkawy/ redirects): no CV yet; his page has placeholder text.",
     "leader: CV in, age shown (51, from his CV; Ahmed's call). Company cards: StyleHome, Kleek, Tanta Modern School, Syncology (Friends taken off the cards by Ahmed; it stays in the bio). Logos from the media agent. Each card links to the company's site (elections.json url): stylehome-egypt.com, kleekdevelopments.com, tms-egypt.com, syncology.tech.",
     "seats: from the campaign poster (via the media agent). Ballot numbers are the official ones (the club's candidate lists, numbered per seat), set 18 Nov.",
-    "names to confirm: Fathy Selim's title (CV: الكابتن, poster: الدكتور); the poster spells the leader 'داود'.",
+    "names: Fathy Selim is د. (Ahmed, matching the poster; his bio keeps his popular name كابتن فتحي سليم); the poster spells the leader 'داود'.",
     "photos: client photos cut out by the media agent and matched to names by face (needs one human confirmation, see media-manifest.json). Crest: the media agent's 3D version (crest.webp with shadow on blue: hero, page bands, ballot card, share cards; logo.webp without shadow: header, favicon, schema logo). The club's original file would still be the best source.",
     "seo: Google Search Console is verified by DNS (TXT record in Cloudflare, so seo.googleSiteVerification stays empty) and /sitemap.xml is submitted. Cloudflare Web Analytics is on. The election's place carries the club's street address, postcode and map point (from the club's site tantasc.net and OpenStreetMap)."
   ],

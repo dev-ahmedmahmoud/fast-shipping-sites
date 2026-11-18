@@ -15,8 +15,8 @@ interface Props { ctx: PageContext; kit: ShareKitData }
 const { ctx, kit: k } = Astro.props;
 const wa = (text: string) => `https://wa.me/?text=${encodeURIComponent(text)}`;
 const first = k.messages[0];
-// The message as chat text: the link shown as a link, the rest as plain text.
-const parts = (text: string) => text.split(k.url);
+// The message as chat text: every web address shown as a link, the rest as plain text.
+const parts = (text: string) => text.split(/(https?:\/\/\S+)/);
 ---
 <section class="section sk" data-sk data-url={k.url} data-msgs={JSON.stringify(k.messages.map((m) => m.text))}>
   <div class="container grid">
@@ -70,7 +70,7 @@ const parts = (text: string) => text.split(k.url);
                   <span class="host" dir="ltr">{k.host}</span>
                 </div>
               </div>
-              <p class="text" data-sk-text>{parts(first.text).map((t, i) => <>{i > 0 && <span class="link" dir="ltr">{k.url}</span>}{t}</>)}</p>
+              <p class="text" data-sk-text>{parts(first.text).map((t, i) => (i % 2 ? <span class="link" dir="ltr">{t}</span> : t))}</p>
               <span class="meta"><time data-sk-time>8:30 م</time><svg viewBox="0 0 18 12" width="17" height="11" aria-hidden="true"><path d="M1 6.5 4.2 9.6 10.8 2.4M7 9.6 7.9 10.5 14.5 3.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
             </div>
             <div class="msg in typing" data-sk-typing hidden><i></i><i></i><i></i></div>
@@ -108,9 +108,9 @@ const parts = (text: string) => text.split(k.url);
     const render = (i: number) => {
       const text = msgs[i] ?? '';
       textEl.replaceChildren();
-      text.split(url).forEach((part, n) => {
-        if (n > 0) { const a = document.createElement('span'); a.className = 'link'; a.dir = 'ltr'; a.textContent = url; textEl.append(a); }
-        textEl.append(part);
+      text.split(/(https?:\/\/\S+)/).forEach((part, n) => {
+        if (n % 2) { const a = document.createElement('span'); a.className = 'link'; a.dir = 'ltr'; a.textContent = part; textEl.append(a); }
+        else textEl.append(part);
       });
       wa.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
     };
@@ -201,7 +201,7 @@ const parts = (text: string) => text.split(k.url);
     background: linear-gradient(145deg, #2b3350, #0e1326);
     box-shadow: inset 0 0 0 2px #3b4466, 0 30px 60px -24px color-mix(in oklab, var(--c-ink) 70%, transparent), 0 0 0 6px color-mix(in oklab, var(--st-brass) 40%, transparent);
   }
-  .screen { position: relative; overflow: hidden; border-radius: 34px; background: #efeae2; display: flex; flex-direction: column; block-size: 700px; }
+  .screen { position: relative; overflow: hidden; border-radius: 34px; background: #efeae2; display: flex; flex-direction: column; block-size: 740px; }
   .bar { display: flex; align-items: center; gap: 10px; padding: 14px 12px 10px; background: #008069; color: #fff; }
   .back { flex: 0 0 auto; }
   .avatar { inline-size: 38px; block-size: 38px; border-radius: 50%; background: #fff; display: grid; place-items: center; overflow: hidden; flex: 0 0 auto; }
@@ -253,7 +253,7 @@ const parts = (text: string) => text.split(k.url);
   }
   @media (max-width: 400px) {
     .phone { inline-size: 100%; border-radius: 38px; }
-    .screen { block-size: 660px; }
+    .screen { block-size: 770px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .is-in, .typing i { animation: none !important; }
