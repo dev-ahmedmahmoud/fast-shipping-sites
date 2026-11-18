@@ -27,7 +27,12 @@ export function initCountdowns(numerals: string) {
       }
       const s = Math.floor(left / 1000);
       const v: Record<string, number> = { d: Math.floor(s / 86400), h: Math.floor((s % 86400) / 3600), m: Math.floor((s % 3600) / 60), s: s % 60 };
-      for (const k of Object.keys(v)) if (cells[k]) cells[k].textContent = fmt.format(v[k]);
+      // Write a cell only when its number changes, so designs that animate a change (a flip,
+      // a roll) move just the seconds each tick, and the minutes only when they turn over.
+      for (const k of Object.keys(v)) {
+        const text = fmt.format(v[k]);
+        if (cells[k] && cells[k].textContent !== text) cells[k].textContent = text;
+      }
       box.dataset.tick = String(s);
     };
     tick();

@@ -153,7 +153,7 @@ const ogType = entry.template === 'candidate' ? 'profile' : 'website';
         actions={home.hero.actions.map(action).filter(Boolean)}
         image={home.hero.image ? media(home.hero.image) : null} imageAlt={home.hero.imageAlt} crest={crest} />
       <E.Countdown ctx={ctx} countdown={countdown} />
-      <E.ProgramFiles ctx={ctx} title={home.filesTitle} files={programFiles} />
+      <E.ProgramFiles ctx={ctx} title={home.filesTitle} files={programFiles} layout="strip" />
       {leader && (
         <E.LeaderSpotlight ctx={ctx} kicker={home.leader.kicker} name={leader.name} text={home.leader.text}
           more={{ label: home.leader.more, href: leader.href }} video={video(home.leader.video)} photo={leader.photo} />
@@ -207,7 +207,7 @@ const ogType = entry.template === 'candidate' ? 'profile' : 'website';
       <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} />
       <E.Panel ctx={ctx}><Content /></E.Panel>
       {clipsForFile(file.slug).length > 0 && <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} />}
-      <E.ProgramFiles ctx={ctx} title={file.othersTitle} files={programFiles.filter((f) => f.slug !== file.slug)} />
+      <E.ProgramFiles ctx={ctx} title={file.othersTitle} files={programFiles.filter((f) => f.slug !== file.slug)} layout="strip" />
     </>
   )}
 

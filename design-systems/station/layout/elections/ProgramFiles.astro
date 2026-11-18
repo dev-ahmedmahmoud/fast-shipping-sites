@@ -2,10 +2,12 @@
 // The list's program files as enamel platform signs hanging from brass chains: a platform
 // number, the file's icon in a brass ring, its title and line. On arrival they swing gently
 // to rest; on hover a sign lifts on its chains.
+// layout "strip": on phones the signs become one sideways row (swipe, the next sign peeking in);
+// "grid" (default) stacks them. Wider screens always show the grid.
 import type { PageContext } from '@engine/context';
 import type { FileCard } from '@elections/data';
-interface Props { ctx: PageContext; title?: string; lead?: string; hint?: string; files: FileCard[] }
-const { ctx, title, lead, hint, files } = Astro.props;
+interface Props { ctx: PageContext; title?: string; lead?: string; hint?: string; files: FileCard[]; layout?: 'grid' | 'strip' }
+const { ctx, title, lead, hint, files, layout = 'grid' } = Astro.props;
 ---
 <section class="section files">
   <div class="container wrap">
@@ -16,7 +18,7 @@ const { ctx, title, lead, hint, files } = Astro.props;
         {hint && <p class="hint">{hint}</p>}
       </header>
     )}
-    <ul class="grid" role="list">
+    <ul class:list={['grid', layout === 'strip' && 'strip']} role="list" tabindex={layout === 'strip' ? 0 : undefined} aria-label={layout === 'strip' ? title : undefined}>
       {files.map((f, i) => (
         <li data-st-swing style={`--i:${i}`}>
           <a class="sign" href={f.href}>
@@ -73,4 +75,18 @@ const { ctx, title, lead, hint, files } = Astro.props;
   .arrow { margin-block-start: auto; color: var(--st-brass-hi); transition: translate var(--dur-base) var(--ease-out); }
   .sign:hover .arrow { translate: calc(var(--dir-x, -1) * 6px) 0; }
   :global([dir='ltr']) .sign { --dir-x: 1; }
+
+  /* Phones, strip layout: one row that scrolls sideways, edge to edge, each sign snapping to the
+     start with the next one peeking in. Room above for the chains and below for the shadows. */
+  @media (max-width: 700px) {
+    .strip {
+      display: flex; gap: var(--space-4);
+      overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+      margin-inline: calc(-1 * var(--gutter)); padding: var(--space-6) var(--gutter) var(--space-5);
+      scroll-padding-inline: var(--gutter); scrollbar-width: none;
+    }
+    .strip::-webkit-scrollbar { display: none; }
+    .strip > li { flex: 0 0 min(78vw, 19rem); scroll-snap-align: start; }
+    .strip:focus-visible { outline-offset: -4px; }
+  }
 </style>

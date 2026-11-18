@@ -78,7 +78,7 @@
   ],
   "todo": [
     "videos: none yet (leader's word, interviews, program clips); sections stay hidden until the client sends them.",
-    "program files: the four pages wait for the client's text.",
+    "program files: seven (المالي والحوكمة، التطوير، الاستثمار والتسويق، الطبي، التحول الرقمي، الأمني والإداري، الرياضي), named by the client; their pages wait for the client's text, and the one-line taglines are ours (placeholders: confirm). The old /files/services and /files/culture redirect to /files/.",
     "election date/time: still the template's (Friday 20 Nov 2026, 8 PM) until the client confirms.",
     "membership number rule (6 digits) is the template's; confirm Tanta's format.",
     "social: Facebook only; the footer icon links to facebook.com until the page exists (\"placeholder\": true keeps it out of search data). Live at https://husseindawoudlist.com (own Cloudflare Pages project site-tantasportsclubelections, set up by the Infra Agent; www redirects to the apex; no build watch paths, so every push to the branch rebuilds it). The live page's generator meta ends with the commit it was built from.",

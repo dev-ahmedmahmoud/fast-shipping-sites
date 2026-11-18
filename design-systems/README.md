@@ -78,7 +78,7 @@ Types come from `@elections/data` (`VideoData`, `CandidateCard`, `FileCard`, `Co
 | --- | --- | --- |
 | ElectionHero | home | `title`, `slogan`, `sub`, `actions: Action[]`, `image` (team photo or null), `imageAlt`, `crest` (or null) |
 | Countdown | home | `countdown: CountdownData` (`at`, `timezone`, `title`, `labels {d,h,m,s}`, `today`, `after`, `dateText`) |
-| ProgramFiles | home, files, file | `title?`, `lead?`, `hint?`, `files: FileCard[]` (`title`, `tagline`, `icon` as inline SVG using `currentColor`, `href`) |
+| ProgramFiles | home, files, file | `title?`, `lead?`, `hint?`, `files: FileCard[]` (`title`, `tagline`, `icon` as inline SVG using `currentColor`, `href`), `layout?: 'grid' \| 'strip'` (strip: one sideways-scrolling row on phones; home and "other files" use it) |
 | LeaderSpotlight | home | `kicker`, `name`, `text`, `more {label, href}`, `video: VideoData \| null`, `photo` |
 | CandidateGrid | home, candidates, candidate | `variant: 'strip' \| 'groups'`, `title?`, `lead?`, `groups: {label, candidates: CandidateCard[]}[]`, `more?`, `cardMore` (profile link label), `numberLabel` ("رقم") |
 | InterviewStrip | home | `title`, `lead?`, `items: {name, seat, href, poster, cta}[]` |
