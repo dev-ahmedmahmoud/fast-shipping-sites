@@ -12,8 +12,10 @@ const external = ctx.nav.filter((n) => n.external);
 const c = ctx.contact;
 const hasContact = !!(c.address || c.phones.length || c.emails.length || c.hours || c.mapUrl);
 const credit = ctx.legal.credit;
-// Six arched bays of the facade around the clock tower in the middle.
-const bays = [0, 1, 2, 4, 5, 6];
+// The facade is drawn 3000 units wide (wider than any screen) at a fixed height, so a screen
+// trims it at the sides, never at the top: arched bays every 140 units on both sides of the
+// clock tower in the middle (x = 1500).
+const bays = Array.from({ length: 10 }, (_, i) => i + 1).flatMap((k) => [1500 - k * 140, 1500 + k * 140]);
 // Social networks as round brass buttons with their mark (24px grid; fill marks start with F:,
 // the rest are stroked). A network without a mark here shows its name instead.
 const marks: Record<string, string> = {
@@ -28,20 +30,14 @@ const marks: Record<string, string> = {
 ---
 <footer class="footer">
   <div class="sky">
-    <svg class="facade" viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+    <svg class="facade" viewBox="0 0 3000 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
       <g class="ink">
-        <path d="M0 120 V90 H1200 V120 Z" />
-        {bays.map((i) => {
-          const x = 180 + i * 140;
-          return <path d={`M${x - 52} 90 V60 A52 44 0 0 1 ${x + 52} 60 V90 Z`} />;
-        })}
-        <path d="M540 90 V32 H558 V14 L600 -6 L642 14 V32 H660 V90 Z" />
+        <path d="M0 120 V90 H3000 V120 Z" />
+        {bays.map((x) => <path d={`M${x - 52} 90 V60 A52 44 0 0 1 ${x + 52} 60 V90 Z`} />)}
+        <path d="M1440 90 V36 H1458 V18 L1500 2 L1542 18 V36 H1560 V90 Z" />
       </g>
       <g class="lit">
-        {bays.map((i) => {
-          const x = 180 + i * 140;
-          return <path d={`M${x - 40} 90 V64 A40 34 0 0 1 ${x + 40} 64 V90`} />;
-        })}
+        {bays.map((x) => <path d={`M${x - 40} 90 V64 A40 34 0 0 1 ${x + 40} 64 V90`} />)}
       </g>
     </svg>
     {ctx.site.logo && <Image class="crest" src={ctx.site.logo} alt="" height={120} densities={[1, 2]} loading="lazy" />}
@@ -137,7 +133,7 @@ const marks: Record<string, string> = {
 
   /* ---- the facade with the crest in its clock tower ---- */
   .sky { position: relative; background: var(--c-bg); }
-  .facade { display: block; inline-size: 100%; block-size: clamp(84px, 10vw, 128px); }
+  .facade { display: block; inline-size: 100%; block-size: clamp(84px, 9vw, 120px); }
   .facade .ink { fill: var(--st-night); }
   .facade .lit { fill: none; stroke: var(--st-brass); stroke-width: 2; opacity: 0.85; }
   .sky :global(.crest) {
