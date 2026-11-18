@@ -1,0 +1,55 @@
+---
+// The support page as a WhatsApp share kit (simple version): numbered steps, a choice of ready
+// messages, the chosen message as it will be sent, and buttons to share it on WhatsApp or copy it.
+import type { PageContext } from '@engine/context';
+import type { ShareKitData } from '@elections/data';
+interface Props { ctx: PageContext; kit: ShareKitData }
+const { ctx, kit: k } = Astro.props;
+const wa = (text: string) => `https://wa.me/?text=${encodeURIComponent(text)}`;
+---
+<section class="section" data-sk data-msgs={JSON.stringify(k.messages.map((m) => m.text))} data-url={k.url}>
+  <div class="container wrap">
+    <ol class="steps">{k.steps.map((s) => <li>{s}</li>)}</ol>
+    <fieldset class="pick">
+      <legend>{k.pick}</legend>
+      {k.messages.map((m, i) => <label><input type="radio" name="sk-msg" value={i} checked={i === 0} data-sk-pick /> {m.label}</label>)}
+    </fieldset>
+    <p class="msg" data-sk-text>{k.messages[0].text}</p>
+    <p class="row">
+      <a class="btn btn--primary" href={wa(k.messages[0].text)} target="_blank" rel="noopener" data-sk-wa>{k.labels.button}<span class="sr-only"> {ctx.ui.newTab}</span></a>
+      <button class="btn btn--ghost" type="button" data-sk-copy="msg" data-done={k.labels.copied}>{k.labels.copy}</button>
+      <button class="btn btn--ghost" type="button" data-sk-copy="url" data-done={k.labels.copied}>{k.labels.copyLink}</button>
+    </p>
+    <p class="note">{k.labels.note}</p>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-sk]').forEach((root) => {
+    const msgs: string[] = JSON.parse(root.dataset.msgs || '[]');
+    const url = root.dataset.url ?? '';
+    let current = 0;
+    const text = root.querySelector<HTMLElement>('[data-sk-text]');
+    const wa = root.querySelector<HTMLAnchorElement>('[data-sk-wa]');
+    root.querySelectorAll<HTMLInputElement>('[data-sk-pick]').forEach((r) => r.addEventListener('change', () => {
+      current = Number(r.value);
+      if (text) text.textContent = msgs[current];
+      if (wa) wa.href = `https://wa.me/?text=${encodeURIComponent(msgs[current])}`;
+    }));
+    root.querySelectorAll<HTMLButtonElement>('[data-sk-copy]').forEach((b) => b.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(b.dataset.skCopy === 'url' ? url : msgs[current]); } catch { return; }
+      const label = b.textContent; b.textContent = `${b.dataset.done} ✓`;
+      window.setTimeout(() => { b.textContent = label; }, 1800);
+    }));
+  });
+</script>
+
+<style>
+  .wrap { display: flex; flex-direction: column; gap: var(--space-4); max-inline-size: 40rem; }
+  .steps { padding-inline-start: var(--space-5); font-weight: var(--weight-strong); }
+  .pick { display: flex; flex-wrap: wrap; gap: var(--space-4); border: 1px solid var(--c-line); border-radius: var(--radius-m); padding: var(--space-3) var(--space-4); }
+  .pick label { display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 44px; }
+  .msg { white-space: pre-wrap; padding: var(--space-4); border-radius: var(--radius-m); background: #d9fdd3; color: #111b21; overflow-wrap: anywhere; }
+  .row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .note { color: var(--c-muted); font-size: var(--step--1); }
+</style>

@@ -269,6 +269,39 @@ export function ventures(slug: string): VenturesData | null {
   };
 }
 
+export interface ShareKitData {
+  /** The page the message links to, absolute (the site's home). */
+  url: string;
+  host: string;
+  steps: string[];
+  pick: string;
+  /** Ready messages; "{url}" in a text is replaced with the link. */
+  messages: { label: string; text: string }[];
+  /** What the link's preview card shows in the chat (the linked page's own share data). */
+  preview: { image: ImageMetadata | null; title: string; description: string };
+  labels: { button: string; copy: string; copyLink: string; copied: string; note: string; preview: string };
+  chat: { name: string; status: string; reply: string; input: string };
+}
+
+/**
+ * The support page as a WhatsApp share kit (elections.json → support.share), or null when the
+ * client keeps the supporters' sign-up app. `url` is the absolute link to share.
+ */
+export function shareKit(url: string, preview: ShareKitData['preview']): ShareKitData | null {
+  const s = supporters.share;
+  if (!s?.messages?.length) return null;
+  return {
+    url,
+    host: new URL(url).host,
+    steps: s.steps ?? [],
+    pick: s.pick ?? '',
+    messages: s.messages.map((m: any) => ({ label: m.label, text: String(m.text).replaceAll('{url}', url) })),
+    preview,
+    labels: { button: s.button ?? '', copy: s.copy ?? '', copyLink: s.copyLink ?? '', copied: s.copied ?? '', note: s.note ?? '', preview: s.previewLabel ?? '' },
+    chat: { name: s.chat?.name ?? '', status: s.chat?.status ?? '', reply: s.chat?.reply ?? '', input: s.chat?.input ?? '' },
+  };
+}
+
 export const crest = list.crest ? media(list.crest) : null;
 export const cardLogo = list.cardLogo ? media(list.cardLogo) : null;
 export const shareImage = (name?: string) => (name ? media(name) : list.shareImage ? media(list.shareImage) : null);

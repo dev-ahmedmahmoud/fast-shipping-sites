@@ -1,4 +1,4 @@
-// Tanta Station's election sections (clients with "kind": "elections"). All fifteen are the
+// Tanta Station's election sections (clients with "kind": "elections"). All sixteen are the
 // station's own; none falls back to baseline. Not re-exported from layout/index.ts, so school
 // sites never bundle these components or their styles.
 import ElectionHero from './ElectionHero.astro';
@@ -16,8 +16,9 @@ import PhotoRow from './PhotoRow.astro';
 import ClipGrid from './ClipGrid.astro';
 import Panel from './Panel.astro';
 import Ventures from './Ventures.astro';
+import ShareKit from './ShareKit.astro';
 
 export const electionComponents = {
   ElectionHero, Countdown, ProgramFiles, LeaderSpotlight, CandidateGrid, InterviewStrip, BallotCard,
-  PageBand, CandidateHero, MediaFrame, InterviewPlayer, PhotoRow, ClipGrid, Panel, Ventures,
+  PageBand, CandidateHero, MediaFrame, InterviewPlayer, PhotoRow, ClipGrid, Panel, Ventures, ShareKit,
 };

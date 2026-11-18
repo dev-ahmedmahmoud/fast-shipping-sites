@@ -16,7 +16,7 @@ import ComplaintForm from './ComplaintForm.astro';
 import {
   action, ballotGroups, candidate, candidateGroups, candidateRaw, candidates, clipsForCandidate, clipsForFile,
   complaints, countdown, crest, fileRaw, filesPage, home, list, programFiles, shareImage, supporters, teamPage,
-  timeLabel, ui, ventures, video, vote, election,
+  timeLabel, ui, ventures, video, vote, election, shareKit,
 } from './data';
 import { media } from '@engine/media';
 import type { ImageMetadata } from 'astro';
@@ -145,6 +145,11 @@ if (entry.template === 'candidate' && c) {
   }
 }
 const ogType = entry.template === 'candidate' ? 'profile' : 'website';
+// The support page as a WhatsApp share kit: the message links to the home page, whose own
+// share data (title, description, image) is what the chat's preview card will show.
+const kit = entry.template === 'support'
+  ? shareKit(homeUrl, { image: shareImage(), title: (homeEntry?.fm as Record<string, any>)?.titleTag ?? homeEntry?.title ?? '', description: homeEntry?.description ?? '' })
+  : null;
 ---
 <Base ctx={ctx} title={entry.title} description={entry.description} fullTitle={fullTitle} image={image} imageAlt={imageAlt}
   type={ogType} breadcrumbs={breadcrumbs} jsonLd={jsonLd}>
@@ -214,8 +219,8 @@ const ogType = entry.template === 'candidate' ? 'profile' : 'website';
 
   {entry.template === 'support' && (
     <>
-      <E.PageBand ctx={ctx} title={supporters.title ?? entry.title} crest={crest} />
-      <E.Panel ctx={ctx}><SupportApp /></E.Panel>
+      <E.PageBand ctx={ctx} title={supporters.title ?? entry.title} lead={kit ? supporters.share.lead : undefined} crest={crest} />
+      {kit ? <E.ShareKit ctx={ctx} kit={kit} /> : <E.Panel ctx={ctx}><SupportApp /></E.Panel>}
     </>
   )}
 

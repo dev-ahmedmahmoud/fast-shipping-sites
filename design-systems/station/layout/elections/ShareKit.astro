@@ -1,0 +1,261 @@
+---
+// The support page as a WhatsApp share kit. Beside three numbered steps and a choice of ready
+// messages, a phone shows the chat exactly as the friend will see it: the visitor's message with
+// the site's link card (its share image, title, description and address), the time, the blue
+// ticks, then the friend typing and a short reply. The big green button opens WhatsApp with the
+// chosen message; the others copy the message or the link.
+//
+// Works without script (the first message and its share link). With script: choosing a message
+// rewrites the bubble and the links, the clock shows the visitor's time, and on capable devices
+// the message is "typed" in, then the reply arrives. Reduced motion: everything just appears.
+import { Image } from 'astro:assets';
+import type { PageContext } from '@engine/context';
+import type { ShareKitData } from '@elections/data';
+interface Props { ctx: PageContext; kit: ShareKitData }
+const { ctx, kit: k } = Astro.props;
+const wa = (text: string) => `https://wa.me/?text=${encodeURIComponent(text)}`;
+const first = k.messages[0];
+// The message as chat text: the link shown as a link, the rest as plain text.
+const parts = (text: string) => text.split(k.url);
+---
+<section class="section sk" data-sk data-url={k.url} data-msgs={JSON.stringify(k.messages.map((m) => m.text))}>
+  <div class="container grid">
+    <div class="side">
+      <ol class="steps" role="list">
+        {k.steps.map((s, i) => <li><span class="st-plate" aria-hidden="true">{ctx.fmt.number(i + 1)}</span><span>{s}</span></li>)}
+      </ol>
+
+      <fieldset class="pick">
+        <legend>{k.pick}</legend>
+        <div class="chips">
+          {k.messages.map((m, i) => (
+            <label class="chip">
+              <input type="radio" name="sk-msg" value={i} checked={i === 0} data-sk-pick />
+              <span>{m.label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <a class="go" href={wa(first.text)} target="_blank" rel="noopener" data-sk-wa>
+          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M9 8.5c0 3.5 2.5 6.5 6.5 6.5l1-1.6-2-1-1 1c-1.2-.4-2.6-1.8-3-3l1-1-1-2Z" fill="currentColor" /></svg>
+          {k.labels.button}<span class="sr-only"> {ctx.ui.newTab}</span>
+        </a>
+        <div class="minor">
+          <button class="btn btn--ghost" type="button" data-sk-copy="msg" data-done={k.labels.copied}>{k.labels.copy}</button>
+          <button class="btn btn--ghost" type="button" data-sk-copy="url" data-done={k.labels.copied}>{k.labels.copyLink}</button>
+        </div>
+        <p class="note">{k.labels.note}</p>
+        <p class="sr-only" aria-live="polite" data-sk-status></p>
+      </div>
+    </div>
+
+    <figure class="phone-wrap">
+      <figcaption class="cap">{k.labels.preview}</figcaption>
+      <div class="phone">
+        <div class="screen">
+          <div class="bar" aria-hidden="true">
+            <svg class="back flip-rtl" viewBox="0 0 24 24" width="22" height="22"><path d="M19 12H5m6-6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <span class="avatar">{ctx.site.logo && <Image src={ctx.site.logo} alt="" height={36} densities={[1, 2]} />}</span>
+            <span class="who"><b>{k.chat.name}</b><small data-sk-status-line>{k.chat.status}</small></span>
+          </div>
+          <div class="chat">
+            <div class="msg out" data-sk-bubble>
+              <div class="card">
+                {k.preview.image && <Image class="card-img" src={k.preview.image} alt="" widths={[300, 600]} sizes="300px" />}
+                <div class="card-txt">
+                  <b>{k.preview.title}</b>
+                  <span class="desc">{k.preview.description}</span>
+                  <span class="host" dir="ltr">{k.host}</span>
+                </div>
+              </div>
+              <p class="text" data-sk-text>{parts(first.text).map((t, i) => <>{i > 0 && <span class="link" dir="ltr">{k.url}</span>}{t}</>)}</p>
+              <span class="meta"><time data-sk-time>8:30 م</time><svg viewBox="0 0 18 12" width="17" height="11" aria-hidden="true"><path d="M1 6.5 4.2 9.6 10.8 2.4M7 9.6 7.9 10.5 14.5 3.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+            </div>
+            <div class="msg in typing" data-sk-typing hidden><i></i><i></i><i></i></div>
+            <div class="msg in" data-sk-reply><p class="text">{k.chat.reply}</p><span class="meta"><time data-sk-time>8:31 م</time></span></div>
+          </div>
+          <div class="input" aria-hidden="true"><span>{k.chat.input}</span><i class="mic"><svg viewBox="0 0 24 24" width="22" height="22"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" /><path d="M6 11a6 6 0 0 0 12 0M12 17v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg></i></div>
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<script>
+  const fmtTime = (d: Date) => new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit' }).format(d);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLElement>('[data-sk]').forEach((root) => {
+    const url = root.dataset.url ?? '';
+    const msgs: string[] = JSON.parse(root.dataset.msgs || '[]');
+    const wa = root.querySelector<HTMLAnchorElement>('[data-sk-wa]')!;
+    const textEl = root.querySelector<HTMLElement>('[data-sk-text]')!;
+    const bubble = root.querySelector<HTMLElement>('[data-sk-bubble]')!;
+    const typing = root.querySelector<HTMLElement>('[data-sk-typing]')!;
+    const reply = root.querySelector<HTMLElement>('[data-sk-reply]')!;
+    const status = root.querySelector<HTMLElement>('[data-sk-status]');
+    const statusLine = root.querySelector<HTMLElement>('[data-sk-status-line]');
+    let current = 0;
+
+    // The chat clock shows the visitor's own time: now, and a minute later for the reply.
+    const times = root.querySelectorAll<HTMLElement>('[data-sk-time]');
+    const now = new Date();
+    if (times[0]) times[0].textContent = fmtTime(now);
+    if (times[1]) times[1].textContent = fmtTime(new Date(now.getTime() + 60_000));
+
+    const render = (i: number) => {
+      const text = msgs[i] ?? '';
+      textEl.replaceChildren();
+      text.split(url).forEach((part, n) => {
+        if (n > 0) { const a = document.createElement('span'); a.className = 'link'; a.dir = 'ltr'; a.textContent = url; textEl.append(a); }
+        textEl.append(part);
+      });
+      wa.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    };
+
+    // The little play: the message lands, the friend types, the reply arrives.
+    let timers: number[] = [];
+    const play = () => {
+      timers.forEach(clearTimeout); timers = [];
+      if (reduce) return;
+      reply.hidden = true; typing.hidden = true;
+      bubble.classList.remove('is-in'); void bubble.offsetWidth; bubble.classList.add('is-in');
+      const typingText = statusLine?.dataset.typing;
+      timers.push(window.setTimeout(() => { typing.hidden = false; if (statusLine && typingText) statusLine.textContent = typingText; }, 1100));
+      timers.push(window.setTimeout(() => {
+        typing.hidden = true; reply.hidden = false;
+        if (statusLine) statusLine.textContent = statusLine.dataset.idle ?? '';
+        reply.classList.remove('is-in'); void reply.offsetWidth; reply.classList.add('is-in');
+      }, 2600));
+    };
+    if (statusLine) { statusLine.dataset.idle = statusLine.textContent ?? ''; statusLine.dataset.typing = 'يكتب…'; }
+
+    root.querySelectorAll<HTMLInputElement>('[data-sk-pick]').forEach((r) => r.addEventListener('change', () => {
+      current = Number(r.value); render(current); play();
+    }));
+
+    root.querySelectorAll<HTMLButtonElement>('[data-sk-copy]').forEach((b) => b.addEventListener('click', async () => {
+      const value = b.dataset.skCopy === 'url' ? url : msgs[current] ?? '';
+      try { await navigator.clipboard.writeText(value); } catch { return; }
+      const label = b.textContent;
+      b.textContent = `${b.dataset.done} ✓`; b.classList.add('is-done');
+      if (status) status.textContent = b.dataset.done ?? '';
+      window.setTimeout(() => { b.textContent = label; b.classList.remove('is-done'); }, 1800);
+    }));
+
+    // Play once when the phone comes into view.
+    if (!reduce) {
+      reply.hidden = true;
+      const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { play(); io.disconnect(); } }, { threshold: 0.4 });
+      io.observe(root.querySelector('.phone')!);
+    }
+  });
+</script>
+
+<style>
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-8); align-items: center; }
+
+  /* ---- steps, message choice, buttons ---- */
+  .side { display: flex; flex-direction: column; gap: var(--space-6); min-inline-size: 0; }
+  .steps { display: flex; flex-direction: column; gap: var(--space-3); padding: 0; margin: 0; list-style: none; }
+  .steps li { display: flex; align-items: center; gap: var(--space-3); font-size: var(--step-1); font-weight: 700; }
+  .steps .st-plate { font-size: var(--step-0); flex: 0 0 auto; }
+
+  .pick { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-3); min-inline-size: 0; }
+  .pick legend { padding: 0; margin-block-end: var(--space-3); font-family: var(--font-body); font-weight: 700; color: var(--c-muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .chip { position: relative; cursor: pointer; }
+  .chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .chip span {
+    display: inline-flex; align-items: center; min-block-size: 48px; padding-inline: var(--space-5);
+    border-radius: 999px; border: 2px solid var(--c-line); background: var(--c-surface);
+    font-weight: 700; transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .chip:hover span { border-color: var(--st-enamel); }
+  .chip input:checked + span { background: var(--st-enamel); color: var(--st-enamel-ink); border-color: var(--st-brass); box-shadow: 0 3px 0 var(--st-brass-lo); }
+  .chip input:focus-visible + span { outline: 3px solid var(--st-brass); outline-offset: 3px; }
+
+  .actions { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-3); max-inline-size: 30rem; }
+  .go {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-3);
+    min-block-size: 64px; padding-inline: var(--space-6); border-radius: var(--radius-l);
+    background: #25D366; color: #052e16; text-decoration: none; font-weight: 800; font-size: var(--step-1);
+    box-shadow: 0 4px 0 #128C4B, 0 16px 30px -14px rgb(18 140 75 / 0.7);
+    transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  }
+  .go:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #128C4B, 0 20px 34px -14px rgb(18 140 75 / 0.75); }
+  .go:active { transform: translateY(2px); box-shadow: 0 2px 0 #128C4B; }
+  .go:focus-visible { outline: 3px solid var(--st-brass); outline-offset: 4px; }
+  .minor { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+  .minor .btn { inline-size: 100%; color: var(--st-enamel); border-color: var(--st-enamel); }
+  .minor .btn.is-done { background: var(--c-accent-soft); }
+  .note { color: var(--c-muted); font-size: var(--step--1); text-align: center; }
+
+  /* ---- the phone and the chat ---- */
+  .phone-wrap { margin: 0; display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+  .cap { font-weight: 700; color: var(--c-muted); }
+  .phone {
+    inline-size: 340px; padding: 12px; border-radius: 44px;
+    background: linear-gradient(145deg, #2b3350, #0e1326);
+    box-shadow: inset 0 0 0 2px #3b4466, 0 30px 60px -24px color-mix(in oklab, var(--c-ink) 70%, transparent), 0 0 0 6px color-mix(in oklab, var(--st-brass) 40%, transparent);
+  }
+  .screen { position: relative; overflow: hidden; border-radius: 34px; background: #efeae2; display: flex; flex-direction: column; block-size: 700px; }
+  .bar { display: flex; align-items: center; gap: 10px; padding: 14px 12px 10px; background: #008069; color: #fff; }
+  .back { flex: 0 0 auto; }
+  .avatar { inline-size: 38px; block-size: 38px; border-radius: 50%; background: #fff; display: grid; place-items: center; overflow: hidden; flex: 0 0 auto; }
+  .avatar :global(img) { block-size: 30px; inline-size: auto; }
+  .who { display: flex; flex-direction: column; line-height: 1.25; min-inline-size: 0; }
+  .who b { font-size: 16px; }
+  .who small { font-size: 12px; }
+  /* Like a real chat: anchored to the input, the oldest part slides out at the top. */
+  .chat {
+    flex: 1; min-block-size: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: 12px 10px;
+    background-color: #efeae2;
+    background-image: radial-gradient(color-mix(in oklab, #b8ad9c 45%, transparent) 1px, transparent 1.4px), radial-gradient(color-mix(in oklab, #b8ad9c 35%, transparent) 1px, transparent 1.4px);
+    background-size: 22px 22px, 22px 22px; background-position: 0 0, 11px 11px;
+  }
+  .msg { position: relative; max-inline-size: 86%; padding: 6px 8px 4px; border-radius: 10px; color: #111b21; box-shadow: 0 1px 0.5px rgb(11 20 26 / 0.13); font-family: var(--font-body); }
+  /* Arabic WhatsApp: your own messages on the left, the friend's on the right. */
+  .out { align-self: flex-end; background: #d9fdd3; border-start-end-radius: 2px; }
+  .in { align-self: flex-start; background: #fff; border-start-start-radius: 2px; }
+  .card { overflow: hidden; border-radius: 7px; background: color-mix(in oklab, #d9fdd3 70%, #8fb98a); margin-block-end: 6px; }
+  .card :global(.card-img) { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 1200 / 630; object-fit: cover; }
+  .card-txt { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px 8px; }
+  .card-txt b { font-size: 13px; line-height: 1.4; }
+  .desc { font-size: 12px; line-height: 1.5; color: #33424b; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .host { font-size: 11px; color: #44535c; text-align: end; }
+  .text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .text :global(.link) { color: #015f87; text-decoration: underline; unicode-bidi: isolate; }
+  .meta { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 11px; color: #4d5d66; margin-block-start: 2px; }
+  .out .meta svg { color: #53bdeb; }
+  .typing { display: flex; gap: 4px; padding: 12px 14px; }
+  .typing[hidden], .msg[hidden] { display: none; }
+  .typing i { inline-size: 7px; block-size: 7px; border-radius: 50%; background: #8696a0; animation: sk-dot 1s infinite ease-in-out; }
+  .typing i:nth-child(2) { animation-delay: 0.15s; }
+  .typing i:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes sk-dot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+  .is-in { animation: sk-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both; transform-origin: bottom left; }
+  .in.is-in { transform-origin: bottom right; }
+  @keyframes sk-pop { from { opacity: 0; transform: translateY(14px) scale(0.92); } }
+  .input { display: flex; align-items: center; gap: 8px; padding: 8px 10px 14px; background: #efeae2; }
+  .input span { flex: 1; padding: 10px 14px; border-radius: 999px; background: #fff; color: #5b6b75; font-size: 14px; }
+  .mic { display: grid; place-items: center; inline-size: 42px; block-size: 42px; border-radius: 50%; background: #00a884; color: #fff; flex: 0 0 auto; }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+    .side { display: contents; }
+    .steps { order: 1; }
+    .pick { order: 2; }
+    .phone-wrap { order: 3; }
+    .actions { order: 4; max-inline-size: none; inline-size: 100%; }
+  }
+  @media (max-width: 400px) {
+    .phone { inline-size: 100%; border-radius: 38px; }
+    .screen { block-size: 660px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .is-in, .typing i { animation: none !important; }
+  }
+</style>
