@@ -326,15 +326,10 @@
         "label": "تعرّف على القائمة",
         "href": "page:team"
       },
-      "galleryLabel": "صور",
       "filesTitle": "اللواء مصطفى الشرقاوي يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "mostafa-el-sharkawy-share.jpg",
-      "description": "اللواء مصطفى الشرقاوي، مرشح القائمة لعضوية مجلس إدارة نادي طنطا الرياضي (فوق السن).",
-      "gallery": [
-        "mostafa-el-sharkawy-1.webp",
-        "mostafa-el-sharkawy-2.webp"
-      ]
+      "description": "اللواء مصطفى الشرقاوي، مرشح القائمة لعضوية مجلس إدارة نادي طنطا الرياضي (فوق السن)."
     },
     {
       "slug": "mohamed-attia",
