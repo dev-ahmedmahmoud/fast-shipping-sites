@@ -136,16 +136,27 @@ const ribs = Array.from({ length: 9 }, (_, i) => i);
      front of them (it covers the waist line, so the half-body photo reads as standing behind
      the board). */
   @media (min-width: 901px) {
-    .hall { padding-block: var(--space-7) 0; }
-    .grid { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: var(--space-4); }
-    .copy { align-items: center; padding-block-end: 0; }
-    h1 { font-size: clamp(2.6rem, 1.8rem + 2.6vw, 4.2rem); }
-    .actions { justify-content: center; }
-    .platform { inline-size: min(100%, 980px); margin-block-start: var(--space-3); }
+    /* The team's width follows the screen's height too, so the whole team (front row included)
+       is on the first screen of a laptop; tall screens get the full 980px. The countdown board
+       shares the value to cover the same share of the photo. */
+    .hall, .hall + :global(.count-wrap) {
+      --st-team-w: min(100%, 980px, max(520px, calc((100vh - 540px) * 2.36)));
+    }
+    @supports (height: 100svh) {
+      .hall, .hall + :global(.count-wrap) {
+        --st-team-w: min(100%, 980px, max(520px, calc((100svh - 540px) * 2.36)));
+      }
+    }
+    .hall { padding-block: var(--space-5) 0; }
+    .grid { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: var(--space-3); }
+    .copy { align-items: center; padding-block-end: 0; gap: var(--space-3); }
+    h1 { font-size: clamp(2.2rem, min(1.8rem + 2.6vw, 7.5vh), 4.2rem); }
+    .actions { justify-content: center; margin-block-start: 0; }
+    .platform { inline-size: var(--st-team-w); margin-block-start: calc(var(--st-team-w) * -0.05 + var(--space-4)); }
     .arch { inset: 14% 10% 0 10%; }
     .platform :global(.team) { padding-block-start: 6%; }
     .edge { display: none; }
-    .hall + :global(.count-wrap) :global(.board) { margin-block-start: -120px; }
+    .hall + :global(.count-wrap) :global(.board) { margin-block-start: calc(var(--st-team-w) * -0.122); }
   }
 
   /* Phones and tablets: the team must be on screen at first load. The copy's parts become grid
