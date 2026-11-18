@@ -10,7 +10,6 @@ interface Props { ctx: PageContext; candidate: CandidateCard; kicker: Action | n
 const { candidate: c, kicker, numberLabel } = Astro.props;
 ---
 <section class="person st-glass" data-st-ambient>
-  <span class="beam" aria-hidden="true"></span>
   <div class="container grid">
     <div class="copy">
       {kicker && (
@@ -23,6 +22,7 @@ const { candidate: c, kicker, numberLabel } = Astro.props;
       <p class="num" data-st-flaps><span class="st-flap" data-st-flap>{numberLabel}</span></p>
     </div>
     <figure class="stand">
+      <span class="beam" aria-hidden="true"></span>
       <span class="arch">
         <Image class="photo" src={c.photo} alt={c.photoAlt} widths={[360, 540, 800]} sizes="(max-width: 900px) 92vw, 26rem" loading="eager" fetchpriority="high" />
       </span>
@@ -37,11 +37,15 @@ const { candidate: c, kicker, numberLabel } = Astro.props;
     padding-block: var(--space-7) 0;
     background-color: var(--st-night); color: var(--st-enamel-ink);
   }
+  /* A shaft of light falling from above the hall straight down the middle of the arch: it
+     belongs to the stand, so it stays centred on the arch at every screen width. */
   .beam {
-    position: absolute; z-index: -1; inset-block-start: -60px; inset-inline-end: 12%; inline-size: 30%; block-size: calc(100% + 120px);
-    background: linear-gradient(to bottom, color-mix(in oklab, var(--st-brass-hi) 20%, transparent), transparent 75%);
-    clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%); opacity: 0.6; pointer-events: none;
+    position: absolute; z-index: 0; inset-block: -40rem 0; left: 50%; translate: -50% 0;
+    inline-size: min(100%, 26rem);
+    background: linear-gradient(to bottom, color-mix(in oklab, var(--st-brass-hi) 22%, transparent), transparent 85%);
+    clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%); opacity: 0.6; pointer-events: none;
   }
+  .stand > .arch, .stand > .edge { position: relative; z-index: 1; }
   .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr); gap: var(--space-6); align-items: end; }
   .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; padding-block-end: var(--space-8); align-self: center; }
   .kicker a { display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 48px; color: var(--st-brass-hi); font-family: var(--font-body); font-weight: 700; text-decoration: none; }
