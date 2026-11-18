@@ -37,7 +37,10 @@ const linkAttrs = (item: NavItem) => ({
       {cta && (
         <a class="btn btn--primary cta" href={cta.href}
            target={cta.external ? '_blank' : undefined} rel={cta.external ? 'noopener' : undefined}>
-          {cta.label}
+          {cta.href.startsWith('https://wa.me/') && (
+            <svg class="wa" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M9 8.5c0 3.5 2.5 6.5 6.5 6.5l1-1.6-2-1-1 1c-1.2-.4-2.6-1.8-3-3l1-1-1-2Z" fill="currentColor" /></svg>
+          )}
+          {cta.label}{cta.external && <span class="sr-only"> {ctx.ui.newTab}</span>}
         </a>
       )}
       <details class="nav-mobile">
@@ -166,7 +169,8 @@ const linkAttrs = (item: NavItem) => ({
   }
   @media (max-width: 380px) {
     .logo { block-size: 44px; }
-    .cta { padding-inline: var(--space-2); font-size: 0.9rem; }
+    .cta { padding-inline: var(--space-2); font-size: 0.9rem; gap: var(--space-1); }
+    .cta .wa { inline-size: 18px; block-size: 18px; }
   }
   @media (max-width: 440px) {
     .menu-label { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
