@@ -7,7 +7,7 @@ BACK_Y = int(os.environ.get('BACK_Y', 165)); LEAD_Y = int(os.environ.get('LEAD_Y
 from PIL import Image, ImageFilter
 M, OUT = sys.argv[1], sys.argv[2]
 W, H, CX = 1400, 780, 700
-back = ['mohamed-el-menshawy', 'ashoush', 'hussein-dawood', 'mostafa-el-shamkawy', 'khaled-hamza']
+back = ['mohamed-el-menshawy', 'ashoush', 'hussein-dawood', 'mostafa-el-sharkawy', 'khaled-hamza']
 # Photos cropped on one side face that side inwards, under the next person in (drawn later):
 # Mabrouk (cropped right) left of centre; Attia (cropped left) at the left end, past the edge.
 front = ['mohamed-attia', 'karim-abu-elazm', 'mohamed-mabrouk', 'mohamed-sedky', 'waleed-afify', 'fathy-selim', 'ahmed-sweilem']

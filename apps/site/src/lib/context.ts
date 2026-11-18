@@ -111,7 +111,9 @@ export function buildContext(entry: Pick<Entry, 'id' | 'locale'> & Partial<Entry
   // href "share:whatsapp" opens WhatsApp's share screen (the app on Android and iOS, WhatsApp Web
   // on a computer) with headerCta.text, where "{url}" becomes the site's home address.
   const shareText = client.headerCta?.href === 'share:whatsapp' ? pick(client.headerCta.text, locale) : null;
-  const ctaTarget = !client.headerCta ? null
+  // headerCta.hideOn: page ids where the button stays out of the header (e.g. the page it duplicates).
+  const ctaHidden = Array.isArray(client.headerCta?.hideOn) && client.headerCta.hideOn.includes((entry as Entry).id);
+  const ctaTarget = !client.headerCta || ctaHidden ? null
     : client.headerCta.href === 'share:whatsapp'
       ? { href: `https://wa.me/?text=${encodeURIComponent((shareText ?? '{url}').replaceAll('{url}', new URL(homeOf(locale).href, import.meta.env.SITE).href))}`, external: true }
       : resolveHref(client.headerCta.href, locale);

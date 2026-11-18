@@ -14,7 +14,7 @@
     {"slug": "ashoush", "name_ar": "الأستاذ محمد رضا عشوش", "seat_ar": "عضو مجلس الإدارة (فوق السن)"},
     {"slug": "ahmed-sweilem", "name_ar": "الدكتور أحمد إبراهيم سويلم", "seat_ar": "عضو مجلس الإدارة (فوق السن)"},
     {"slug": "khaled-hamza", "name_ar": "المهندس خالد عادل حمزة", "seat_ar": "عضو مجلس الإدارة (فوق السن)"},
-    {"slug": "mostafa-el-shamkawy", "name_ar": "اللواء مصطفى الشمقاوي", "seat_ar": "عضو مجلس الإدارة (فوق السن)", "extra_poses": ["mostafa-el-shamkawy-1.webp", "mostafa-el-shamkawy-2.webp"]}
+    {"slug": "mostafa-el-sharkawy", "name_ar": "اللواء مصطفى الشرقاوي", "seat_ar": "عضو مجلس الإدارة (فوق السن)", "extra_poses": ["mostafa-el-sharkawy-1.webp", "mostafa-el-sharkawy-2.webp"]}
   ],
   "notes": [
     "team.webp: composed from the 12 individual cut-outs (not the night group photo), leader at the apex.",

@@ -166,7 +166,7 @@
       "name": "المستشار محمد صدقي",
       "seat": "لمقعد نائب رئيس مجلس الإدارة",
       "group": "presidency",
-      "number": 2,
+      "number": 4,
       "card": "mohamed-sedky-card.webp",
       "photo": "mohamed-sedky-card.webp",
       "photoAlt": "المستشار محمد صدقي — لمقعد نائب رئيس مجلس الإدارة، قائمة المهندس حسين داود",
@@ -185,7 +185,7 @@
       "name": "أ.د. وليد محمد عفيفي",
       "seat": "لمقعد أمين الصندوق",
       "group": "presidency",
-      "number": 3,
+      "number": 2,
       "card": "waleed-afify-card.webp",
       "photo": "waleed-afify-card.webp",
       "photoAlt": "أ.د. وليد محمد عفيفي — لمقعد أمين الصندوق، قائمة المهندس حسين داود",
@@ -200,87 +200,11 @@
       "description": "أستاذ الإحصاء الرياضي وعميد كلية التجارة بجامعة كفر الشيخ، وخريج كلية التجارة – جامعة طنطا."
     },
     {
-      "slug": "karim-abu-elazm",
-      "name": "المحاسب كريم ممدوح أبو العزم",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 4,
-      "card": "karim-abu-elazm-card.webp",
-      "photo": "karim-abu-elazm-card.webp",
-      "photoAlt": "المحاسب كريم ممدوح أبو العزم — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "galleryLabel": "صور",
-      "filesTitle": "المحاسب كريم ممدوح أبو العزم يتحدث عن ملفات القائمة",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "karim-abu-elazm-share.jpg",
-      "description": "شريك ومدير تنفيذي لشركتي B&K لتوريدات المطاعم وEgy Mak Pharma، وعضو مجلس إدارة حالي (تحت السن)، ولاعب سباحة سابق بالنادي."
-    },
-    {
-      "slug": "mohamed-mabrouk",
-      "name": "د. محمد مختار مبروك",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 5,
-      "card": "mohamed-mabrouk-card.webp",
-      "photo": "mohamed-mabrouk-card.webp",
-      "photoAlt": "د. محمد مختار مبروك — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "galleryLabel": "صور",
-      "filesTitle": "د. محمد مختار مبروك يتحدث عن ملفات القائمة",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "mohamed-mabrouk-share.jpg",
-      "description": "أستاذ مساعد الأمراض الباطنة والجهاز الهضمي والمناظير بكلية الطب – جامعة طنطا، ومدير إدارة الجودة والاعتماد بمستشفيات جامعة طنطا."
-    },
-    {
-      "slug": "fathy-selim",
-      "name": "الكابتن فتحي محمد سليم",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 6,
-      "card": "fathy-selim-card.webp",
-      "photo": "fathy-selim-card.webp",
-      "photoAlt": "الكابتن فتحي محمد سليم — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "galleryLabel": "صور",
-      "filesTitle": "الكابتن فتحي محمد سليم يتحدث عن ملفات القائمة",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "fathy-selim-share.jpg",
-      "description": "لاعب سابق بالفريق الأول لكرة القدم بنادي طنطا الرياضي منذ عام 1966، ومديره الفني لاحقًا، ومدرب كرة قدم محترف بخبرات دولية."
-    },
-    {
-      "slug": "ashoush",
-      "name": "أ. محمد رضا عشوش",
-      "seat": "عضو مجلس الإدارة — فوق السن",
-      "group": "board-over",
-      "number": 7,
-      "card": "ashoush-card.webp",
-      "photo": "ashoush-card.webp",
-      "photoAlt": "أ. محمد رضا عشوش — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
-      "kicker": {
-        "label": "تعرّف على القائمة",
-        "href": "page:team"
-      },
-      "galleryLabel": "صور",
-      "filesTitle": "أ. محمد رضا عشوش يتحدث عن ملفات القائمة",
-      "restTitle": "باقي فريق القائمة",
-      "shareImage": "ashoush-share.jpg",
-      "description": "حاصل على ليسانس الحقوق من جامعة طنطا، وصاحب شركات في التجارة والاستثمار السياحي والعقاري، وأحد أبناء نادي طنطا الرياضي."
-    },
-    {
       "slug": "ahmed-sweilem",
       "name": "د. أحمد إبراهيم سويلم",
       "seat": "عضو مجلس الإدارة — فوق السن",
       "group": "board-over",
-      "number": 8,
+      "number": 1,
       "card": "ahmed-sweilem-card.webp",
       "photo": "ahmed-sweilem-card.webp",
       "photoAlt": "د. أحمد إبراهيم سويلم — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
@@ -299,7 +223,7 @@
       "name": "م. خالد عادل حمزة",
       "seat": "عضو مجلس الإدارة — فوق السن",
       "group": "board-over",
-      "number": 9,
+      "number": 3,
       "card": "khaled-hamza-card.webp",
       "photo": "khaled-hamza-card.webp",
       "photoAlt": "م. خالد عادل حمزة — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
@@ -314,26 +238,102 @@
       "description": "مدير قطاع تجارة ونقل المواد البترولية بشركة غاز الشرق، ولاعب تنس طاولة سابق بنادي طنطا، من عائلة رياضية ارتبط اسمها بتاريخ النادي."
     },
     {
-      "slug": "mostafa-el-shamkawy",
-      "name": "اللواء مصطفى الشمقاوي",
+      "slug": "fathy-selim",
+      "name": "الكابتن فتحي محمد سليم",
       "seat": "عضو مجلس الإدارة — فوق السن",
       "group": "board-over",
-      "number": 10,
-      "card": "mostafa-el-shamkawy-card.webp",
-      "photo": "mostafa-el-shamkawy-card.webp",
-      "photoAlt": "اللواء مصطفى الشمقاوي — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
+      "number": 9,
+      "card": "fathy-selim-card.webp",
+      "photo": "fathy-selim-card.webp",
+      "photoAlt": "الكابتن فتحي محمد سليم — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
       "kicker": {
         "label": "تعرّف على القائمة",
         "href": "page:team"
       },
       "galleryLabel": "صور",
-      "filesTitle": "اللواء مصطفى الشمقاوي يتحدث عن ملفات القائمة",
+      "filesTitle": "الكابتن فتحي محمد سليم يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
-      "shareImage": "mostafa-el-shamkawy-share.jpg",
-      "description": "اللواء مصطفى الشمقاوي، مرشح القائمة لعضوية مجلس إدارة نادي طنطا الرياضي (فوق السن).",
+      "shareImage": "fathy-selim-share.jpg",
+      "description": "لاعب سابق بالفريق الأول لكرة القدم بنادي طنطا الرياضي منذ عام 1966، ومديره الفني لاحقًا، ومدرب كرة قدم محترف بخبرات دولية."
+    },
+    {
+      "slug": "karim-abu-elazm",
+      "name": "المحاسب كريم ممدوح أبو العزم",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 12,
+      "card": "karim-abu-elazm-card.webp",
+      "photo": "karim-abu-elazm-card.webp",
+      "photoAlt": "المحاسب كريم ممدوح أبو العزم — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "المحاسب كريم ممدوح أبو العزم يتحدث عن ملفات القائمة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "karim-abu-elazm-share.jpg",
+      "description": "شريك ومدير تنفيذي لشركتي B&K لتوريدات المطاعم وEgy Mak Pharma، وعضو مجلس إدارة حالي (تحت السن)، ولاعب سباحة سابق بالنادي."
+    },
+    {
+      "slug": "ashoush",
+      "name": "أ. محمد رضا عشوش",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 19,
+      "card": "ashoush-card.webp",
+      "photo": "ashoush-card.webp",
+      "photoAlt": "أ. محمد رضا عشوش — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "أ. محمد رضا عشوش يتحدث عن ملفات القائمة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "ashoush-share.jpg",
+      "description": "حاصل على ليسانس الحقوق من جامعة طنطا، وصاحب شركات في التجارة والاستثمار السياحي والعقاري، وأحد أبناء نادي طنطا الرياضي."
+    },
+    {
+      "slug": "mohamed-mabrouk",
+      "name": "د. محمد مختار مبروك",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 21,
+      "card": "mohamed-mabrouk-card.webp",
+      "photo": "mohamed-mabrouk-card.webp",
+      "photoAlt": "د. محمد مختار مبروك — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "د. محمد مختار مبروك يتحدث عن ملفات القائمة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "mohamed-mabrouk-share.jpg",
+      "description": "أستاذ مساعد الأمراض الباطنة والجهاز الهضمي والمناظير بكلية الطب – جامعة طنطا، ومدير إدارة الجودة والاعتماد بمستشفيات جامعة طنطا."
+    },
+    {
+      "slug": "mostafa-el-sharkawy",
+      "name": "اللواء مصطفى الشرقاوي",
+      "seat": "عضو مجلس الإدارة — فوق السن",
+      "group": "board-over",
+      "number": 24,
+      "card": "mostafa-el-sharkawy-card.webp",
+      "photo": "mostafa-el-sharkawy-card.webp",
+      "photoAlt": "اللواء مصطفى الشرقاوي — عضو مجلس الإدارة — فوق السن، قائمة المهندس حسين داود",
+      "kicker": {
+        "label": "تعرّف على القائمة",
+        "href": "page:team"
+      },
+      "galleryLabel": "صور",
+      "filesTitle": "اللواء مصطفى الشرقاوي يتحدث عن ملفات القائمة",
+      "restTitle": "باقي فريق القائمة",
+      "shareImage": "mostafa-el-sharkawy-share.jpg",
+      "description": "اللواء مصطفى الشرقاوي، مرشح القائمة لعضوية مجلس إدارة نادي طنطا الرياضي (فوق السن).",
       "gallery": [
-        "mostafa-el-shamkawy-1.webp",
-        "mostafa-el-shamkawy-2.webp"
+        "mostafa-el-sharkawy-1.webp",
+        "mostafa-el-sharkawy-2.webp"
       ]
     },
     {
@@ -341,7 +341,7 @@
       "name": "م. محمد السيد عطية",
       "seat": "عضو مجلس الإدارة — تحت السن",
       "group": "board-under",
-      "number": 11,
+      "number": 4,
       "card": "mohamed-attia-card.webp",
       "photo": "mohamed-attia-card.webp",
       "photoAlt": "م. محمد السيد عطية — عضو مجلس الإدارة — تحت السن، قائمة المهندس حسين داود",
@@ -360,7 +360,7 @@
       "name": "د. محمد رياض المنشاوي",
       "seat": "عضو مجلس الإدارة — تحت السن",
       "group": "board-under",
-      "number": 12,
+      "number": 5,
       "card": "mohamed-el-menshawy-card.webp",
       "photo": "mohamed-el-menshawy-card.webp",
       "photoAlt": "د. محمد رياض المنشاوي — عضو مجلس الإدارة — تحت السن، قائمة المهندس حسين داود",

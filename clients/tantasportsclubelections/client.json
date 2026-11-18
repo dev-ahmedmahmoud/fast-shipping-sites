@@ -37,7 +37,10 @@
     "href": "share:whatsapp",
     "text": {
       "ar": "🗳️ الجمعة 18 ديسمبر موعدنا في نادي طنطا الرياضي\nصوتي لقائمة المهندس حسين داود .. وانت معانا؟\nتاريخ نحترمه .. ومستقبل نصنعه 💛💙\nاتعرّف على المرشحين الـ12 وبرنامج القائمة هنا 👇\n{url}"
-    }
+    },
+    "hideOn": [
+      "support"
+    ]
   },
   "navExternal": [],
   "portals": [],
@@ -86,9 +89,9 @@
     "membership number rule (6 digits) is the template's; confirm Tanta's format.",
     "social: Facebook only; the footer icon links to facebook.com until the page exists (\"placeholder\": true keeps it out of search data). Live at https://husseindawoudlist.com (own Cloudflare Pages project site-tantasportsclubelections, set up by the Infra Agent; www redirects to the apex; no build watch paths, so every push to the branch rebuilds it). The live page's generator meta ends with the commit it was built from.",
     "support page: no sign-up any more (Ahmed's call). It is a WhatsApp share kit (elections.json support.share: three ready messages linking to the home page, a live chat preview, share and copy buttons); the link preview is media/share.jpg, made by tools/share-card.mjs. Complaints still run in demo mode (nothing sent); live needs the backend in API.md and a Turnstile site key.",
-    "El-Shamkawy: no CV yet (he came from the poster only; none of the CVs sent is his); his page has placeholder text.",
+    "El-Sharkawy (اللواء مصطفى الشرقاوي; first read from the poster as الشمقاوي, corrected from the poster and the official list; the old /team/mostafa-el-shamkawy/ redirects): no CV yet; his page has placeholder text.",
     "leader: CV in, age shown (51, from his CV; Ahmed's call). Company cards: StyleHome, Kleek, Tanta Modern School, Syncology (Friends taken off the cards by Ahmed; it stays in the bio). Logos from the media agent. Each card links to the company's site (elections.json url): stylehome-egypt.com, kleekdevelopments.com, tms-egypt.com, syncology.tech.",
-    "seats: from the campaign poster (via the media agent). Ballot numbers are placeholders (1–12) until the client sends the real ones.",
+    "seats: from the campaign poster (via the media agent). Ballot numbers are the official ones (the club's candidate lists, numbered per seat), set 18 Nov.",
     "names to confirm: Fathy Selim's title (CV: الكابتن, poster: الدكتور); the poster spells the leader 'داود'.",
     "photos: client photos cut out by the media agent and matched to names by face (needs one human confirmation, see media-manifest.json). Crest: the media agent's 3D version (crest.webp with shadow on blue: hero, page bands, ballot card, share cards; logo.webp without shadow: header, favicon, schema logo). The club's original file would still be the best source.",
     "seo: Google Search Console is verified by DNS (TXT record in Cloudflare, so seo.googleSiteVerification stays empty) and /sitemap.xml is submitted. Cloudflare Web Analytics is on. The election's place carries the club's street address, postcode and map point (from the club's site tantasc.net and OpenStreetMap)."
