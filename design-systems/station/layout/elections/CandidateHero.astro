@@ -23,8 +23,9 @@ const { candidate: c, kicker, numberLabel } = Astro.props;
       <p class="num" data-st-flaps><span class="st-flap" data-st-flap>{numberLabel}</span></p>
     </div>
     <figure class="stand">
-      <span class="arch" aria-hidden="true"></span>
-      <Image class="photo" src={c.photo} alt={c.photoAlt} widths={[320, 480, 800]} sizes="(max-width: 900px) 70vw, 380px" loading="eager" fetchpriority="high" />
+      <span class="arch">
+        <Image class="photo" src={c.photo} alt={c.photoAlt} widths={[360, 540, 800]} sizes="(max-width: 900px) 92vw, 26rem" loading="eager" fetchpriority="high" />
+      </span>
       <span class="edge" aria-hidden="true"></span>
     </figure>
   </div>
@@ -49,12 +50,16 @@ const { candidate: c, kicker, numberLabel } = Astro.props;
   .seat { font-family: var(--font-body); font-weight: 700; font-size: var(--step-1); padding-inline: var(--space-7); white-space: normal; }
   .num .st-flap { font-size: var(--step-3); padding: 0.1em 0.6em; }
   .stand { position: relative; margin: 0; display: grid; justify-items: center; align-items: end; min-inline-size: 0; }
+  /* The arch is a window: the photo fills its width exactly and is trimmed to its shape, so a
+     shoulder or an arm never crosses the brass, and where a photo was cropped at its side the
+     crop lies on the frame's edge. */
   .arch {
-    position: absolute; inset-inline: 4%; inset-block: 4% 0;
-    border: 3px solid var(--st-brass); border-block-end: 0; border-radius: 50% 50% 0 0 / 38% 38% 0 0;
+    position: relative; display: block; overflow: hidden; inline-size: min(100%, 26rem);
+    padding-block-start: 6%;
+    border: 3px solid var(--st-brass); border-block-end: 0; border-radius: 50% 50% 0 0 / 34% 34% 0 0;
     background: radial-gradient(ellipse 60% 55% at 50% 55%, color-mix(in oklab, var(--st-brass-hi) 24%, transparent), transparent 70%);
   }
-  .stand :global(.photo) { position: relative; inline-size: min(100%, 24rem); block-size: auto; padding-block-start: 10%; }
+  .arch :global(.photo) { display: block; inline-size: 100%; block-size: auto; }
   .edge {
     position: relative; inline-size: 100%; block-size: 22px; margin-block-start: -4px;
     background: linear-gradient(var(--st-brass) 0 0) top / 100% 4px no-repeat, color-mix(in oklab, var(--st-enamel-ink) 16%, var(--st-night));
