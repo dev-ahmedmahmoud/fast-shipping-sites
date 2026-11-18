@@ -39,7 +39,7 @@ html,body{width:1200px;height:630px;overflow:hidden;background:#141B3A}
 .glow{position:absolute;left:-60px;bottom:-140px;width:820px;height:520px;border-radius:50%;
   background:radial-gradient(closest-side,rgba(242,213,69,.38),transparent)}
 /* the team on a brass platform */
-.team{position:absolute;left:-26px;bottom:26px;height:424px}
+.team{position:absolute;left:14px;bottom:26px;width:690px;height:auto}
 .ledge{position:absolute;left:0;right:0;bottom:0;height:26px;background:linear-gradient(#F5E06A,#EDD427 45%,#B89B12)}
 .ledge::after{content:'';position:absolute;inset:auto 0 26px 0;height:40px;background:linear-gradient(transparent,rgba(10,15,40,.55))}
 /* the words */
