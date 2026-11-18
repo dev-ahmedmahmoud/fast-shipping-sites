@@ -167,13 +167,25 @@ const words = (line: string) => line.split(/\s+/).filter(Boolean);
       {team && (
         <figure class="crew" data-st-reveal>
           <span class="halo" aria-hidden="true"></span>
-          <Image class="crew-img" src={team.image} alt={team.alt} widths={[640, 960, 1400, 2000]} sizes="(max-width: 1100px) 100vw, 1100px" loading="lazy" />
+          <div class="crew-scroll" data-vt-scroll>
+            <Image class="crew-img" src={team.image} alt={team.alt} widths={[960, 1400, 1800, 2400]} sizes="(max-width: 700px) 1000px, min(100vw, 1700px)" loading="lazy" />
+          </div>
           <span class="platform" aria-hidden="true"></span>
         </figure>
       )}
     </section>
   )}
 </div>
+
+<script>
+  // Open the team strip on the middle of the group (the list's head stands there).
+  document.querySelectorAll<HTMLElement>('[data-vt-scroll]').forEach((el) => {
+    const centre = () => { el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2 * (getComputedStyle(el).direction === 'rtl' ? -1 : 1); };
+    const img = el.querySelector('img');
+    if (img && !img.complete) img.addEventListener('load', centre, { once: true });
+    centre();
+  });
+</script>
 
 <style>
   /* ---- chapter index ---- */
@@ -282,9 +294,10 @@ const words = (line: string) => line.split(/\s+/).filter(Boolean);
   .wa:hover { transform: translateY(-1px); }
   /* The team standing on the platform at the foot of the board, in the lamp's pool of light. */
   .terminus.has-team { padding-block-end: 0; }
-  .crew { position: relative; margin: var(--space-7) auto 0; inline-size: min(100%, 1100px); display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; padding-block-end: 16px; }
+  .crew { position: relative; margin: var(--space-7) auto 0; inline-size: min(100%, 1700px); display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; padding-block-end: 16px; }
+  .crew-scroll { position: relative; inline-size: 100%; }
   .halo { position: absolute; inset: 8% 6% 0; border-radius: 50% 50% 0 0 / 60% 60% 0 0; background: radial-gradient(ellipse 50% 60% at 50% 80%, color-mix(in oklab, var(--st-brass-hi) 30%, transparent), transparent 72%); pointer-events: none; }
-  .crew :global(.crew-img) { position: relative; inline-size: 100%; block-size: auto; filter: drop-shadow(0 -6px 24px rgb(0 0 0 / 0.35)); }
+  .crew :global(.crew-img) { position: relative; display: block; inline-size: 100%; block-size: auto; filter: drop-shadow(0 -6px 24px rgb(0 0 0 / 0.35)); }
   .platform { position: absolute; inset-block-end: 0; left: 50%; translate: -50% 0; inline-size: 100vw; block-size: 18px; background: linear-gradient(var(--st-brass-hi), var(--st-brass) 45%, var(--st-brass-lo)); box-shadow: 0 -16px 30px -10px rgb(0 0 0 / 0.55); }
   :global(.st-rich) .terminus.st-live .beam { animation: v-beam 7s ease-in-out infinite alternate; }
   @keyframes v-beam { from { opacity: 0.45; } to { opacity: 0.75; } }
@@ -312,6 +325,13 @@ const words = (line: string) => line.split(/\s+/).filter(Boolean);
     .chapters ol::-webkit-scrollbar { display: none; }
     .chapters li { flex: 0 0 auto; }
     .row .st-flap { font-size: var(--step-1); }
+  }
+  /* Phones: the row of people stays large enough to see faces and pans sideways, opened on the
+     middle of the group. */
+  @media (max-width: 700px) {
+    .crew-scroll { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; }
+    .crew-scroll::-webkit-scrollbar { display: none; }
+    .crew :global(.crew-img) { inline-size: 1000px; max-inline-size: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     .scale :global(svg), .track i, .beam { animation: none !important; }

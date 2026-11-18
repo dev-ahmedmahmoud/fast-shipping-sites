@@ -965,6 +965,10 @@
       "more": {
         "label": "تعرّف على القائمة",
         "href": "page:team"
+      },
+      "team": {
+        "image": "vision-team.webp",
+        "alt": "مرشحو قائمة المهندس حسين داود يقفون معًا"
       }
     }
   }
