@@ -224,7 +224,8 @@ const kit = entry.template === 'support'
       <E.PageBand ctx={ctx} title={vision.title ?? entry.title} lead={vision.lead} crest={crest} />
       <E.Vision ctx={ctx} vision={vision}
         share={vision.board?.share ? { label: vision.board.share.label, href: `https://wa.me/?text=${encodeURIComponent(String(vision.board.share.text).replaceAll('{url}', abs(entry.href)))}` } : null}
-        more={action(vision.board?.more)} />
+        more={action(vision.board?.more)}
+        team={vision.board?.team ? { image: media(vision.board.team.image), alt: vision.board.team.alt ?? '' } : null} />
     </>
   )}
 
