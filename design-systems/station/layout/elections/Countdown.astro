@@ -51,7 +51,8 @@ const marks = Array.from({ length: 60 }, (_, i) => i);
 <style>
   .count-wrap { padding-block-start: 0; }
   .board {
-    display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: var(--space-6);
+    /* The clock and the numbers as one group, centred in the board. */
+    display: grid; grid-template-columns: auto minmax(0, 36rem); justify-content: center; align-items: center; gap: var(--space-7);
     margin-block-start: calc(-1 * var(--space-6)); position: relative; z-index: 2;
     padding: var(--space-6); border-radius: var(--radius-l);
     background-color: var(--st-night-2); color: var(--st-enamel-ink);
@@ -70,9 +71,9 @@ const marks = Array.from({ length: 60 }, (_, i) => i);
   :global(.st-motion) .hand.s { transition: transform 0.25s cubic-bezier(0.4, 2.2, 0.55, 1); }
   :global(.st-motion) .hand.s.is-wrap { transition: none; }
 
-  .panel { display: flex; flex-direction: column; gap: var(--space-4); min-inline-size: 0; }
+  .panel { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); min-inline-size: 0; text-align: center; }
   .title { font-family: var(--font-display); font-size: var(--step-2); color: var(--st-brass-hi); }
-  .cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); max-inline-size: 36rem; }
+  .cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); inline-size: 100%; }
   .cells li { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
   .tile { inline-size: 100%; padding-block: var(--space-2); font-size: var(--step-4); perspective: 400px; }
   .tile b { font-weight: 600; display: inline-block; }
@@ -83,7 +84,7 @@ const marks = Array.from({ length: 60 }, (_, i) => i);
   .board:global(.is-msg) .title { font-size: var(--step-3); }
 
   @media (max-width: 760px) {
-    .board { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: var(--space-5) var(--space-4); }
+    .board { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: var(--space-5); padding: var(--space-5) var(--space-4); }
     .panel { align-items: center; inline-size: 100%; }
     .cells { inline-size: 100%; gap: var(--space-2); }
     .tile { font-size: var(--step-3); }

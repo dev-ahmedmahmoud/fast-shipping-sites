@@ -38,7 +38,8 @@ const { title, text, action } = Astro.props;
   h2 { font-size: var(--step-3); }
   p { font-size: var(--step-1); color: color-mix(in oklab, var(--st-enamel-ink) 90%, var(--st-enamel)); max-inline-size: 46ch; }
   .stub {
-    flex: 0 1 30%; min-inline-size: 15rem; display: grid; place-items: center; padding: var(--space-6);
+    /* As wide as its button needs (never narrower), so the button can't spill out of the ticket. */
+    flex: 0 0 auto; min-inline-size: 15rem; display: grid; place-items: center; padding: var(--space-6);
     border-inline-start: 3px dashed color-mix(in oklab, var(--st-enamel-ink) 55%, transparent);
   }
   @media (max-width: 700px) {
