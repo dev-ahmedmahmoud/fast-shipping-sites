@@ -2,7 +2,7 @@
 // The combination is chosen by environment variables and wired in through
 // Vite aliases, so only the chosen parts enter the bundle.
 import { defineConfig } from 'astro/config';
-import { copyFileSync, createReadStream, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
+import { copyFileSync, createReadStream, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { satteri } from '@astrojs/markdown-satteri';
@@ -104,6 +104,20 @@ export default defineConfig({
             mkdirSync(target, { recursive: true });
             copyFileSync(from, path.join(target, name));
           }
+        },
+      },
+    },
+    {
+      // An election client's live build carries the small server (server/elections-worker.js)
+      // as a Cloudflare Pages _worker.js, with a _routes.json that sends only /api/* to it.
+      // Previews (NOINDEX) and other clients get nothing.
+      name: 'fss-elections-worker',
+      hooks: {
+        'astro:build:done': ({ dir }) => {
+          if (mode !== 'site' || client.kind !== 'elections' || env.NOINDEX === '1' || base !== '/') return;
+          const out = fileURLToPath(dir);
+          copyFileSync(fileURLToPath(new URL('./server/elections-worker.js', import.meta.url)), path.join(out, '_worker.js'));
+          writeFileSync(path.join(out, '_routes.json'), JSON.stringify({ version: 1, include: ['/api/*'], exclude: [] }) + '\n');
         },
       },
     },

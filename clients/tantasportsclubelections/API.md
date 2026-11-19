@@ -11,7 +11,22 @@ The site is static. Two features need a server: the supporters' team (`/support/
 - `demo` (previews, the default): nothing leaves the browser. Accounts, codes and visit counts are kept in `localStorage` (one store per sample), the WhatsApp code is shown on screen marked «معاينة», and the complaints form says «معاينة: لا يتم إرسال أي بيانات». Pages show a preview notice.
 - `live`: the browser calls the routes below under `base` (resolved against the site; `/api/` means `https://<domain>/api/`). With `turnstileSiteKey` set, forms carry a Cloudflare Turnstile token (as the source site does); without it they send `ts: ""`.
 
-Nothing here is built yet. The intended home is Cloudflare Pages Functions next to the static site, with D1 for accounts, codes and visits, R2 for complaint photos, a WhatsApp sender for codes (the source uses WhatsApp), and the Turnstile secret as a Pages secret.
+The complaints route is built: `apps/site/server/elections-worker.js`, which a live build copies to the output as `_worker.js` (Cloudflare Pages advanced mode) with a `_routes.json` that sends only `/api/*` to it. It sends each complaint to the team through the WhatsApp Cloud API as an approved template message (settings and template names at the top of that file; tests in `apps/site/server/test/`). Until its settings exist it answers every call with «الإرسال غير متاح الآن», and the site keeps `api.mode: demo` with the WhatsApp hand-off below. The supporters' routes are not built (the support page is a WhatsApp share kit now).
+
+WhatsApp templates to create (WhatsApp Manager → Message templates; category Utility, language Arabic `ar`), six body variables in this order: kind, membership, name, the member's wa.me link, topic, details:
+- `tanta_complaint` (no header)
+- `tanta_complaint_photo` (header: Image)
+
+Body for both:
+```
+وصلت {{1}} جديدة من موقع القائمة.
+رقم العضوية: {{2}}
+الاسم: {{3}}
+للرد على العضو: {{4}}
+الموضوع: {{5}}
+التفاصيل: {{6}}
+برجاء المتابعة.
+```
 
 ## Conventions
 
