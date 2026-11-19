@@ -4,7 +4,16 @@ import type { Api } from './api';
 import { digits, validComplaintPhone } from './phone';
 import { turnstile } from './turnstile';
 
+interface WhatsApp {
+  number: string;
+  done: string;
+  title: string;
+  labels: Record<string, string>;
+}
+
 interface Settings {
+  /** Hand the complaint to WhatsApp (no server): open a chat with this number, message ready. */
+  whatsapp?: WhatsApp | null;
   fields: Record<string, any>;
   sending: string;
   failed: string;
@@ -22,7 +31,8 @@ export function mountComplaints(form: HTMLFormElement, api: Api, s: Settings, si
   const ts = turnstile(siteKey);
   const box = form.querySelector<HTMLElement>('[data-el-ts]');
   if (box) ts.mount(box);
-  if (api.mode === 'demo') form.querySelector<HTMLElement>('[data-el-demo]')?.removeAttribute('hidden');
+  const wa = s.whatsapp ?? null;
+  if (api.mode === 'demo' && !wa) form.querySelector<HTMLElement>('[data-el-demo]')?.removeAttribute('hidden');
 
   const fieldOf = (name: string) => form.querySelector<HTMLElement>(`[name="${name}"]`)?.closest<HTMLElement>('.el-form__field');
 
@@ -80,6 +90,33 @@ export function mountComplaints(form: HTMLFormElement, api: Api, s: Settings, si
     const first = check();
     if (first) {
       form.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
+      return;
+    }
+    if (wa) {
+      // Opened right inside the click, so phones hand it to the WhatsApp app and browsers don't
+      // block it as a pop-up. The visitor presses Send in WhatsApp.
+      const v = (n: string) => String((form.elements.namedItem(n) as HTMLInputElement | null)?.value ?? '').trim();
+      const kind = (form.querySelector<HTMLInputElement>('input[name=kind]:checked')?.value) ?? '';
+      const L = wa.labels;
+      const lines = [
+        `📩 ${kind} — ${wa.title}`,
+        '',
+        `${L.membership}: ${digits(v('membership'))}`,
+        v('full_name') ? `${L.full_name}: ${v('full_name')}` : null,
+        `${L.phone}: ${digits(v('phone'))}`,
+        `${L.topic}: ${v('topic')}`,
+        '',
+        `${L.details}:`,
+        v('details'),
+      ].filter((x): x is string => x !== null);
+      const url = `https://wa.me/${wa.number}?text=${encodeURIComponent(lines.join('\n'))}`;
+      // No "noopener" flag: with it window.open always returns null, and we need to know whether
+      // a pop-up blocker stopped it (then this tab goes to WhatsApp instead).
+      const opened = window.open(url, '_blank');
+      if (opened) opened.opener = null;
+      else window.location.href = url;
+      msg.textContent = wa.done;
+      msg.className = 'el-form__msg is-good';
       return;
     }
     go.disabled = true;

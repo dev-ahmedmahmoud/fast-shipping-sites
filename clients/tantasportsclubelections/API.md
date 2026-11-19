@@ -60,6 +60,8 @@ Error codes and their messages (from `elections.json` → `support.words`): `bad
 
 ## Complaints
 
+Until this route is live, `complaints.whatsapp` in `elections.json` (`number`, texts) hands the form to WhatsApp instead: after the browser's checks it opens `https://wa.me/<number>?text=<the complaint>` and the member presses Send there (a photo is attached in the chat). It is ignored once `api.mode` is `live`.
+
 `POST complaints`, `multipart/form-data`:
 
 | Field | Value |

@@ -8,9 +8,12 @@
 //   .el-form__choices, .el-form__choice, .el-form__file, .el-form__file-btn,
 //   .el-form__file-name, .el-form__help, .el-form__err, .el-form__ts, .el-form__msg
 //   (.is-good / .is-bad), .el-form__go, .el-form__demo
+import client from '@client/client.json';
 import { complaints } from './data';
 
 const f = complaints.fields ?? {};
+// WhatsApp hand-off (no server yet): see Runtime.astro.
+const wa = (client as { api?: { mode?: string } }).api?.mode !== 'live' && complaints.whatsapp?.number ? complaints.whatsapp : null;
 const id = (name: string) => `el-c-${name}`;
 ---
 <form class="el-form" data-el-complaints novalidate aria-labelledby="el-c-legend">
@@ -59,7 +62,7 @@ const id = (name: string) => `el-c-${name}`;
               placeholder={f.details.placeholder} required aria-required="true"></textarea>
   </div>
 
-  <div class="el-form__field el-form__file">
+  {wa ? <p class="el-form__help el-form__wa-photo">{wa.photo}</p> : <div class="el-form__field el-form__file">
     <span class="el-form__label" id={`${id('photo')}-label`}>{f.photo.label}</span>
     <label class="el-form__file-btn" for={id('photo')}>
       <span aria-hidden="true">{f.photo.button}</span>
@@ -67,10 +70,11 @@ const id = (name: string) => `el-c-${name}`;
     </label>
     <span class="el-form__file-name" data-el-file-name aria-live="polite"></span>
     <p class="el-form__help" id={`${id('photo')}-help`}>{f.photo.help}</p>
-  </div>
+  </div>}
 
   <div class="el-form__ts" data-el-ts></div>
   <p class="el-form__msg" role="status" aria-live="polite" data-el-msg></p>
-  <button class="el-form__go" type="submit">{complaints.submit}</button>
-  <p class="el-form__demo" data-el-demo hidden>{complaints.demoNote}</p>
+  {wa && <p class="el-form__help">{wa.note}</p>}
+  <button class="el-form__go" type="submit">{wa ? wa.submit : complaints.submit}</button>
+  {!wa && <p class="el-form__demo" data-el-demo hidden>{complaints.demoNote}</p>}
 </form>

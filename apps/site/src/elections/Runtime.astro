@@ -38,6 +38,9 @@ const config = {
   },
   supporters: { words: { ...supporters.words, ...DEMO_WORDS }, goal: supporters.goal ?? 5 },
   complaints: {
+    // Until the server is live, a client may hand complaints to WhatsApp: the form opens a
+    // chat with this number, the message already written (elections.json complaints.whatsapp).
+    whatsapp: api.mode !== 'live' && complaints.whatsapp?.number ? complaints.whatsapp : null,
     fields: complaints.fields,
     sending: complaints.sending,
     failed: complaints.failed,
