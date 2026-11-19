@@ -9,6 +9,138 @@ interface WhatsApp {
   done: string;
   title: string;
   labels: Record<string, string>;
+  /** On computers: a QR code the visitor scans with their phone (texts for the dialog). */
+  qr?: { title: string; text: string; web: string; long: string; close: string };
+  /** The list's crest, small, for the middle of the QR code (Runtime.astro). */
+  logo?: string | null;
+}
+
+// A computer (a fine pointer that can hover): WhatsApp there is often not installed, so the
+// message goes to the visitor's phone through a QR code instead.
+const isComputer = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+/**
+ * The wa.me link for the QR code: Arabic letters stay as they are (UTF-8 in the code, which phone
+ * cameras read as a link), only what would break a link is escaped. This holds about three times
+ * more text than a fully escaped link, so ordinary complaints fit in a code a phone reads easily.
+ */
+function qrLink(number: string, text: string): string {
+  const t = text.replace(/[%&#+?=\s<>"'\\^`{|}\[\]]/gu, (c) => encodeURIComponent(c));
+  return `https://wa.me/${number}?text=${t}`;
+}
+
+interface QrCode { getModuleCount(): number; isDark(row: number, col: number): boolean }
+
+/** Biggest code a phone still reads easily from a screen: 117 modules (version 25) when the crest
+ * covers the middle, 133 (version 29) without it. Longer messages get the WhatsApp Web link. */
+const QR_MAX_LOGO = 117;
+const QR_MAX = 133;
+
+const WA_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8.5c0 3.5 2.5 6.5 6.5 6.5l1-1.6-2-1-1 1c-1.2-.4-2.6-1.8-3-3l1-1-1-2Z" fill="currentColor"/></svg>';
+
+/** A rounded square as a path, top-left (x, y), side s, corner radius r. */
+const rsq = (x: number, y: number, s: number, r: number) =>
+  `M${x + r} ${y}h${s - 2 * r}a${r} ${r} 0 0 1 ${r} ${r}v${s - 2 * r}a${r} ${r} 0 0 1 -${r} ${r}h-${s - 2 * r}a${r} ${r} 0 0 1 -${r} -${r}v-${s - 2 * r}a${r} ${r} 0 0 1 ${r} -${r}z`;
+
+/**
+ * The code as an SVG on white, with the 4-module quiet zone the standard asks for. The modules
+ * flow into each other with rounded outer corners (a lone module is a dot), the three corner
+ * "eyes" are rounded, and the list's crest sits on a white tile in the middle when `logo` is set
+ * (the code is then made with more error correction, which reads through the covered part).
+ * Colours come from .el-qr__code in elections.css and always stay dark on the white.
+ */
+function qrSvg(qr: QrCode, logo: string | null): string {
+  const n = qr.getModuleCount();
+  const Q = 4;
+  let lz = logo ? Math.round(n * 0.2) : 0;
+  if (lz && lz % 2 !== n % 2) lz++;
+  const l0 = (n - lz) / 2;
+  const eye = (x: number, y: number) => (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
+  const hole = (x: number, y: number) => lz > 0 && x >= l0 && x < l0 + lz && y >= l0 && y < l0 + lz;
+  const on = (x: number, y: number) => x >= 0 && y >= 0 && x < n && y < n && !eye(x, y) && !hole(x, y) && qr.isDark(y, x);
+  const r = 0.5;
+  let d = '';
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      if (!on(x, y)) continue;
+      const t = !on(x, y - 1), b = !on(x, y + 1), s = !on(x - 1, y), e = !on(x + 1, y);
+      const tl = t && s ? r : 0, tr = t && e ? r : 0, br = b && e ? r : 0, bl = b && s ? r : 0;
+      const X = x + Q, Y = y + Q;
+      d += `M${X + tl} ${Y}H${X + 1 - tr}${tr ? `a${r} ${r} 0 0 1 ${r} ${r}` : ''}V${Y + 1 - br}${br ? `a${r} ${r} 0 0 1 -${r} ${r}` : ''}`
+        + `H${X + bl}${bl ? `a${r} ${r} 0 0 1 -${r} -${r}` : ''}V${Y + tl}${tl ? `a${r} ${r} 0 0 1 ${r} -${r}` : ''}z`;
+    }
+  }
+  let eyes = '', pupils = '';
+  for (const [x, y] of [[0, 0], [n - 7, 0], [0, n - 7]]) {
+    eyes += rsq(x + Q, y + Q, 7, 2.2) + rsq(x + Q + 1, y + Q + 1, 5, 1.4);
+    pupils += rsq(x + Q + 2, y + Q + 2, 3, 0.9);
+  }
+  const tile = lz
+    ? `<path class="el-qr__tile" d="${rsq(l0 + Q - 0.3, l0 + Q - 0.3, lz + 0.6, 1.4)}"/>`
+      + `<image href="${logo}" x="${l0 + Q + 0.7}" y="${l0 + Q + 0.7}" width="${lz - 1.4}" height="${lz - 1.4}" preserveAspectRatio="xMidYMid meet"/>`
+    : '';
+  const w = n + 2 * Q;
+  return `<svg viewBox="0 0 ${w} ${w}" aria-hidden="true"><defs><linearGradient id="el-qr-ink" x1="0" y1="0" x2="1" y2="1">`
+    + '<stop offset="0" class="el-qr__ink-a"/><stop offset="1" class="el-qr__ink-b"/></linearGradient></defs>'
+    + `<rect width="${w}" height="${w}" fill="#fff"/><path d="${d}" fill="url(#el-qr-ink)"/>`
+    + `<path class="el-qr__eye" fill-rule="evenodd" d="${eyes}"/><path class="el-qr__pupil" d="${pupils}"/>${tile}</svg>`;
+}
+
+type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
+
+/** The smallest code that holds the link: with the crest while it stays small enough, else plain. */
+function makeQr(qrcode: QRCodeFactory, link: string, logo: string | null): { qr: QrCode; logo: string | null } | null {
+  // With the crest: Q (25% recovery). M also covers the crest's 5% on paper, but failed to read
+  // from a plain (non-retina) screen in tests; Q read every time.
+  const tries: [ErrorCorrectionLevel, string | null, number][] = logo ? [['Q', logo, QR_MAX_LOGO], ['L', null, QR_MAX]] : [['L', null, QR_MAX]];
+  for (const [ecc, withLogo, max] of tries) {
+    try {
+      const qr = qrcode(0, ecc);
+      qr.addData(link, 'Byte');
+      qr.make();
+      if (qr.getModuleCount() <= max) return { qr, logo: withLogo };
+    } catch {
+      // Too long for any QR code at this level.
+    }
+  }
+  return null;
+}
+async function showQr(wa: WhatsApp, text: string) {
+  const q = wa.qr!;
+  const web = `https://web.whatsapp.com/send?phone=${wa.number}&text=${encodeURIComponent(text)}`;
+  const link = qrLink(wa.number, text);
+  const dlg = document.createElement('dialog');
+  dlg.className = 'el-qr';
+  dlg.setAttribute('aria-labelledby', 'el-qr-title');
+  const badge = document.createElement('span'); badge.className = 'el-qr__badge'; badge.innerHTML = WA_ICON;
+  const h = document.createElement('h2'); h.id = 'el-qr-title'; h.className = 'el-qr__title'; h.textContent = q.title;
+  const p = document.createElement('p'); p.className = 'el-qr__text';
+  const a = document.createElement('a'); a.className = 'el-qr__web'; a.href = web; a.target = '_blank'; a.rel = 'noopener';
+  a.innerHTML = WA_ICON; a.append(q.web);
+  const close = document.createElement('button'); close.type = 'button'; close.className = 'el-qr__close'; close.textContent = q.close;
+  close.addEventListener('click', () => dlg.close());
+  dlg.addEventListener('close', () => dlg.remove());
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  const { default: qrcode } = await import('qrcode-generator');
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
+  const made = makeQr(qrcode, link, wa.logo ?? null);
+  if (made) {
+    const frame = document.createElement('div'); frame.className = 'el-qr__frame';
+    const box = document.createElement('div'); box.className = 'el-qr__code';
+    box.setAttribute('role', 'img'); box.setAttribute('aria-label', q.title);
+    box.innerHTML = qrSvg(made.qr, made.logo);
+    box.dataset.modules = String(made.qr.getModuleCount());
+    const scan = document.createElement('span'); scan.className = 'el-qr__scan'; scan.setAttribute('aria-hidden', 'true');
+    box.append(scan);
+    frame.append(box);
+    p.textContent = q.text;
+    dlg.append(badge, h, frame, p, a, close);
+  } else {
+    p.textContent = q.long;
+    dlg.append(badge, h, p, a, close);
+  }
+  document.body.append(dlg);
+  dlg.showModal();
 }
 
 interface Settings {
@@ -109,7 +241,12 @@ export function mountComplaints(form: HTMLFormElement, api: Api, s: Settings, si
         `${L.details}:`,
         v('details'),
       ].filter((x): x is string => x !== null);
-      const url = `https://wa.me/${wa.number}?text=${encodeURIComponent(lines.join('\n'))}`;
+      const text = lines.join('\n');
+      if (wa.qr && isComputer()) {
+        void showQr(wa, text);
+        return;
+      }
+      const url = `https://wa.me/${wa.number}?text=${encodeURIComponent(text)}`;
       // No "noopener" flag: with it window.open always returns null, and we need to know whether
       // a pop-up blocker stopped it (then this tab goes to WhatsApp instead).
       const opened = window.open(url, '_blank');

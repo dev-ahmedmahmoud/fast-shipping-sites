@@ -13,7 +13,7 @@ interface Config {
   home: string;
   ballot: BallotData;
   supporters: { words: Record<string, string>; goal: number };
-  complaints: { whatsapp?: { number: string; done: string; title: string; labels: Record<string, string> } | null; fields: Record<string, any>; sending: string; failed: string; success: string; demoNote: string };
+  complaints: { whatsapp?: { number: string; done: string; title: string; labels: Record<string, string>; qr?: { title: string; text: string; web: string; long: string; close: string }; logo?: string | null } | null; fields: Record<string, any>; sending: string; failed: string; success: string; demoNote: string };
 }
 
 const config = JSON.parse(document.getElementById('el-config')?.textContent || '{}') as Config;

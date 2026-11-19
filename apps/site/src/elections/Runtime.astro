@@ -3,8 +3,10 @@
 // and the scripts themselves (./client/runtime.ts), plus default styles for the engine's
 // own widgets (./elections.css), which design systems may restyle.
 import './elections.css';
+import { getImage } from 'astro:assets';
 import client from '@client/client.json';
 import { homeOf } from '@engine/content';
+import { media } from '@engine/media';
 import { ballotGroups, cardLogo, complaints, list, supporters, vote } from './data';
 
 const api = (client as { api?: { mode?: string; base?: string; turnstileSiteKey?: string } }).api ?? {};
@@ -16,6 +18,10 @@ const DEMO_WORDS = {
   demoBadge: 'معاينة: نسخة تجريبية. البيانات تُحفظ على هذا الجهاز فقط، ولا تُرسل رسائل واتساب.',
   demoCode: 'معاينة: كود التأكيد هو %s',
 };
+
+// The crest for the middle of the complaints QR code (computers): the site logo, small.
+const qrLogoSrc = client.logo ? media(client.logo) : null;
+const qrLogo = qrLogoSrc ? (await getImage({ src: qrLogoSrc, width: 160, format: 'webp' })).src : null;
 
 const config = {
   api: {
@@ -40,7 +46,7 @@ const config = {
   complaints: {
     // Until the server is live, a client may hand complaints to WhatsApp: the form opens a
     // chat with this number, the message already written (elections.json complaints.whatsapp).
-    whatsapp: api.mode !== 'live' && complaints.whatsapp?.number ? complaints.whatsapp : null,
+    whatsapp: api.mode !== 'live' && complaints.whatsapp?.number ? { ...complaints.whatsapp, logo: qrLogo } : null,
     fields: complaints.fields,
     sending: complaints.sending,
     failed: complaints.failed,

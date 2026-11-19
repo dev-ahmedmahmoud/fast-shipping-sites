@@ -137,3 +137,76 @@
 :where(.el-form__file-name) { font-size: var(--step--1); color: var(--c-ink); }
 :where(.el-form__help) { font-size: var(--step--1); color: var(--c-muted); }
 :where(.el-form__go) { align-self: flex-start; }
+
+/* ---------- complaints: the QR code dialog (computers, WhatsApp hand-off) ----------
+   A WhatsApp badge, the title, the code in gold viewfinder corners with a slow gold scan line,
+   then the hint, the WhatsApp Web link and Close. The code itself stays dark on white (phones
+   must read it): its blues are the palette's accent pulled toward black. */
+:where(.el-qr) {
+  --el-qr-gold: var(--c-highlight);
+  inline-size: min(92vw, 30rem); padding: var(--space-6) var(--space-5) var(--space-5); border: 0; border-radius: var(--radius-l);
+  background: radial-gradient(120% 55% at 50% 0%, var(--c-accent-soft), transparent 72%), var(--c-surface);
+  color: var(--c-ink); text-align: center;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--el-qr-gold) 60%, transparent), 0 30px 80px rgb(0 0 0 / 0.35);
+}
+:where(.el-qr[open]) { animation: el-qr-in 0.35s var(--ease-out, ease-out); }
+:where(.el-qr)::backdrop { background: rgb(10 15 40 / 0.62); backdrop-filter: blur(3px); }
+:where(.el-qr__badge) {
+  position: relative; display: grid; place-items: center; inline-size: 56px; block-size: 56px; margin: 0 auto var(--space-3);
+  border-radius: 50%; color: #fff; background: linear-gradient(145deg, #25d366, #128c7e);
+  box-shadow: 0 10px 22px -8px rgb(18 140 126 / 0.7);
+}
+:where(.el-qr__badge) svg { inline-size: 30px; block-size: 30px; }
+:where(.el-qr__badge)::after { content: ''; position: absolute; inset: 0; border-radius: inherit; border: 2px solid #25d366; opacity: 0; animation: el-qr-ping 2.6s ease-out 0.4s infinite; }
+:where(.el-qr__title) { font-size: var(--step-2); margin-block-end: var(--space-4); }
+:where(.el-qr__frame) { --s: 2.6rem; position: relative; inline-size: min(100%, 22rem, max(15rem, 100vh - 29rem)); margin: 0 auto var(--space-4); padding: 0.8rem; }
+:where(.el-qr__frame)::before {
+  content: ''; position: absolute; inset: 0; border: 4px solid var(--el-qr-gold); border-radius: 1.7rem; pointer-events: none;
+  mask: conic-gradient(at var(--s) var(--s), #0000 75%, #000 0) 0 0 / calc(100% - var(--s)) calc(100% - var(--s));
+}
+:where(.el-qr__code) {
+  --el-qr-a: color-mix(in oklab, var(--c-accent) 42%, #000);
+  --el-qr-b: color-mix(in oklab, var(--c-accent) 82%, #000);
+  position: relative; overflow: hidden; border-radius: 1.1rem; background: #fff;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--c-ink) 8%, transparent), 0 18px 40px -18px color-mix(in oklab, var(--c-ink) 60%, transparent);
+}
+:where(.el-qr__code) svg { display: block; inline-size: 100%; block-size: auto; }
+:where(.el-qr__ink-a) { stop-color: var(--el-qr-a); }
+:where(.el-qr__ink-b) { stop-color: var(--el-qr-b); }
+:where(.el-qr__eye) { fill: var(--el-qr-a); }
+:where(.el-qr__pupil) { fill: var(--el-qr-b); }
+:where(.el-qr__tile) { fill: #fff; stroke: var(--el-qr-gold); stroke-width: 0.35; }
+/* Multiplied over the code: the white turns a light gold, the dark modules stay dark. */
+:where(.el-qr__scan) {
+  position: absolute; inset-inline: 0; inset-block-start: 0; block-size: 22%; pointer-events: none; opacity: 0; mix-blend-mode: multiply;
+  background: linear-gradient(to bottom, transparent, color-mix(in oklab, var(--el-qr-gold) 45%, transparent) 88%, color-mix(in oklab, var(--el-qr-gold) 80%, transparent));
+  animation: el-qr-scan 3.4s var(--ease-in-out, ease-in-out) 0.8s infinite;
+}
+:where(.el-qr__text) { color: var(--c-muted); margin-block-end: var(--space-3); line-height: 1.8; }
+/* (an a with a class: beats the page-wide link colour, still easy for a design system to restyle) */
+:where(.el-qr) a.el-qr__web {
+  display: inline-flex; gap: 0.5em; align-items: center; min-block-size: 44px; padding-inline: var(--space-4); border-radius: 999px;
+  background: #e7f8ef; color: #075e54; font-weight: var(--weight-strong); text-decoration: none;
+}
+:where(.el-qr) a.el-qr__web:hover { background: #d3f3e1; }
+:where(.el-qr__web) svg { inline-size: 1.3em; block-size: 1.3em; flex: none; }
+:where(.el-qr__close) {
+  display: block; margin: var(--space-3) auto 0; min-block-size: 44px; padding-inline: var(--space-6);
+  border: 2px solid var(--c-line); border-radius: var(--radius-m); background: none; color: var(--c-ink); font: inherit; cursor: pointer;
+}
+/* Short laptop screens: a smaller badge and tighter spacing, so the dialog needs no scrolling. */
+@media (max-height: 800px) {
+  :where(.el-qr) { padding-block: var(--space-4); }
+  :where(.el-qr__badge) { inline-size: 44px; block-size: 44px; margin-block-end: var(--space-2); }
+  :where(.el-qr__badge) svg { inline-size: 24px; block-size: 24px; }
+  :where(.el-qr__title) { font-size: var(--step-1); margin-block-end: var(--space-2); }
+  :where(.el-qr__frame) { inline-size: min(100%, 22rem, max(15rem, 100vh - 24rem)); margin-block-end: var(--space-2); }
+  :where(.el-qr__text) { margin-block-end: var(--space-2); line-height: 1.6; }
+  :where(.el-qr__close) { margin-block-start: var(--space-2); }
+}
+@keyframes el-qr-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } }
+@keyframes el-qr-ping { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 0; transform: scale(1.65); } }
+@keyframes el-qr-scan { 0% { opacity: 0; translate: 0 -100%; } 12%, 82% { opacity: 1; } 100% { opacity: 0; translate: 0 360%; } }
+@media (prefers-reduced-motion: reduce) {
+  :where(.el-qr[open], .el-qr__scan), :where(.el-qr__badge)::after { animation: none; }
+}
