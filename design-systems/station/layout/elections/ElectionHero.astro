@@ -1,6 +1,6 @@
 ---
 // The list's home hero: the great hall of the station at night. Iron roof arches and glass
-// overhead, two shafts of light, slow steam; the election's name on an enamel sign, the list's
+// overhead, two spotlights crossing over the team, slow steam; the election's name on an enamel sign, the list's
 // name in the light, and the team standing on the platform under a brass arch with the
 // club's crest as its keystone. Steam and light only move on capable devices while in view.
 import type { ImageMetadata } from 'astro';
@@ -71,14 +71,19 @@ const ribs = Array.from({ length: 9 }, (_, i) => i);
       repeating-linear-gradient(0deg, color-mix(in oklab, var(--st-enamel-ink) 5%, transparent) 0 1px, transparent 1px 64px);
   }
   .roof { position: absolute; z-index: -1; inset-inline: 0; inset-block-start: 0; inline-size: 100%; block-size: min(70%, 420px); fill: none; stroke: color-mix(in oklab, var(--st-brass) 32%, transparent); stroke-width: 1.5; }
+  /* Two spotlights, a mirror pair: they hang from above the hall at the same distance either
+     side of the centre and lean in so they cross over the team (physical left, so the pair is
+     the same in both directions). --dx: distance from the centre; --a: the lean, computed from
+     --dx and the depth where they cross (--y) where the browser can, else a fixed angle. */
   .beam {
-    position: absolute; z-index: -1; inset-block-start: -60px; block-size: calc(100% + 120px); inline-size: 22%;
-    background: linear-gradient(to bottom, color-mix(in oklab, var(--st-brass-hi) 20%, transparent), transparent 75%);
+    --w: 20%; --dx: 20%; --a: 10deg;
+    position: absolute; z-index: -1; inset-block-start: -60px; block-size: calc(100% + 120px); inline-size: var(--w);
+    background: linear-gradient(to bottom, color-mix(in oklab, var(--st-brass-hi) 22%, transparent), transparent 78%);
     clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
-    opacity: 0.6; pointer-events: none; transform-origin: 50% 0;
+    opacity: 0.55; pointer-events: none; transform-origin: 50% 0;
   }
-  .b1 { inset-inline-start: 18%; rotate: 8deg; }
-  .b2 { inset-inline-start: 46%; rotate: -6deg; inline-size: 16%; opacity: 0.45; }
+  .b1 { left: calc(50% - var(--dx) - var(--w) / 2); rotate: calc(-1 * var(--a)); }
+  .b2 { left: calc(50% + var(--dx) - var(--w) / 2); rotate: var(--a); }
   .steam {
     position: absolute; z-index: -1; inset-block-end: 10%; inline-size: 34vmax; block-size: 22vmax; border-radius: 50%;
     background: radial-gradient(closest-side, color-mix(in oklab, var(--st-enamel-ink) 14%, transparent), transparent);
@@ -87,13 +92,14 @@ const ribs = Array.from({ length: 9 }, (_, i) => i);
   .s1 { inset-inline-end: -8%; }
   .s2 { inset-inline-end: 22%; inset-block-end: 2%; }
   .s3 { inset-inline-start: -10%; inset-block-end: 26%; }
+  /* Both sway together, mirrored (no delay), so the pair stays symmetric. */
   :global(.st-rich) .hall.st-live .beam { animation: st-sway 14s var(--ease-in-out) infinite alternate; }
   :global(.st-rich) .hall.st-live .steam { animation: st-steam 16s linear infinite; }
   :global(.st-rich) .hall.st-live .s2 { animation-delay: -6s; }
   :global(.st-rich) .hall.st-live .s3 { animation-delay: -11s; }
-  @keyframes st-sway { to { rotate: var(--to, 2deg); } }
-  .b1 { --to: 3deg; }
-  .b2 { --to: -2deg; }
+  @keyframes st-sway { to { rotate: var(--to); } }
+  .b1 { --to: calc(-1 * var(--a) + 2deg); }
+  .b2 { --to: calc(var(--a) - 2deg); }
   @keyframes st-steam {
     0% { opacity: 0; transform: translate3d(0, 20%, 0) scale(0.8); }
     25% { opacity: 0.9; }
@@ -135,6 +141,10 @@ const ribs = Array.from({ length: 9 }, (_, i) => i);
      stands large across the middle under the arch, and the countdown board below rises in
      front of them (it covers the waist line, so the half-body photo reads as standing behind
      the board). */
+  /* Phones: the beams cross over the team, about 440px down. */
+  .beam { --dx: 19vw; --a: 10deg; }
+  @supports (rotate: atan2(1px, 1px)) { .beam { --a: atan2(var(--dx), 440px); } }
+
   @media (min-width: 901px) {
     /* The team's width follows the screen's height too, so the whole team (front row included)
        is on the first screen of a laptop; tall screens get the full 980px. The countdown board
@@ -153,7 +163,16 @@ const ribs = Array.from({ length: 9 }, (_, i) => i);
     h1 { font-size: clamp(2.2rem, min(1.8rem + 2.6vw, 7.5vh), 4.2rem); }
     .actions { justify-content: center; margin-block-start: 0; }
     .platform { inline-size: var(--st-team-w); margin-block-start: calc(var(--st-team-w) * -0.05 + var(--space-4)); }
-    .arch { inset: 14% 10% 0 10%; }
+    /* The gate is wider than the team, so both its posts show beside them. */
+    .arch { inset: 12% -13% 0 -13%; }
+    /* The whole roof drawing at the hall's width (never cut by its box), fading out at the
+       bottom so the arches' feet dissolve instead of ending. */
+    .roof {
+      block-size: auto; aspect-ratio: 1200 / 360;
+      mask-image: linear-gradient(to bottom, #000 62%, transparent);
+    }
+    .beam { --w: 18%; --dx: 13vw; --a: 16deg; }
+    @supports (rotate: atan2(1px, 1px)) { .beam { --a: atan2(var(--dx), 620px); } }
     .platform :global(.team) { padding-block-start: 6%; }
     .edge { display: none; }
     .hall + :global(.count-wrap) :global(.board) { margin-block-start: calc(var(--st-team-w) * -0.05); }
