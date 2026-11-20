@@ -235,8 +235,28 @@ const BALLOT = '<rect x="3" y="12" width="18" height="9" rx="1.5"/><path d="M7.5
   @media (min-width: 901px) and (max-width: 1150px) {
     .acts ul { grid-template-columns: repeat(2, minmax(0, 1fr)); max-inline-size: 48rem; }
   }
+  /* Phones: compact, so the team AND the four buttons fit the first screen. No roof lines
+     here (they read as a globe's grid on a narrow screen); smaller words and tighter gaps;
+     slimmer buttons (still 48px to tap); and on short phones the team narrows with the screen's
+     height (--tw; everything but the team takes ~507px down to the 4th button, the photo is
+     0.514 as tall as wide), never below 70% of the width. */
   @media (max-width: 900px) {
+    .hall { --fix: 517px; --tw: min(100vw, max(70vw, calc((100vh - var(--fix)) / 0.514))); padding-block-start: calc(var(--st-wave-h) * 0.72 + var(--space-2)); }
+    @supports (height: 100svh) { .hall { --tw: min(100vw, max(70vw, calc((100svh - var(--fix)) / 0.514))); } }
+    .roof { display: none; }
+    .grid { gap: var(--space-2); }
+    .sign { font-size: 0.8rem; padding-block: 0.3em; }
+    h1 { font-size: clamp(1.6rem, 7.6vw, 2.1rem); line-height: 1.2; }
     h1 .lead { display: block; }
+    .slogan { font-size: min(1.05rem, 4.4vw); }
+    .platform { inline-size: var(--tw); margin-inline: calc((100% - var(--tw)) / 2); margin-block-start: var(--space-1); }
+    .platform :global(.team) { padding-block-start: 8%; }
+    .arch :global(.keystone) { block-size: 46px; }
+    .acts { padding-block-start: var(--space-3); }
+    .acts ul { gap: var(--space-2); }
+    .act { min-block-size: 48px; font-size: 1.05rem; border-radius: 12px; }
+    .tab { inline-size: 4.2rem; }
+    .tab svg { inline-size: 24px; block-size: 24px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .act { transition: none; }
