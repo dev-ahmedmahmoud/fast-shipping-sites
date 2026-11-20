@@ -1,15 +1,19 @@
 ---
-// A candidate's profile header (h1): the candidate standing under a brass arch on the night
-// platform, the name in the light, the seat on an enamel sign, and the ballot number on the
-// split-flap board.
+// A candidate's profile header (h1): the candidate standing under a brass arch, the name in
+// the light, the seat on the gold pill, and the ballot number on the split-flap board; in the
+// home hero's style (gold ribbons, navy gradient, the club's building pale on the left).
+import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
 import type { Action } from '@engine/content';
 import type { CandidateCard } from '@elections/data';
-interface Props { ctx: PageContext; candidate: CandidateCard; kicker: Action | null; numberLabel: string }
-const { candidate: c, kicker, numberLabel } = Astro.props;
+import GoldWave from './GoldWave.astro';
+interface Props { ctx: PageContext; candidate: CandidateCard; kicker: Action | null; numberLabel: string; backdrop?: ImageMetadata | null }
+const { candidate: c, kicker, numberLabel, backdrop } = Astro.props;
 ---
 <section class="person st-glass" data-st-ambient>
+  {backdrop && <Image class="st-backdrop" src={backdrop} alt="" widths={[640, 1000, 1600]} sizes="(max-width: 900px) 90vw, 44vw" loading="eager" />}
+  <GoldWave edge="top" />
   <div class="container grid">
     <div class="copy">
       {kicker && (
@@ -18,7 +22,7 @@ const { candidate: c, kicker, numberLabel } = Astro.props;
         </p>
       )}
       <h1 data-split-words>{c.name}</h1>
-      <p class="st-sign st-rivets seat">{c.seat}</p>
+      <p class="st-pill seat">{c.seat}</p>
       <p class="num" data-st-flaps><span class="st-flap" data-st-flap>{numberLabel}</span></p>
     </div>
     <figure class="stand">
@@ -26,17 +30,23 @@ const { candidate: c, kicker, numberLabel } = Astro.props;
       <span class="arch">
         <Image class="photo" src={c.photo} alt={c.photoAlt} widths={[360, 540, 800]} sizes="(max-width: 900px) 92vw, 26rem" loading="eager" fetchpriority="high" />
       </span>
-      <span class="edge" aria-hidden="true"></span>
     </figure>
   </div>
+  <GoldWave edge="bottom" />
 </section>
 
 <style>
   .person {
     position: relative; overflow: hidden; isolation: isolate;
-    padding-block: var(--space-7) 0;
+    padding-block: calc(var(--st-wave-h) + var(--space-5)) 0;
     background-color: var(--st-night); color: var(--st-enamel-ink);
+    background-image:
+      repeating-linear-gradient(90deg, color-mix(in oklab, var(--st-enamel-ink) 4%, transparent) 0 1px, transparent 1px 96px),
+      repeating-linear-gradient(0deg, color-mix(in oklab, var(--st-enamel-ink) 3.5%, transparent) 0 1px, transparent 1px 64px),
+      var(--st-night-grad);
   }
+  .person :global(.st-backdrop) { --bd-left: -22%; --bd-top: 2%; --bd-w: 92%; --bd-o: 0.32; }
+  @media (min-width: 901px) { .person :global(.st-backdrop) { --bd-left: -3%; --bd-top: 0%; --bd-w: 42%; --bd-o: 0.4; } }
   /* A shaft of light falling from above the hall straight down the middle of the arch: it
      belongs to the stand, so it stays centred on the arch at every screen width. */
   .beam {
@@ -45,7 +55,9 @@ const { candidate: c, kicker, numberLabel } = Astro.props;
     background: linear-gradient(to bottom, color-mix(in oklab, var(--st-brass-hi) 22%, transparent), transparent 85%);
     clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%); opacity: 0.6; pointer-events: none;
   }
-  .stand > .arch, .stand > .edge { position: relative; z-index: 1; }
+  .stand > .arch { position: relative; z-index: 1; }
+  /* The photo runs under the bottom ribbon, which cuts it like the team on the home page. */
+  .stand { padding-block-end: calc(var(--st-wave-h) * 0.35); }
   .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr); gap: var(--space-6); align-items: end; }
   .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; padding-block-end: var(--space-8); align-self: center; }
   .kicker a { display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 48px; color: var(--st-brass-hi); font-family: var(--font-body); font-weight: 700; text-decoration: none; }
@@ -64,10 +76,6 @@ const { candidate: c, kicker, numberLabel } = Astro.props;
     background: radial-gradient(ellipse 60% 55% at 50% 55%, color-mix(in oklab, var(--st-brass-hi) 24%, transparent), transparent 70%);
   }
   .arch :global(.photo) { display: block; inline-size: 100%; block-size: auto; }
-  .edge {
-    position: relative; inline-size: 100%; block-size: 22px; margin-block-start: -4px;
-    background: linear-gradient(var(--st-brass) 0 0) top / 100% 4px no-repeat, color-mix(in oklab, var(--st-enamel-ink) 16%, var(--st-night));
-  }
   @media (max-width: 900px) {
     .grid { grid-template-columns: minmax(0, 1fr); }
     .copy { padding-block-end: var(--space-4); align-items: center; text-align: center; }

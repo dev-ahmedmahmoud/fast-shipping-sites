@@ -1,10 +1,13 @@
 ---
-// An inner page's title band (h1): the night hall under its roof arch, the club's crest,
-// and the page's name on a large enamel platform sign; kicker link, lead and one action.
+// An inner page's title band (h1), in the home hero's style (the client's agent's design,
+// Nov 2026): gold ribbons above and below, the navy gradient with the club's building pale on
+// the left, the roof arch and the two spotlights; the club's crest, the page's name over a gold
+// rule, then the kicker link, lead and one action.
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
 import type { Action } from '@engine/content';
+import GoldWave from './GoldWave.astro';
 interface Props {
   ctx: PageContext;
   title: string;
@@ -12,14 +15,19 @@ interface Props {
   kicker?: Action | null;
   action?: Action | null;
   crest: ImageMetadata | null;
+  backdrop?: ImageMetadata | null;
 }
-const { title, lead, kicker, action, crest } = Astro.props;
+const { title, lead, kicker, action, crest, backdrop } = Astro.props;
 ---
-<section class="band st-glass">
+<section class="band st-glass" data-st-ambient>
+  {backdrop && <Image class="st-backdrop" src={backdrop} alt="" widths={[640, 1000, 1600]} sizes="(max-width: 900px) 90vw, 44vw" loading="eager" />}
   <svg class="arch" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
     <path d="M-20 220 A620 200 0 0 1 1220 220" />
     <path d="M80 220 A520 160 0 0 1 1120 220" />
   </svg>
+  <span class="st-beam st-beam--l" aria-hidden="true"></span>
+  <span class="st-beam st-beam--r" aria-hidden="true"></span>
+  <GoldWave edge="top" />
   <div class="container inner">
     {crest && <Image class="crest" src={crest} alt="" height={96} loading="eager" />}
     {kicker && (
@@ -27,26 +35,40 @@ const { title, lead, kicker, action, crest } = Astro.props;
         <a href={kicker.href}><svg class="flip-rtl" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>{kicker.label}</a>
       </p>
     )}
-    <div class="st-sign st-rivets sign"><h1 data-split-words>{title}</h1></div>
+    <h1 data-split-words>{title}</h1>
+    <span class="rule" aria-hidden="true"></span>
     {lead && <p class="lead">{lead}</p>}
     {action && <p><a class="btn btn--brass" href={action.href}>{action.label}</a></p>}
   </div>
+  <GoldWave edge="bottom" />
 </section>
 
 <style>
   .band {
     position: relative; overflow: hidden; isolation: isolate;
-    padding-block: var(--space-7) var(--space-8);
+    padding-block: calc(var(--st-wave-h) + var(--space-5)) calc(var(--st-wave-h) + var(--space-6));
     background-color: var(--st-night); color: var(--st-enamel-ink);
-    box-shadow: inset 0 -5px 0 var(--st-brass);
+    background-image:
+      radial-gradient(ellipse 70% 70% at 50% 0%, color-mix(in oklab, var(--st-brass-hi) 12%, transparent), transparent 70%),
+      repeating-linear-gradient(90deg, color-mix(in oklab, var(--st-enamel-ink) 4%, transparent) 0 1px, transparent 1px 96px),
+      repeating-linear-gradient(0deg, color-mix(in oklab, var(--st-enamel-ink) 3.5%, transparent) 0 1px, transparent 1px 64px),
+      var(--st-night-grad);
   }
   .arch { position: absolute; z-index: -1; inset-inline: 0; inset-block-end: 0; inline-size: 100%; block-size: 100%; fill: none; stroke: color-mix(in oklab, var(--st-brass) 30%, transparent); stroke-width: 1.5; }
-  .inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); text-align: center; }
-  .inner :global(.crest) { block-size: 84px; inline-size: auto; filter: drop-shadow(0 6px 12px color-mix(in oklab, var(--c-ink) 60%, transparent)); }
+  .band :global(.st-beam) { --dx: 22vw; --y: 380px; }
+  .band :global(.st-backdrop) { --bd-left: -22%; --bd-top: 6%; --bd-w: 92%; --bd-o: 0.36; }
+  .inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; }
+  .inner :global(.crest) { block-size: 76px; inline-size: auto; filter: drop-shadow(0 6px 12px color-mix(in oklab, var(--c-ink) 60%, transparent)); }
   .kicker a { display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 48px; color: var(--st-brass-hi); font-family: var(--font-body); font-weight: 700; text-decoration: none; }
   .kicker a:hover { text-decoration: underline; }
-  .sign { padding: var(--space-4) var(--space-8); max-inline-size: 100%; }
-  h1 { font-size: var(--step-4); }
+  h1 { font-size: var(--step-5); line-height: 1.25; text-wrap: balance; text-shadow: 0 2px 14px color-mix(in oklab, var(--c-ink) 50%, transparent); }
+  /* A gold rule with a small diamond under the name. */
+  .rule { position: relative; display: block; inline-size: min(12rem, 60%); block-size: 2px; background: linear-gradient(90deg, transparent, var(--st-brass) 30%, var(--st-brass-hi) 50%, var(--st-brass) 70%, transparent); }
+  .rule::after { content: ''; position: absolute; inset-inline-start: 50%; inset-block-start: 50%; inline-size: 9px; block-size: 9px; translate: -50% -50%; rotate: 45deg; background: var(--st-brass-hi); }
+  :global([dir='rtl']) .rule::after { translate: 50% -50%; }
   .lead { font-size: var(--step-1); max-inline-size: 48ch; color: color-mix(in oklab, var(--st-enamel-ink) 90%, var(--st-night)); }
-  @media (max-width: 560px) { .sign { padding-inline: var(--space-6); } }
+  @media (min-width: 901px) {
+    .band :global(.st-beam) { --w: 16%; --dx: 12vw; --y: 360px; }
+    .band :global(.st-backdrop) { --bd-left: -3%; --bd-top: -8%; --bd-w: 40%; --bd-o: 0.4; }
+  }
 </style>

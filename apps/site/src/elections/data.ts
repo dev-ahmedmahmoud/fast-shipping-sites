@@ -315,6 +315,8 @@ export function shareKit(url: string, preview: ShareKitData['preview']): ShareKi
 }
 
 export const crest = list.crest ? media(list.crest) : null;
+/** The club's building, shown pale behind the page heroes (elections.json list.backdrop). */
+export const backdrop = list.backdrop ? media(list.backdrop) : null;
 export const cardLogo = list.cardLogo ? media(list.cardLogo) : null;
 export const shareImage = (name?: string) => (name ? media(name) : list.shareImage ? media(list.shareImage) : null);
 export { link };

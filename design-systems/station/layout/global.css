@@ -14,6 +14,12 @@
   --st-flap-ink: color-mix(in oklab, var(--c-accent-ink) 92%, var(--c-highlight));
   --st-shadow: 0 1px 0 color-mix(in oklab, var(--c-ink) 12%, transparent), 0 14px 34px -14px color-mix(in oklab, var(--c-ink) 45%, transparent);
   --st-tap: 52px;
+  /* Metallic gold (pills, waves, icon tabs) and the lighter navy at the top of the hero
+     gradient, from the client's agent's design (Nov 2026). */
+  --st-gold: linear-gradient(100deg, var(--st-brass-lo), var(--st-brass-hi) 32%, var(--st-brass) 55%, var(--st-brass-hi) 78%, var(--st-brass-lo));
+  --st-night-hi: color-mix(in oklab, var(--c-accent) 88%, var(--c-surface));
+  --st-night-grad: linear-gradient(200deg, var(--st-night-hi) 0%, var(--st-night) 55%, var(--st-night-2) 100%);
+  --st-wave-h: clamp(24px, 5vw, 60px);
 }
 
 body {
@@ -236,3 +242,58 @@ button.btn[aria-busy='true'] { opacity: 0.6; cursor: progress; }
    does not jump down when it does. */
 .el-sup:not(:has(.el-sup__card)) { min-block-size: 66rem; }
 @media (min-width: 700px) { .el-sup:not(:has(.el-sup__card)) { min-block-size: 58rem; } }
+
+/* ---- page heroes, after the client's agent's design (Nov 2026) ----
+   .st-wave: the gold ribbons at the top and bottom of a hero (GoldWave.astro).
+   .st-backdrop: the club's building, pale on the left of a hero, fading into the navy.
+   .st-pill: the metallic gold pill (the election's name, a candidate's seat). */
+.st-wave { position: absolute; z-index: 3; inset-inline: 0; inline-size: 100%; block-size: var(--st-wave-h); pointer-events: none; }
+.st-wave--top { inset-block-start: 0; }
+.st-wave--bottom { inset-block-end: -1px; }
+.st-wave__cover { fill: var(--c-bg); }
+.st-wave--top .st-wave__cover { fill: var(--c-surface); }
+/* Where the header's menu row shows (Header.astro, over 1080px), the top matches its cream. */
+@media (min-width: 1081px) { .st-wave--top .st-wave__cover { fill: var(--c-bg); } }
+.st-wave__hair { fill: none; stroke: color-mix(in oklab, var(--st-brass-hi) 70%, transparent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.st-wave__lo { stop-color: var(--st-brass-lo); }
+.st-wave__hi { stop-color: var(--st-brass-hi); }
+.st-wave__mid { stop-color: var(--st-brass); }
+
+.st-backdrop {
+  position: absolute; z-index: -2; pointer-events: none;
+  inset-block-start: var(--bd-top, 4%); left: var(--bd-left, -3%);
+  inline-size: var(--bd-w, 50%); block-size: auto; aspect-ratio: 16 / 9; object-fit: cover;
+  filter: grayscale(1) contrast(1.08) brightness(1.12); mix-blend-mode: screen; opacity: var(--bd-o, 0.4);
+  /* It runs off the left edge and fades out to the right, the top (the sky) and the bottom. */
+  -webkit-mask-image: linear-gradient(to right, #000 45%, transparent 92%), linear-gradient(to bottom, transparent 2%, #000 24%, #000 62%, transparent 96%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, #000 45%, transparent 92%), linear-gradient(to bottom, transparent 2%, #000 24%, #000 62%, transparent 96%);
+  mask-composite: intersect;
+}
+
+.st-pill {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.6em; max-inline-size: 100%;
+  padding: 0.45em 1.4em; border-radius: 999px;
+  background: var(--st-gold); color: var(--c-ink);
+  font-family: var(--font-body); font-weight: 700; line-height: 1.4; text-align: center;
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--c-surface) 55%, transparent), 0 8px 20px -10px color-mix(in oklab, var(--c-ink) 80%, transparent);
+}
+.st-pill svg { flex: none; inline-size: 1.35em; block-size: 1.35em; }
+
+/* Two spotlights, a mirror pair (<span class="st-beam st-beam--l">, st-beam--r): they hang from
+   above the section at the same distance either side of the centre (--dx) and lean in so they
+   cross --y below its top; the lean is computed where the browser can (atan2), else a fixed
+   angle. Physical left, so the pair is the same in both directions. Contexts set --w, --dx and
+   --y only. They sway together, mirrored, while the section is in view on capable devices. */
+.st-beam {
+  --w: 20%; --dx: 19vw; --y: 440px; --a: 10deg;
+  position: absolute; z-index: -1; inset-block-start: -60px; block-size: calc(100% + 120px); inline-size: var(--w);
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--st-brass-hi) 24%, transparent), transparent 78%);
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  opacity: 0.55; pointer-events: none; transform-origin: 50% 0;
+}
+@supports (rotate: atan2(1px, 1px)) { .st-beam { --a: atan2(var(--dx), var(--y)); } }
+.st-beam--l { left: calc(50% - var(--dx) - var(--w) / 2); rotate: calc(-1 * var(--a)); --to: calc(-1 * var(--a) + 2deg); }
+.st-beam--r { left: calc(50% + var(--dx) - var(--w) / 2); rotate: var(--a); --to: calc(var(--a) - 2deg); }
+.st-rich .st-live .st-beam { animation: st-beam-sway 14s var(--ease-in-out) infinite alternate; }
+@keyframes st-beam-sway { to { rotate: var(--to); } }

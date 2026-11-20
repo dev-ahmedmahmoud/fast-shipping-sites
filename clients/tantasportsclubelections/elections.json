@@ -36,7 +36,8 @@
     "logo": "logo.webp",
     "cardLogo": "crest.webp",
     "site": "husseindawoudlist.com",
-    "shareImage": "share.jpg"
+    "shareImage": "share.jpg",
+    "backdrop": "club-gate.webp"
   },
   "groups": [
     {
@@ -492,24 +493,29 @@
   "home": {
     "hero": {
       "title": "قائمة المهندس حسين داود",
+      "titleAccent": "حسين داود",
       "slogan": "تاريخ نحترمه .. ومستقبل نصنعه",
       "sub": "انتخابات نادي طنطا الرياضي 2026",
       "actions": [
         {
           "label": "تعرّف على القائمة",
-          "href": "page:team"
+          "href": "page:team",
+          "icon": "team"
         },
         {
           "label": "رؤية القائمة",
-          "href": "page:vision"
+          "href": "page:vision",
+          "icon": "vision"
         },
         {
           "label": "كن من الداعمين",
-          "href": "page:support"
+          "href": "page:support",
+          "icon": "support"
         },
         {
           "label": "خطتنا في ملفات القائمة",
-          "href": "page:files"
+          "href": "page:files",
+          "icon": "files"
         }
       ],
       "image": "team.webp",

@@ -1,27 +1,47 @@
 ---
-// The list's home hero: the great hall of the station at night. Iron roof arches and glass
-// overhead, two spotlights crossing over the team, slow steam; the election's name on an enamel sign, the list's
-// name in the light, and the team standing on the platform under a brass arch with the
-// club's crest as its keystone. Steam and light only move on capable devices while in view.
+// The list's home hero, after the client's agent's design (Nov 2026) on the station's night
+// hall: a gold ribbon above and below, the navy gradient with the club's building pale on the
+// left, the roof's thin gold arches and two spotlights crossing over the team, the election on
+// a gold pill, the list's name with the leader's name in gold, the slogan between gold rules,
+// and the team under the brass gate with the club's crest as its keystone; the bottom ribbon
+// cuts the team at the waist. The buttons follow below the hero, on the cream, as cards with
+// a gold icon tab (stacked on phones, one row on computers).
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
 import type { Action } from '@engine/content';
+import GoldWave from './GoldWave.astro';
+type HeroAction = Action & { icon?: string };
 interface Props {
   ctx: PageContext;
   title: string;
+  /** The part of the title shown in gold (the leader's name), when it is in the title. */
+  titleAccent?: string;
   slogan: string;
   sub: string;
-  actions: Action[];
+  actions: HeroAction[];
   image: ImageMetadata | null;
   imageAlt: string;
   crest: ImageMetadata | null;
+  backdrop?: ImageMetadata | null;
 }
-const { title, slogan, sub, actions, image, imageAlt, crest } = Astro.props;
+const { title, titleAccent, slogan, sub, actions, image, imageAlt, crest, backdrop } = Astro.props;
+const at = titleAccent ? title.indexOf(titleAccent) : -1;
+const titleLead = at >= 0 ? title.slice(0, at).trim() : title;
+const titleTail = at >= 0 ? title.slice(at + titleAccent!.length).trim() : '';
 // Roof ribs radiating from the arch's spring points.
 const ribs = Array.from({ length: 9 }, (_, i) => i);
+// Line icons for the buttons (24×24, drawn with the text colour).
+const ICONS: Record<string, string> = {
+  team: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  vision: '<circle cx="11" cy="13" r="8.5"/><circle cx="11" cy="13" r="4.8"/><circle cx="11" cy="13" r="1.3"/><path d="M11 13 20.5 3.5M17 3.5h3.5V7"/>',
+  support: '<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>',
+  files: '<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>',
+};
+const BALLOT = '<rect x="3" y="12" width="18" height="9" rx="1.5"/><path d="M7.5 12V4.5h6.5l3 3V12"/><path d="M10 8.5h4.5M2 12h20"/>';
 ---
 <section class="hall st-glass" data-st-ambient>
+  {backdrop && <Image class="st-backdrop" src={backdrop} alt="" widths={[640, 1000, 1600]} sizes="(max-width: 900px) 80vw, 46vw" loading="eager" />}
   <svg class="roof" viewBox="0 0 1200 360" preserveAspectRatio="xMidYMin slice" aria-hidden="true" focusable="false">
     <path d="M-40 360 A640 330 0 0 1 1240 360" />
     <path d="M40 360 A560 280 0 0 1 1160 360" />
@@ -30,23 +50,21 @@ const ribs = Array.from({ length: 9 }, (_, i) => i);
       return <path d={`M600 360 L${(600 - Math.cos(a) * 640).toFixed(1)} ${(360 - Math.sin(a) * 330).toFixed(1)}`} />;
     })}
   </svg>
-  <span class="beam b1" aria-hidden="true"></span>
-  <span class="beam b2" aria-hidden="true"></span>
+  <span class="st-beam st-beam--l" aria-hidden="true"></span>
+  <span class="st-beam st-beam--r" aria-hidden="true"></span>
   <span class="steam s1" aria-hidden="true"></span>
   <span class="steam s2" aria-hidden="true"></span>
   <span class="steam s3" aria-hidden="true"></span>
+  <GoldWave edge="top" />
 
   <div class="container grid">
-    <div class="copy">
-      <p class="st-sign st-rivets sign" data-st-swing>{sub}</p>
-      <h1 data-split-words>{title}</h1>
-      <p class="slogan"><span>{slogan}</span></p>
-      <div class="actions">
-        {actions.map((a, i) => (
-          <a class:list={['btn', i === 0 ? 'btn--brass' : 'btn--ghost']} href={a.href}>{a.label}</a>
-        ))}
-      </div>
-    </div>
+    <p class="st-pill sign"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={BALLOT} />{sub}</p>
+    <h1>
+      <span class="lead" data-split-words>{titleLead}</span>
+      {at >= 0 && <> <span class="gold" data-split-words>{titleAccent}</span></>}
+      {titleTail && <> <span data-split-words>{titleTail}</span></>}
+    </h1>
+    <p class="slogan"><span>{slogan}</span></p>
 
     {image && (
       <figure class="platform">
@@ -54,145 +72,165 @@ const ribs = Array.from({ length: 9 }, (_, i) => i);
           {crest && <Image class="keystone" src={crest} alt="" height={96} loading="eager" />}
         </span>
         <Image class="team" src={image} alt={imageAlt} widths={[640, 960, 1397]} sizes="(max-width: 900px) 100vw, 52vw" loading="eager" fetchpriority="high" />
-        <span class="edge" aria-hidden="true"></span>
       </figure>
     )}
   </div>
+  <GoldWave edge="bottom" />
 </section>
+
+{actions.length > 0 && (
+  <div class="acts">
+    <ul role="list" class="container">
+      {actions.map((a, i) => (
+        <li>
+          <a class:list={['act', i === 0 && 'act--main']} href={a.href}>
+            <span class="tab" aria-hidden="true">
+              {a.icon && ICONS[a.icon] && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={ICONS[a.icon]} />}
+            </span>
+            <span class="act__text">{a.label}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
 
 <style>
   .hall {
     position: relative; overflow: hidden; isolation: isolate;
-    padding-block: var(--space-8) 0;
+    padding-block: calc(var(--st-wave-h) + var(--space-3)) 0;
     background-color: var(--st-night); color: var(--st-enamel-ink);
     background-image:
-      radial-gradient(ellipse 70% 60% at 50% 0%, color-mix(in oklab, var(--st-brass-hi) 16%, transparent), transparent 70%),
-      repeating-linear-gradient(90deg, color-mix(in oklab, var(--st-enamel-ink) 6%, transparent) 0 1px, transparent 1px 96px),
-      repeating-linear-gradient(0deg, color-mix(in oklab, var(--st-enamel-ink) 5%, transparent) 0 1px, transparent 1px 64px);
+      radial-gradient(ellipse 70% 60% at 50% 0%, color-mix(in oklab, var(--st-brass-hi) 12%, transparent), transparent 70%),
+      repeating-linear-gradient(90deg, color-mix(in oklab, var(--st-enamel-ink) 4%, transparent) 0 1px, transparent 1px 96px),
+      repeating-linear-gradient(0deg, color-mix(in oklab, var(--st-enamel-ink) 3.5%, transparent) 0 1px, transparent 1px 64px),
+      var(--st-night-grad);
   }
-  .roof { position: absolute; z-index: -1; inset-inline: 0; inset-block-start: 0; inline-size: 100%; block-size: min(70%, 420px); fill: none; stroke: color-mix(in oklab, var(--st-brass) 32%, transparent); stroke-width: 1.5; }
-  /* Two spotlights, a mirror pair: they hang from above the hall at the same distance either
-     side of the centre and lean in so they cross over the team (physical left, so the pair is
-     the same in both directions). --dx: distance from the centre; --a: the lean, computed from
-     --dx and the depth where they cross (--y) where the browser can, else a fixed angle. */
-  .beam {
-    --w: 20%; --dx: 20%; --a: 10deg;
-    position: absolute; z-index: -1; inset-block-start: -60px; block-size: calc(100% + 120px); inline-size: var(--w);
-    background: linear-gradient(to bottom, color-mix(in oklab, var(--st-brass-hi) 22%, transparent), transparent 78%);
-    clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
-    opacity: 0.55; pointer-events: none; transform-origin: 50% 0;
-  }
-  .b1 { left: calc(50% - var(--dx) - var(--w) / 2); rotate: calc(-1 * var(--a)); }
-  .b2 { left: calc(50% + var(--dx) - var(--w) / 2); rotate: var(--a); }
+  .roof { position: absolute; z-index: -1; inset-inline: 0; inset-block-start: 0; inline-size: 100%; block-size: min(70%, 420px); fill: none; stroke: color-mix(in oklab, var(--st-brass) 30%, transparent); stroke-width: 1.5; }
+
+  /* The spotlights (global .st-beam) cross over the team. */
+  .hall :global(.st-beam) { --dx: 19vw; --y: 440px; }
   .steam {
     position: absolute; z-index: -1; inset-block-end: 10%; inline-size: 34vmax; block-size: 22vmax; border-radius: 50%;
-    background: radial-gradient(closest-side, color-mix(in oklab, var(--st-enamel-ink) 14%, transparent), transparent);
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--st-enamel-ink) 12%, transparent), transparent);
     filter: blur(8px); opacity: 0; pointer-events: none;
   }
   .s1 { inset-inline-end: -8%; }
   .s2 { inset-inline-end: 22%; inset-block-end: 2%; }
   .s3 { inset-inline-start: -10%; inset-block-end: 26%; }
-  /* Both sway together, mirrored (no delay), so the pair stays symmetric. */
-  :global(.st-rich) .hall.st-live .beam { animation: st-sway 14s var(--ease-in-out) infinite alternate; }
   :global(.st-rich) .hall.st-live .steam { animation: st-steam 16s linear infinite; }
   :global(.st-rich) .hall.st-live .s2 { animation-delay: -6s; }
   :global(.st-rich) .hall.st-live .s3 { animation-delay: -11s; }
-  @keyframes st-sway { to { rotate: var(--to); } }
-  .b1 { --to: calc(-1 * var(--a) + 2deg); }
-  .b2 { --to: calc(var(--a) - 2deg); }
   @keyframes st-steam {
     0% { opacity: 0; transform: translate3d(0, 20%, 0) scale(0.8); }
     25% { opacity: 0.9; }
     100% { opacity: 0; transform: translate3d(0, -60%, 0) scale(1.35); }
   }
 
-  .grid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: var(--space-6); align-items: end; }
-  .copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-inline-size: 0; padding-block-end: var(--space-8); align-self: center; }
-  .sign { font-family: var(--font-body); font-size: var(--step-0); font-weight: 700; padding-inline: var(--space-7); max-inline-size: 100%; white-space: normal; text-align: center; }
-  h1 { font-size: var(--step-5); line-height: 1.3; }
-  .slogan { font-family: var(--font-display); font-size: var(--step-2); color: var(--st-brass-hi); }
-  .slogan span { background: linear-gradient(var(--st-brass) 0 0) bottom / 100% 2px no-repeat; padding-block-end: 0.2em; }
-  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-block-start: var(--space-2); }
-  .actions .btn--ghost { color: var(--st-enamel-ink); }
+  /* The building: pale on the left, behind the name (phones) or beside the gate (computers). */
+  .hall :global(.st-backdrop) { --bd-left: -14%; --bd-top: 11%; --bd-w: 78%; --bd-o: 0.42; }
 
-  .platform { position: relative; margin: 0; display: grid; align-items: end; justify-items: center; min-inline-size: 0; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: var(--space-3); }
+  .sign { font-size: var(--step--1); }
+  h1 { font-size: var(--step-4); line-height: 1.25; text-wrap: balance; }
+  /* The leader's name in metallic gold (painted on the words too, as the motion script wraps
+     each word in its own span). */
+  h1 .gold, h1 .gold :global([data-word]) {
+    background: linear-gradient(180deg, var(--st-brass-hi) 10%, var(--st-brass) 55%, var(--st-brass-lo) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  h1 .gold { filter: drop-shadow(0 2px 6px color-mix(in oklab, var(--c-ink) 45%, transparent)); }
+  .slogan { display: flex; align-items: center; justify-content: center; gap: var(--space-3); inline-size: min(100%, 34rem); font-size: var(--step-1); color: color-mix(in oklab, var(--st-enamel-ink) 92%, var(--st-brass-hi)); }
+  .slogan::before, .slogan::after { content: ''; flex: 1 1 2rem; max-inline-size: 5rem; block-size: 2px; border-radius: 2px; }
+  .slogan::before { background: linear-gradient(to left, var(--st-brass), transparent); }
+  .slogan::after { background: linear-gradient(to right, var(--st-brass), transparent); }
+  .slogan span { flex: none; max-inline-size: 80%; }
+
+  .platform { position: relative; margin: var(--space-2) calc(-1 * var(--gutter)) 0; inline-size: calc(100% + 2 * var(--gutter)); display: grid; align-items: end; justify-items: center; min-inline-size: 0; }
   .arch {
     position: absolute; inset-inline: 6%; inset-block: 2% 6%;
     border: 3px solid var(--st-brass); border-block-end: 0;
     border-radius: 50% 50% 0 0 / 34% 34% 0 0;
-    background: radial-gradient(ellipse 60% 55% at 50% 60%, color-mix(in oklab, var(--st-brass-hi) 26%, transparent), transparent 70%);
+    background: radial-gradient(ellipse 60% 55% at 50% 60%, color-mix(in oklab, var(--st-brass-hi) 22%, transparent), transparent 70%);
     box-shadow: inset 0 0 0 10px color-mix(in oklab, var(--st-night) 70%, transparent), inset 0 0 0 12px color-mix(in oklab, var(--st-brass) 45%, transparent);
   }
   .arch :global(.keystone) {
-    position: absolute; inset-block-start: -2px; inset-inline-start: 50%; translate: 50% -50%; block-size: 76px; inline-size: auto;
+    position: absolute; inset-block-start: -2px; inset-inline-start: 50%; translate: 50% -50%; block-size: 56px; inline-size: auto;
     filter: drop-shadow(0 6px 10px color-mix(in oklab, var(--c-ink) 60%, transparent));
   }
   :global([dir='ltr']) .arch :global(.keystone) { translate: -50% -50%; }
-  .platform :global(.team) { position: relative; inline-size: 100%; block-size: auto; padding-block-start: 12%; }
-  .edge {
-    position: relative; inline-size: 112%; block-size: 26px; margin-block-start: -4px;
-    background:
-      linear-gradient(var(--st-brass) 0 0) top / 100% 4px no-repeat,
-      repeating-linear-gradient(90deg, color-mix(in oklab, var(--st-enamel-ink) 22%, var(--st-night)) 0 46px, color-mix(in oklab, var(--st-enamel-ink) 12%, var(--st-night)) 46px 48px);
-    box-shadow: 0 -18px 30px -12px color-mix(in oklab, var(--c-ink) 60%, transparent);
+  /* The photo runs a little below the hall so the bottom ribbon cuts the team at the waist. */
+  .platform :global(.team) { position: relative; inline-size: 100%; block-size: auto; padding-block-start: 9%; margin-block-end: calc(-1 * clamp(4px, 1vw, 12px)); }
+
+  /* ---- the buttons: cards with a gold icon tab, on the cream under the hero ---- */
+  .acts { background: var(--c-bg); padding-block: var(--space-4) calc(var(--space-6) + var(--space-5)); }
+  .acts ul { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin-block: 0; padding-block: 0; list-style: none; }
+  .acts li { display: flex; }
+  .acts li > .act { flex: 1; }
+  .act {
+    position: relative; display: flex; align-items: stretch; min-block-size: 56px; overflow: hidden;
+    border-radius: 14px; background: var(--c-surface); color: var(--c-ink);
+    border: 1px solid color-mix(in oklab, var(--st-brass) 30%, var(--c-line));
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--c-ink) 6%, transparent), 0 12px 26px -16px color-mix(in oklab, var(--st-night) 70%, transparent);
+    font-family: var(--font-body); font-weight: 700; font-size: 1.15rem; text-decoration: none;
+    transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
   }
+  .act:hover { transform: translateY(-2px); box-shadow: 0 1px 0 color-mix(in oklab, var(--c-ink) 6%, transparent), 0 18px 30px -16px color-mix(in oklab, var(--st-night) 75%, transparent); }
+  .act:focus-visible { outline: 3px solid var(--st-brass); outline-offset: 3px; }
+  /* The tab sits at the start (the right in Arabic) with a slanted inner edge. */
+  .tab {
+    flex: none; display: grid; place-items: center; inline-size: 4.8rem; padding-inline-end: 0.9rem;
+    background: color-mix(in oklab, var(--st-brass-hi) 45%, var(--c-surface)); color: var(--st-brass-lo);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 1.1rem) 100%, 0 100%);
+  }
+  :global([dir='rtl']) .tab { clip-path: polygon(1.1rem 0, 100% 0, 100% 100%, 0 100%); padding-inline: 0.9rem 0; }
+  .tab svg { inline-size: 28px; block-size: 28px; }
+  .act__text { flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-2) var(--space-4); text-align: center; line-height: 1.35; }
+  .act--main { background: linear-gradient(200deg, var(--st-night-hi), var(--st-night)); color: var(--st-enamel-ink); border-color: var(--st-night); }
+  .act--main .tab { background: var(--st-gold); color: var(--st-night); }
 
-  /* Desktop: centre stage. The sign, name, slogan and buttons sit centred on top; the team
-     stands large across the middle under the arch, and the countdown board below rises in
-     front of them (it covers the waist line, so the half-body photo reads as standing behind
-     the board). */
-  /* Phones: the beams cross over the team, about 440px down. */
-  .beam { --dx: 19vw; --a: 10deg; }
-  @supports (rotate: atan2(1px, 1px)) { .beam { --a: atan2(var(--dx), 440px); } }
-
+  /* Computers: centre stage, the team as large as the screen's height allows (so the whole
+     team and the buttons are on a laptop's first screen); buttons in one row. */
   @media (min-width: 901px) {
-    /* The team's width follows the screen's height too, so the whole team (front row included)
-       is on the first screen of a laptop; tall screens get the full 980px. The countdown board
-       shares the value to cover the same share of the photo. */
-    .hall, .hall + :global(.count-wrap) {
-      --st-team-w: min(100%, 980px, max(520px, calc((100vh - 540px) * 2.36)));
+    .hall, .hall ~ :global(.acts) {
+      --st-team-w: min(100%, 940px, max(500px, calc((100vh - 600px) * 2.36)));
     }
     @supports (height: 100svh) {
-      .hall, .hall + :global(.count-wrap) {
-        --st-team-w: min(100%, 980px, max(520px, calc((100svh - 540px) * 2.36)));
+      .hall, .hall ~ :global(.acts) {
+        --st-team-w: min(100%, 940px, max(500px, calc((100svh - 600px) * 2.36)));
       }
     }
-    .hall { padding-block: var(--space-5) 0; }
-    .grid { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: var(--space-3); }
-    .copy { align-items: center; padding-block-end: 0; gap: var(--space-3); }
+    .hall { padding-block-start: calc(var(--st-wave-h) + var(--space-2)); }
+    .grid { gap: var(--space-2); }
     h1 { font-size: clamp(2.2rem, min(1.8rem + 2.6vw, 7.5vh), 4.2rem); }
-    .actions { justify-content: center; margin-block-start: 0; }
-    .platform { inline-size: var(--st-team-w); margin-block-start: calc(var(--st-team-w) * -0.05 + var(--space-4)); }
+    .slogan { font-size: var(--step-2); inline-size: min(100%, 44rem); }
+    .platform { inline-size: var(--st-team-w); margin: var(--space-2) 0 0; }
     /* The gate is wider than the team, so both its posts show beside them. */
     .arch { inset: 12% -13% 0 -13%; }
+    .arch :global(.keystone) { block-size: 76px; }
+    .platform :global(.team) { padding-block-start: 6%; }
     /* The whole roof drawing at the hall's width (never cut by its box), fading out at the
        bottom so the arches' feet dissolve instead of ending. */
     .roof {
       block-size: auto; aspect-ratio: 1200 / 360;
       mask-image: linear-gradient(to bottom, #000 62%, transparent);
     }
-    .beam { --w: 18%; --dx: 13vw; --a: 16deg; }
-    @supports (rotate: atan2(1px, 1px)) { .beam { --a: atan2(var(--dx), 620px); } }
-    .platform :global(.team) { padding-block-start: 6%; }
-    .edge { display: none; }
-    .hall + :global(.count-wrap) :global(.board) { margin-block-start: calc(var(--st-team-w) * -0.05); }
+    .hall :global(.st-beam) { --w: 18%; --dx: 13vw; --y: 620px; }
+    .hall :global(.st-backdrop) { --bd-left: -4%; --bd-top: 14%; --bd-w: 44%; --bd-o: 0.4; }
+    .acts { padding-block-start: var(--space-5); }
+    .acts ul { grid-template-columns: repeat(4, minmax(0, 1fr)); max-inline-size: 76rem; }
+    .act { font-size: var(--step-0); min-block-size: 64px; }
+    .act__text { padding-inline: var(--space-2); }
+    .tab { inline-size: 4.4rem; }
+    .tab svg { inline-size: 26px; block-size: 26px; }
   }
-
-  /* Phones and tablets: the team must be on screen at first load. The copy's parts become grid
-     items so the photo can sit between the slogan and the buttons (sign, name, slogan, team,
-     buttons), with tighter spacing and the photo running edge to edge. */
+  @media (min-width: 901px) and (max-width: 1150px) {
+    .acts ul { grid-template-columns: repeat(2, minmax(0, 1fr)); max-inline-size: 48rem; }
+  }
   @media (max-width: 900px) {
-    .hall { padding-block-start: var(--space-5); }
-    .grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); justify-items: center; text-align: center; }
-    .copy { display: contents; }
-    .sign { order: 1; font-size: var(--step--1); padding: var(--space-2) var(--space-6); }
-    h1 { order: 2; font-size: var(--step-4); line-height: 1.25; }
-    .slogan { order: 3; font-size: var(--step-1); }
-    .platform { order: 4; inline-size: calc(100% + 2 * var(--gutter)); margin-inline: calc(-1 * var(--gutter)); margin-block-start: var(--space-2); }
-    .platform :global(.team) { padding-block-start: 9%; }
-    .arch :global(.keystone) { block-size: 56px; }
-    /* The countdown below rises into the hall by --space-6, so leave that plus a real gap. */
-    .actions { order: 5; inline-size: 100%; justify-content: center; margin: 0; padding-block: var(--space-4) calc(var(--space-6) * 2); }
-    .actions .btn { flex: 1 1 15rem; }
+    h1 .lead { display: block; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .act { transition: none; }
   }
 </style>

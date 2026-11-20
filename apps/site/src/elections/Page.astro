@@ -15,7 +15,7 @@ import SupportApp from './SupportApp.astro';
 import ComplaintForm from './ComplaintForm.astro';
 import {
   action, ballotGroups, candidate, candidateGroups, candidateRaw, candidates, clipsForCandidate, clipsForFile,
-  complaints, countdown, crest, fileRaw, filesPage, home, list, programFiles, shareImage, supporters, teamPage,
+  backdrop, complaints, countdown, crest, fileRaw, filesPage, home, list, programFiles, shareImage, supporters, teamPage,
   timeLabel, ui, ventures, video, vote, election, shareKit, vision,
 } from './data';
 import { media } from '@engine/media';
@@ -155,9 +155,9 @@ const kit = entry.template === 'support'
   type={ogType} breadcrumbs={breadcrumbs} jsonLd={jsonLd}>
   {entry.template === 'home' && (
     <>
-      <E.ElectionHero ctx={ctx} title={home.hero.title} slogan={home.hero.slogan} sub={home.hero.sub}
-        actions={home.hero.actions.map(action).filter(Boolean)}
-        image={home.hero.image ? media(home.hero.image) : null} imageAlt={home.hero.imageAlt} crest={crest} />
+      <E.ElectionHero ctx={ctx} title={home.hero.title} titleAccent={home.hero.titleAccent} slogan={home.hero.slogan} sub={home.hero.sub}
+        actions={home.hero.actions.map((a: { label: string; href: string; icon?: string }) => { const r = action(a); return r ? { ...r, icon: a.icon } : null; }).filter(Boolean)}
+        image={home.hero.image ? media(home.hero.image) : null} imageAlt={home.hero.imageAlt} crest={crest} backdrop={backdrop} />
       <E.Countdown ctx={ctx} countdown={countdown} />
       <E.ProgramFiles ctx={ctx} title={home.filesTitle} files={programFiles} layout="strip" />
       {leader && (
@@ -180,7 +180,7 @@ const kit = entry.template === 'support'
 
   {entry.template === 'candidates' && (
     <>
-      <E.PageBand ctx={ctx} title={teamPage.title} lead={teamPage.lead} crest={crest} />
+      <E.PageBand ctx={ctx} title={teamPage.title} lead={teamPage.lead} crest={crest} backdrop={backdrop} />
       <E.CandidateGrid ctx={ctx} variant="groups" groups={candidateGroups()} cardMore={cardMore} numberLabel={ui.number} />
       <E.BallotCard ctx={ctx} {...ballot} support={null} />
     </>
@@ -188,7 +188,7 @@ const kit = entry.template === 'support'
 
   {entry.template === 'candidate' && c && cr && (
     <>
-      <E.CandidateHero ctx={ctx} candidate={c} kicker={action(cr.kicker)} numberLabel={`${ui.number} ${c.number}`} />
+      <E.CandidateHero ctx={ctx} candidate={c} kicker={action(cr.kicker)} numberLabel={`${ui.number} ${c.number}`} backdrop={backdrop} />
       {cr.word && <E.MediaFrame ctx={ctx} video={video(cr.word)!} label={cr.word.title ?? cr.word.label} />}
       <E.Panel ctx={ctx}><Content /></E.Panel>
       {vf && <E.Ventures ctx={ctx} ventures={vf} />}
@@ -205,14 +205,14 @@ const kit = entry.template === 'support'
 
   {entry.template === 'files' && (
     <>
-      <E.PageBand ctx={ctx} title={filesPage.title} lead={filesPage.lead} crest={crest} />
+      <E.PageBand ctx={ctx} title={filesPage.title} lead={filesPage.lead} crest={crest} backdrop={backdrop} />
       <E.ProgramFiles ctx={ctx} hint={filesPage.hint} files={programFiles} />
     </>
   )}
 
   {entry.template === 'file' && file && (
     <>
-      <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} />
+      <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} backdrop={backdrop} />
       <E.Panel ctx={ctx}><Content /></E.Panel>
       {clipsForFile(file.slug).length > 0 && <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} />}
       <E.ProgramFiles ctx={ctx} title={file.othersTitle} files={programFiles.filter((f) => f.slug !== file.slug)} layout="strip" />
@@ -221,7 +221,7 @@ const kit = entry.template === 'support'
 
   {entry.template === 'vision' && vision && (
     <>
-      <E.PageBand ctx={ctx} title={vision.title ?? entry.title} lead={vision.lead} crest={crest} />
+      <E.PageBand ctx={ctx} title={vision.title ?? entry.title} lead={vision.lead} crest={crest} backdrop={backdrop} />
       <E.Vision ctx={ctx} vision={vision}
         share={vision.board?.share ? { label: vision.board.share.label, href: `https://wa.me/?text=${encodeURIComponent(String(vision.board.share.text).replaceAll('{url}', abs(entry.href)))}` } : null}
         more={action(vision.board?.more)}
@@ -231,14 +231,14 @@ const kit = entry.template === 'support'
 
   {entry.template === 'support' && (
     <>
-      <E.PageBand ctx={ctx} title={supporters.title ?? entry.title} lead={kit ? supporters.share.lead : undefined} crest={crest} />
+      <E.PageBand ctx={ctx} title={supporters.title ?? entry.title} lead={kit ? supporters.share.lead : undefined} crest={crest} backdrop={backdrop} />
       {kit ? <E.ShareKit ctx={ctx} kit={kit} /> : <E.Panel ctx={ctx}><SupportApp /></E.Panel>}
     </>
   )}
 
   {entry.template === 'complaints' && (
     <>
-      <E.PageBand ctx={ctx} title={complaints.title ?? entry.title} lead={complaints.lead} crest={crest} />
+      <E.PageBand ctx={ctx} title={complaints.title ?? entry.title} lead={complaints.lead} crest={crest} backdrop={backdrop} />
       <E.Panel ctx={ctx}><ComplaintForm /></E.Panel>
     </>
   )}
