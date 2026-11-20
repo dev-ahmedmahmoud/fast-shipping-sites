@@ -98,7 +98,9 @@ const BALLOT = '<rect x="3" y="12" width="18" height="9" rx="1.5"/><path d="M7.5
 <style>
   .hall {
     position: relative; overflow: hidden; isolation: isolate;
-    padding-block: calc(var(--st-wave-h) + var(--space-3)) 0;
+    /* The bottom: the team photo ends just under the ribbon's top edge (which never comes lower
+       than ~55% of the wave's height), so only its flat cut is hidden, never faces. */
+    padding-block: calc(var(--st-wave-h) + var(--space-3)) calc(var(--st-wave-h) * 0.42);
     background-color: var(--st-night); color: var(--st-enamel-ink);
     background-image:
       radial-gradient(ellipse 70% 60% at 50% 0%, color-mix(in oklab, var(--st-brass-hi) 12%, transparent), transparent 70%),
@@ -162,8 +164,7 @@ const BALLOT = '<rect x="3" y="12" width="18" height="9" rx="1.5"/><path d="M7.5
     filter: drop-shadow(0 6px 10px color-mix(in oklab, var(--c-ink) 60%, transparent));
   }
   :global([dir='ltr']) .arch :global(.keystone) { translate: -50% -50%; }
-  /* The photo runs a little below the hall so the bottom ribbon cuts the team at the waist. */
-  .platform :global(.team) { position: relative; inline-size: 100%; block-size: auto; padding-block-start: 9%; margin-block-end: calc(-1 * clamp(4px, 1vw, 12px)); }
+  .platform :global(.team) { position: relative; inline-size: 100%; block-size: auto; padding-block-start: 9%; }
 
   /* ---- the buttons: cards with a gold icon tab, on the cream under the hero ---- */
   .acts { background: var(--c-bg); padding-block: var(--space-4) calc(var(--space-6) + var(--space-5)); }
@@ -192,15 +193,16 @@ const BALLOT = '<rect x="3" y="12" width="18" height="9" rx="1.5"/><path d="M7.5
   .act--main { background: linear-gradient(200deg, var(--st-night-hi), var(--st-night)); color: var(--st-enamel-ink); border-color: var(--st-night); }
   .act--main .tab { background: var(--st-gold); color: var(--st-night); }
 
-  /* Computers: centre stage, the team as large as the screen's height allows (so the whole
-     team and the buttons are on a laptop's first screen); buttons in one row. */
+  /* Computers: centre stage, the team as large as the screen's height allows: the whole team,
+     front row included, on the first screen of any laptop (the buttons follow just below; the
+     same links are in the menu bar). Buttons in one row. */
   @media (min-width: 901px) {
     .hall, .hall ~ :global(.acts) {
-      --st-team-w: min(100%, 940px, max(500px, calc((100vh - 600px) * 2.36)));
+      --st-team-w: min(100%, 980px, max(560px, calc((100vh - 450px) * 2.05)));
     }
     @supports (height: 100svh) {
       .hall, .hall ~ :global(.acts) {
-        --st-team-w: min(100%, 940px, max(500px, calc((100svh - 600px) * 2.36)));
+        --st-team-w: min(100%, 980px, max(560px, calc((100svh - 450px) * 2.05)));
       }
     }
     .hall { padding-block-start: calc(var(--st-wave-h) + var(--space-2)); }
