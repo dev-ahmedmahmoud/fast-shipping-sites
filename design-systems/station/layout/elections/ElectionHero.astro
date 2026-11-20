@@ -144,7 +144,10 @@ const BALLOT = '<rect x="3" y="12" width="18" height="9" rx="1.5"/><path d="M7.5
   .slogan::before, .slogan::after { content: ''; flex: 1 1 2rem; max-inline-size: 5rem; block-size: 2px; border-radius: 2px; }
   .slogan::before { background: linear-gradient(to left, var(--st-brass), transparent); }
   .slogan::after { background: linear-gradient(to right, var(--st-brass), transparent); }
-  .slogan span { flex: none; max-inline-size: 80%; }
+  /* One line on every phone: the text never wraps (it shrinks with the screen), the gold
+     rules take what is left. */
+  .slogan span { flex: none; white-space: nowrap; }
+  @media (max-width: 900px) { .slogan { font-size: min(var(--step-1), 5.1vw); gap: var(--space-2); } .slogan::before, .slogan::after { flex-basis: 0.75rem; } }
 
   .platform { position: relative; margin: var(--space-2) calc(-1 * var(--gutter)) 0; inline-size: calc(100% + 2 * var(--gutter)); display: grid; align-items: end; justify-items: center; min-inline-size: 0; }
   .arch {
