@@ -26,36 +26,37 @@ const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-
 @font-face{font-family:Cairo;font-weight:200 1000;src:url(${font('cairo-arabic.woff2')}) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFC,U+200C-200E}
 @font-face{font-family:Cairo;font-weight:200 1000;src:url(${font('cairo-latin.woff2')}) format('woff2');unicode-range:U+0000-00FF,U+2000-206F}
 *{box-sizing:border-box;margin:0}
-html,body{width:1200px;height:630px;overflow:hidden;background:#141B3A}
+html,body{width:1200px;height:630px;overflow:hidden;background:#0D1E3A}
 .card{position:absolute;inset:0;overflow:hidden;font-family:Cairo,sans-serif;color:#F7F6FA;
-  background:radial-gradient(90% 120% at 25% 100%,#3d6fd0 0%,#23449A 38%,#1a2f6e 70%,#141B3A 100%)}
-/* station hall: roof rays and a faint grid */
+  background:radial-gradient(90% 120% at 25% 100%,#2B5690 0%,#15396A 38%,#10284D 70%,#0B1A33 100%)}
+/* navy and gold (the client's agent's design, Nov 2026): roof rays and a faint grid */
 .rays{position:absolute;inset:0;background:
-  repeating-conic-gradient(from 180deg at 30% 105%, rgba(237,212,39,.10) 0 1deg, transparent 1deg 9deg);
+  repeating-conic-gradient(from 180deg at 30% 105%, rgba(210,162,76,.12) 0 1deg, transparent 1deg 9deg);
   -webkit-mask:linear-gradient(to bottom,#000,transparent 85%);mask:linear-gradient(to bottom,#000,transparent 85%)}
 .grid{position:absolute;inset:0;background:
   repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 64px),
   repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 64px)}
 .glow{position:absolute;left:-60px;bottom:-140px;width:820px;height:520px;border-radius:50%;
-  background:radial-gradient(closest-side,rgba(242,213,69,.38),transparent)}
-/* the team on a brass platform */
+  background:radial-gradient(closest-side,rgba(225,185,100,.32),transparent)}
+/* the team on a gold ribbon */
 .team{position:absolute;left:14px;bottom:26px;width:690px;height:auto}
-.ledge{position:absolute;left:0;right:0;bottom:0;height:26px;background:linear-gradient(#F5E06A,#EDD427 45%,#B89B12)}
+.ledge{position:absolute;left:0;right:0;bottom:0;height:26px;background:linear-gradient(100deg,#9C7432,#F0D493 30%,#D2A24C 55%,#F3DD9E 78%,#9C7432)}
 .ledge::after{content:'';position:absolute;inset:auto 0 26px 0;height:40px;background:linear-gradient(transparent,rgba(10,15,40,.55))}
 /* the words */
 .txt{position:absolute;right:52px;top:40px;width:420px;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
 .crest{height:108px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));margin-bottom:6px}
-.kicker{font-size:24px;font-weight:700;color:#141B3A;background:#EDD427;padding:2px 18px 4px;border-radius:8px}
+.kicker{font-size:24px;font-weight:700;color:#0D1E3A;background:linear-gradient(100deg,#B98A3C,#F1D58F 35%,#D9AE5C 60%,#F3DD9E 80%,#B98A3C);padding:4px 22px 6px;border-radius:999px}
 h1{font-size:72px;line-height:1.08;font-weight:900;letter-spacing:0;text-shadow:0 4px 18px rgba(0,0,0,.35)}
-h1 small{display:block;font-size:46px;font-weight:700;color:#DCE4F5}
-.slogan{font-size:30px;font-weight:600;color:#F2D545;padding-bottom:6px;border-bottom:3px solid #EDD427}
+h1 small{display:block;font-size:46px;font-weight:700;color:#FFFFFF}
+h1 .gold{background:linear-gradient(180deg,#F3DD9E 10%,#D2A24C 55%,#9C7432);-webkit-background-clip:text;background-clip:text;color:transparent}
+.slogan{font-size:30px;font-weight:600;color:#F0DDB0;padding-bottom:6px;border-bottom:3px solid #D2A24C}
 .cta{margin-top:10px;font-size:28px;font-weight:800;display:flex;align-items:center;gap:12px}
-.cta i{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#F7F6FA;color:#23449A;font-style:normal}
-/* the date as a brass seal */
+.cta i{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#FFFFFF;color:#15396A;font-style:normal}
+/* the date as a gold seal */
 .seal{position:absolute;left:262px;top:30px;width:178px;height:178px;border-radius:50%;transform:rotate(-10deg);
-  display:grid;place-items:center;text-align:center;color:#141B3A;
-  background:radial-gradient(circle at 35% 30%,#FFF3A8,#EDD427 58%,#B89B12);
-  box-shadow:0 0 0 6px rgba(20,27,58,.55),0 0 0 9px #EDD427,0 16px 30px rgba(0,0,0,.45)}
+  display:grid;place-items:center;text-align:center;color:#0D1E3A;
+  background:radial-gradient(circle at 35% 30%,#F6E2AE,#D2A24C 58%,#9C7432);
+  box-shadow:0 0 0 6px rgba(13,30,58,.55),0 0 0 9px #D2A24C,0 16px 30px rgba(0,0,0,.45)}
 .seal b{display:block;font-size:24px;font-weight:800;line-height:1.1}
 .seal strong{display:block;font-size:44px;font-weight:900;line-height:1}
 .seal span{display:block;font-size:22px;font-weight:700}
@@ -67,7 +68,7 @@ h1 small{display:block;font-size:46px;font-weight:700;color:#DCE4F5}
   <div class="txt">
     <img class="crest" src="${img('crest.webp')}">
     <span class="kicker">انتخابات نادي طنطا الرياضي 2026</span>
-    <h1><small>قائمة المهندس</small>حسين داود</h1>
+    <h1><small>قائمة المهندس</small><span class="gold">حسين داود</span></h1>
     <p class="slogan">تاريخ نحترمه .. ومستقبل نصنعه</p>
     <p class="cta"><i>✓</i>انتخب القائمة كاملة</p>
   </div>
