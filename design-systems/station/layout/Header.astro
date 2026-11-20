@@ -1,7 +1,7 @@
 ---
 // The station's name board: the crest and the list's name on an enamel plate, the menu as
-// platform direction signs, and the main call to action (the brass rail on top was removed
-// on 20 Nov: the hero's gold ribbon now edges the header).
+// platform direction signs under a brass rail, and the main call to action. No line at the
+// bottom: every page's hero starts right under it with its own gold ribbon (20 Nov).
 import { Image } from 'astro:assets';
 import type { PageContext, NavItem } from '@engine/context';
 interface Props { ctx: PageContext }
@@ -22,6 +22,7 @@ const linkAttrs = (item: NavItem) => ({
 });
 ---
 <header class="header">
+  <div class="rail" aria-hidden="true"></div>
   <div class="container bar">
     <a class="brand" href={ctx.site.homeHref} aria-label={ctx.site.name}>
       {ctx.site.logo
@@ -87,9 +88,9 @@ const linkAttrs = (item: NavItem) => ({
     position: sticky; inset-block-start: 0; z-index: 20;
     background: color-mix(in srgb, var(--c-surface) 96%, transparent);
     backdrop-filter: blur(10px);
-    border-block-end: 1px solid var(--c-line);
     padding-block-start: env(safe-area-inset-top, 0px);
   }
+  .rail { block-size: 5px; background: linear-gradient(90deg, var(--st-brass-lo), var(--st-brass-hi) 30%, var(--st-brass) 50%, var(--st-brass-hi) 70%, var(--st-brass-lo)); }
   .bar { display: flex; align-items: center; gap: var(--space-4); min-block-size: 78px; }
   .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--c-ink); text-decoration: none; min-inline-size: 0; }
   .logo { block-size: 56px; inline-size: auto; }
