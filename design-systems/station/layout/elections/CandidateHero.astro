@@ -45,13 +45,13 @@ const { candidate: c, kicker, numberLabel, backdrop } = Astro.props;
       repeating-linear-gradient(0deg, color-mix(in oklab, var(--st-enamel-ink) 3.5%, transparent) 0 1px, transparent 1px 64px),
       var(--st-night-grad);
   }
-  /* The whole gate: on phones across the top under the ribbon; on computers its full height
-     on the right, behind the name (the photo's arch stands on the left), fading toward it. */
+  /* The whole gate in the top corner under the ribbon: on phones across the top; on computers
+     in the top right, behind the name (the photo's arch stands on the left), fading toward it. */
   .person :global(.st-backdrop) { --bd-left: -12%; --bd-top: calc(var(--st-wave-h) * 0.85); --bd-w: 88%; --bd-o: 0.34; }
   @media (min-width: 901px) {
     .person :global(.st-backdrop) {
-      --bd-left: auto; --bd-top: 50%; --bd-w: auto; --bd-o: 0.38; --bd-fade: left;
-      right: -2%; block-size: min(calc(100% - var(--st-wave-h) * 1.6), 26vw); translate: 0 -50%;
+      --bd-left: auto; --bd-top: calc(var(--st-wave-h) * 0.85); --bd-w: auto; --bd-o: 0.38; --bd-fade: left;
+      right: -2%; block-size: min(calc(100% - var(--st-wave-h) * 1.6), 26vw);
     }
   }
   /* A shaft of light falling from above the hall straight down the middle of the arch: it

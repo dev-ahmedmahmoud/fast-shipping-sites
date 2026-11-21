@@ -70,8 +70,8 @@ const { title, lead, kicker, action, crest, backdrop, leads = [], leadLabel } = 
       var(--st-night-grad);
   }
   .band :global(.st-beam) { --dx: 22vw; --y: 380px; }
-  /* The gate: on phones across the top under the ribbon; on computers its full height fits
-     between the two ribbons (sized by height, so the sign on top is never cut). */
+  /* The gate, in the top corner under the ribbon on every screen: on phones across the top;
+     on computers sized by height so its whole height (the sign on top too) fits the band. */
   .band :global(.st-backdrop) { --bd-left: -12%; --bd-top: calc(var(--st-wave-h) * 0.85); --bd-w: 88%; --bd-o: 0.38; }
   .inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; }
   .inner :global(.crest) { block-size: 76px; inline-size: auto; filter: drop-shadow(0 6px 12px color-mix(in oklab, var(--c-ink) 60%, transparent)); }
@@ -114,8 +114,8 @@ const { title, lead, kicker, action, crest, backdrop, leads = [], leadLabel } = 
   @media (min-width: 901px) {
     .band :global(.st-beam) { --w: 16%; --dx: 12vw; --y: 360px; }
     .band :global(.st-backdrop) {
-      --bd-left: -2%; --bd-top: 50%; --bd-w: auto; --bd-o: 0.42;
-      block-size: min(calc(100% - var(--st-wave-h) * 1.6), 24vw); translate: 0 -50%;
+      --bd-left: -2%; --bd-top: calc(var(--st-wave-h) * 0.85); --bd-w: auto; --bd-o: 0.42;
+      block-size: min(calc(100% - var(--st-wave-h) * 1.6), 24vw);
     }
   }
 </style>
