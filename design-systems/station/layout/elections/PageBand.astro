@@ -1,8 +1,8 @@
 ---
 // An inner page's title band (h1), in the home hero's style (the client's agent's design,
-// Nov 2026): gold ribbons above and below, the navy gradient with the club's building pale on
-// the left, the roof arch and the two spotlights; the club's crest, the page's name over a gold
-// rule, then the kicker link, lead and one action.
+// Nov 2026): gold ribbons above and below, the navy gradient with the whole club gate pale on
+// the left, and the two spotlights; the club's crest, the page's name over a gold rule, then
+// the kicker link, lead, leads and one action. (No roof arcs here: Ahmed, 22 Nov.)
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
@@ -24,11 +24,7 @@ interface Props {
 const { title, lead, kicker, action, crest, backdrop, leads = [], leadLabel } = Astro.props;
 ---
 <section class="band st-glass" data-st-ambient>
-  {backdrop && <Image class="st-backdrop" src={backdrop} alt="" widths={[640, 1000, 1600]} sizes="(max-width: 900px) 90vw, 44vw" loading="eager" />}
-  <svg class="arch" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
-    <path d="M-20 220 A620 200 0 0 1 1220 220" />
-    <path d="M80 220 A520 160 0 0 1 1120 220" />
-  </svg>
+  {backdrop && <Image class="st-backdrop st-backdrop--whole" src={backdrop} alt="" widths={[640, 1000, 1600]} sizes="(max-width: 900px) 90vw, 44vw" loading="eager" />}
   <span class="st-beam st-beam--l" aria-hidden="true"></span>
   <span class="st-beam st-beam--r" aria-hidden="true"></span>
   <GoldWave edge="top" />
@@ -73,9 +69,10 @@ const { title, lead, kicker, action, crest, backdrop, leads = [], leadLabel } = 
       repeating-linear-gradient(0deg, color-mix(in oklab, var(--st-enamel-ink) 3.5%, transparent) 0 1px, transparent 1px 64px),
       var(--st-night-grad);
   }
-  .arch { position: absolute; z-index: -1; inset-inline: 0; inset-block-end: 0; inline-size: 100%; block-size: 100%; fill: none; stroke: color-mix(in oklab, var(--st-brass) 30%, transparent); stroke-width: 1.5; }
   .band :global(.st-beam) { --dx: 22vw; --y: 380px; }
-  .band :global(.st-backdrop) { --bd-left: -22%; --bd-top: 6%; --bd-w: 92%; --bd-o: 0.36; }
+  /* The gate: on phones across the top under the ribbon; on computers its full height fits
+     between the two ribbons (sized by height, so the sign on top is never cut). */
+  .band :global(.st-backdrop) { --bd-left: -12%; --bd-top: calc(var(--st-wave-h) * 0.85); --bd-w: 88%; --bd-o: 0.38; }
   .inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; }
   .inner :global(.crest) { block-size: 76px; inline-size: auto; filter: drop-shadow(0 6px 12px color-mix(in oklab, var(--c-ink) 60%, transparent)); }
   .kicker a { display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 48px; color: var(--st-brass-hi); font-family: var(--font-body); font-weight: 700; text-decoration: none; }
@@ -116,6 +113,9 @@ const { title, lead, kicker, action, crest, backdrop, leads = [], leadLabel } = 
 
   @media (min-width: 901px) {
     .band :global(.st-beam) { --w: 16%; --dx: 12vw; --y: 360px; }
-    .band :global(.st-backdrop) { --bd-left: -3%; --bd-top: -8%; --bd-w: 40%; --bd-o: 0.4; }
+    .band :global(.st-backdrop) {
+      --bd-left: -2%; --bd-top: 50%; --bd-w: auto; --bd-o: 0.42;
+      block-size: min(calc(100% - var(--st-wave-h) * 1.6), 24vw); translate: 0 -50%;
+    }
   }
 </style>
