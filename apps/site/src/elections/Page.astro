@@ -213,7 +213,9 @@ const kit = entry.template === 'support'
   {entry.template === 'file' && file && (
     <>
       <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} backdrop={backdrop} />
-      <E.Panel ctx={ctx}><Content /></E.Panel>
+      {file.plan?.groups?.length
+        ? <E.FilePlan ctx={ctx} plan={file.plan} words={filesPage.planWords} />
+        : <E.Panel ctx={ctx}><Content /></E.Panel>}
       {clipsForFile(file.slug).length > 0 && <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} />}
       <E.ProgramFiles ctx={ctx} title={file.othersTitle} files={programFiles.filter((f) => f.slug !== file.slug)} layout="strip" />
     </>

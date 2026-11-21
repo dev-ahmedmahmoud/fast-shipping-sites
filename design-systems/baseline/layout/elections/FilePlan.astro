@@ -1,0 +1,43 @@
+---
+// A program file's plan (elections.json files[].plan), plainly: each part's title, intro and
+// vision, then its initiatives as a numbered list, each opening to its full text. Design systems
+// restyle it (Station: FilePlan.astro, a line of stops).
+import type { PageContext } from '@engine/context';
+interface Item { title: string; tags?: string[]; lead?: string; text?: string; points?: string[]; tail?: string }
+interface Group { title?: string; intro?: string[]; vision?: string[]; items: Item[] }
+interface Props { ctx: PageContext; plan: { groups: Group[] }; words: { vision: string } }
+const { plan, words } = Astro.props;
+---
+<section class="section">
+  <div class="container">
+    {plan.groups.filter((g) => g.items?.length).map((g) => (
+      <section class="part">
+        {g.title && <h2>{g.title}</h2>}
+        {g.intro?.map((p) => <p>{p}</p>)}
+        {g.vision?.length && <blockquote><strong>{words.vision}</strong>{g.vision.map((p) => <p>{p}</p>)}</blockquote>}
+        <ol>
+          {g.items.map((it) => (
+            <li>
+              <details>
+                <summary><strong>{it.title}</strong></summary>
+                {it.lead && <p>{it.lead}</p>}
+                {it.text && <p>{it.text}</p>}
+                {it.points?.length ? <ul>{it.points.map((p) => <li>{p}</li>)}</ul> : null}
+                {it.tail && <p>{it.tail}</p>}
+              </details>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+  </div>
+</section>
+
+<style>
+  .part + .part { margin-block-start: var(--space-7); }
+  h2 { margin-block-end: var(--space-3); }
+  blockquote { margin: var(--space-4) 0; padding: var(--space-4); border-inline-start: 4px solid var(--c-accent); background: var(--c-sunk); }
+  ol { display: grid; gap: var(--space-3); padding-inline-start: var(--space-5); }
+  summary { cursor: pointer; min-block-size: 44px; display: flex; align-items: center; }
+  details > :not(summary) { margin-block-start: var(--space-2); }
+</style>

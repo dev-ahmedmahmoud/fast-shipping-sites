@@ -1,0 +1,264 @@
+---
+// A program file's plan (elections.json files[].plan), built to be grasped at a glance rather
+// than read as a wall of text: a "file at a glance" box (how many initiatives, a jump chip per
+// part, "show all details"), each part's vision as a navy quote card, then the initiatives as
+// numbered stops on a gold line (zig-zag on computers, one column on phones). A stop shows its
+// title and two or three key phrases taken from its own text; the full text (word for word, as
+// the candidates wrote it) opens on a tap.
+import type { PageContext } from '@engine/context';
+import { formatNumber } from '@engine/i18n';
+interface Item { title: string; tags?: string[]; lead?: string; text?: string; points?: string[]; tail?: string }
+interface Group { title?: string; intro?: string[]; vision?: string[]; items: Item[] }
+interface Words { glance: string; count: Record<string, string>; vision: string; more: string; all: string; none: string; parts: string }
+interface Props { ctx: PageContext; plan: { groups: Group[] }; words: Words }
+const { ctx, plan, words } = Astro.props;
+const loc = ctx.locale;
+const fmt = (n: number) => formatNumber(n, loc);
+const groups = plan.groups.filter((g) => g.items?.length);
+const total = groups.reduce((n, g) => n + g.items.length, 0);
+const countWord = words.count[new Intl.PluralRules(loc).select(total)] ?? words.count.other;
+// Continuous numbering across the parts, like stops along one line.
+const starts = groups.map((_, i) => groups.slice(0, i).reduce((n, g) => n + g.items.length, 0));
+const many = groups.length > 1;
+---
+<section class="section plan" data-plan>
+  <div class="container">
+    <div class="glance">
+      <p class="glance__count"><b>{fmt(total)}</b><span>{countWord}</span></p>
+      <div class="glance__mid">
+        <p class="glance__label">{words.glance}</p>
+        {many ? (
+          <nav class="glance__parts" aria-label={words.parts}>
+            {groups.map((g, i) => (
+              <a href={`#part-${i + 1}`}><span class="glance__no">{fmt(i + 1)}</span>{g.title}<small>{fmt(g.items.length)}</small></a>
+            ))}
+          </nav>
+        ) : (
+          <ul class="glance__titles" role="list">
+            {groups[0].items.map((it) => <li>{it.title}</li>)}
+          </ul>
+        )}
+      </div>
+      <button type="button" class="btn btn--brass glance__all" data-plan-all data-all={words.all} data-none={words.none} aria-pressed="false">{words.all}</button>
+    </div>
+
+    {groups.map((g, i) => (
+      <section class="part" id={`part-${i + 1}`} aria-labelledby={g.title ? `part-${i + 1}-title` : undefined}>
+        {(g.title || g.intro || g.vision) && (
+          <header class="part__head">
+            {g.title && (
+              <h2 class="part__title" id={`part-${i + 1}-title`}>
+                {many && <span class="part__no" aria-hidden="true">{fmt(i + 1)}</span>}
+                <span>{g.title}</span>
+              </h2>
+            )}
+            {g.intro?.map((p) => <p class="part__intro">{p}</p>)}
+            {g.vision?.length && (
+              <figure class="vision">
+                <figcaption>{words.vision}</figcaption>
+                <blockquote>{g.vision.map((p) => <p>{p}</p>)}</blockquote>
+              </figure>
+            )}
+          </header>
+        )}
+        <ol class="line" role="list">
+          {g.items.map((it, k) => (
+            <li class="stop">
+              <span class="num" aria-hidden="true">{fmt(starts[i] + k + 1)}</span>
+              <details class="card">
+                <summary>
+                  <span class="card__head">
+                    <h3 class="card__title">{it.title}</h3>
+                    {it.tags?.length ? <span class="tags">{it.tags.map((t) => <span class="tag">{t}</span>)}</span> : null}
+                  </span>
+                  <span class="card__more" aria-hidden="true">{words.more}<svg viewBox="0 0 24 24" width="18" height="18"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+                </summary>
+                <div class="card__body">
+                  {it.lead && <p class="card__lead">{it.lead}</p>}
+                  {it.text && <p>{it.text}</p>}
+                  {it.points?.length ? <ul class="checks" role="list">{it.points.map((p) => <li>{p}</li>)}</ul> : null}
+                  {it.tail && <p class="card__tail">{it.tail}</p>}
+                </div>
+              </details>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+  </div>
+</section>
+
+<script>
+  // "Show all details" opens or closes every initiative of the plan; it follows hand toggles too.
+  document.querySelectorAll<HTMLElement>('[data-plan]').forEach((root) => {
+    const btn = root.querySelector<HTMLButtonElement>('[data-plan-all]');
+    const cards = [...root.querySelectorAll<HTMLDetailsElement>('details.card')];
+    if (!btn || !cards.length) return;
+    const sync = () => {
+      const all = cards.every((c) => c.open);
+      btn.setAttribute('aria-pressed', String(all));
+      btn.textContent = (all ? btn.dataset.none : btn.dataset.all) ?? '';
+    };
+    btn.addEventListener('click', () => {
+      const open = !cards.every((c) => c.open);
+      cards.forEach((c) => { c.open = open; });
+      sync();
+    });
+    cards.forEach((c) => c.addEventListener('toggle', sync));
+  });
+</script>
+
+<style>
+  .plan { --rail: 4px; --dot: 46px; }
+
+  /* ---- the file at a glance ---- */
+  .glance {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-5);
+    padding: var(--space-5) var(--space-6); border-radius: 20px;
+    background: var(--c-surface); border: 1px solid color-mix(in oklab, var(--st-brass) 40%, var(--c-line));
+    box-shadow: 0 18px 40px -26px color-mix(in oklab, var(--st-night) 70%, transparent);
+  }
+  .glance__count {
+    display: grid; place-items: center; align-content: center; inline-size: 7.5rem; aspect-ratio: 1; border-radius: 50%;
+    background: var(--st-night-grad); color: var(--st-enamel-ink);
+    box-shadow: inset 0 0 0 4px var(--st-night), inset 0 0 0 6px var(--st-brass), 0 12px 24px -12px color-mix(in oklab, var(--st-night) 80%, transparent);
+    text-align: center; line-height: 1.1;
+  }
+  .glance__count b { font-family: var(--font-display); font-size: 2.6rem; color: var(--st-brass-hi); }
+  .glance__count span { font-weight: 700; font-size: var(--step--1); }
+  .glance__label { font-weight: 800; color: var(--c-accent); margin-block-end: var(--space-2); }
+  .glance__parts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .glance__parts a {
+    display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 44px; padding: 0.3em 0.9em 0.3em 0.5em;
+    border-radius: 999px; background: color-mix(in oklab, var(--st-brass-hi) 30%, var(--c-surface)); color: var(--c-ink);
+    font-weight: 700; font-size: var(--step--1); text-decoration: none; border: 1px solid color-mix(in oklab, var(--st-brass) 45%, transparent);
+  }
+  :global([dir='rtl']) .glance__parts a { padding: 0.3em 0.5em 0.3em 0.9em; }
+  .glance__parts a:hover { background: color-mix(in oklab, var(--st-brass-hi) 50%, var(--c-surface)); }
+  .glance__parts small { font-weight: 800; color: var(--st-brass-lo); }
+  .glance__no { display: grid; place-items: center; inline-size: 1.8em; block-size: 1.8em; border-radius: 50%; background: var(--st-night); color: var(--st-brass-hi); font-size: 0.85em; }
+  .glance__titles { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); margin: 0; padding: 0; list-style: none; color: var(--c-muted); font-size: var(--step--1); font-weight: 600; }
+  .glance__titles li::before { content: '◆'; margin-inline-end: 0.45em; color: var(--st-brass); font-size: 0.7em; vertical-align: 0.15em; }
+  .glance__all { white-space: nowrap; }
+
+  /* ---- a part: title, intro, vision ---- */
+  .part { margin-block-start: var(--space-8); scroll-margin-block-start: 120px; }
+  .part__head { display: grid; justify-items: center; gap: var(--space-3); text-align: center; max-inline-size: 52rem; margin: 0 auto var(--space-6); }
+  .part__title { display: inline-flex; align-items: center; gap: var(--space-3); font-size: var(--step-2); color: var(--c-accent); text-wrap: balance; }
+  .part__no { flex: none; display: grid; place-items: center; inline-size: 2.2em; block-size: 2.2em; border-radius: 50%; font-size: 0.7em; background: var(--st-gold); color: var(--st-night); box-shadow: 0 6px 14px -8px color-mix(in oklab, var(--c-ink) 70%, transparent); }
+  .part__title::after { content: none; }
+  .part__intro { color: var(--c-muted); font-size: var(--step-0); line-height: 1.9; max-inline-size: 60ch; }
+  .vision {
+    position: relative; margin: var(--space-2) 0 0; inline-size: 100%; padding: var(--space-6) var(--space-6) var(--space-5);
+    border-radius: 20px; background: var(--st-night-grad); color: var(--st-enamel-ink); text-align: start;
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--st-brass) 50%, transparent), 0 20px 40px -24px color-mix(in oklab, var(--st-night) 80%, transparent);
+    overflow: hidden;
+  }
+  .vision::before {
+    content: '”'; position: absolute; inset-block-start: -0.18em; inset-inline-end: 0.12em; font-family: Georgia, 'Times New Roman', serif;
+    font-size: 9rem; line-height: 1; color: color-mix(in oklab, var(--st-brass) 55%, transparent); pointer-events: none;
+  }
+  .vision figcaption {
+    display: inline-block; margin-block-end: var(--space-3); padding: 0.15em 0.9em; border-radius: 999px;
+    background: var(--st-gold); color: var(--st-night); font-weight: 800; font-size: var(--step--1);
+  }
+  .vision blockquote { margin: 0; display: grid; gap: var(--space-3); font-size: var(--step-1); line-height: 1.85; }
+
+  /* ---- the line of initiatives ---- */
+  .line { position: relative; display: grid; gap: var(--space-4); margin: 0 auto; padding: 0; list-style: none; max-inline-size: 72rem; }
+  .line::before {
+    content: ''; position: absolute; inset-block: calc(var(--dot) / 2) calc(var(--dot) / 2); inset-inline-start: calc(var(--dot) / 2 - var(--rail) / 2);
+    inline-size: var(--rail); border-radius: var(--rail);
+    background: linear-gradient(to bottom, var(--st-brass-hi), var(--st-brass) 50%, var(--st-brass-lo));
+  }
+  .stop { position: relative; padding-inline-start: calc(var(--dot) + var(--space-3)); min-inline-size: 0; }
+  .num {
+    position: absolute; inset-inline-start: 0; inset-block-start: 10px; z-index: 1;
+    display: grid; place-items: center; inline-size: var(--dot); block-size: var(--dot); border-radius: 50%;
+    background: var(--st-night); color: var(--st-brass-hi); font-family: var(--font-display); font-size: 1.15rem; font-weight: 800;
+    box-shadow: 0 0 0 3px var(--c-bg), 0 0 0 6px var(--st-brass), 0 8px 16px -8px color-mix(in oklab, var(--c-ink) 70%, transparent);
+  }
+
+  .card {
+    border-radius: 16px; background: var(--c-surface); overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--st-brass) 32%, var(--c-line));
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--c-ink) 5%, transparent), 0 14px 30px -22px color-mix(in oklab, var(--st-night) 70%, transparent);
+    transition: box-shadow var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .card:hover { border-color: color-mix(in oklab, var(--st-brass) 65%, var(--c-line)); }
+  .card[open] { border-color: var(--st-brass); box-shadow: inset 0 3px 0 var(--st-brass), 0 22px 40px -24px color-mix(in oklab, var(--st-night) 75%, transparent); }
+  summary { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4) var(--space-5); cursor: pointer; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary:focus-visible { outline: 3px solid var(--st-brass); outline-offset: -3px; border-radius: 16px; }
+  .card__head { flex: 1; min-inline-size: 0; }
+  .card__title { font-family: var(--font-body); font-weight: 800; font-size: 1.12rem; line-height: 1.5; color: var(--c-accent); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-block-start: var(--space-2); }
+  .tag {
+    padding: 0.15em 0.75em; border-radius: 999px; font-size: 0.82rem; font-weight: 700; line-height: 1.6;
+    background: color-mix(in oklab, var(--st-brass-hi) 32%, var(--c-surface)); color: color-mix(in oklab, var(--st-brass-lo) 55%, var(--c-ink));
+  }
+  .card__more { flex: none; display: inline-flex; align-items: center; gap: 2px; margin-block-start: 0.2em; font-size: 0.85rem; font-weight: 700; color: var(--st-brass-lo); }
+  .card__more svg { transition: rotate var(--dur-fast) var(--ease-out); }
+  .card[open] .card__more svg { rotate: 180deg; }
+  .card__body {
+    display: grid; gap: var(--space-3); padding: var(--space-4) var(--space-5) var(--space-5);
+    border-block-start: 1px dashed color-mix(in oklab, var(--st-brass) 40%, var(--c-line));
+    font-size: var(--step-0); line-height: 1.95; color: var(--c-ink);
+  }
+  .card[open] .card__body { animation: plan-in 0.28s var(--ease-out); }
+  .card__lead { font-weight: 700; color: var(--c-accent); }
+  .card__tail { color: var(--c-muted); }
+  .checks { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+  .checks li { position: relative; padding-inline-start: 2rem; }
+  .checks li::before {
+    content: ''; position: absolute; inset-inline-start: 0; inset-block-start: 0.45em; inline-size: 1.25rem; block-size: 1.25rem; border-radius: 50%;
+    background: var(--st-gold) ;
+    -webkit-mask: radial-gradient(circle, #000 68%, transparent 70%); mask: radial-gradient(circle, #000 68%, transparent 70%);
+  }
+  .checks li::after {
+    content: ''; position: absolute; inset-inline-start: 0.42rem; inset-block-start: calc(0.45em + 0.3rem); inline-size: 0.42rem; block-size: 0.62rem;
+    border: solid var(--st-night); border-width: 0 2.5px 2.5px 0; rotate: 45deg;
+  }
+  @keyframes plan-in { from { opacity: 0; transform: translateY(-4px); } }
+
+  /* Computers: the line runs down the middle and the stops zig-zag either side of it. */
+  @media (min-width: 901px) {
+    .plan { --dot: 52px; --gap: 104px; }
+    .line { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--gap); row-gap: var(--space-5); }
+    .line::before { inset-inline-start: auto; left: calc(50% - var(--rail) / 2); }
+    .stop { padding: 0; }
+    .stop:nth-child(odd) { grid-column: 1; }
+    .stop:nth-child(even) { grid-column: 2; margin-block-start: var(--space-8); }
+    .stop:nth-child(odd) .num { inset-inline-start: auto; inset-inline-end: calc(-1 * (var(--gap) / 2 + var(--dot) / 2)); }
+    .stop:nth-child(even) .num { inset-inline-start: calc(-1 * (var(--gap) / 2 + var(--dot) / 2)); }
+    /* a short gold link from each card to its stop */
+    .stop::after { content: ''; position: absolute; inset-block-start: calc(10px + var(--dot) / 2 - 1px); block-size: 2px; inline-size: calc(var(--gap) / 2 - var(--dot) / 2); background: var(--st-brass); }
+    .stop:nth-child(odd)::after { inset-inline-end: calc(-1 * (var(--gap) / 2 - var(--dot) / 2)); }
+    .stop:nth-child(even)::after { inset-inline-start: calc(-1 * (var(--gap) / 2 - var(--dot) / 2)); }
+    .card__title { font-size: var(--step-1); }
+  }
+  /* Phones: the count and the label side by side, then the parts (or titles) full width, then
+     the button; a part's number sits above its title. */
+  @media (max-width: 900px) {
+    .glance { grid-template-columns: auto minmax(0, 1fr); padding: var(--space-4); gap: var(--space-3) var(--space-4); }
+    .glance__mid { display: contents; }
+    .glance__label { align-self: center; margin: 0; font-size: var(--step-1); }
+    .glance__parts, .glance__titles { grid-column: 1 / -1; }
+    .glance__parts { display: grid; gap: var(--space-2); }
+    .glance__parts a { border-radius: 14px; }
+    .glance__parts small { margin-inline-start: auto; }
+    .glance__count { inline-size: 5.4rem; }
+    .glance__count b { font-size: 1.9rem; }
+    .glance__all { grid-column: 1 / -1; justify-self: stretch; }
+    .part__title { flex-direction: column; gap: var(--space-2); }
+    .part { margin-block-start: var(--space-7); }
+    .vision { padding: var(--space-5) var(--space-5) var(--space-4); }
+    .vision blockquote { font-size: var(--step-0); }
+    summary { padding: var(--space-3) var(--space-4); }
+    .card__body { padding: var(--space-3) var(--space-4) var(--space-4); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card[open] .card__body { animation: none; }
+    .card, .card__more svg { transition: none; }
+  }
+</style>
