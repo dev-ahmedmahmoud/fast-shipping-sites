@@ -8,6 +8,7 @@ import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
 import type { Action } from '@engine/content';
 import GoldWave from './GoldWave.astro';
+interface Lead { name: string; seat: string; href: string; photo: ImageMetadata }
 interface Props {
   ctx: PageContext;
   title: string;
@@ -16,8 +17,11 @@ interface Props {
   action?: Action | null;
   crest: ImageMetadata | null;
   backdrop?: ImageMetadata | null;
+  /** The people who lead this page's subject (a program file's leads), with their label. */
+  leads?: Lead[];
+  leadLabel?: { one: string; two: string };
 }
-const { title, lead, kicker, action, crest, backdrop } = Astro.props;
+const { title, lead, kicker, action, crest, backdrop, leads = [], leadLabel } = Astro.props;
 ---
 <section class="band st-glass" data-st-ambient>
   {backdrop && <Image class="st-backdrop" src={backdrop} alt="" widths={[640, 1000, 1600]} sizes="(max-width: 900px) 90vw, 44vw" loading="eager" />}
@@ -38,6 +42,21 @@ const { title, lead, kicker, action, crest, backdrop } = Astro.props;
     <h1 data-split-words>{title}</h1>
     <span class="rule" aria-hidden="true"></span>
     {lead && <p class="lead">{lead}</p>}
+    {leads.length > 0 && leadLabel && (
+      <div class="leads">
+        <p class="leads__label">{leads.length > 1 ? leadLabel.two : leadLabel.one}</p>
+        <ul class="leads__list" role="list">
+          {leads.map((l) => (
+            <li>
+              <a class="who" href={l.href}>
+                <Image class="who__face" src={l.photo} alt="" width={128} height={128} fit="cover" position="top" loading="eager" />
+                <span class="who__txt"><b>{l.name}</b><small>{l.seat}</small></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
     {action && <p><a class="btn btn--brass" href={action.href}>{action.label}</a></p>}
   </div>
   <GoldWave edge="bottom" />
@@ -67,6 +86,29 @@ const { title, lead, kicker, action, crest, backdrop } = Astro.props;
   .rule::after { content: ''; position: absolute; inset-inline-start: 50%; inset-block-start: 50%; inline-size: 9px; block-size: 9px; translate: -50% -50%; rotate: 45deg; background: var(--st-brass-hi); }
   :global([dir='rtl']) .rule::after { translate: 50% -50%; }
   .lead { font-size: var(--step-1); max-inline-size: 48ch; color: color-mix(in oklab, var(--st-enamel-ink) 90%, var(--st-night)); }
+  /* A file's leads: a gold label, then each person as a chip (photo in a gold ring, name, seat)
+     linking to their profile. */
+  .leads { display: grid; justify-items: center; gap: var(--space-2); margin-block-start: var(--space-2); }
+  .leads__label { padding: 0.1em 1em; border-radius: 999px; background: var(--st-gold); color: var(--st-night); font-weight: 800; font-size: var(--step--1); }
+  .leads__list { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+  .who {
+    display: flex; align-items: center; gap: var(--space-3); padding-block: 6px; padding-inline: 6px var(--space-5); border-radius: 999px;
+    background: color-mix(in oklab, var(--st-night) 55%, transparent); color: var(--st-enamel-ink); text-decoration: none;
+    border: 1px solid color-mix(in oklab, var(--st-brass) 65%, transparent);
+    box-shadow: 0 12px 26px -16px color-mix(in oklab, var(--c-ink) 80%, transparent);
+    backdrop-filter: blur(4px); transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .who:hover { transform: translateY(-2px); border-color: var(--st-brass-hi); }
+  .who :global(.who__face) {
+    flex: none; inline-size: 58px; block-size: 58px; border-radius: 50%; object-fit: cover; object-position: top;
+    background: radial-gradient(circle at 50% 30%, var(--st-brass-hi), var(--st-brass) 70%);
+    box-shadow: 0 0 0 3px var(--st-brass-hi);
+  }
+  .who__txt { display: grid; text-align: start; line-height: 1.4; }
+  .who__txt b { font-size: var(--step-0); font-weight: 800; }
+  .who__txt small { font-size: 0.8rem; color: color-mix(in oklab, var(--st-enamel-ink) 80%, var(--st-brass-hi)); }
+  @media (prefers-reduced-motion: reduce) { .who { transition: none; } }
+
   @media (min-width: 901px) {
     .band :global(.st-beam) { --w: 16%; --dx: 12vw; --y: 360px; }
     .band :global(.st-backdrop) { --bd-left: -3%; --bd-top: -8%; --bd-w: 40%; --bd-o: 0.4; }

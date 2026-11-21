@@ -159,7 +159,7 @@ const kit = entry.template === 'support'
         actions={home.hero.actions.map((a: { label: string; href: string; icon?: string }) => { const r = action(a); return r ? { ...r, icon: a.icon } : null; }).filter(Boolean)}
         image={home.hero.image ? media(home.hero.image) : null} imageAlt={home.hero.imageAlt} crest={crest} backdrop={backdrop} />
       <E.Countdown ctx={ctx} countdown={countdown} />
-      <E.ProgramFiles ctx={ctx} title={home.filesTitle} files={programFiles} layout="strip" />
+      <E.ProgramFiles ctx={ctx} leadLabel={filesPage.leadLabel} title={home.filesTitle} files={programFiles} layout="strip" />
       {leader && (
         <E.LeaderSpotlight ctx={ctx} kicker={home.leader.kicker} name={leader.name} text={home.leader.text}
           more={{ label: home.leader.more, href: leader.href }} video={video(home.leader.video)} photo={leader.photo} />
@@ -206,18 +206,19 @@ const kit = entry.template === 'support'
   {entry.template === 'files' && (
     <>
       <E.PageBand ctx={ctx} title={filesPage.title} lead={filesPage.lead} crest={crest} backdrop={backdrop} />
-      <E.ProgramFiles ctx={ctx} hint={filesPage.hint} files={programFiles} />
+      <E.ProgramFiles ctx={ctx} leadLabel={filesPage.leadLabel} hint={filesPage.hint} files={programFiles} />
     </>
   )}
 
   {entry.template === 'file' && file && (
     <>
-      <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} backdrop={backdrop} />
+      <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} backdrop={backdrop}
+        leads={programFiles.find((f) => f.slug === file.slug)?.leads} leadLabel={filesPage.leadLabel} />
       {file.plan?.groups?.length
         ? <E.FilePlan ctx={ctx} plan={file.plan} words={filesPage.planWords} />
         : <E.Panel ctx={ctx}><Content /></E.Panel>}
       {clipsForFile(file.slug).length > 0 && <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} />}
-      <E.ProgramFiles ctx={ctx} title={file.othersTitle} files={programFiles.filter((f) => f.slug !== file.slug)} layout="strip" />
+      <E.ProgramFiles ctx={ctx} leadLabel={filesPage.leadLabel} title={file.othersTitle} files={programFiles.filter((f) => f.slug !== file.slug)} layout="strip" />
     </>
   )}
 

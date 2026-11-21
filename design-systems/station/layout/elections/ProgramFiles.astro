@@ -4,10 +4,13 @@
 // to rest; on hover a sign lifts on its chains.
 // layout "strip": on phones the signs become one sideways row (swipe, the next sign peeking in);
 // "grid" (default) stacks them. Wider screens always show the grid.
+// A file with leads (board members responsible for it) shows them at the foot of its sign:
+// their photos in gold rings, "مسؤول الملف" and the names, beside the arrow.
+import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
 import type { FileCard } from '@elections/data';
-interface Props { ctx: PageContext; title?: string; lead?: string; hint?: string; files: FileCard[]; layout?: 'grid' | 'strip' }
-const { ctx, title, lead, hint, files, layout = 'grid' } = Astro.props;
+interface Props { ctx: PageContext; title?: string; lead?: string; hint?: string; files: FileCard[]; layout?: 'grid' | 'strip'; leadLabel?: { one: string; two: string } }
+const { ctx, title, lead, hint, files, layout = 'grid', leadLabel } = Astro.props;
 ---
 <section class="section files">
   <div class="container wrap">
@@ -26,7 +29,20 @@ const { ctx, title, lead, hint, files, layout = 'grid' } = Astro.props;
             <span class="icon" aria-hidden="true" set:html={f.icon} />
             <h3>{f.title}</h3>
             <p>{f.tagline}</p>
-            <svg class="arrow flip-rtl" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <span class="foot">
+              {f.leads.length > 0 && leadLabel && (
+                <span class="leads">
+                  <span class="faces" aria-hidden="true">
+                    {f.leads.map((l) => <Image class="face" src={l.photo} alt="" width={96} height={96} fit="cover" position="top" loading="lazy" />)}
+                  </span>
+                  <span class="who">
+                    <small>{f.leads.length > 1 ? leadLabel.two : leadLabel.one}</small>
+                    {f.leads.map((l) => <b>{l.name}</b>)}
+                  </span>
+                </span>
+              )}
+              <svg class="arrow flip-rtl" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </span>
           </a>
         </li>
       ))}
@@ -76,7 +92,23 @@ const { ctx, title, lead, hint, files, layout = 'grid' } = Astro.props;
   /* Large enough for the sign lettering. */
   h3 { font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--step-2); line-height: var(--lh-heading); }
   .sign p { font-size: var(--step-0); color: color-mix(in oklab, var(--st-enamel-ink) 90%, var(--st-enamel)); }
-  .arrow { margin-block-start: auto; color: var(--st-brass-hi); transition: translate var(--dur-base) var(--ease-out); }
+  .foot { margin-block-start: auto; align-self: stretch; display: flex; align-items: center; gap: var(--space-2); }
+  .foot:has(.leads) { padding-block-start: var(--space-3); border-block-start: 1px solid color-mix(in oklab, var(--st-brass) 45%, transparent); }
+  .leads { flex: 1; min-inline-size: 0; display: flex; align-items: center; gap: var(--space-2); }
+  .faces { flex: none; display: flex; }
+  .faces :global(.face) {
+    inline-size: 38px; block-size: 38px; border-radius: 50%; object-fit: cover; object-position: top;
+    background: radial-gradient(circle at 50% 30%, var(--st-brass-hi), var(--st-brass) 70%);
+    box-shadow: 0 0 0 2px var(--st-brass-hi), 0 4px 10px -4px color-mix(in oklab, var(--c-ink) 70%, transparent);
+  }
+  .faces :global(.face + .face) { margin-inline-start: -15px; }
+  .who { min-inline-size: 0; display: grid; line-height: 1.35; }
+  /* Two leads: the photos get their own row so each name has the card's width. */
+  .leads:has(.face + .face) { flex-wrap: wrap; row-gap: var(--space-2); }
+  .leads:has(.face + .face) .who { flex-basis: 100%; }
+  .who small { font-size: 0.75rem; font-weight: 700; color: var(--st-brass-hi); }
+  .who b { font-size: 0.82rem; font-weight: 800; color: var(--st-enamel-ink); text-wrap: pretty; }
+  .arrow { flex: none; margin-inline-start: auto; color: var(--st-brass-hi); transition: translate var(--dur-base) var(--ease-out); }
   .sign:hover .arrow { translate: calc(var(--dir-x, -1) * 6px) 0; }
   :global([dir='ltr']) .sign { --dir-x: 1; }
 

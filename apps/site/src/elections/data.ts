@@ -57,7 +57,11 @@ export interface FileCard {
   /** Inline SVG markup for the file's icon (stroke uses currentColor). */
   icon: string;
   href: string;
+  /** The board members who lead the file (elections.json files[].leads: candidate slugs). */
+  leads: FileLead[];
 }
+
+export interface FileLead { slug: string; name: string; seat: string; href: string; photo: ImageMetadata }
 
 export interface CountdownData {
   /** ISO moment with offset, e.g. 2026-11-20T20:00:00+02:00. */
@@ -155,6 +159,10 @@ export const programFiles: FileCard[] = (raw.files ?? []).map((f: any) => ({
   tagline: f.tagline,
   icon: f.icon ?? '',
   href: isElections ? needEntry(`file-${f.slug}`).href : '#',
+  leads: (f.leads ?? []).map((slug: string) => {
+    const c = candidate(slug);
+    return { slug, name: c.name, seat: c.seat, href: c.href, photo: c.card };
+  }),
 }));
 
 export function fileRaw(slug: string): any {
