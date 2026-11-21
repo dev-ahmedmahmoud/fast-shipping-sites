@@ -376,6 +376,9 @@
       "slug": "finance",
       "title": "المالي والحوكمة",
       "tagline": "شفافية في إدارة أموال النادي وحوكمة قراراته",
+      "leads": [
+        "waleed-afify"
+      ],
       "icon": "<svg viewBox=\"0 0 24 24\" width=\"40\" height=\"40\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" focusable=\"false\"><path d=\"M12 4v15M7 19h10M5 8h14\"/><path d=\"M5 8l-2.5 5a2.5 2.5 0 0 0 5 0Z\"/><path d=\"M19 8l-2.5 5a2.5 2.5 0 0 0 5 0Z\"/><circle cx=\"12\" cy=\"4\" r=\"1\"/></svg>",
       "kicker": {
         "label": "الملفات",
@@ -432,6 +435,9 @@
       "slug": "development",
       "title": "التطوير",
       "tagline": "تطوير مرافق النادي وخدماته لأعضائه",
+      "leads": [
+        "mohamed-attia"
+      ],
       "icon": "<svg viewBox=\"0 0 24 24\" width=\"40\" height=\"40\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" focusable=\"false\"><path d=\"M4 20h16M7 20V11h6v9M9 14h2M9 17h2\"/><path d=\"M15 20V6M15 6h6M15 6L8 6M15 6l3-2.5M19 6v3.5\"/><path d=\"M8 6v2.5\"/></svg>",
       "kicker": {
         "label": "الملفات",
@@ -497,6 +503,10 @@
       "slug": "investment",
       "title": "الاستثمار والتسويق",
       "tagline": "استثمار أصول النادي وتسويق اسمه",
+      "leads": [
+        "karim-abu-elazm",
+        "ashoush"
+      ],
       "icon": "<svg viewBox=\"0 0 24 24\" width=\"40\" height=\"40\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" focusable=\"false\"><path d=\"M4 19h16\"/><path d=\"M5 15l4-4 3 3 6-6\"/><path d=\"M14 8h4v4\"/></svg>",
       "kicker": {
         "label": "الملفات",
@@ -616,6 +626,9 @@
       "slug": "digital",
       "title": "التحول الرقمي",
       "tagline": "خدمات رقمية أسهل لأعضاء النادي",
+      "leads": [
+        "ahmed-sweilem"
+      ],
       "icon": "<svg viewBox=\"0 0 24 24\" width=\"40\" height=\"40\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" focusable=\"false\"><rect x=\"7\" y=\"7\" width=\"10\" height=\"10\" rx=\"1.5\"/><rect x=\"10\" y=\"10\" width=\"4\" height=\"4\"/><path d=\"M10 4v3M14 4v3M10 17v3M14 17v3M4 10h3M4 14h3M17 10h3M17 14h3\"/></svg>",
       "kicker": {
         "label": "الملفات",
@@ -659,6 +672,7 @@
       "title": "الأمني والإداري",
       "tagline": "نادٍ آمن وإدارة منظّمة",
       "leads": [
+        "mohamed-sedky",
         "mostafa-el-sharkawy"
       ],
       "icon": "<svg viewBox=\"0 0 24 24\" width=\"40\" height=\"40\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" focusable=\"false\"><path d=\"M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6Z\"/><path d=\"M9 12l2 2 4-4\"/></svg>",
@@ -799,6 +813,7 @@
       "title": "الرياضي",
       "tagline": "الرياضة تعود لأبناء النادي",
       "leads": [
+        "fathy-selim",
         "khaled-hamza",
         "mohamed-el-menshawy"
       ],
@@ -1223,7 +1238,8 @@
     },
     "leadLabel": {
       "one": "مسؤول الملف",
-      "two": "مسؤولا الملف"
+      "two": "مسؤولا الملف",
+      "many": "مسؤولو الملف"
     }
   },
   "support": {

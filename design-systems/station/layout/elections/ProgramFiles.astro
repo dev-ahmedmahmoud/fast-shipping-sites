@@ -9,7 +9,7 @@
 import { Image } from 'astro:assets';
 import type { PageContext } from '@engine/context';
 import type { FileCard } from '@elections/data';
-interface Props { ctx: PageContext; title?: string; lead?: string; hint?: string; files: FileCard[]; layout?: 'grid' | 'strip'; leadLabel?: { one: string; two: string } }
+interface Props { ctx: PageContext; title?: string; lead?: string; hint?: string; files: FileCard[]; layout?: 'grid' | 'strip'; leadLabel?: { one: string; two: string; many?: string } }
 const { ctx, title, lead, hint, files, layout = 'grid', leadLabel } = Astro.props;
 ---
 <section class="section files">
@@ -36,7 +36,7 @@ const { ctx, title, lead, hint, files, layout = 'grid', leadLabel } = Astro.prop
                     {f.leads.map((l) => <Image class="face" src={l.photo} alt="" width={96} height={96} fit="cover" position="top" loading="lazy" />)}
                   </span>
                   <span class="who">
-                    <small>{f.leads.length > 1 ? leadLabel.two : leadLabel.one}</small>
+                    <small>{f.leads.length > 2 ? (leadLabel.many ?? leadLabel.two) : f.leads.length > 1 ? leadLabel.two : leadLabel.one}</small>
                     {f.leads.map((l) => <b>{l.name}</b>)}
                   </span>
                 </span>
@@ -103,7 +103,7 @@ const { ctx, title, lead, hint, files, layout = 'grid', leadLabel } = Astro.prop
   }
   .faces :global(.face + .face) { margin-inline-start: -15px; }
   .who { min-inline-size: 0; display: grid; line-height: 1.35; }
-  /* Two leads: the photos get their own row so each name has the card's width. */
+  /* Two or more leads: the photos get their own row so each name has the card's width. */
   .leads:has(.face + .face) { flex-wrap: wrap; row-gap: var(--space-2); }
   .leads:has(.face + .face) .who { flex-basis: 100%; }
   .who small { font-size: 0.75rem; font-weight: 700; color: var(--st-brass-hi); }

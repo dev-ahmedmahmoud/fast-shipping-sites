@@ -19,7 +19,7 @@ interface Props {
   backdrop?: ImageMetadata | null;
   /** The people who lead this page's subject (a program file's leads), with their label. */
   leads?: Lead[];
-  leadLabel?: { one: string; two: string };
+  leadLabel?: { one: string; two: string; many?: string };
 }
 const { title, lead, kicker, action, crest, backdrop, leads = [], leadLabel } = Astro.props;
 ---
@@ -44,7 +44,7 @@ const { title, lead, kicker, action, crest, backdrop, leads = [], leadLabel } = 
     {lead && <p class="lead">{lead}</p>}
     {leads.length > 0 && leadLabel && (
       <div class="leads">
-        <p class="leads__label">{leads.length > 1 ? leadLabel.two : leadLabel.one}</p>
+        <p class="leads__label">{leads.length > 2 ? (leadLabel.many ?? leadLabel.two) : leads.length > 1 ? leadLabel.two : leadLabel.one}</p>
         <ul class="leads__list" role="list">
           {leads.map((l) => (
             <li>
@@ -107,6 +107,11 @@ const { title, lead, kicker, action, crest, backdrop, leads = [], leadLabel } = 
   .who__txt { display: grid; text-align: start; line-height: 1.4; }
   .who__txt b { font-size: var(--step-0); font-weight: 800; }
   .who__txt small { font-size: 0.8rem; color: color-mix(in oklab, var(--st-enamel-ink) 80%, var(--st-brass-hi)); }
+  @media (max-width: 700px) {
+    /* stacked chips, all the same width */
+    .leads__list { display: grid; inline-size: min(100%, 22rem); }
+    .leads__list .who { inline-size: 100%; }
+  }
   @media (prefers-reduced-motion: reduce) { .who { transition: none; } }
 
   @media (min-width: 901px) {
