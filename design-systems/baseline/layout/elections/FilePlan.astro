@@ -4,7 +4,7 @@
 // restyle it (Station: FilePlan.astro, a line of stops).
 import type { PageContext } from '@engine/context';
 interface Item { title: string; tags?: string[]; lead?: string; text?: string; points?: string[]; tail?: string }
-interface Group { title?: string; intro?: string[]; vision?: string[]; items: Item[] }
+interface Group { title?: string; intro?: string[]; vision?: string[]; items: Item[]; closing?: string }
 interface Props { ctx: PageContext; plan: { groups: Group[] }; words: { vision: string } }
 const { plan, words } = Astro.props;
 ---
@@ -28,6 +28,7 @@ const { plan, words } = Astro.props;
             </li>
           ))}
         </ol>
+        {g.closing && <p><strong>{g.closing}</strong></p>}
       </section>
     ))}
   </div>

@@ -8,7 +8,7 @@
 import type { PageContext } from '@engine/context';
 import { formatNumber } from '@engine/i18n';
 interface Item { title: string; tags?: string[]; lead?: string; text?: string; points?: string[]; tail?: string }
-interface Group { title?: string; intro?: string[]; vision?: string[]; items: Item[] }
+interface Group { title?: string; intro?: string[]; vision?: string[]; items: Item[]; closing?: string }
 interface Words { glance: string; count: Record<string, string>; vision: string; more: string; all: string; none: string; parts: string }
 interface Props { ctx: PageContext; plan: { groups: Group[] }; words: Words }
 const { ctx, plan, words } = Astro.props;
@@ -83,6 +83,7 @@ const many = groups.length > 1;
             </li>
           ))}
         </ol>
+        {g.closing && <p class="closing">{g.closing}</p>}
       </section>
     ))}
   </div>
@@ -220,6 +221,14 @@ const many = groups.length > 1;
     border: solid var(--st-night); border-width: 0 2.5px 2.5px 0; rotate: 45deg;
   }
   @keyframes plan-in { from { opacity: 0; transform: translateY(-4px); } }
+
+  /* A part's closing line (its motto or an execution note), centred under the line. */
+  .closing {
+    max-inline-size: 48rem; margin: var(--space-6) auto 0; padding: var(--space-4) var(--space-5);
+    border-radius: 16px; text-align: center; font-weight: 700; line-height: 1.85; color: var(--c-accent);
+    background: color-mix(in oklab, var(--st-brass-hi) 22%, var(--c-surface));
+    border: 1px solid color-mix(in oklab, var(--st-brass) 55%, transparent);
+  }
 
   /* Computers: the line runs down the middle and the stops zig-zag either side of it. */
   @media (min-width: 901px) {
