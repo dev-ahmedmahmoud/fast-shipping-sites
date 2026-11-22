@@ -147,6 +147,18 @@ if (entry.template === 'candidate' && c) {
 const ogType = entry.template === 'candidate' ? 'profile' : 'website';
 // The support page as a WhatsApp share kit: the message links to the home page, whose own
 // share data (title, description, image) is what the chat's preview card will show.
+// An interview card (home "لقاءات القائمة", and a program file's leads): a placeholder links to
+// the profile with a "soon" badge; a real interview to its player on the profile.
+const interviewCard = (it: any) => {
+  const who = candidate(it.candidate);
+  return it.placeholder
+    ? { name: who.name, seat: who.seat, href: who.href, poster: media(it.poster), cta: ui.profileShort ?? ui.watch, soon: typeof it.placeholder === 'string' ? it.placeholder : (ui.soon ?? 'قريبًا') }
+    : { name: who.name, seat: who.seat, href: `${who.href}#interview`, poster: media(it.poster), cta: ui.watch };
+};
+// A program file's page opens with its leads' interviews (the same videos as on the home page).
+const fileInterviews = file
+  ? (file.leads ?? []).map((s: string) => (home.interviews?.items ?? []).find((x: any) => x.candidate === s)).filter(Boolean).map(interviewCard)
+  : [];
 const kit = entry.template === 'support'
   ? shareKit(homeUrl, { image: shareImage(), title: (homeEntry?.fm as Record<string, any>)?.titleTag ?? homeEntry?.title ?? '', description: homeEntry?.description ?? '' })
   : null;
@@ -167,12 +179,7 @@ const kit = entry.template === 'support'
       <E.CandidateGrid ctx={ctx} variant="strip" title={home.team.title} lead={home.team.lead} groups={strip()}
         more={{ label: home.team.all, href: teamHref }} cardMore={cardMore} numberLabel={ui.number} />
       {home.interviews.items.length > 0 && <E.InterviewStrip ctx={ctx} title={home.interviews.title} lead={home.interviews.lead}
-        items={home.interviews.items.map((it: any) => {
-          const who = candidate(it.candidate);
-          return it.placeholder
-            ? { name: who.name, seat: who.seat, href: who.href, poster: media(it.poster), cta: ui.profileShort ?? ui.watch, soon: typeof it.placeholder === 'string' ? it.placeholder : (ui.soon ?? 'قريبًا') }
-            : { name: who.name, seat: who.seat, href: `${who.href}#interview`, poster: media(it.poster), cta: ui.watch };
-        })} />}
+        items={home.interviews.items.map(interviewCard)} />}
       <E.BallotCard ctx={ctx} {...ballot} support={action(vote.support)} />
       <CTA ctx={ctx} title={home.cta.title} text={home.cta.text} action={action(home.cta.action)} />
     </>
@@ -214,6 +221,11 @@ const kit = entry.template === 'support'
     <>
       <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} backdrop={backdrop}
         leads={programFiles.find((f) => f.slug === file.slug)?.leads} leadLabel={filesPage.leadLabel} />
+      {fileInterviews.length > 0 && filesPage.videos && (
+        <E.InterviewStrip ctx={ctx} variant="file" items={fileInterviews}
+          title={fileInterviews.length > 1 ? filesPage.videos.many : filesPage.videos.one}
+          lead={fileInterviews.length > 1 ? filesPage.videos.manyLead : filesPage.videos.oneLead} />
+      )}
       {file.plan?.groups?.length
         ? <E.FilePlan ctx={ctx} plan={file.plan} words={filesPage.planWords} />
         : <E.Panel ctx={ctx}><Content /></E.Panel>}
