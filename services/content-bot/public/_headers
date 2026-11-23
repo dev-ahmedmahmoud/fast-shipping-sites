@@ -3,7 +3,7 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   X-Robots-Tag: noindex, nofollow
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Permissions-Policy: camera=(), microphone=(self), geolocation=()
 /sw.js
   Cache-Control: no-cache
 /app.js

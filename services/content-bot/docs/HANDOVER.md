@@ -1,7 +1,7 @@
 # Handover: the text-request app
 
 ## Day to day
-- Open the app (home-screen icon), type the change, tap **إرسال الطلب**.
+- Open the app (home-screen icon). Type the change, or tap 🎤, speak, and tap 🎤 again. Check the text, then tap **إرسال**.
 - Progress: الوكيل يعدّل (agent editing) → فحص ونشر (checking & publishing) → تحديث الموقع (site updating) → **تم** (done). Then refresh the site.
 - **إيقاف (Stop):** while the agent works. Nothing changes.
 - **تراجع (Undo):** on a finished request, by the requester or the client. Refused if that text changed again later.

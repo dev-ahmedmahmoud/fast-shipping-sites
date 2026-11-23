@@ -4,8 +4,8 @@ For Ahmed. Nothing is created yet.
 
 ## What it does
 1. The client and his team open a small web app on their phone (home-screen icon, no app store). Login is a one-time invite link from Ahmed.
-2. They type one request, e.g. «غيّر نص الفوتر في الصفحة الرئيسية إلى …», and tap **إرسال**.
-3. The app shows progress: **sent → agent editing → checking & publishing → site updating → Done, refresh**.
+2. It looks like a chat. They **type or speak** (🎤) one request, e.g. «غيّر نص الفوتر في الصفحة الرئيسية إلى …». Speech becomes text in the box, so they can fix words before **إرسال**.
+3. The bot's reply bubble shows live progress: **agent editing → checking & publishing → site updating → Done ✓, refresh**.
 4. Behind it, the app starts the site agent: a **Claude Code routine** on the same repo, a fresh copy for each request. The agent pushes its edit to a branch `claude/content-<id>`.
 5. The app checks that branch in code: text only, the person's own words. Only then does the app put it on the live branch. The site updates in about 1 minute.
 6. **إيقاف (Stop)** on a running request: the app ignores the agent's result.
@@ -29,7 +29,7 @@ For Ahmed. Nothing is created yet.
 ## Pieces
 | Piece | Where | Notes |
 |---|---|---|
-| Worker `tanta-content-bot` | Cloudflare (Syncology), free plan | App + API + admin page; cron every 2 min |
+| Worker `tanta-content-bot` | Cloudflare (Syncology), free plan | App + API + admin page; cron every 2 min; Workers AI for voice |
 | D1 `tanta-content-bot` | Cloudflare | people, requests, audit |
 | Routine "Tanta text requests" | claude.ai/code/routines (Ahmed's account) | The agent. Prompt in `docs/ROUTINE.md` |
 | Secrets | Cloudflare | `GITHUB_TOKEN`, `ADMIN_KEY`, `ROUTINE_TOKEN`, `VAPID_PRIVATE_JWK`, optional `CF_PAGES_TOKEN` |
@@ -38,6 +38,7 @@ For Ahmed. Nothing is created yet.
 | Item | Cost |
 |---|---|
 | Cloudflare Worker, D1, cron (free plan) | $0 |
+| Voice to text (Cloudflare Workers AI, Whisper) | $0 within the free daily quota (about 200 minutes of speech a day) |
 | Agent runs | Your Claude subscription (no extra bill). Limit: 30 runs/hour |
 | Phone alerts | $0 |
 | GitHub, Pages builds (1 per change, 500/month free) | $0 |
@@ -49,4 +50,5 @@ Risk: the free plan allows 10 ms CPU per run. If logs show error 1102, switch to
 - Anthropic's routine trigger is a "research preview" and may change.
 - A routine run can't be stopped from outside. Stop means "ignore it and delete its branch".
 - iPhone alerts need "Add to Home Screen" (iOS 16.4+).
+- Voice: up to 1 minute per recording. Whisper may mishear names, so the person checks the text before sending.
 - The bot changes existing text only. It can't add new fields.

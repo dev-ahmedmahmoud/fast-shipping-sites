@@ -6,6 +6,7 @@ import { pathAllowed, LIMITS } from './config.js';
 import { audit, housekeeping, hit, nowSec } from './db.js';
 import { currentPerson, redeemInvite, createInvite, sessionCookie, clearCookie, isAdmin, sha256hex, readCookie } from './auth.js';
 import { Push, validEndpoint, publicKeyFromJwk } from './push.js';
+import { transcribe } from './voice.js';
 
 const json = (data, status = 200, headers = {}) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers } });
@@ -27,6 +28,7 @@ export function createApp(overrides = {}) {
     if (request.method === 'POST') {
       // Only our own page may call the API (with SameSite=Strict cookies this blocks cross-site requests).
       if (request.headers.get('origin') !== url.origin) return fail(403, 'forbidden');
+      if (path === '/api/voice') return voice(request, env);
       if (!(request.headers.get('content-type') || '').startsWith('application/json')) return fail(415, 'json only');
     }
     let body = {};
@@ -95,6 +97,30 @@ export function createApp(overrides = {}) {
       return json({ ok: true });
     }
     return fail(404, 'not found');
+  }
+
+  /** Audio in, text out. Max about 1 minute of speech. */
+  async function voice(request, env) {
+    const db = env.DB;
+    const person = await currentPerson(db, request);
+    if (!person) return fail(401, 'login');
+    if (!env.AI) return fail(503, 'التحويل الصوتي غير متاح الآن.');
+    const type = request.headers.get('content-type') || '';
+    if (!/^audio\/(webm|mp4|mpeg|ogg|wav|x-m4a|aac)/.test(type)) return fail(415, 'audio only');
+    const len = Number(request.headers.get('content-length') || 0);
+    if (len > 3_000_000) return fail(413, 'التسجيل طويل جدًا. سجّل أقل من دقيقة.');
+    if ((await hit(db, `voice:${person.id}`, 3600, 30)).over) return fail(429, 'تسجيلات كثيرة. انتظر قليلًا.');
+    const bytes = new Uint8Array(await request.arrayBuffer());
+    if (bytes.length > 3_000_000) return fail(413, 'التسجيل طويل جدًا. سجّل أقل من دقيقة.');
+    if (bytes.length < 1000) return fail(400, 'لم يُسمع صوت. حاول مرة أخرى.');
+    try {
+      const text = await transcribe(env, bytes);
+      if (!text) return fail(422, 'لم أفهم التسجيل. تكلّم بوضوح أو اكتب طلبك.');
+      return json({ ok: true, text: text.slice(0, LIMITS.maxIncomingChars) });
+    } catch (e) {
+      await audit(db, { actor: person.name, event: 'voice_error', detail: String(e.message).slice(0, 200) });
+      return fail(502, 'تعذّر تحويل الصوت إلى نص. اكتب طلبك.');
+    }
   }
 
   async function admin(request, env, body, url) {

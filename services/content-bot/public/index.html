@@ -29,14 +29,15 @@
 
   <main id="app" class="screen" hidden>
     <div id="hint" class="hint" hidden></div>
-    <form id="composer" class="ask">
-      <label for="text">ما التعديل المطلوب على نصوص الموقع؟</label>
-      <textarea id="text" rows="3" maxlength="1500" placeholder="مثال: غيّر نص الفوتر في الصفحة الرئيسية إلى …"></textarea>
-      <button id="send" type="submit">إرسال الطلب</button>
-      <p class="small">نصوص فقط، بدون تصميم. يُنشر التعديل على الموقع مباشرة بعد الفحص.</p>
-    </form>
-    <ol id="list" class="plain reqs" aria-live="polite"></ol>
+    <ol id="list" class="chat" aria-live="polite"></ol>
   </main>
+
+  <form id="composer" hidden>
+    <button id="mic" type="button" class="mic" aria-label="تسجيل صوتي">🎤</button>
+    <textarea id="text" rows="1" maxlength="1500" placeholder="اكتب أو سجّل طلبك…" aria-label="طلبك"></textarea>
+    <button id="send" type="submit" aria-label="إرسال">إرسال</button>
+  </form>
+  <div id="rec" class="rec" hidden><span class="dot"></span><span id="rec-time">0:00</span> — جارٍ التسجيل… اضغط 🎤 للإيقاف</div>
 
   <div id="toast" role="status" hidden></div>
 </body>

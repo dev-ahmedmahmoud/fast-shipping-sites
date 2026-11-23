@@ -204,3 +204,24 @@ test('payload format; push endpoints; audit append-only', async () => {
   const s = await setup();
   assert.throws(() => s.db.raw.exec("UPDATE audit SET actor='x'"), /append-only/);
 });
+
+test('voice: audio in, Arabic text out; login, type and size checked', async () => {
+  const s = await setup();
+  const seen = [];
+  s.env.AI = { run: async (model, input) => { seen.push({ model, input }); return { text: '  غير الشعار   الى شعار جديد ' }; } };
+  const audio = new Uint8Array(5000).fill(7);
+  const post = (headers, body = audio) => s.app.fetch(new Request(ORIGIN + '/api/voice', { method: 'POST', headers: { origin: ORIGIN, ...headers }, body }), s.env, s.ctx);
+  let r = await post({ 'content-type': 'audio/webm', cookie: s.cab.cookie });
+  assert.equal(r.status, 200);
+  assert.equal((await r.json()).text, 'غير الشعار الى شعار جديد');
+  assert.equal(seen[0].model, '@cf/openai/whisper-large-v3-turbo');
+  assert.equal(seen[0].input.language, 'ar');
+  assert.equal(Buffer.from(seen[0].input.audio, 'base64').length, 5000);
+  assert.equal((await post({ 'content-type': 'audio/webm' })).status, 401, 'no login');
+  assert.equal((await post({ 'content-type': 'text/plain', cookie: s.cab.cookie })).status, 415);
+  assert.equal((await post({ 'content-type': 'audio/mp4', cookie: s.cab.cookie }, new Uint8Array(10))).status, 400, 'too short');
+  assert.equal((await post({ 'content-type': 'audio/mp4', cookie: s.cab.cookie }, new Uint8Array(3_100_000))).status, 413);
+  assert.equal((await s.app.fetch(new Request(ORIGIN + '/api/voice', { method: 'POST', headers: { origin: 'https://evil.example', 'content-type': 'audio/webm', cookie: s.cab.cookie }, body: audio }), s.env, s.ctx)).status, 403);
+  s.env.AI = { run: async () => { throw new Error('ai down'); } };
+  assert.equal((await post({ 'content-type': 'audio/webm', cookie: s.cab.cookie })).status, 502);
+});

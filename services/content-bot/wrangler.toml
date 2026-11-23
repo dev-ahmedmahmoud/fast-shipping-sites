@@ -25,6 +25,10 @@ VAPID_SUBJECT = "https://husseindawoudlist.com"
 # Set to "off" to stop new requests (kill switch).
 BOT_MODE = "on"
 
+# Voice -> text (Whisper) on Cloudflare Workers AI. Free daily quota.
+[ai]
+binding = "AI"
+
 [triggers]
 crons = ["*/2 * * * *"]   # every 2 minutes: follow running requests (also when nobody has the app open)
 
