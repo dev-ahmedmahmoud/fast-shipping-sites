@@ -4,37 +4,55 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0e2a4e">
   <title>إدارة تطبيق التعديل</title>
+  <link rel="icon" href="/icon-192.png">
   <link rel="stylesheet" href="/style.css">
   <script src="/admin.js" defer></script>
 </head>
-<body>
-  <header class="bar"><img src="/icon-192.png" alt="" width="32" height="32"><div class="bar-text"><strong>إدارة تطبيق التعديل</strong><span>لأحمد فقط</span></div></header>
-  <div class="admin scroll">
-    <section id="login">
-      <h2>مفتاح الإدارة</h2>
-      <div class="row"><input id="key" type="password" autocomplete="off" placeholder="المفتاح" class="grow"><button id="go">دخول</button></div>
+<body class="admin-body">
+  <header class="bar">
+    <img src="/icon-192.png" alt="" width="32" height="32">
+    <div class="bar-text"><strong>إدارة تطبيق التعديل</strong><span>للمسؤول فقط</span></div>
+    <button id="logout" class="ghost" hidden>خروج</button>
+  </header>
+
+  <main class="admin">
+    <section id="login" class="card login">
+      <div class="lock" aria-hidden="true">🔒</div>
+      <h1>دخول المسؤول</h1>
+      <p class="small">الصق مفتاح الإدارة المحفوظ في AWS Secrets Manager.</p>
+      <form id="login-form" class="stack">
+        <input id="key" type="password" autocomplete="off" placeholder="مفتاح الإدارة" dir="ltr" required>
+        <button id="go" type="submit">دخول</button>
+      </form>
     </section>
-    <div id="panel" hidden>
-      <section>
+
+    <div id="panel" class="grid" hidden>
+      <section class="card">
         <h2>إضافة شخص</h2>
-        <div class="row">
-          <input id="name" placeholder="الاسم" maxlength="60" class="grow">
-          <select id="role"><option value="cabinet">عضو بالحملة</option><option value="client">المرشح (صاحب الموافقة)</option></select>
-          <button id="add">إضافة</button>
-        </div>
+        <form id="add-form" class="stack">
+          <input id="name" placeholder="الاسم، مثل: منى أحمد" maxlength="60" required>
+          <div class="roles">
+            <label class="role"><input type="radio" name="role" value="cabinet" checked><span><strong>عضو بالحملة</strong><small>يرسل طلبات ويرى طلباته فقط</small></span></label>
+            <label class="role"><input type="radio" name="role" value="client"><span><strong>المرشح</strong><small>يرى كل الطلبات · واحد فقط</small></span></label>
+          </div>
+          <button id="add" type="submit">إضافة</button>
+        </form>
+        <div id="link" class="link" hidden></div>
       </section>
-      <section>
-        <h2>الأشخاص</h2>
-        <div id="link" hidden></div>
-        <div id="people"></div>
+
+      <section class="card">
+        <h2>الأشخاص <span id="count" class="badge"></span></h2>
+        <div id="people" class="people"></div>
       </section>
-      <section>
-        <h2>سجل العمليات</h2>
-        <ol id="audit" class="audit plain"></ol>
+
+      <section class="card wide">
+        <h2>سجل العمليات <button id="reload" class="link-btn" type="button">تحديث</button></h2>
+        <ol id="audit" class="audit"></ol>
       </section>
     </div>
-  </div>
+  </main>
   <div id="toast" role="status" hidden></div>
 </body>
 </html>
