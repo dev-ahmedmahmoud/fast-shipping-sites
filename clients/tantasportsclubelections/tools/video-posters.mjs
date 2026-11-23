@@ -21,16 +21,16 @@ const b = await chromium.launch();
 const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
 for (const c of data.candidates) {
   await p.setContent(`<!doctype html><html dir="rtl"><head><style>
-  *{margin:0}html,body{width:1280px;height:720px;overflow:hidden;background:#141B3A}
-  .s{position:absolute;inset:0;overflow:hidden;background:radial-gradient(70% 110% at 78% 100%,#3d6fd0 0%,#23449A 40%,#1a2f6e 72%,#141B3A 100%)}
-  .rays{position:absolute;inset:0;background:repeating-conic-gradient(from 180deg at 78% 108%,rgba(237,212,39,.10) 0 1deg,transparent 1deg 9deg);
+  *{margin:0}html,body{width:1280px;height:720px;overflow:hidden;background:#0D1E3A}
+  .s{position:absolute;inset:0;overflow:hidden;background:radial-gradient(70% 110% at 78% 100%,#2B5690 0%,#15396A 40%,#10284D 72%,#0B1A33 100%)}
+  .rays{position:absolute;inset:0;background:repeating-conic-gradient(from 180deg at 78% 108%,rgba(210,162,76,.12) 0 1deg,transparent 1deg 9deg);
     -webkit-mask:linear-gradient(to bottom,#000,transparent 80%)}
   .grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 64px),repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 64px)}
-  .glow{position:absolute;right:60px;bottom:-120px;width:640px;height:560px;border-radius:50%;background:radial-gradient(closest-side,rgba(242,213,69,.32),transparent)}
-  .arch{position:absolute;right:120px;bottom:0;width:440px;height:600px;border:4px solid #EDD427;border-bottom:0;border-radius:50% 50% 0 0/34% 34% 0 0;opacity:.85}
+  .glow{position:absolute;right:60px;bottom:-120px;width:640px;height:560px;border-radius:50%;background:radial-gradient(closest-side,rgba(225,185,100,.30),transparent)}
+  .arch{position:absolute;right:120px;bottom:0;width:440px;height:600px;border:4px solid #D2A24C;border-bottom:0;border-radius:50% 50% 0 0/34% 34% 0 0;opacity:.85}
   .who{position:absolute;right:90px;bottom:0;height:640px}
   .crest{position:absolute;left:70px;top:56px;height:110px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45))}
-  .ledge{position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(#F5E06A,#EDD427 45%,#B89B12)}
+  .ledge{position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(100deg,#9C7432,#F0D493 30%,#D2A24C 55%,#F3DD9E 78%,#9C7432)}
   </style></head><body><div class="s"><div class="rays"></div><div class="grid"></div><div class="glow"></div><div class="arch"></div>
   <img class="who" src="${img(c.card)}"><img class="crest" src="${crest}"><div class="ledge"></div></div></body></html>`);
   await p.waitForTimeout(150);
