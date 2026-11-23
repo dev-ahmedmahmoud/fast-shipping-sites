@@ -12,7 +12,7 @@ if grep -q REPLACE_AFTER_D1_CREATE wrangler.toml; then
   echo "D1 created. Commit the database_id in wrangler.toml (it is not a secret)."
 fi
 npx wrangler d1 migrations apply tanta-content-bot --remote
-npx wrangler deploy
+npm run deploy
 # Push-alert key: made here and piped straight into Cloudflare (never printed, never stored).
 node scripts/vapid.mjs | npx wrangler secret put VAPID_PRIVATE_JWK >/dev/null && echo "set secret VAPID_PRIVATE_JWK"
 echo "Done. App = the workers.dev URL above. Admin page = <that URL>/admin"

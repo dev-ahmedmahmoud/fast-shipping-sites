@@ -5,9 +5,10 @@
   "version": "0.1.0",
   "description": "WhatsApp bot: text-only edits for the tantasportsclubelections site, client approves with YES.",
   "scripts": {
-    "test": "node --test --no-warnings test/*.test.mjs",
+    "build": "node scripts/build-static.mjs",
+    "test": "node scripts/build-static.mjs && node --test --no-warnings test/*.test.mjs",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "deploy": "node scripts/build-static.mjs && wrangler deploy",
     "people": "node scripts/people.mjs"
   },
   "devDependencies": {

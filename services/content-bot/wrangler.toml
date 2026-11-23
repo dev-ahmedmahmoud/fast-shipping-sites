@@ -2,13 +2,10 @@
 name = "tanta-content-bot"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
+workers_dev = true
+preview_urls = false
 
-# The app files. /api/* always goes to the Worker; everything else is a static file.
-[assets]
-directory = "./public"
-binding = "ASSETS"
-not_found_handling = "single-page-application"
-run_worker_first = ["/api/*"]
+# The app files (public/) are packed into src/static.js by `npm run build` and served by the Worker.
 
 # Non-secret settings. Secrets: GITHUB_TOKEN, ADMIN_KEY, ROUTINE_TOKEN, VAPID_PRIVATE_JWK, CF_PAGES_TOKEN (optional).
 [vars]
@@ -17,9 +14,9 @@ LIVE_BRANCH = "claude/islamic-website-design-systems-wfyy85"
 CLIENT_DIR = "clients/tantasportsclubelections"
 SITE_URL = "https://husseindawoudlist.com"
 # The site agent: a Claude Code routine with an API trigger (id starts with trig_). See docs/ROUTINE.md.
-ROUTINE_ID = "REPLACE_WITH_ROUTINE_ID"
+ROUTINE_ID = "trig_01Mjye1Y5yMZnTGCDHhLDvYZ"
 # Optional: to show "done" when the site build really finished (else: 90 seconds after publishing).
-CF_ACCOUNT_ID = ""
+CF_ACCOUNT_ID = "60cc13042940b287d108bc99cd58d8ff"
 PAGES_PROJECT = "site-tantasportsclubelections"
 VAPID_SUBJECT = "https://husseindawoudlist.com"
 # Set to "off" to stop new requests (kill switch).
@@ -35,5 +32,5 @@ crons = ["*/2 * * * *"]   # every 2 minutes: follow running requests (also when 
 [[d1_databases]]
 binding = "DB"
 database_name = "tanta-content-bot"
-database_id = "REPLACE_AFTER_D1_CREATE"
+database_id = "d77e894f-e3bd-482b-ae4f-5511bf1093be"
 migrations_dir = "migrations"

@@ -95,3 +95,17 @@ test('Pages build state: waits for a production build that started after the com
   assert.equal(await buildState({}, since), 'pending');                         // no token: 90 seconds
   assert.equal(await buildState({}, since - 100), 'success');
 });
+
+test('the Worker serves the app files with security headers', async () => {
+  const { serveStatic } = await import('../src/serve.js');
+  const r = serveStatic(new Request('https://x/'));
+  assert.equal(r.status, 200); assert.match(r.headers.get('content-type'), /text\/html/);
+  assert.match(r.headers.get('content-security-policy'), /script-src 'self'/);
+  assert.match(await r.text(), /تعديل نصوص الموقع/);
+  assert.match(await serveStatic(new Request('https://x/admin')).text(), /مفتاح الإدارة/);
+  assert.match(await serveStatic(new Request('https://x/#join=abc')).text(), /app\.js/);
+  const png = serveStatic(new Request('https://x/icon-192.png'));
+  assert.equal(png.headers.get('content-type'), 'image/png');
+  assert.deepEqual([...new Uint8Array(await png.arrayBuffer()).slice(1, 4)].map((c) => String.fromCharCode(c)).join(''), 'PNG');
+  assert.equal(serveStatic(new Request('https://x/sw.js')).headers.get('cache-control'), 'no-cache');
+});

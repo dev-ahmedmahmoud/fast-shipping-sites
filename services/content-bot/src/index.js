@@ -7,6 +7,7 @@ import { audit, housekeeping, hit, nowSec } from './db.js';
 import { currentPerson, redeemInvite, createInvite, sessionCookie, clearCookie, isAdmin, sha256hex, readCookie } from './auth.js';
 import { Push, validEndpoint, publicKeyFromJwk } from './push.js';
 import { transcribe } from './voice.js';
+import { serveStatic } from './serve.js';
 
 const json = (data, status = 200, headers = {}) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers } });
@@ -187,7 +188,7 @@ export function createApp(overrides = {}) {
         }
       }
       if (url.pathname === '/health') return new Response('ok');
-      return env.ASSETS ? env.ASSETS.fetch(request) : new Response('not found', { status: 404 });
+      return serveStatic(request);
     },
     async scheduled(_event, env, ctx) {
       ctx.waitUntil((async () => { await makeRelay(env).advanceAll(); await housekeeping(env.DB); })());
