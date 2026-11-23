@@ -17,7 +17,7 @@ export function createApp(overrides = {}) {
   const makeRelay = (env) => {
     const gh = overrides.gh || new GitHub({ token: env.GITHUB_TOKEN, repo: env.GITHUB_REPO, clientDir: env.CLIENT_DIR, pathAllowed: (p) => pathAllowed(env.CLIENT_DIR, p) });
     return new Relay({
-      env, db: env.DB, gh, fire: overrides.fire,
+      env, db: env.DB, gh, fire: overrides.fire, pagesFetch: overrides.pagesFetch,
       push: overrides.push || new Push({ env, db: env.DB }),
       loadStore: overrides.loadStore || ((tip) => loadStore(gh, tip, env.CLIENT_DIR)),
     });

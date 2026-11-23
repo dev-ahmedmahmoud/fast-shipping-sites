@@ -109,7 +109,7 @@ export class Relay {
       return this.cleanBranches(req.id);
     }
     if (req.status === 'building') {
-      const st = await buildState(this.env, req.building_since);
+      const st = await buildState(this.env, req.building_since, this.pagesFetch, req.edits_json ? JSON.parse(req.edits_json) : []);
       if (st === 'success') await this.finish(req, 'done', null, 'site_updated');
       else if (st === 'failure') await this.finish(req, 'failed', t('buildFailed'), 'build_failed');
       return;
@@ -189,11 +189,12 @@ export class Relay {
         const after = applyEdits(rel, before, ok);
         verifyEdits(rel, before, after, ok.map((e) => e.locator));
         files.push({ rel, before, after, edits: ok.map(({ file, locator, old, new: nw }) => ({ file, locator, old, new: nw })), deletes: 0 });
-        for (const e of ok) display.push({ page: e.page.label.ar, op: 'edit', old: e.old, new: e.new });
+        for (const e of ok) display.push({ page: e.page.label.ar, route: e.page.route, op: 'edit', old: e.old, new: e.new });
       } else {
         let d;
         try { d = diffMd(rel, before, head.get(rel)); } catch (e) { throw new CheckError(code(e)); }
-        const page = (indexFile(rel, before)[0]?.page.label.ar) || rel;
+        const first = indexFile(rel, before)[0];
+        const page = first?.page.label.ar || rel, route = first?.page.route || '/';
         const ok = [];
         for (const o of d.ops) {
           if (o.op === 'delete') { ok.push(o); continue; }
@@ -205,7 +206,7 @@ export class Relay {
         try { diffMd(rel, before, after); } catch { throw new CheckError('structure-changed'); }
         const deletes = ok.filter((o) => o.op !== 'edit').length;      // added or deleted points: undo needs the exact file
         files.push({ rel, before, after, deletes, edits: deletes ? [] : ok.map((o) => ({ file: rel, locator: o.locator, old: o.old, new: o.new })) });
-        for (const o of ok) display.push({ page, op: o.op, old: o.old, new: o.op === 'delete' ? null : o.new });
+        for (const o of ok) display.push({ page, route, op: o.op, old: o.old, new: o.op === 'delete' ? null : o.new });
       }
     }
     if (!display.length) throw new CheckError(skipped[0]?.code || 'no-change');

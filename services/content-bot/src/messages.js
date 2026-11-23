@@ -24,7 +24,7 @@ const M = {
   reverted: 'تم التراجع. يعود النص القديم خلال دقيقة تقريبًا.',
 };
 export const STATUS_AR = {
-  working: 'الوكيل يعمل على التعديل…', checking: 'فحص ونشر…', building: 'جارٍ تحديث الموقع…', done: 'تم. حدّث صفحة الموقع.',
+  working: 'الوكيل يعمل على التعديل…', checking: 'فحص ونشر…', building: 'جارٍ تحديث الموقع… (قد يستغرق بضع دقائق)', done: 'تم. حدّث صفحة الموقع.',
   refused: 'لم يُنفَّذ', failed: 'لم يُنفَّذ', aborted: 'تم الإيقاف', reverting: 'جارٍ التراجع…', reverted: 'تم التراجع',
 };
 export const t = (key) => { if (!M[key]) throw new Error('missing message ' + key); return M[key]; };

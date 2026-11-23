@@ -35,7 +35,8 @@ test('request -> agent run -> its branch is checked -> live -> done; nobody appr
   const msg = s.gh.commits.get(s.gh.branches.get(LIVE)).message;
   assert.match(msg, new RegExp(`Text request ${id}`)); assert.match(msg, /Requested-by: Mona/);
 
-  s.ago(id, 'building_since', 100);                       // no Pages token: done 90 s after publishing
+  assert.equal((await s.cab.get(id)).status, 'building', 'not done until the site build finished');
+  s.pages.built = true;
   r = await s.cab.get(id);
   assert.equal(r.status, 'done'); assert.equal(r.statusText, 'تم. حدّث صفحة الموقع.');
   assert.ok(s.pushes.includes(s.cab.id), 'requester alerted when done');

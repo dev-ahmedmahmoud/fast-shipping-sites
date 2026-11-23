@@ -83,9 +83,11 @@ export async function setup() {
   const db = makeDb(), gh = new FakeGH();
   const pushes = [], fired = [];
   const fire = async (env, text) => { fired.push(text); if (fire.fail) throw new Error('down'); return 'https://claude.ai/code/session_test'; };
-  const app = createApp({ gh, fire, push: { notify: async (pid) => pushes.push(pid) } });
+  const pages = { built: false };
+  const pagesFetch = async () => new Response(JSON.stringify({ result: pages.built ? [{ created_on: new Date().toISOString(), latest_stage: { name: 'deploy', status: 'success' } }] : [] }), { status: 200 });
+  const app = createApp({ gh, fire, pagesFetch, push: { notify: async (pid) => pushes.push(pid) } });
   const pending = [];
-  const env = { DB: db, GITHUB_REPO: 'x/y', LIVE_BRANCH: LIVE, CLIENT_DIR: DIR, SITE_URL: 'https://site.test', ADMIN_KEY };
+  const env = { DB: db, GITHUB_REPO: 'x/y', LIVE_BRANCH: LIVE, CLIENT_DIR: DIR, SITE_URL: 'https://site.test', ADMIN_KEY, CF_PAGES_TOKEN: 'pages', CF_ACCOUNT_ID: 'acc', PAGES_PROJECT: 'proj' };
   const ctx = { waitUntil: (p) => pending.push(p) };
   const settle = async () => { while (pending.length) await pending.shift(); };
 
@@ -123,5 +125,5 @@ export async function setup() {
   const audit = () => db.raw.prepare('SELECT * FROM audit ORDER BY id').all();
   const row = (id) => db.raw.prepare('SELECT * FROM requests WHERE id = ?').get(id);
   const branch = (id) => `claude/content-${id.toLowerCase()}`;
-  return { db, gh, app, env, ctx, settle, req, adminCall, person, client, cab, audit, row, branch, fired, fire, pushes, ago, due };
+  return { pages, db, gh, app, env, ctx, settle, req, adminCall, person, client, cab, audit, row, branch, fired, fire, pushes, ago, due };
 }

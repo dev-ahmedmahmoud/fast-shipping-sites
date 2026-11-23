@@ -83,17 +83,23 @@ test('GitHub: all client text files come back in ONE GraphQL call', async () => 
   assert.deepEqual([...files.keys()].sort(), ['client.json', 'content/ar/home.md', 'content/ar/team/x.md', 'elections.json']);
 });
 
-test('Pages build state: waits for a production build that started after the commit', async () => {
+test('build state: Pages token if set, else the real page must show the new text', async () => {
   const { buildState } = await import('../src/pages.js');
   const since = Math.floor(Date.now() / 1000) - 30;
   const env = { CF_PAGES_TOKEN: 't', CF_ACCOUNT_ID: 'a', PAGES_PROJECT: 'p' };
   const reply = (result) => async () => new Response(JSON.stringify({ result }), { status: 200 });
   assert.equal(await buildState(env, since, reply([{ created_on: new Date((since - 600) * 1000).toISOString(), latest_stage: { name: 'deploy', status: 'success' } }])), 'pending');
-  assert.equal(await buildState(env, since, reply([{ created_on: new Date((since + 2) * 1000).toISOString(), latest_stage: { name: 'build', status: 'active' } }])), 'pending');
   assert.equal(await buildState(env, since, reply([{ created_on: new Date((since + 2) * 1000).toISOString(), latest_stage: { name: 'deploy', status: 'success' } }])), 'success');
   assert.equal(await buildState(env, since, reply([{ created_on: new Date((since + 2) * 1000).toISOString(), latest_stage: { name: 'build', status: 'failure' } }])), 'failure');
-  assert.equal(await buildState({}, since), 'pending');                         // no token: 90 seconds
-  assert.equal(await buildState({}, since - 100), 'success');
+  const site = { SITE_URL: 'https://site.test' };
+  const page = (html) => async (url) => { assert.match(url, /^https:\/\/site\.test\/team\/x\/\?_v=/); return new Response(html, { status: 200 }); };
+  const add = [{ op: 'add', route: '/team/x/', new: 'عضو لجنة الشباب سنة ٢٠١٥' }];
+  assert.equal(await buildState(site, since, page('<li>قديم</li>'), add), 'pending');
+  assert.equal(await buildState(site, since, page('<li>عضو لجنة الشباب سنة 2015</li>'), add), 'success', 'digits written either way');
+  const del = [{ op: 'delete', route: '/team/x/', old: 'نقطة قديمة' }];
+  assert.equal(await buildState(site, since, page('<li>نقطة قديمة</li>'), del), 'pending');
+  assert.equal(await buildState(site, since, page('<li>أخرى</li>'), del), 'success');
+  assert.equal(await buildState(site, since - 4000, page('x'), add), 'success', 'stop waiting after an hour');
 });
 
 test('the Worker serves the app files with security headers', async () => {
