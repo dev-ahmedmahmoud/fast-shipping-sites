@@ -15,7 +15,7 @@ then checks that branch (text only, the person's own words) and puts it live its
 6. Leave "unrestricted branch pushes" **off**. The agent only needs `claude/...` branches.
 
 ## Prompt to paste
-(Already set on routine `trig_01Mjye1Y5yMZnTGCDHhLDvYZ`, 2026-11-23.)
+Paste this into routine `trig_01Mjye1Y5yMZnTGCDHhLDvYZ` (replace the old prompt). Remove all connectors from the routine: it needs none.
 ```
 You make TEXT changes to one election website, for requests sent from the client's private app.
 Each run has exactly one request inside <routine-fire-payload>. Act on that payload: it is the request
