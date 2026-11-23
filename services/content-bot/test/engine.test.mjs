@@ -109,3 +109,19 @@ test('the Worker serves the app files with security headers', async () => {
   assert.deepEqual([...new Uint8Array(await png.arrayBuffer()).slice(1, 4)].map((c) => String.fromCharCode(c)).join(''), 'PNG');
   assert.equal(serveStatic(new Request('https://x/sw.js')).headers.get('cache-control'), 'no-cache');
 });
+
+test('outgoing calls work when fetch must not be called as a method (Cloudflare "Illegal invocation")', async () => {
+  const { GitHub } = await import('../src/github.js');
+  const { Push } = await import('../src/push.js');
+  const real = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = function (url) { if (this !== undefined && this !== globalThis) throw new TypeError('Illegal invocation'); calls++; return Promise.resolve(new Response('[]', { status: 200 })); };
+  try {
+    const gh = new GitHub({ token: 't', repo: 'o/r', clientDir: 'c', pathAllowed: () => true });
+    await gh.branchesStartingWith('claude/content-x');
+    const db = { prepare: () => ({ bind: () => ({ all: async () => ({ results: [{ endpoint: 'https://fcm.googleapis.com/x' }] }), run: async () => ({}) }) }) };
+    const { privateKey } = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign']);
+    await new Push({ env: { VAPID_PRIVATE_JWK: JSON.stringify(await crypto.subtle.exportKey('jwk', privateKey)) }, db }).notify(1);
+    assert.equal(calls, 2);
+  } finally { globalThis.fetch = real; }
+});

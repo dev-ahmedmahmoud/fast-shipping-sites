@@ -1,7 +1,7 @@
 // Minimal GitHub client: read files at an exact commit, make one commit with several files, move a branch
 // forward (never force), create/delete preview branches. Uses a fine-grained token for THIS repo only.
 export class GitHub {
-  constructor({ token, repo, clientDir, pathAllowed, fetchImpl = fetch }) {
+  constructor({ token, repo, clientDir, pathAllowed, fetchImpl = (...a) => fetch(...a) }) {
     Object.assign(this, { token, repo, clientDir, pathAllowed, fetchImpl });
   }
 

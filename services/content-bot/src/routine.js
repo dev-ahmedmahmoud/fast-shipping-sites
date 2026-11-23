@@ -1,6 +1,6 @@
 // Starts one run of the site agent: a Claude Code routine with an API trigger.
 // Docs: https://code.claude.com/docs/en/routines  (POST .../routines/{id}/fire, research preview)
-export async function fireRoutine(env, text, fetchImpl = fetch) {
+export async function fireRoutine(env, text, fetchImpl = (...a) => fetch(...a)) {
   const res = await fetchImpl(`https://api.anthropic.com/v1/claude_code/routines/${env.ROUTINE_ID}/fire`, {
     method: 'POST',
     headers: {

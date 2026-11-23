@@ -22,7 +22,7 @@ async function vapidAuth(env, endpoint) {
 }
 
 export class Push {
-  constructor({ env, db, fetchImpl = fetch }) { Object.assign(this, { env, db, fetchImpl }); }
+  constructor({ env, db, fetchImpl = (...a) => fetch(...a) }) { Object.assign(this, { env, db, fetchImpl }); }
   /** Alert every device of this person. Dead subscriptions are removed. Never throws. */
   async notify(personId) {
     if (!this.env.VAPID_PRIVATE_JWK) return;
