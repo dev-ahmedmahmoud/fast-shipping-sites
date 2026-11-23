@@ -1,9 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import { pathAllowed } from '../src/config.js';
-import { hash8 } from '../src/segments.js';
 import { createApp } from '../src/index.js';
-import { createInvite } from '../src/auth.js';
 
 export const DIR = 'clients/tantasportsclubelections';
 export const LIVE = 'claude/live';
@@ -50,31 +48,42 @@ export class FakeGH {
     return false;
   }
   async createBranch(b, sha) { this.branches.set(b, sha); }
-  async deleteBranch(b) { if (!b.startsWith('content/')) throw new Error('refused'); this.branches.delete(b); }
+  async deleteBranch(b) { if (!b.startsWith('claude/content-')) throw new Error('refused'); this.branches.delete(b); }
+  async branchesStartingWith(prefix) { return [...this.branches].filter(([n]) => n.startsWith(prefix)).map(([name, sha]) => ({ name, sha })); }
+  async commitMessage(sha) { return this.commits.get(sha).message; }
+  ancestors(sha) { const out = []; for (let c = sha; c; c = this.commits.get(c).parent) out.push(c); return out; }
+  async compare(base, head) {
+    const anc = new Set(this.ancestors(base));
+    const headAnc = this.ancestors(head);
+    const mergeBase = headAnc.find((c) => anc.has(c));
+    const a = this.commits.get(mergeBase).files, b = this.commits.get(head).files;
+    const files = [];
+    for (const [k, v] of b) if (!a.has(k)) files.push({ path: `${DIR}/${k}`, status: 'added' }); else if (a.get(k) !== v) files.push({ path: `${DIR}/${k}`, status: 'modified' });
+    for (const k of a.keys()) if (!b.has(k)) files.push({ path: `${DIR}/${k}`, status: 'removed' });
+    return { mergeBase, aheadBy: headAnc.indexOf(mergeBase), files };
+  }
+  /** Test helper: what the agent does. files: {rel: newText} or a function(oldFiles) -> {rel: newText}. */
+  agentPush(branch, files, message = 'Request') {
+    const base = this.branches.get(LIVE);
+    const m = new Map(this.commits.get(base).files);
+    for (const [k, v] of Object.entries(typeof files === 'function' ? files(m) : files)) { if (v === null) m.delete(k); else m.set(k, v); }
+    const sha = this.addCommit(base, m, message); this.branches.set(branch, sha); return sha;
+  }
   push(files, message = 'site builder') { const sha = this.addCommit(this.branches.get(LIVE), new Map([...this.commits.get(this.branches.get(LIVE)).files, ...Object.entries(files)]), message); this.branches.set(LIVE, sha); return sha; }
   liveFile(rel) { return this.commits.get(this.branches.get(LIVE)).files.get(rel); }
 }
 
-export const refOf = (file, locator) => hash8(`${file}|${locator}`);
-export const toolUse = (name, input) => ({ stop_reason: 'tool_use', content: [{ type: 'tool_use', id: 'tu_' + Math.random().toString(36).slice(2), name, input }] });
-export const say = (text) => ({ stop_reason: 'end_turn', content: [{ type: 'text', text }] });
-export const propose = (ref, new_text) => toolUse('propose_change', { edits: [{ ref, new_text }] });
-export const SLOGAN = refOf('elections.json', '/list/slogan');
 export const ADMIN_KEY = 'admin-key-0123456789-abcdefghij';
 export const ORIGIN = 'https://app.test';
 
-/** A full app (API + bot) on fakes. Each person gets a real login cookie through an invite link. */
-export async function setup({ script = [] } = {}) {
+/** A full app (API + relay) on fakes. Each person gets a real login cookie through an invite link. */
+export async function setup() {
   const db = makeDb(), gh = new FakeGH();
-  const pushes = [];
-  const state = { script };
-  const calls = [];
-  const callModel = async (params) => { calls.push(params); const n = state.script.shift(); if (!n) throw new Error('script exhausted'); return typeof n === 'function' ? n(params) : n; };
-  const app = createApp({ gh, callModel, push: { notify: async (pid) => pushes.push(pid) } });
+  const pushes = [], fired = [];
+  const fire = async (env, text) => { fired.push(text); if (fire.fail) throw new Error('down'); return 'https://claude.ai/code/session_test'; };
+  const app = createApp({ gh, fire, push: { notify: async (pid) => pushes.push(pid) } });
   const pending = [];
-  const env = {
-    DB: db, GITHUB_REPO: 'x/y', LIVE_BRANCH: LIVE, CLIENT_DIR: DIR, PREVIEW_URL_TEMPLATE: 'https://content-{id}.site.pages.dev', ADMIN_KEY,
-  };
+  const env = { DB: db, GITHUB_REPO: 'x/y', LIVE_BRANCH: LIVE, CLIENT_DIR: DIR, SITE_URL: 'https://site.test', ADMIN_KEY };
   const ctx = { waitUntil: (p) => pending.push(p) };
   const settle = async () => { while (pending.length) await pending.shift(); };
 
@@ -89,6 +98,9 @@ export async function setup({ script = [] } = {}) {
     return { status: res.status, json, headers: res.headers };
   }
   const adminCall = (body) => req('/api/admin', { body, headers: { 'x-admin-key': ADMIN_KEY } });
+  /** Make the next poll check GitHub now (skip the 10-second throttle) */
+  const due = () => db.raw.prepare('UPDATE requests SET checked_at = 0').run();
+  const ago = (id, field, sec) => db.raw.prepare(`UPDATE requests SET ${field} = ${field} - ? WHERE id = ?`).run(sec, id);
 
   async function person(name, role) {
     const a = await adminCall({ action: 'add', name, role });
@@ -98,15 +110,16 @@ export async function setup({ script = [] } = {}) {
     const cookie = j.headers.get('set-cookie').split(';')[0];
     return {
       id: a.json.personId, name, cookie, token,
-      say: (text) => req('/api/message', { body: { text }, cookie }),
-      act: (id, action) => req(`/api/changes/${id}/${action}`, { body: {}, cookie }),
-      chat: async () => (await req('/api/messages?after=0', { cookie })).json,
-      last: async () => (await req('/api/messages?after=0', { cookie })).json.messages.at(-1),
+      send: async (text) => (await req('/api/requests', { body: { text }, cookie })),
+      list: async () => { due(); return (await req('/api/requests', { cookie })).json; },
+      get: async (id) => { due(); return (await req('/api/requests', { cookie })).json.requests.find((r) => r.id === id); },
+      act: (id, action) => req(`/api/requests/${id}/${action}`, { body: {}, cookie }),
     };
   }
   const client = await person('حسين', 'client');
   const cab = await person('Mona', 'cabinet');
   const audit = () => db.raw.prepare('SELECT * FROM audit ORDER BY id').all();
-  const lastChange = () => db.raw.prepare('SELECT * FROM changes ORDER BY created_at DESC, rowid DESC LIMIT 1').get();
-  return { db, gh, app, env, ctx, settle, req, adminCall, person, client, cab, audit, state, calls, pushes, lastChange };
+  const row = (id) => db.raw.prepare('SELECT * FROM requests WHERE id = ?').get(id);
+  const branch = (id) => `claude/content-${id.toLowerCase()}`;
+  return { db, gh, app, env, ctx, settle, req, adminCall, person, client, cab, audit, row, branch, fired, fire, pushes, ago, due };
 }

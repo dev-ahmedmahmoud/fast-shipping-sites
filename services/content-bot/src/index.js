@@ -1,10 +1,9 @@
-// One Worker: serves the app (public/) and its API (/api/*). Heavy AI work runs from a Queue.
+// One Worker: serves the app (public/) and its API (/api/*). Requests are relayed to the site agent (a Claude Code routine).
 import { GitHub } from './github.js';
-import { Bot } from './flow.js';
-import { makeSdkCaller } from './claude.js';
+import { Relay } from './relay.js';
 import { loadStore } from './store.js';
 import { pathAllowed, LIMITS } from './config.js';
-import { audit, housekeeping, hit, addChat, nowSec } from './db.js';
+import { audit, housekeeping, hit, nowSec } from './db.js';
 import { currentPerson, redeemInvite, createInvite, sessionCookie, clearCookie, isAdmin, sha256hex, readCookie } from './auth.js';
 import { Push, validEndpoint, publicKeyFromJwk } from './push.js';
 
@@ -13,12 +12,11 @@ const json = (data, status = 200, headers = {}) =>
 const fail = (status, message) => json({ ok: false, message }, status);
 
 export function createApp(overrides = {}) {
-  const makeBot = (env) => {
+  const makeRelay = (env) => {
     const gh = overrides.gh || new GitHub({ token: env.GITHUB_TOKEN, repo: env.GITHUB_REPO, clientDir: env.CLIENT_DIR, pathAllowed: (p) => pathAllowed(env.CLIENT_DIR, p) });
-    return new Bot({
-      env, db: env.DB, gh,
+    return new Relay({
+      env, db: env.DB, gh, fire: overrides.fire,
       push: overrides.push || new Push({ env, db: env.DB }),
-      callModel: overrides.callModel || makeSdkCaller(env),
       loadStore: overrides.loadStore || ((tip) => loadStore(gh, tip, env.CLIENT_DIR)),
     });
   };
@@ -49,7 +47,7 @@ export function createApp(overrides = {}) {
 
     const person = await currentPerson(db, request);
     if (!person) return fail(401, 'login');
-    const bot = makeBot(env);
+    const relay = makeRelay(env);
 
     if (path === '/api/logout' && request.method === 'POST') {
       const tok = readCookie(request, 'sid');
@@ -57,41 +55,35 @@ export function createApp(overrides = {}) {
       return json({ ok: true }, 200, { 'Set-Cookie': clearCookie });
     }
     if (path === '/api/me' && request.method === 'GET') {
-      const client = await db.prepare("SELECT name FROM people WHERE role = 'client' AND active = 1").first();
-      return json({ ok: true, name: person.name, role: person.role, client: client?.name || '', site: env.SITE_URL,
+      return json({ ok: true, name: person.name, role: person.role, site: env.SITE_URL,
         vapidPublicKey: env.VAPID_PRIVATE_JWK ? publicKeyFromJwk(JSON.parse(env.VAPID_PRIVATE_JWK)) : null });
     }
-    if (path === '/api/messages' && request.method === 'GET') {
-      const after = Math.max(0, Number(url.searchParams.get('after')) || 0);
-      const rows = after
-        ? (await db.prepare('SELECT id, kind, text, change_id, created_at FROM chat WHERE person_id = ? AND id > ? ORDER BY id LIMIT 100').bind(person.id, after).all()).results
-        : (await db.prepare('SELECT * FROM (SELECT id, kind, text, change_id, created_at FROM chat WHERE person_id = ? ORDER BY id DESC LIMIT 100) ORDER BY id').bind(person.id).all()).results;
-      const ids = (await db.prepare('SELECT DISTINCT change_id FROM (SELECT change_id FROM chat WHERE person_id = ? AND change_id IS NOT NULL ORDER BY id DESC LIMIT 100)').bind(person.id).all()).results.map((r) => r.change_id);
+    if (path === '/api/requests' && request.method === 'GET') {
+      // The client sees everyone's requests; a team member sees their own.
+      const rows = person.role === 'client'
+        ? (await db.prepare('SELECT * FROM requests ORDER BY created_at DESC LIMIT 30').all()).results
+        : (await db.prepare('SELECT * FROM requests WHERE person_id = ? ORDER BY created_at DESC LIMIT 30').bind(person.id).all()).results;
+      let advanced = 0;
+      for (const r of rows) {                         // move running requests forward while someone is watching
+        if (advanced >= 3 || !['working', 'building', 'aborted'].includes(r.status)) continue;
+        advanced++;
+        try { await relay.advance(r); } catch (e) { await audit(db, { actor: 'bot', event: 'advance_error', changeId: r.id, detail: relay.redact(e.message) }); }
+      }
       const names = new Map((await db.prepare('SELECT id, name FROM people').all()).results.map((p) => [p.id, p.name]));
-      const changes = [];
-      for (const id of ids) { const ch = await db.prepare('SELECT * FROM changes WHERE id = ?').bind(id).first(); if (ch) changes.push(bot.view(ch, person, names)); }
-      const lastUser = await db.prepare("SELECT id, created_at FROM chat WHERE person_id = ? AND kind = 'user' ORDER BY id DESC LIMIT 1").bind(person.id).first();
-      const answered = lastUser && (await db.prepare("SELECT 1 FROM chat WHERE person_id = ? AND kind != 'user' AND id > ? LIMIT 1").bind(person.id, lastUser.id).first());
-      const waiting = !!lastUser && !answered && nowSec() - lastUser.created_at < 180;
-      return json({ ok: true, messages: rows.map((r) => ({ id: r.id, kind: r.kind, text: r.text, changeId: r.change_id, at: r.created_at })), changes, waiting });
+      return json({ ok: true, requests: rows.map((r) => relay.view(r, person, names)) });
     }
-    if (path === '/api/message' && request.method === 'POST') {
+    if (path === '/api/requests' && request.method === 'POST') {
       if (env.BOT_MODE === 'off') return fail(503, 'الخدمة متوقفة مؤقتًا.');
       const text = typeof body.text === 'string' ? body.text.trim() : '';
-      if (!text) return fail(400, 'اكتب رسالة.');
-      if (text.length > LIMITS.maxIncomingChars) return fail(400, 'الرسالة طويلة جدًا.');
-      if ((await hit(db, `msg:${person.id}`, 3600, LIMITS.msgPerHour)).over) return fail(429, 'رسائل كثيرة. انتظر قليلًا ثم حاول مرة أخرى.');
-      const chatId = await addChat(db, person.id, 'user', text);
-      await audit(db, { actor: person.name, event: 'msg_in', detail: text });
-      if (env.INBOX) await env.INBOX.send({ chatId });
-      else ctx.waitUntil(bot.handleChat(chatId));
-      return json({ ok: true, id: chatId });
+      if (!text) return fail(400, 'اكتب طلبك.');
+      if (text.length > LIMITS.maxIncomingChars) return fail(400, 'الطلب طويل جدًا.');
+      const r = await relay.submit(person, text);
+      return json(r, r.ok ? 200 : 429);
     }
-    const m = /^\/api\/changes\/([A-Z2-9]{6})\/(approve|reject|undo)$/.exec(path);
+    const m = /^\/api\/requests\/([A-Z2-9]{6})\/(abort|revert)$/.exec(path);
     if (m && request.method === 'POST') {
-      if (env.BOT_MODE === 'off') return fail(503, 'الخدمة متوقفة مؤقتًا.');
       if ((await hit(db, `act:${person.id}`, 3600, 60)).over) return fail(429, 'محاولات كثيرة.');
-      const r = await bot.act(person, m[2], m[1]);
+      const r = m[2] === 'abort' ? await relay.abort(person, m[1]) : await relay.revert(person, m[1]);
       return json(r, r.ok ? 200 : 409);
     }
     if (path === '/api/push' && request.method === 'POST') {
@@ -171,15 +163,8 @@ export function createApp(overrides = {}) {
       if (url.pathname === '/health') return new Response('ok');
       return env.ASSETS ? env.ASSETS.fetch(request) : new Response('not found', { status: 404 });
     },
-    async queue(batch, env) {
-      const bot = makeBot(env);
-      for (const m of batch.messages) {
-        try { await bot.handleChat(Number(m.body?.chatId)); } catch (e) { try { await audit(env.DB, { actor: 'bot', event: 'fatal', detail: String(e.message).slice(0, 300) }); } catch { /* ignore */ } }
-        m.ack();
-      }
-    },
     async scheduled(_event, env, ctx) {
-      ctx.waitUntil((async () => { const bot = makeBot(env); await bot.recoverStuck(); await bot.expireAll(); await housekeeping(env.DB); })());
+      ctx.waitUntil((async () => { await makeRelay(env).advanceAll(); await housekeeping(env.DB); })());
     },
   };
 }

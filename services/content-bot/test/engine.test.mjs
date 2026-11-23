@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { indexFile, applyEdits, verifyEdits } from '../src/segments.js';
 import { checkNewText, wordsComeFromRequest } from '../src/validate.js';
 import { pathAllowed } from '../src/config.js';
-import { parseCommand } from '../src/flow.js';
 import { ELECTIONS, CLIENT, MD } from './helpers.mjs';
 
 test('only text values are indexed: images, hrefs, numbers, domains are not', () => {
@@ -64,15 +63,6 @@ test('path guard allows only the client text files', () => {
   for (const p of [`${d}/media/logo.webp`, `${d}/content/../API.md`, 'clients/genesis/client.json', 'apps/site/src/layouts/Base.astro', `${d}/API.md`, `/${d}/client.json`]) assert.equal(pathAllowed(d, p), false, p);
 });
 
-test('typed commands in Arabic and English', () => {
-  assert.deepEqual(parseCommand('YES k7m2qx'), { cmd: 'approve', id: 'K7M2QX' });
-  assert.deepEqual(parseCommand('نعم ab3k7q'), { cmd: 'approve', id: 'AB3K7Q' });
-  assert.deepEqual(parseCommand('no AB3K7Q.'), { cmd: 'reject', id: 'AB3K7Q' });
-  assert.deepEqual(parseCommand('تراجع AB3K7Q'), { cmd: 'undo', id: 'AB3K7Q' });
-  assert.deepEqual(parseCommand('yes'), { cmd: 'approve', id: undefined });
-  assert.equal(parseCommand('yes please change the slogan'), null);
-});
-
 test('GitHub: all client text files come back in ONE GraphQL call', async () => {
   const { GitHub } = await import('../src/github.js');
   const calls = [];
@@ -91,4 +81,17 @@ test('GitHub: all client text files come back in ONE GraphQL call', async () => 
   assert.equal(calls.length, 1);
   assert.equal(calls[0].body.variables.c, 'abc:clients/c/content');
   assert.deepEqual([...files.keys()].sort(), ['client.json', 'content/ar/home.md', 'content/ar/team/x.md', 'elections.json']);
+});
+
+test('Pages build state: waits for a production build that started after the commit', async () => {
+  const { buildState } = await import('../src/pages.js');
+  const since = Math.floor(Date.now() / 1000) - 30;
+  const env = { CF_PAGES_TOKEN: 't', CF_ACCOUNT_ID: 'a', PAGES_PROJECT: 'p' };
+  const reply = (result) => async () => new Response(JSON.stringify({ result }), { status: 200 });
+  assert.equal(await buildState(env, since, reply([{ created_on: new Date((since - 600) * 1000).toISOString(), latest_stage: { name: 'deploy', status: 'success' } }])), 'pending');
+  assert.equal(await buildState(env, since, reply([{ created_on: new Date((since + 2) * 1000).toISOString(), latest_stage: { name: 'build', status: 'active' } }])), 'pending');
+  assert.equal(await buildState(env, since, reply([{ created_on: new Date((since + 2) * 1000).toISOString(), latest_stage: { name: 'deploy', status: 'success' } }])), 'success');
+  assert.equal(await buildState(env, since, reply([{ created_on: new Date((since + 2) * 1000).toISOString(), latest_stage: { name: 'build', status: 'failure' } }])), 'failure');
+  assert.equal(await buildState({}, since), 'pending');                         // no token: 90 seconds
+  assert.equal(await buildState({}, since - 100), 'success');
 });

@@ -210,3 +210,16 @@ export function verifyEdits(rel, oldText, newText, locators) {
   const set = new Set(locators);
   return kindOfFile(rel) === 'json' ? verifyJson(oldText, newText, set) : verifyMd(rel, oldText, newText, set);
 }
+
+/**
+ * Compare two versions of one client file written by someone else (the agent).
+ * Returns the list of text edits, or throws if anything other than editable text changed.
+ */
+export function diffFile(rel, oldText, newText) {
+  const a = indexFile(rel, oldText), b = indexFile(rel, newText);
+  if (a.length !== b.length || a.some((s, i) => s.locator !== b[i].locator)) throw new Error('structure-changed');
+  const changed = [];
+  a.forEach((s, i) => { if (s.text !== b[i].text) changed.push({ file: rel, locator: s.locator, old: s.text, new: b[i].text, kind: s.kind, page: s.page }); });
+  verifyEdits(rel, oldText, newText, changed.map((c) => c.locator));   // anything else changed -> throws
+  return changed;
+}

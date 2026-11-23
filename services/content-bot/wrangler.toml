@@ -1,4 +1,4 @@
-# Worker: tanta-content-bot = the chat app (public/) + its API + the AI worker. Workers FREE plan.
+# Worker: tanta-content-bot = the request app (public/) + its API. Workers FREE plan.
 name = "tanta-content-bot"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
@@ -10,32 +10,23 @@ binding = "ASSETS"
 not_found_handling = "single-page-application"
 run_worker_first = ["/api/*"]
 
-# Non-secret settings. Secrets: ANTHROPIC_API_KEY, GITHUB_TOKEN, ADMIN_KEY, VAPID_PRIVATE_JWK (see docs/SETUP.md).
+# Non-secret settings. Secrets: GITHUB_TOKEN, ADMIN_KEY, ROUTINE_TOKEN, VAPID_PRIVATE_JWK, CF_PAGES_TOKEN (optional).
 [vars]
 GITHUB_REPO = "dev-ahmedmahmoud/fast-shipping-sites"
 LIVE_BRANCH = "claude/islamic-website-design-systems-wfyy85"
 CLIENT_DIR = "clients/tantasportsclubelections"
 SITE_URL = "https://husseindawoudlist.com"
-# Cloudflare Pages branch preview. Branch content/<id> becomes content-<id> (lowercase).
-PREVIEW_URL_TEMPLATE = "https://content-{id}.site-tantasportsclubelections.pages.dev"
-ANTHROPIC_MODEL = "claude-sonnet-5-5"
+# The site agent: a Claude Code routine with an API trigger (id starts with trig_). See docs/ROUTINE.md.
+ROUTINE_ID = "REPLACE_WITH_ROUTINE_ID"
+# Optional: to show "done" when the site build really finished (else: 90 seconds after publishing).
+CF_ACCOUNT_ID = ""
+PAGES_PROJECT = "site-tantasportsclubelections"
 VAPID_SUBJECT = "https://husseindawoudlist.com"
-# Set to "off" to stop new messages and approvals (kill switch).
+# Set to "off" to stop new requests (kill switch).
 BOT_MODE = "on"
 
 [triggers]
-crons = ["17 * * * *"]   # hourly: drop changes older than 24 hours, fix stuck ones
-
-# Queue: the API saves the message and drops a job here; the consumer runs the AI (no 30-second limit).
-[[queues.producers]]
-queue = "tanta-content-bot-inbox"
-binding = "INBOX"
-
-[[queues.consumers]]
-queue = "tanta-content-bot-inbox"
-max_batch_size = 1
-max_batch_timeout = 1
-max_retries = 1
+crons = ["*/2 * * * *"]   # every 2 minutes: follow running requests (also when nobody has the app open)
 
 [[d1_databases]]
 binding = "DB"

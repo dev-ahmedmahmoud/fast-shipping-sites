@@ -72,14 +72,14 @@ export const JSON_SECTIONS = {
 
 // Limits
 export const LIMITS = {
-  maxEditsPerChange: 8,
+  maxEditsPerChange: 12,
   maxTextLength: 1500,          // hard cap for any value
   growthFactor: 3,              // new value may be at most max(200, old*3) characters
-  pendingHours: 24,
-  msgPerHour: 30,
-  claudeCallsPerDay: 60,
-  pendingPerPerson: 5,
-  convoMinutes: 30,
+  inProgressPerPerson: 2,
+  requestsPerHour: 10,          // per person
+  firesPerHour: 25,             // all people together (the routine allows 30/hour)
+  checkEverySec: 10,            // how often GitHub is asked about one request
+  agentTimeoutSec: 30 * 60,
   maxIncomingChars: 1500,
 };
 

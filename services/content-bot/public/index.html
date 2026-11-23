@@ -27,16 +27,16 @@
     </div>
   </main>
 
-  <main id="chat" class="screen" hidden>
+  <main id="app" class="screen" hidden>
     <div id="hint" class="hint" hidden></div>
-    <ol id="list" aria-live="polite"></ol>
-    <div id="typing" class="bubble bot typing" hidden>جارٍ العمل على طلبك…</div>
+    <form id="composer" class="ask">
+      <label for="text">ما التعديل المطلوب على نصوص الموقع؟</label>
+      <textarea id="text" rows="3" maxlength="1500" placeholder="مثال: غيّر نص الفوتر في الصفحة الرئيسية إلى …"></textarea>
+      <button id="send" type="submit">إرسال الطلب</button>
+      <p class="small">نصوص فقط، بدون تصميم. يُنشر التعديل على الموقع مباشرة بعد الفحص.</p>
+    </form>
+    <ol id="list" class="plain reqs" aria-live="polite"></ol>
   </main>
-
-  <form id="composer" hidden>
-    <textarea id="text" rows="1" maxlength="1500" placeholder="اكتب طلبك…" aria-label="رسالتك"></textarea>
-    <button id="send" type="submit">إرسال</button>
-  </form>
 
   <div id="toast" role="status" hidden></div>
 </body>

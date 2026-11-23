@@ -34,40 +34,24 @@ CREATE TABLE push_subs (
   created_at INTEGER NOT NULL
 );
 
--- The chat. kind: user = typed by the person, reply = bot answer, notice = change card / status note.
-CREATE TABLE chat (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+-- One request typed in the app = one run of the site agent (Claude Code routine).
+CREATE TABLE requests (
+  id TEXT PRIMARY KEY,                   -- short id, e.g. K7M2QX (branch: claude/content-k7m2qx)
   person_id INTEGER NOT NULL REFERENCES people(id),
-  kind TEXT NOT NULL CHECK (kind IN ('user','reply','notice')),
   text TEXT NOT NULL,
-  change_id TEXT,
-  created_at INTEGER NOT NULL
-);
-CREATE INDEX chat_person ON chat(person_id, id);
-
-CREATE TABLE changes (
-  id TEXT PRIMARY KEY,                   -- short id, e.g. K7M2QX
-  status TEXT NOT NULL CHECK (status IN ('pending','applying','live','rejected','expired','reverted','failed')),
-  requester_id INTEGER NOT NULL REFERENCES people(id),
-  approver_id INTEGER REFERENCES people(id),
-  edits_json TEXT NOT NULL,              -- [{file, locator, old, new, page}]
-  preview_branch TEXT,
-  preview_url TEXT,
+  status TEXT NOT NULL CHECK (status IN ('working','checking','building','done','refused','failed','aborted','reverting','reverted')),
+  message TEXT,                          -- shown to the person (why refused / failed)
+  session_url TEXT,                      -- the agent run, for Ahmed only (admin log)
+  edits_json TEXT,                       -- [{file, locator, old, new, page}] once checked
   live_commit TEXT,
   revert_commit TEXT,
   created_at INTEGER NOT NULL,
-  expires_at INTEGER NOT NULL,
-  decided_at INTEGER,
-  applying_op TEXT,                      -- 'approve' or 'undo' while status = 'applying'
-  applying_since INTEGER
+  updated_at INTEGER NOT NULL,
+  checked_at INTEGER NOT NULL DEFAULT 0,
+  building_since INTEGER
 );
-CREATE INDEX changes_status ON changes(status, expires_at);
-
--- Queue jobs already handled (a retried job is ignored).
-CREATE TABLE seen_jobs (
-  key TEXT PRIMARY KEY,
-  created_at INTEGER NOT NULL
-);
+CREATE INDEX requests_status ON requests(status, created_at);
+CREATE INDEX requests_person ON requests(person_id, created_at);
 
 CREATE TABLE rate (
   key TEXT NOT NULL,

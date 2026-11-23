@@ -1,7 +1,9 @@
-// The chat app. All text from the server is shown with textContent (never as HTML).
+// Request app: send a text change, watch it go: sent -> agent working -> checking -> site updating -> done.
+// All server text is shown with textContent (never as HTML).
 'use strict';
 const $ = (s) => document.querySelector(s);
-const state = { me: null, messages: [], changes: new Map(), lastId: 0, timer: null, busy: false, waiting: false };
+const state = { me: null, requests: [], timer: null, busy: false };
+const STEPS = [['working', 'الوكيل يعدّل'], ['checking', 'فحص ونشر'], ['building', 'تحديث الموقع'], ['done', 'تم']];
 
 function el(tag, attrs = {}, ...kids) {
   const e = document.createElement(tag);
@@ -24,97 +26,87 @@ async function api(path, body) {
   if (res.status === 401 && path !== '/api/join') { showLocked(); throw new Error('login'); }
   return { status: res.status, ...data };
 }
-
 function showLocked(msg) {
   stopPolling();
-  $('#chat').hidden = true; $('#composer').hidden = true; $('#alerts').hidden = true;
+  $('#app').hidden = true; $('#alerts').hidden = true;
   if (msg) $('#locked-msg').textContent = msg;
   $('#locked').hidden = false;
 }
+const when = (ts) => new Date(ts * 1000).toLocaleString('ar-EG', { hour: 'numeric', minute: '2-digit', day: 'numeric', month: 'short' });
 
-// ---------- rendering ----------
-function card(ch) {
-  const status = el('span', { class: `status ${ch.status}`, text: ch.statusText });
-  const c = el('div', { class: 'card' },
-    el('h3', {}, el('span', { text: `تعديل ${ch.id}` }), status),
-    el('div', { class: 'meta', text: `طلب: ${ch.requester}` }));
-  for (const e of ch.edits) {
-    c.append(el('div', { class: 'edit' },
-      el('div', { class: 'page', text: e.page }),
+// ---------- one request ----------
+function steps(r) {
+  const order = STEPS.map((s) => s[0]);
+  const at = r.status === 'checking' ? 1 : order.indexOf(r.status);
+  const ol = el('ol', { class: 'steps' });
+  STEPS.forEach(([, label], i) => ol.append(el('li', { class: i < at || r.status === 'done' ? 'past' : i === at ? 'now' : '', text: label })));
+  return ol;
+}
+function item(r) {
+  const li = el('li', { class: `req ${r.status}` });
+  li.append(el('div', { class: 'meta', text: `${r.mine ? 'طلبك' : r.from} · ${when(r.at)} · ${r.id}` }));
+  li.append(el('div', { class: 'ask-text', text: r.text }));
+  if (['working', 'checking', 'building', 'done'].includes(r.status)) li.append(steps(r));
+  const line = el('div', { class: 'state' }, r.inProgress ? el('span', { class: 'spin', 'aria-hidden': 'true' }) : null, document.createTextNode(r.statusText));
+  li.append(line);
+  if (r.message) li.append(el('div', { class: 'msg', text: r.message }));
+  for (const e of r.edits) {
+    li.append(el('div', { class: 'edit' }, el('div', { class: 'page', text: e.page }),
       el('div', { class: 'old' }, el('span', { class: 'lbl', text: 'القديم' }), el('span', { class: 'txt', text: e.old })),
-      el('div', { class: 'new' }, el('span', { class: 'lbl', text: 'الجديد' }), document.createTextNode(e.new))));
+      el('div', { class: 'new' }, el('span', { class: 'lbl', text: 'الجديد' }), el('span', { class: 'txt', text: e.new }))));
   }
   const actions = el('div', { class: 'actions' });
-  if (ch.preview && /^https:\/\//.test(ch.preview)) actions.append(el('a', { class: 'preview', href: ch.preview, target: '_blank', rel: 'noopener noreferrer', text: 'معاينة' }));
-  if (ch.can.approve) actions.append(el('button', { class: 'ok', text: 'نشر', onclick: () => act(ch.id, 'approve', 'نشر هذا التعديل على الموقع الآن؟') }));
-  if (ch.can.reject) actions.append(el('button', { class: 'bad', text: state.me.role === 'client' ? 'رفض' : 'إلغاء', onclick: () => act(ch.id, 'reject') }));
-  if (ch.can.undo) actions.append(el('button', { class: 'warn', text: 'تراجع', onclick: () => act(ch.id, 'undo', 'إرجاع النص القديم على الموقع؟') }));
-  if (actions.childElementCount) c.append(actions);
-  return c;
+  if (r.status === 'done' && state.me.site) actions.append(el('a', { class: 'preview', href: state.me.site, target: '_blank', rel: 'noopener noreferrer', text: 'فتح الموقع' }));
+  if (r.can.abort) actions.append(el('button', { class: 'bad', text: 'إيقاف', onclick: () => act(r.id, 'abort', 'إيقاف هذا الطلب؟ لن يتغير شيء على الموقع.') }));
+  if (r.can.revert) actions.append(el('button', { class: 'warn', text: 'تراجع', onclick: () => act(r.id, 'revert', 'إرجاع النص القديم على الموقع؟') }));
+  if (actions.childElementCount) li.append(actions);
+  return li;
 }
-
 function render() {
   const list = $('#list');
-  const nearBottom = $('#chat').scrollHeight - $('#chat').scrollTop - $('#chat').clientHeight < 120;
-  const lastNotice = new Map();                       // show each change card once, under its newest note
-  for (const m of state.messages) if (m.changeId) lastNotice.set(m.changeId, m.id);
   list.replaceChildren();
-  if (!state.messages.length) {
-    list.append(el('li', { class: 'bubble bot', text: `أهلًا ${state.me.name}. اكتب ما تريد تغييره في نصوص الموقع، مثلًا:\n«غيّر الشعار في الصفحة الرئيسية إلى …»\nأغيّر النصوص فقط، والنشر بموافقة ${state.me.client || 'المرشح'}.` }));
-  }
-  for (const m of state.messages) {
-    const cls = m.kind === 'user' ? 'me' : m.kind === 'notice' ? 'notice' : 'bot';
-    list.append(el('li', { class: `bubble ${cls}`, text: m.text }));
-    const ch = m.changeId && lastNotice.get(m.changeId) === m.id && state.changes.get(m.changeId);
-    if (ch) list.append(el('li', { class: 'card-wrap' }, card(ch)));
-  }
-  $('#typing').hidden = !state.waiting;
-  if (nearBottom) $('#chat').scrollTop = $('#chat').scrollHeight;
+  if (!state.requests.length) list.append(el('li', { class: 'empty', text: 'لا توجد طلبات بعد.' }));
+  for (const r of state.requests) list.append(item(r));
 }
 
 // ---------- data ----------
-async function refresh(full = false) {
-  const r = await api(`/api/messages?after=${full ? 0 : state.lastId}`);
+async function refresh() {
+  const r = await api('/api/requests');
   if (!r.ok) return;
-  if (full) state.messages = [];
-  for (const m of r.messages) { state.messages.push(m); state.lastId = Math.max(state.lastId, m.id); }
-  state.changes = new Map(r.changes.map((c) => [c.id, c]));
-  state.waiting = r.waiting;
+  state.requests = r.requests;
   render();
 }
 function startPolling() {
   stopPolling();
-  const tick = async () => { try { await refresh(); } catch { /* offline: try again */ } state.timer = setTimeout(tick, state.waiting ? 2000 : 5000); };
-  state.timer = setTimeout(tick, 2000);
+  const tick = async () => {
+    try { await refresh(); } catch { /* offline: try again */ }
+    state.timer = setTimeout(tick, state.requests.some((r) => r.inProgress) ? 4000 : 20000);
+  };
+  state.timer = setTimeout(tick, 3000);
 }
 function stopPolling() { clearTimeout(state.timer); state.timer = null; }
 
 async function act(id, action, question) {
-  if (state.busy) return;
-  if (question && !confirm(question)) return;
+  if (state.busy || (question && !confirm(question))) return;
   state.busy = true;
-  document.querySelectorAll('.card button').forEach((b) => { b.disabled = true; });
-  try {
-    const r = await api(`/api/changes/${id}/${action}`, {});
-    toast(r.message || (r.ok ? 'تم.' : 'تعذّر التنفيذ.'));
-  } catch { toast('تعذّر الاتصال. حاول مرة أخرى.'); }
+  document.querySelectorAll('.req button').forEach((b) => { b.disabled = true; });
+  try { const r = await api(`/api/requests/${id}/${action}`, {}); toast(r.message || (r.ok ? 'تم.' : 'تعذّر التنفيذ.')); }
+  catch { toast('تعذّر الاتصال. حاول مرة أخرى.'); }
   state.busy = false;
-  await refresh();
+  await refresh(); startPolling();
 }
-
 async function send(ev) {
   ev.preventDefault();
   const box = $('#text'), text = box.value.trim();
   if (!text || state.busy) return;
-  state.busy = true; $('#send').disabled = true;
+  state.busy = true; $('#send').disabled = true; $('#send').textContent = 'جارٍ الإرسال…';
   try {
-    const r = await api('/api/message', { text });
-    if (r.ok) { box.value = ''; autosize(); state.waiting = true; await refresh(); startPolling(); }
-    else toast(r.message || 'لم تُرسل الرسالة.');
+    const r = await api('/api/requests', { text });
+    if (r.ok) { box.value = ''; toast('تم إرسال الطلب إلى الوكيل.'); await refresh(); startPolling(); }
+    else toast(r.message || 'لم يُرسل الطلب.');
   } catch (e) { if (e.message !== 'login') toast('تعذّر الاتصال. حاول مرة أخرى.'); }
-  state.busy = false; $('#send').disabled = false;
+  state.busy = false; $('#send').disabled = false; $('#send').textContent = 'إرسال الطلب';
 }
-function autosize() { const t = $('#text'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 140) + 'px'; }
 
 // ---------- phone alerts ----------
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -158,11 +150,10 @@ async function start() {
   try { me = await api('/api/me'); } catch { return; }
   if (!me.ok) return showLocked();
   state.me = me;
-  $('#who').textContent = me.role === 'client' ? `${me.name} — صاحب الموافقة` : me.name;
-  $('#chat').hidden = false; $('#composer').hidden = false;
+  $('#who').textContent = me.role === 'client' ? `${me.name} — كل الطلبات` : me.name;
+  $('#app').hidden = false;
   $('#composer').addEventListener('submit', send);
-  $('#text').addEventListener('input', autosize);
-  await refresh(true);
+  await refresh();
   startPolling();
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopPolling(); else { refresh().catch(() => {}); startPolling(); } });
   setupAlerts().catch(() => {});

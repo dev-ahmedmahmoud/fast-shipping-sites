@@ -1,44 +1,36 @@
 // Everything the app says. Arabic only.
 const M = {
-  designRefused: 'أستطيع تغيير النصوص فقط. للتعديلات على التصميم تواصل مع أحمد.',
-  slowDown: 'رسائل كثيرة. انتظر قليلًا ثم حاول مرة أخرى.',
-  busy: 'عذرًا، حدث خطأ ولم يتغير أي شيء. حاول مرة أخرى بعد دقيقة.',
-  help: 'اكتب ما تريد تغييره، مثلًا: «غيّر الشعار في الصفحة الرئيسية إلى ...». أغيّر النصوص فقط وليس التصميم. النشر بموافقة {client} فقط.',
-  onlyClient: 'النشر أو التراجع بموافقة {client} فقط.',
-  unknownChange: 'لا أجد التعديل {id}.',
-  notPending: 'التعديل {id} لم يعد في الانتظار ({status}).',
-  needId: 'اكتب رقم التعديل مع الرد، مثل: نعم {example}',
-  nothingWaiting: 'لا توجد تعديلات في الانتظار.',
-  tooManyPending: 'لديك {n} تعديلات في الانتظار. انتظر الرد عليها أولًا.',
-  notLive: 'التعديل {id} ليس منشورًا، لذلك لا يمكن التراجع عنه.',
-  proposalOwn: 'التعديل {id} جاهز. راجعه ثم اضغط «نشر» أو «رفض».',
-  proposalCabinet: 'التعديل {id} جاهز وأُرسل إلى {client} للموافقة. لن يُنشر قبل موافقته.',
-  approvalRequest: '{requester} يطلب هذا التعديل ({id}). ينتهي الطلب بعد 24 ساعة.',
-  live: 'تم نشر التعديل {id}. يظهر على الموقع خلال دقيقة تقريبًا.',
-  liveRequester: 'وافق {client} على التعديل {id}. يظهر على الموقع خلال دقيقة تقريبًا.',
-  rejected: 'تم إلغاء التعديل {id}. لم يتغير شيء.',
-  rejectedOther: 'تم إلغاء التعديل {id} بواسطة {who}.',
-  expired: 'لم يتم الرد على التعديل {id} خلال 24 ساعة وتم إلغاؤه.',
-  stale: 'تغيّرت الصفحة منذ هذا الطلب، لذلك لا أستطيع نشر التعديل {id}. أرسل الطلب مرة أخرى.',
-  undone: 'تم التراجع عن التعديل {id}. يعود النص القديم خلال دقيقة تقريبًا.',
-  undoneOther: 'تراجع {client} عن التعديل {id}.',
-  undoStale: 'تم تعديل هذا النص مرة أخرى بعد التعديل {id}، لذلك لا أستطيع التراجع تلقائيًا. تواصل مع أحمد.',
-  notFromRequest: 'اكتب النص الجديد بالضبط كما تريده. أستخدم كلماتك أنت فقط ولا أضيف صياغة من عندي.',
-  rejectTooLong: 'هذا النص أطول من اللازم لهذا المكان.',
-  rejectMarkup: 'أستطيع تغيير النص العادي فقط (بدون وسوم أو رموز مثل < >).',
-  rejectKind: 'هذه القيمة لا تبدو صحيحة (رقم هاتف أو بريد أو رابط https).',
-  rejectEmpty: 'لا أستطيع حذف النص أو تركه فارغًا. اكتب النص الجديد.',
-  rejectSame: 'هذا هو النص الحالي بالفعل.',
-  rejectOther: 'لا أستطيع إجراء هذا التعديل. أستطيع تغيير النصوص فقط، وللتصميم تواصل مع أحمد.',
+  tooMany: 'لديك طلبان قيد التنفيذ. انتظر حتى ينتهيا.',
+  slowDown: 'طلبات كثيرة. انتظر قليلًا ثم حاول مرة أخرى.',
+  sendFailed: 'تعذّر إرسال الطلب إلى الوكيل. حاول مرة أخرى بعد دقيقة.',
+  timeout: 'لم يرد الوكيل في الوقت المحدد. لم يتغير شيء. حاول مرة أخرى أو تواصل مع أحمد.',
+  textOnly: 'أستطيع تغيير النصوص فقط. للتعديلات على التصميم تواصل مع أحمد.',
+  noChange: 'لم يجد الوكيل ما يغيّره. اكتب النص الحالي والنص الجديد بوضوح.',
+  notFromRequest: 'النص الجديد فيه كلمات لم تكتبها. اكتب النص الجديد بالضبط كما تريده.',
+  tooLong: 'النص الجديد أطول من اللازم لهذا المكان.',
+  markup: 'أستطيع تغيير النص العادي فقط (بدون وسوم أو رموز مثل < >).',
+  badValue: 'هذه القيمة لا تبدو صحيحة (رقم هاتف أو بريد أو رابط https).',
+  empty: 'لا أستطيع حذف النص أو تركه فارغًا.',
+  stale: 'تغيّرت الصفحة أثناء التنفيذ. لم يتغير شيء. أرسل الطلب مرة أخرى.',
+  error: 'حدث خطأ ولم يتغير شيء. حاول مرة أخرى أو تواصل مع أحمد.',
+  buildFailed: 'تم حفظ التعديل لكن تحديث الموقع فشل. أحمد سيتحقق.',
+  notAllowed: 'لا تملك صلاحية لهذا الإجراء.',
+  cannotAbort: 'لا يمكن الإيقاف الآن: الطلب لم يعد قيد التنفيذ.',
+  cannotRevert: 'لا يمكن التراجع عن هذا الطلب.',
+  revertStale: 'تم تعديل هذا النص مرة أخرى بعد ذلك، لذلك لا أستطيع التراجع تلقائيًا. تواصل مع أحمد.',
+  aborted: 'تم إيقاف الطلب. لن يتغير شيء.',
+  reverted: 'تم التراجع. يعود النص القديم خلال دقيقة تقريبًا.',
 };
-export const STATUS_AR = { pending: 'في انتظار الموافقة', applying: 'جارٍ النشر', live: 'منشور', rejected: 'ملغى', expired: 'انتهت مدته', reverted: 'تم التراجع', failed: 'لم يُنشر' };
+export const STATUS_AR = {
+  working: 'الوكيل يعمل على التعديل…', checking: 'فحص ونشر…', building: 'جارٍ تحديث الموقع…', done: 'تم. حدّث صفحة الموقع.',
+  refused: 'لم يُنفَّذ', failed: 'لم يُنفَّذ', aborted: 'تم الإيقاف', reverting: 'جارٍ التراجع…', reverted: 'تم التراجع',
+};
+export const t = (key) => { if (!M[key]) throw new Error('missing message ' + key); return M[key]; };
 
-export function t(key, vars = {}) {
-  const s = M[key];
-  if (!s) throw new Error('missing message ' + key);
-  return s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? ''));
-}
-export const REJECT_KEY = {
-  too_long: 'rejectTooLong', bad_chars: 'rejectMarkup', markup: 'rejectMarkup', placeholder: 'rejectMarkup', kind: 'rejectKind',
-  empty: 'rejectEmpty', same: 'rejectSame', not_from_request: 'notFromRequest', type: 'rejectOther',
+/** Map a failed check to what we tell the person. */
+export const CHECK_MSG = {
+  'structure-changed': 'textOnly', 'unexpected-change': 'textOnly', 'non-string-changed': 'textOnly', 'not-editable-file': 'textOnly', 'not-text-file': 'textOnly',
+  'file-added': 'textOnly', 'file-removed': 'textOnly', 'too-many-commits': 'textOnly', 'too-many-edits': 'textOnly', 'unsupported-format': 'textOnly',
+  'no-change': 'noChange', same: 'noChange', not_from_request: 'notFromRequest', too_long: 'tooLong', markup: 'markup', bad_chars: 'markup',
+  placeholder: 'markup', kind: 'badValue', empty: 'empty', type: 'textOnly',
 };

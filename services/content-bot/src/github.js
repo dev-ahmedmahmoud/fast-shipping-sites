@@ -31,14 +31,6 @@ export class GitHub {
     return r.object.sha;
   }
 
-  /** Paths (relative to the client folder) of every file under it at this commit. */
-  async listFiles(sha) {
-    const r = await this.api('GET', `/git/trees/${sha}?recursive=1`);
-    if (r.truncated) throw new Error('github tree truncated');
-    const prefix = this.clientDir + '/';
-    return r.tree.filter((x) => x.type === 'blob' && x.path.startsWith(prefix)).map((x) => x.path.slice(prefix.length));
-  }
-
   /**
    * ALL the client's text files at one commit in ONE call (GraphQL), to stay far under the free plan's
    * 50 outside-calls limit. Returns Map rel -> text (elections.json, client.json, content/**.md).
@@ -72,10 +64,6 @@ export class GitHub {
     return files;
   }
 
-  readFile(rel, sha) {
-    return this.api('GET', `/contents/${this.clientDir}/${rel.split('/').map(encodeURIComponent).join('/')}?ref=${sha}`, null, { raw: true });
-  }
-
   /** One commit on top of baseSha containing `files` {rel: newText}. Returns the new commit sha (no branch moved). */
   async makeCommit(baseSha, files, message) {
     const entries = [];
@@ -103,8 +91,19 @@ export class GitHub {
     }
   }
   createBranch(branch, sha) { return this.api('POST', '/git/refs', { ref: `refs/heads/${branch}`, sha }); }
+  /** Branches whose name starts with `prefix` -> [{ name, sha }]. */
+  async branchesStartingWith(prefix) {
+    const r = await this.api('GET', `/git/matching-refs/heads/${prefix}`);
+    return r.map((x) => ({ name: x.ref.replace('refs/heads/', ''), sha: x.object.sha }));
+  }
+  /** Files changed between base...head, plus the merge base. */
+  async compare(base, head) {
+    const r = await this.api('GET', `/compare/${base}...${head}`);
+    return { mergeBase: r.merge_base_commit.sha, aheadBy: r.ahead_by, files: (r.files || []).map((f) => ({ path: f.filename, status: f.status })) };
+  }
+  async commitMessage(sha) { return (await this.api('GET', `/git/commits/${sha}`)).message; }
   async deleteBranch(branch) {
-    if (!branch.startsWith('content/')) throw new Error('refusing to delete a non content/ branch');
+    if (!branch.startsWith('claude/content-')) throw new Error('refusing to delete a branch the bot does not own');
     await this.api('DELETE', `/git/refs/heads/${branch}`, null, { okStatuses: [404, 422] });
   }
 }

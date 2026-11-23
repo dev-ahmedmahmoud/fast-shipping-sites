@@ -10,9 +10,6 @@
     "deploy": "wrangler deploy",
     "people": "node scripts/people.mjs"
   },
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.100.0"
-  },
   "devDependencies": {
     "wrangler": "^4.0.0"
   }
