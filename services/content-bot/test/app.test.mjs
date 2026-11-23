@@ -31,7 +31,7 @@ test('request -> agent run -> its branch is checked -> live -> done; nobody appr
   assert.match(s.gh.liveFile('elections.json'), new RegExp(NEW));
   assert.equal(s.gh.liveFile('elections.json').split(NEW).length, 2, 'only the list slogan changed, as the agent did');
   assert.ok(!s.gh.branches.has(s.branch(id)), 'agent branch deleted');
-  assert.deepEqual(r.edits, [{ page: 'اسم القائمة وشعارها', old: OLD, new: NEW }]);
+  assert.deepEqual(r.edits, [{ page: 'اسم القائمة وشعارها', op: 'edit', old: OLD, new: NEW }]);
   const msg = s.gh.commits.get(s.gh.branches.get(LIVE)).message;
   assert.match(msg, new RegExp(`Text request ${id}`)); assert.match(msg, /Requested-by: Mona/);
 
@@ -224,4 +224,86 @@ test('voice: audio in, Arabic text out; login, type and size checked', async () 
   assert.equal((await s.app.fetch(new Request(ORIGIN + '/api/voice', { method: 'POST', headers: { origin: 'https://evil.example', 'content-type': 'audio/webm', cookie: s.cab.cookie }, body: audio }), s.env, s.ctx)).status, 403);
   s.env.AI = { run: async () => { throw new Error('ai down'); } };
   assert.equal((await post({ 'content-type': 'audio/webm', cookie: s.cab.cookie })).status, 502);
+});
+
+const MD_PATH = 'content/ar/team.md';
+test('deleting a whole point goes live; undo puts it back exactly', async () => {
+  const s = await setup();
+  const before = s.gh.liveFile(MD_PATH);
+  const id = await sent(s, s.cab, 'احذف نقطة ليسانس الحقوق من صفحة المرشحين');
+  s.gh.agentPush(s.branch(id), (m) => ({ [MD_PATH]: m.get(MD_PATH).replace('<li>ليسانس الحقوق.</li>', '') }));
+  const r = await s.cab.get(id);
+  assert.equal(r.status, 'building', JSON.stringify(r));
+  assert.deepEqual(r.edits.map((e) => [e.op, e.old]), [['delete', 'ليسانس الحقوق.']]);
+  assert.ok(!s.gh.liveFile(MD_PATH).includes('ليسانس'));
+  assert.match(s.gh.commits.get(s.gh.branches.get(LIVE)).message, /delete: "ليسانس الحقوق\."/);
+  assert.equal((await s.cab.act(id, 'revert')).status, 200);
+  assert.equal(s.gh.liveFile(MD_PATH), before);
+});
+
+test('undo of a deleted point is refused if the page changed since; other files changed meanwhile are fine', async () => {
+  const s = await setup();
+  const id = await sent(s, s.cab, 'احذف نقطة ليسانس الحقوق');
+  s.gh.agentPush(s.branch(id), (m) => ({ [MD_PATH]: m.get(MD_PATH).replace('<li>ليسانس الحقوق.</li>', '') }));
+  await s.cab.get(id);
+  s.gh.push({ 'elections.json': s.gh.liveFile('elections.json').replace('نسخ اللينك', 'نسخ الرابط') });
+  s.gh.push({ [MD_PATH]: s.gh.liveFile(MD_PATH).replace('وصف الصفحة', 'وصف آخر') });
+  const r = await s.cab.act(id, 'revert');
+  assert.equal(r.status, 409); assert.match(r.json.message, /مرة أخرى/);
+});
+
+test('partial: the clear part goes live, the rest is reported', async () => {
+  const s = await setup();
+  const id = await sent(s, s.cab, `غير الشعار الى ${NEW} واكتب في الوصف شيئًا جميلًا`);
+  s.gh.agentPush(s.branch(id), (m) => ({
+    'elections.json': m.get('elections.json').replace(`"slogan": "${OLD}"`, `"slogan": "${NEW}"`).replace('"title": "قائمة المهندس حسين داود"', '"title": "أعظم قائمة في التاريخ"'),
+  }), 'Request X: slogan\n\nNOTE: النقطة الثانية غير واضحة، اكتب النص الجديد بالضبط.');
+  const r = await s.cab.get(id);
+  assert.equal(r.status, 'building');
+  assert.deepEqual(r.edits.map((e) => e.new), [NEW]);
+  assert.match(s.gh.liveFile('elections.json'), new RegExp(NEW));
+  assert.ok(!s.gh.liveFile('elections.json').includes('أعظم قائمة'), 'invented words never go live');
+  assert.match(r.message, /النقطة الثانية غير واضحة/);
+  assert.match(r.message, /لم أنفّذ/);
+});
+
+test('deleting a heading or adding a new point is refused', async () => {
+  for (const change of [(m) => ({ [MD_PATH]: m.get(MD_PATH).replace('<h2>المؤهلات</h2>', '') }), (m) => ({ [MD_PATH]: m.get(MD_PATH).replace('</ul>', '<li>نقطة جديدة</li></ul>') })]) {
+    const s = await setup();
+    const before = s.gh.liveFile(MD_PATH);
+    const id = await sent(s);
+    s.gh.agentPush(s.branch(id), change);
+    assert.equal((await s.cab.get(id)).status, 'refused');
+    assert.equal(s.gh.liveFile(MD_PATH), before);
+  }
+});
+
+test('adding a point inside a list goes live (words from the request); undo removes it', async () => {
+  const s = await setup();
+  const before = s.gh.liveFile(MD_PATH);
+  const id = await sent(s, s.cab, 'زود نقطة بعد ليسانس الحقوق: عضو لجنة الشباب بنادي طنطا سنة ٢٠١٥');
+  s.gh.agentPush(s.branch(id), (m) => ({ [MD_PATH]: m.get(MD_PATH).replace('<li>ليسانس الحقوق.</li>', '<li>ليسانس الحقوق.</li><li>عضو لجنة الشباب بنادي طنطا سنة ٢٠١٥</li>') }));
+  const r = await s.cab.get(id);
+  assert.equal(r.status, 'building', JSON.stringify(r));
+  assert.deepEqual(r.edits.map((e) => [e.op, e.new]), [['add', 'عضو لجنة الشباب بنادي طنطا سنة ٢٠١٥']]);
+  assert.match(s.gh.liveFile(MD_PATH), /<li>ليسانس الحقوق\.<\/li><li>عضو لجنة الشباب بنادي طنطا سنة ٢٠١٥<\/li><\/ul>/);
+  assert.equal((await s.cab.act(id, 'revert')).status, 200);
+  assert.equal(s.gh.liveFile(MD_PATH), before);
+});
+
+test('adding: invented words, a point outside a list, or markup are refused', async () => {
+  const cases = [
+    ['invented', (m) => ({ [MD_PATH]: m.get(MD_PATH).replace('</ul>', '<li>أفضل مرشح في التاريخ</li></ul>') })],
+    ['li outside list', (m) => ({ [MD_PATH]: m.get(MD_PATH).replace('<p>أحد', '<li>عضو لجنة الشباب</li><p>أحد') })],
+    ['inner tags', (m) => ({ [MD_PATH]: m.get(MD_PATH).replace('</ul>', '<li><a href="x">عضو لجنة الشباب</a></li></ul>') })],
+  ];
+  for (const [name, change] of cases) {
+    const s = await setup();
+    const before = s.gh.liveFile(MD_PATH);
+    const id = await sent(s, s.cab, 'زود نقطة: عضو لجنة الشباب');
+    s.gh.agentPush(s.branch(id), change);
+    const r = await s.cab.get(id);
+    assert.equal(r.status, 'refused', name);
+    assert.equal(s.gh.liveFile(MD_PATH), before, name);
+  }
 });

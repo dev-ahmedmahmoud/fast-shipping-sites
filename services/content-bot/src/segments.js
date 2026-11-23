@@ -223,3 +223,172 @@ export function diffFile(rel, oldText, newText) {
   verifyEdits(rel, oldText, newText, changed.map((c) => c.locator));   // anything else changed -> throws
   return changed;
 }
+
+// ---------- Markdown pages: text edits + deleting whole points (<li>) or paragraphs (<p>) ----------
+const INLINE = new Set(['strong', 'em', 'b', 'i', 'br', 'span']);
+const DELETABLE = new Set(['li', 'p']);
+const tagInfo = (t) => { const m = /^<(\/?)([a-zA-Z0-9]+)\s*(\/?)>$/.exec(t); return m ? { close: !!m[1], name: m[2].toLowerCase(), plain: true } : { plain: false }; };
+const isWs = (t) => !/\S/.test(t);
+
+/** Body -> units: a deletable block (<li>..</li> or <p>..</p> with only inline tags inside) is one unit; else single tokens. */
+function units(body) {
+  const pieces = body.split(TAG_SPLIT);
+  const toks = [];
+  pieces.forEach((p, i) => { if (i % 2 === 1) toks.push({ tag: true, raw: p }); else if (p !== '') toks.push({ tag: false, raw: p }); });
+  const out = [];
+  for (let i = 0; i < toks.length; i++) {
+    const t = toks[i];
+    const info = t.tag ? tagInfo(t.raw) : null;
+    if (info?.plain && !info.close && DELETABLE.has(info.name)) {
+      let k = i + 1, ok = false;
+      for (; k < toks.length; k++) {
+        if (!toks[k].tag) continue;
+        const ki = tagInfo(toks[k].raw);
+        if (ki.plain && ki.close && ki.name === info.name) { ok = true; break; }
+        if (!ki.plain || !INLINE.has(ki.name)) break;            // a block inside: not a simple point
+      }
+      if (ok) { out.push({ block: true, toks: toks.slice(i, k + 1) }); i = k; continue; }
+    }
+    out.push({ block: false, toks: [t] });
+  }
+  return out;
+}
+const unitText = (u) => u.toks.filter((t) => !t.tag).map((t) => decodeEnt(t.raw)).join('').replace(/\s+/g, ' ').trim();
+const BIG = new Map();
+function bigrams(s) {                              // letter pairs of a text, cached
+  let m = BIG.get(s);
+  if (m) return m;
+  const t = s.toLowerCase().replace(/\s+/g, ' ');
+  m = new Map();
+  for (let i = 0; i < t.length - 1; i++) { const g = t.charCodeAt(i) * 65536 + t.charCodeAt(i + 1); m.set(g, (m.get(g) || 0) + 1); }
+  m.total = Math.max(0, t.length - 1);
+  if (BIG.size > 5000) BIG.clear();
+  BIG.set(s, m);
+  return m;
+}
+function similarity(x, y) {                       // Dice coefficient on letter pairs: 1 = same, 0 = nothing in common
+  const a = bigrams(x), b = bigrams(y);
+  const total = a.total + b.total;
+  if (!total) return 1;
+  let both = 0;
+  const [small, big] = a.size < b.size ? [a, b] : [b, a];
+  for (const [g, c] of small) { const o = big.get(g); if (o) both += Math.min(c, o); }
+  return (2 * both) / total;
+}
+function matchCost(a, b) {
+  if (a.toks.length !== b.toks.length || a.block !== b.block) return Infinity;
+  let c = 0;
+  for (let i = 0; i < a.toks.length; i++) {
+    const x = a.toks[i], y = b.toks[i];
+    if (x.tag !== y.tag) return Infinity;
+    if (x.tag) { if (x.raw !== y.raw) return Infinity; continue; }
+    if (x.raw === y.raw || x.raw.trim() === y.raw.trim()) continue;
+    c += 0.5 + (1 - similarity(x.raw, y.raw));       // a small edit costs less than a rewrite
+  }
+  return c;
+}
+const DEL_COST = 2.5, WS_COST = 0.1;
+/** A new point may only be plain text: <li>words</li> or <p>words</p>. */
+const simplePoint = (u) => u.block && u.toks.length === 3 && !u.toks[1].tag && /\S/.test(u.toks[1].raw);
+/** A new <li> must sit inside a list (between points or the list's own tags); a new <p> must sit outside lists. */
+function placedOk(B, j) {
+  const name = tagInfo(B[j].toks[0].raw).name;
+  const near = (k) => {
+    const u = B[k]; if (!u) return 'edge';
+    if (u.block) return `block:${tagInfo(u.toks[0].raw).name}`;
+    const t = u.toks[0]; if (!t.tag) return 'text';
+    const ti = tagInfo(t.raw); return ti.plain ? `${ti.close ? '/' : ''}${ti.name}` : 'tag';
+  };
+  let prev = j - 1; while (B[prev] && !B[prev].block && !B[prev].toks[0].tag && isWs(B[prev].toks[0].raw)) prev--;
+  let next = j + 1; while (B[next] && !B[next].block && !B[next].toks[0].tag && isWs(B[next].toks[0].raw)) next++;
+  const p = near(prev), n = near(next);
+  const inList = ['block:li', 'ul', 'ol'].includes(p) && ['block:li', '/ul', '/ol'].includes(n);
+  return name === 'li' ? inList : !['block:li', 'ul', 'ol'].includes(p) && !['block:li', '/ul', '/ol'].includes(n);
+}
+
+/**
+ * Compare an old and new .md file. Allowed: front-matter text values change, text inside tags changes,
+ * whole <li>/<p> points deleted. Anything else throws. Returns { ops, rebuild(acceptedOps) -> newText }.
+ * ops: { op:'edit', locator, old, new, raw } | { op:'delete', old, unit }
+ */
+export function diffMd(rel, oldText, newText) {
+  const a = parseMd(oldText), b = parseMd(newText);
+  if (a.hasFm !== b.hasFm || a.fmLines.length !== b.fmLines.length) throw new Error('structure-changed');
+  const ops = [];
+  a.fmLines.forEach((line, i) => {
+    if (line === b.fmLines[i]) return;
+    const m1 = FM_LINE.exec(line), m2 = FM_LINE.exec(b.fmLines[i]);
+    if (!m1 || !m2 || m1[1] !== m2[1] || !MD_FRONT_MATTER_KEYS.includes(m1[1])) throw new Error('structure-changed');
+    ops.push({ op: 'edit', locator: `fm:${m1[1]}`, old: JSON.parse(m1[2]), new: JSON.parse(m2[2]), fmIndex: i });
+  });
+  const A = units(a.pieces.join('')), B = units(b.pieces.join(''));
+  // DP: cheapest way to turn A into B with: match (text may change), delete a point, add/remove whitespace.
+  const n = A.length, m = B.length;
+  const cost = Array.from({ length: n + 1 }, () => new Float64Array(m + 1).fill(Infinity));
+  const step = Array.from({ length: n + 1 }, () => new Int8Array(m + 1));
+  cost[n][m] = 0;
+  for (let i = n; i >= 0; i--) for (let j = m; j >= 0; j--) {
+    if (i === n && j === m) continue;
+    let best = Infinity, s = 0;
+    if (i < n && j < m) { const c = matchCost(A[i], B[j]) + cost[i + 1][j + 1]; if (c < best) { best = c; s = 1; } }
+    if (i < n) {
+      const del = A[i].block ? DEL_COST : (!A[i].toks[0].tag && isWs(A[i].toks[0].raw) ? WS_COST : Infinity);
+      const c = del + cost[i + 1][j]; if (c < best) { best = c; s = 2; }
+    }
+    if (j < m && !B[j].block && !B[j].toks[0].tag && isWs(B[j].toks[0].raw)) { const c = WS_COST + cost[i][j + 1]; if (c < best) { best = c; s = 3; } }
+    if (j < m && simplePoint(B[j]) && placedOk(B, j)) { const c = DEL_COST + cost[i][j + 1]; if (c < best) { best = c; s = 4; } }
+    cost[i][j] = best; step[i][j] = s;
+  }
+  if (!Number.isFinite(cost[0][0])) throw new Error('structure-changed');
+  // walk the path; number text nodes like indexMd does (non-whitespace text in document order)
+  const plan = [];                                   // per A unit: { keep:true, newToks } | { keep:false }
+  let i = 0, j = 0;
+  while (i < n || j < m) {
+    const s = step[i][j];
+    if (s === 1) { plan.push({ unit: A[i], with: B[j] }); i++; j++; }
+    else if (s === 2) { plan.push({ unit: A[i], with: null }); i++; }
+    else if (s === 3) { j++; }
+    else if (s === 4) { plan.push({ insert: B[j] }); j++; }
+    else throw new Error('structure-changed');
+  }
+  let textNo = 0;
+  for (const p of plan) {
+    if (p.insert) { ops.push({ op: 'add', old: '', new: unitText(p.insert), plan: p }); continue; }
+    if (!p.with) {
+      if (p.unit.block) ops.push({ op: 'delete', old: unitText(p.unit), unit: p.unit });
+      textNo += p.unit.toks.filter((t) => !t.tag && /\S/.test(t.raw)).length;
+      continue;
+    }
+    p.unit.toks.forEach((t, k) => {
+      if (t.tag || !/\S/.test(t.raw)) return;
+      const nt = p.with.toks[k].raw;
+      if (nt.trim() !== t.raw.trim()) ops.push({ op: 'edit', locator: `body:${textNo}`, old: decodeEnt(t.raw.trim()), new: decodeEnt(nt.trim()), plan: p, k });
+      textNo++;
+    });
+  }
+  /** Old text with only the accepted ops applied (anything not accepted stays as it was). */
+  function rebuild(accepted) {
+    const acc = new Set(accepted);
+    const fm = a.fmLines.map((line, idx) => {
+      const e = ops.find((o) => o.fmIndex === idx && acc.has(o));
+      return e ? `${FM_LINE.exec(line)[1]}: ${JSON.stringify(e.new)}` : line;
+    });
+    let body = '';
+    for (const p of plan) {
+      if (p.insert) {
+        const add = ops.find((o) => o.op === 'add' && o.plan === p);
+        if (add && acc.has(add)) { const tag = tagInfo(p.insert.toks[0].raw).name; body += `<${tag}>${encodeEnt(add.new)}</${tag}>`; }
+        continue;
+      }
+      const del = ops.find((o) => o.op === 'delete' && o.unit === p.unit);
+      if (del && acc.has(del)) continue;
+      p.unit.toks.forEach((t, k) => {
+        const e = ops.find((o) => o.op === 'edit' && o.plan === p && o.k === k);
+        if (e && acc.has(e)) { const lead = /^\s*/.exec(t.raw)[0], trail = /\s*$/.exec(t.raw)[0]; body += lead + encodeEnt(e.new) + trail; }
+        else body += t.raw;
+      });
+    }
+    return (a.hasFm ? `---\n${fm.join('\n')}\n---\n` : '') + body;
+  }
+  return { ops, rebuild };
+}

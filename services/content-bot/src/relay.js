@@ -4,7 +4,8 @@ import { LIMITS, pathAllowed } from './config.js';
 import { audit, nowSec, personById, hit, newId } from './db.js';
 import { fireRoutine, payload } from './routine.js';
 import { buildState } from './pages.js';
-import { diffFile, kindOfFile } from './segments.js';
+import { diffFile, diffMd, kindOfFile, indexFile, applyEdits, verifyEdits } from './segments.js';
+import { Store } from './store.js';
 import { checkNewText } from './validate.js';
 import { t, STATUS_AR, CHECK_MSG } from './messages.js';
 
@@ -53,7 +54,7 @@ export class Relay {
 
   // ---------- stop / undo ----------
   canAbort(req, person) { return req.status === 'working' && (person.role === 'client' || req.person_id === person.id); }
-  canRevert(req, person) { return ['done', 'building'].includes(req.status) && (person.role === 'client' || req.person_id === person.id); }
+  canRevert(req, person) { return ['done', 'building'].includes(req.status) && !!req.files_json && (person.role === 'client' || req.person_id === person.id); }
 
   async abort(person, id) {
     const req = await this.db.prepare('SELECT * FROM requests WHERE id = ?').bind(id).first();
@@ -68,14 +69,13 @@ export class Relay {
   async revert(person, id) {
     const { db } = this;
     const req = await db.prepare('SELECT * FROM requests WHERE id = ?').bind(id).first();
-    if (!req || !this.canRevert(req, person)) return { ok: false, message: t('cannotRevert') };
+    if (!req || !req.files_json || !this.canRevert(req, person)) return { ok: false, message: t('cannotRevert') };
     const was = req.status;
     const claim = await db.prepare("UPDATE requests SET status = 'reverting', updated_at = ? WHERE id = ? AND status = ?").bind(nowSec(), id, was).run();
     if (claim.meta.changes !== 1) return { ok: false, message: t('cannotRevert') };
     const requester = await personById(db, req.person_id);
-    const inverse = JSON.parse(req.edits_json).map((e) => ({ ...e, old: e.new, new: e.old }));
     try {
-      const sha = await this.commitLive(inverse, `Undo text request ${id}`, requester.name, person.name);
+      const sha = await this.commitLive(JSON.parse(req.files_json), 'back', JSON.parse(req.edits_json), `Undo text request ${id}`, requester.name, person.name);
       await this.set(req, { status: 'reverted', revert_commit: sha, message: t('reverted') });
       await audit(db, { actor: person.name, event: 'reverted', changeId: id, commit: sha });
       if (req.person_id !== person.id) await this.notify(req);
@@ -126,21 +126,25 @@ export class Relay {
     await this.notify(req);
   }
 
-  /** The gate: only text in the client's text files, only the person's own words. Then put it live. */
+  /** The gate: only text in the client's text files (plus deleting whole points), the person's own words. Then put it live. */
   async publish(req, branch) {
-    const { db, gh, env } = this;
-    let edits;
-    try { edits = await this.checkBranch(req, branch.sha); } catch (e) {
+    const { db } = this;
+    let res;
+    try { res = await this.checkBranch(req, branch.sha); } catch (e) {
       const code = e.code || 'type';
       await this.finish(req, 'refused', t(CHECK_MSG[code] || 'textOnly'), 'refused_by_checks');
       await audit(db, { actor: 'bot', event: 'check_detail', changeId: req.id, detail: this.redact(e.message) });
       return this.cleanBranches(req.id);
     }
     const requester = await personById(db, req.person_id);
+    const agentNote = clip(oneLine((await this.gh.commitMessage(branch.sha)).split('\n').filter((l) => /^(NOTE|ملاحظة)\s*:/.test(l.trim())).map((l) => l.replace(/^\s*(NOTE|ملاحظة)\s*:\s*/, '')).join(' ')).replace(/[<>]/g, ''), 300);
+    const skippedNote = res.skipped.length ? `${t('partSkipped')} ${res.skipped.map((x) => `«${clip(x.old, 60)}»`).join('، ')} — ${t(CHECK_MSG[res.skipped[0].code] || 'textOnly')}` : '';
+    const note = [agentNote, skippedNote].filter(Boolean).join('\n') || null;
     try {
-      const sha = await this.commitLive(edits, `Text request ${req.id}`, requester.name, null);
-      await this.set(req, { status: 'building', edits_json: JSON.stringify(edits), live_commit: sha, building_since: nowSec() });
-      await audit(db, { actor: requester.name, event: 'published', changeId: req.id, commit: sha, detail: JSON.stringify(edits.map((e) => ({ f: e.file, l: e.locator, old: clip(e.old, 150), new: clip(e.new, 150) }))) });
+      const sha = await this.commitLive(res.files, 'forward', res.display, `Text request ${req.id}`, requester.name, null);
+      await this.set(req, { status: 'building', edits_json: JSON.stringify(res.display), files_json: JSON.stringify(res.files), live_commit: sha, building_since: nowSec(), message: note });
+      await audit(db, { actor: requester.name, event: 'published', changeId: req.id, commit: sha, detail: JSON.stringify(res.display.map((e) => ({ op: e.op, old: clip(e.old, 120), new: e.new && clip(e.new, 120) }))) });
+      if (res.skipped.length) await audit(db, { actor: 'bot', event: 'check_detail', changeId: req.id, detail: `skipped: ${res.skipped.map((x) => x.code).join(', ')}` });
     } catch (e) {
       await this.finish(req, 'failed', e.code === 'stale' ? t('stale') : t('error'), 'publish_failed');
       await audit(db, { actor: 'bot', event: 'check_detail', changeId: req.id, detail: this.redact(e.message) });
@@ -148,6 +152,10 @@ export class Relay {
     await this.cleanBranches(req.id);
   }
 
+  /**
+   * Returns { files: [{ rel, before, after, edits, deletes }], display: [{ page, op, old, new }], skipped: [{ code, old }] }.
+   * Structure problems throw (nothing is published). A single bad text is skipped; the rest goes live.
+   */
   async checkBranch(req, headSha) {
     const { gh, env } = this;
     const live = await gh.tip(env.LIVE_BRANCH);
@@ -164,35 +172,72 @@ export class Relay {
     }
     if (!rels.length) throw new CheckError('no-change');
     const [base, head] = await Promise.all([gh.readClientFiles(cmp.mergeBase), gh.readClientFiles(headSha)]);
-    const edits = [];
+    const files = [], display = [], skipped = [];
+    const code = (e) => String(e.message).split(':')[0];
     for (const rel of rels) {
       if (!base.has(rel) || !head.has(rel)) throw new CheckError('not-text-file');
-      let list;
-      try { list = diffFile(rel, base.get(rel), head.get(rel)); } catch (e) { throw new CheckError(String(e.message).split(':')[0]); }
-      for (const e of list) {
-        const r = checkNewText({ text: e.old, kind: e.kind }, e.new, [req.text]);
-        if (!r.ok) throw new CheckError(r.code);
-        edits.push({ ...e, new: r.value });
+      const before = base.get(rel);
+      if (kindOfFile(rel) === 'json') {
+        let list;
+        try { list = diffFile(rel, before, head.get(rel)); } catch (e) { throw new CheckError(code(e)); }
+        const ok = [];
+        for (const e of list) {
+          const r = checkNewText({ text: e.old, kind: e.kind }, e.new, [req.text]);
+          if (r.ok) ok.push({ ...e, new: r.value }); else skipped.push({ code: r.code, old: e.old });
+        }
+        if (!ok.length) continue;
+        const after = applyEdits(rel, before, ok);
+        verifyEdits(rel, before, after, ok.map((e) => e.locator));
+        files.push({ rel, before, after, edits: ok.map(({ file, locator, old, new: nw }) => ({ file, locator, old, new: nw })), deletes: 0 });
+        for (const e of ok) display.push({ page: e.page.label.ar, op: 'edit', old: e.old, new: e.new });
+      } else {
+        let d;
+        try { d = diffMd(rel, before, head.get(rel)); } catch (e) { throw new CheckError(code(e)); }
+        const page = (indexFile(rel, before)[0]?.page.label.ar) || rel;
+        const ok = [];
+        for (const o of d.ops) {
+          if (o.op === 'delete') { ok.push(o); continue; }
+          const r = checkNewText({ text: o.old || '', kind: 'text' }, o.new, [req.text]);
+          if (r.ok) { o.new = r.value; ok.push(o); } else skipped.push({ code: r.code, old: o.old });
+        }
+        if (!ok.length) continue;
+        const after = d.rebuild(ok);
+        try { diffMd(rel, before, after); } catch { throw new CheckError('structure-changed'); }
+        const deletes = ok.filter((o) => o.op !== 'edit').length;      // added or deleted points: undo needs the exact file
+        files.push({ rel, before, after, deletes, edits: deletes ? [] : ok.map((o) => ({ file: rel, locator: o.locator, old: o.old, new: o.new })) });
+        for (const o of ok) display.push({ page, op: o.op, old: o.old, new: o.op === 'delete' ? null : o.new });
       }
     }
-    if (!edits.length) throw new CheckError('no-change');
-    if (edits.length > LIMITS.maxEditsPerChange) throw new CheckError('too-many-edits');
-    return edits;
+    if (!display.length) throw new CheckError(skipped[0]?.code || 'no-change');
+    if (display.length > LIMITS.maxEditsPerChange) throw new CheckError('too-many-edits');
+    return { files, display, skipped };
   }
 
-  /** Re-read the newest live tip, check the old text is still there, commit, fast-forward. Retries if the branch moved. */
-  async commitLive(edits, title, requesterName, approverName) {
+  /**
+   * Write the planned files on the newest live tip and fast-forward. A file nobody touched since gets the exact
+   * planned text. A file changed meanwhile only works for plain word edits (re-applied by position); with
+   * deleted points it is refused as stale. direction: 'forward' (publish) or 'back' (undo).
+   */
+  async commitLive(plans, direction, display, title, requesterName, reverterName) {
     const { gh, env } = this;
     const clean = (s) => oneLine(s).replace(/[<>]/g, '');
-    const lines = edits.map((e) => `- ${clean(e.page.label.en)}: "${clip(clean(e.old), 100)}" -> "${clip(clean(e.new), 100)}"`).join('\n');
-    const msg = `${title}\n\n${lines}\n\nRequested-by: ${clean(requesterName)}${approverName ? `\nReverted-by: ${clean(approverName)}` : ''}\n`;
+    const lines = display.map((e) => e.op === 'delete' ? `- delete: "${clip(clean(e.old), 100)}"` : e.op === 'add' ? `- add: "${clip(clean(e.new), 100)}"` : `- "${clip(clean(e.old), 100)}" -> "${clip(clean(e.new), 100)}"`).join('\n');
+    const msg = `${title}\n\n${lines}\n\nRequested-by: ${clean(requesterName)}${reverterName ? `\nReverted-by: ${clean(reverterName)}` : ''}\n`;
     for (let attempt = 0; attempt < 4; attempt++) {
       const tip = await gh.tip(env.LIVE_BRANCH);
-      const store = await this.loadStore(tip);
-      if (store.skipped?.length) await audit(this.db, { actor: 'bot', event: 'file_skipped', detail: store.skipped.join('; ') });
-      const plan = store.build(edits);
-      if (!plan.ok) { const e = new Error(`cannot apply: ${plan.code}`); e.code = plan.code === 'structure' ? 'structure' : 'stale'; throw e; }
-      const sha = await gh.makeCommit(tip, plan.files, msg);
+      const current = await gh.readClientFiles(tip);
+      const out = {};
+      for (const p of plans) {
+        const from = direction === 'forward' ? p.before : p.after, to = direction === 'forward' ? p.after : p.before;
+        const cur = current.get(p.rel);
+        if (cur === from) { out[p.rel] = to; continue; }
+        if (p.deletes || !p.edits.length) { const e = new Error(`file changed: ${p.rel}`); e.code = 'stale'; throw e; }
+        const edits = direction === 'forward' ? p.edits : p.edits.map((e) => ({ ...e, old: e.new, new: e.old }));
+        const built = new Store(tip, new Map([[p.rel, cur]])).build(edits);
+        if (!built.ok) { const e = new Error(`cannot apply: ${built.code}`); e.code = built.code === 'structure' ? 'structure' : 'stale'; throw e; }
+        out[p.rel] = built.files[p.rel];
+      }
+      const sha = await gh.makeCommit(tip, out, msg);
       if (await gh.fastForward(env.LIVE_BRANCH, sha)) return sha;
     }
     throw new Error('branch kept moving');
@@ -210,7 +255,7 @@ export class Relay {
       id: req.id, text: req.text, status: req.status, statusText: STATUS_AR[req.status], message: req.message,
       from: names.get(req.person_id) || '', mine: req.person_id === viewer.id, at: req.created_at,
       inProgress: IN_PROGRESS.includes(req.status),
-      edits: req.edits_json ? JSON.parse(req.edits_json).map((e) => ({ page: e.page.label.ar, old: e.old, new: e.new })) : [],
+      edits: req.edits_json ? JSON.parse(req.edits_json).map((e) => ({ page: typeof e.page === 'string' ? e.page : e.page?.label?.ar, op: e.op || 'edit', old: e.old, new: e.new })) : [],
       can: { abort: this.canAbort(req, viewer), revert: this.canRevert(req, viewer) },
     };
   }

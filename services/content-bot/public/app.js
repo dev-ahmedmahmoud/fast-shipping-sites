@@ -63,8 +63,8 @@ function botBubble(r) {
   if (r.message) li.append(el('div', { class: 'msg', text: r.message }));
   for (const e of r.edits) {
     li.append(el('div', { class: 'edit' }, el('div', { class: 'page', text: e.page }),
-      el('div', { class: 'old' }, el('span', { class: 'lbl', text: 'القديم' }), el('span', { class: 'txt', text: e.old })),
-      el('div', { class: 'new' }, el('span', { class: 'lbl', text: 'الجديد' }), el('span', { class: 'txt', text: e.new }))));
+      e.op === 'add' ? null : el('div', { class: 'old' }, el('span', { class: 'lbl', text: e.op === 'delete' ? 'حُذفت هذه النقطة' : 'القديم' }), el('span', { class: 'txt', text: e.old })),
+      e.op === 'delete' ? null : el('div', { class: 'new' }, el('span', { class: 'lbl', text: e.op === 'add' ? 'نقطة جديدة' : 'الجديد' }), el('span', { class: 'txt', text: e.new }))));
   }
   const actions = el('div', { class: 'actions' });
   if (r.status === 'done' && state.me.site) actions.append(el('a', { class: 'preview', href: state.me.site, target: '_blank', rel: 'noopener noreferrer', text: 'فتح الموقع' }));

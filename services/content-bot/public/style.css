@@ -100,3 +100,4 @@ button.sm { min-height: 36px; padding: 6px 12px; font-size: 14px; }
   .btns { width: 100%; justify-content: stretch; } .btns button { flex: 1; }
   .roles { grid-template-columns: 1fr; }
 }
+.b.bot.done .msg, .b.bot.building .msg { background: #fff8e1; color: #6b5200; }

@@ -9,7 +9,8 @@ export const LIVE = 'claude/live';
 // --- D1 look-alike on node:sqlite ---
 export function makeDb() {
   const sql = new DatabaseSync(':memory:');
-  sql.exec(fs.readFileSync(new URL('../migrations/0001_init.sql', import.meta.url), 'utf8'));
+  const dir = new URL('../migrations/', import.meta.url);
+  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.sql')).sort()) sql.exec(fs.readFileSync(new URL(f, dir), 'utf8'));
   const wrap = (q, args = []) => ({
     bind: (...a) => wrap(q, a),
     run: async () => { const r = sql.prepare(q).run(...args); return { meta: { changes: Number(r.changes) } }; },
@@ -64,6 +65,7 @@ export class FakeGH {
   }
   /** Test helper: what the agent does. files: {rel: newText} or a function(oldFiles) -> {rel: newText}. */
   agentPush(branch, files, message = 'Request') {
+    if (typeof files === 'function') { const f = files; files = (m) => f(m); }
     const base = this.branches.get(LIVE);
     const m = new Map(this.commits.get(base).files);
     for (const [k, v] of Object.entries(typeof files === 'function' ? files(m) : files)) { if (v === null) m.delete(k); else m.set(k, v); }
