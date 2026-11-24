@@ -122,22 +122,60 @@ const many = groups.length > 1;
 </section>
 
 <script>
-  // "Show all details" opens or closes every initiative of the plan; it follows hand toggles too.
+  // Each initiative slides open and shut (its height animates; the text fades in as it opens and
+  // out as it closes). "Show all details" opens or closes them all the same way and follows
+  // hand toggles. Reduced motion: no animation. Clicks during a slide reverse it smoothly.
+  const still = matchMedia('(prefers-reduced-motion: reduce)');
+  const EASE = 'cubic-bezier(0.22, 0.7, 0.2, 1)';
+  type Card = HTMLDetailsElement & { _anim?: Animation | null };
+
+  function slide(d: Card, open: boolean, onDone?: () => void) {
+    const summary = d.querySelector('summary');
+    const body = d.querySelector<HTMLElement>('.card__body');
+    if (!summary || still.matches) { d.open = open; d.classList.remove('is-closing'); onDone?.(); return; }
+    const from = d.offsetHeight; // the height now, mid-slide included
+    d._anim?.cancel();
+    d.dataset.target = open ? 'open' : 'closed';
+    d.classList.toggle('is-closing', !open);
+    if (open) d.open = true;
+    const frame = d.offsetHeight - d.clientHeight; // the card's borders
+    const to = open ? d.offsetHeight : summary.offsetHeight + frame;
+    const ms = Math.round(Math.min(560, 240 + Math.abs(to - from) * 0.35));
+    d._anim = d.animate({ height: [`${from}px`, `${to}px`] }, { duration: ms, easing: EASE });
+    body?.animate(open ? { opacity: [0, 1], transform: ['translateY(-6px)', 'none'] } : { opacity: [1, 0] }, { duration: open ? ms : Math.round(ms * 0.6), easing: EASE, fill: 'both' });
+    d._anim.onfinish = () => {
+      if (!open) d.open = false;
+      d.classList.remove('is-closing');
+      delete d.dataset.target;
+      d._anim = null;
+      body?.getAnimations().forEach((a) => a.cancel());
+      onDone?.();
+    };
+  }
+  // Where a card is heading (an unfinished slide counts as its end).
+  const isOpen = (d: Card) => (d.dataset.target ? d.dataset.target === 'open' : d.open);
+
   document.querySelectorAll<HTMLElement>('[data-plan]').forEach((root) => {
     const btn = root.querySelector<HTMLButtonElement>('[data-plan-all]');
-    const cards = [...root.querySelectorAll<HTMLDetailsElement>('details.card')];
-    if (!btn || !cards.length) return;
+    const cards = [...root.querySelectorAll<Card>('details.card')];
     const sync = () => {
-      const all = cards.every((c) => c.open);
+      if (!btn) return;
+      const all = cards.every(isOpen);
       btn.setAttribute('aria-pressed', String(all));
       btn.textContent = (all ? btn.dataset.none : btn.dataset.all) ?? '';
     };
-    btn.addEventListener('click', () => {
-      const open = !cards.every((c) => c.open);
-      cards.forEach((c) => { c.open = open; });
+    cards.forEach((d) => {
+      d.querySelector('summary')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        slide(d, !isOpen(d), sync);
+        sync();
+      });
+    });
+    btn?.addEventListener('click', () => {
+      const open = !cards.every(isOpen);
+      cards.forEach((d) => { if (isOpen(d) !== open) slide(d, open, sync); });
       sync();
     });
-    cards.forEach((c) => c.addEventListener('toggle', sync));
   });
 </script>
 
@@ -232,13 +270,12 @@ const many = groups.length > 1;
   }
   .card__more { flex: none; display: inline-flex; align-items: center; gap: 2px; margin-block-start: 0.2em; font-size: 0.85rem; font-weight: 700; color: var(--st-brass-lo); }
   .card__more svg { transition: rotate var(--dur-fast) var(--ease-out); }
-  .card[open] .card__more svg { rotate: 180deg; }
+  .card[open]:not(.is-closing) .card__more svg { rotate: 180deg; }
   .card__body {
     display: grid; gap: var(--space-3); padding: var(--space-4) var(--space-5) var(--space-5);
     border-block-start: 1px dashed color-mix(in oklab, var(--st-brass) 40%, var(--c-line));
     font-size: var(--step-0); line-height: 1.95; color: var(--c-ink);
   }
-  .card[open] .card__body { animation: plan-in 0.28s var(--ease-out); }
   .card__lead { font-weight: 700; color: var(--c-accent); }
   .card__tail { color: var(--c-muted); }
   .checks { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
@@ -252,7 +289,6 @@ const many = groups.length > 1;
     content: ''; position: absolute; inset-inline-start: 0.42rem; inset-block-start: calc(0.45em + 0.3rem); inline-size: 0.42rem; block-size: 0.62rem;
     border: solid var(--st-night); border-width: 0 2.5px 2.5px 0; rotate: 45deg;
   }
-  @keyframes plan-in { from { opacity: 0; transform: translateY(-4px); } }
 
   /* ---- labelled sections inside an initiative (strategy projects) ---- */
   .sec { display: grid; gap: var(--space-2); }
@@ -326,7 +362,6 @@ const many = groups.length > 1;
     .card__body { padding: var(--space-3) var(--space-4) var(--space-4); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .card[open] .card__body { animation: none; }
     .card, .card__more svg { transition: none; }
   }
 </style>
