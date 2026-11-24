@@ -1,7 +1,9 @@
 // Text-free 16:9 video posters, one per candidate: media/<slug>-poster.jpg (1280x720).
 // The candidate stands at the inline start (right in Arabic), the crest small at the top of the
 // other side, the middle left clear for a play button or a "قريبًا" badge, and the site's own
-// caption carrying the words.
+// caption carrying the words. The photo stands inside the gold arch as in a window: it fills the
+// arch's width, stands on its bottom edge and is trimmed to its curve, so no shoulder ever
+// crosses the frame (24 Nov: some did when the photo was placed on its own).
 // Usage: node clients/tantasportsclubelections/tools/video-posters.mjs
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
@@ -27,12 +29,13 @@ for (const c of data.candidates) {
     -webkit-mask:linear-gradient(to bottom,#000,transparent 80%)}
   .grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 64px),repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 64px)}
   .glow{position:absolute;right:60px;bottom:-120px;width:640px;height:560px;border-radius:50%;background:radial-gradient(closest-side,rgba(225,185,100,.30),transparent)}
-  .arch{position:absolute;right:120px;bottom:0;width:440px;height:600px;border:4px solid #D2A24C;border-bottom:0;border-radius:50% 50% 0 0/34% 34% 0 0;opacity:.85}
-  .who{position:absolute;right:90px;bottom:0;height:640px}
+  .arch{position:absolute;right:120px;bottom:0;width:440px;height:600px;border:4px solid rgba(210,162,76,.9);border-bottom:0;border-radius:50% 50% 0 0/34% 34% 0 0;
+    overflow:hidden;display:flex;align-items:flex-end;background:radial-gradient(ellipse 60% 55% at 50% 58%,rgba(240,212,147,.16),transparent 72%)}
+  .who{display:block;width:100%;height:auto}
   .crest{position:absolute;left:70px;top:56px;height:110px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45))}
   .ledge{position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(100deg,#9C7432,#F0D493 30%,#D2A24C 55%,#F3DD9E 78%,#9C7432)}
-  </style></head><body><div class="s"><div class="rays"></div><div class="grid"></div><div class="glow"></div><div class="arch"></div>
-  <img class="who" src="${img(c.card)}"><img class="crest" src="${crest}"><div class="ledge"></div></div></body></html>`);
+  </style></head><body><div class="s"><div class="rays"></div><div class="grid"></div><div class="glow"></div><div class="arch"><img class="who" src="${img(c.card)}"></div>
+  <img class="crest" src="${crest}"><div class="ledge"></div></div></body></html>`);
   await p.waitForTimeout(150);
   const png = await p.screenshot();
   await sharp(png).jpeg({ quality: 84, progressive: true, mozjpeg: true }).toFile(path.join(M, `${c.slug}-poster.jpg`));
