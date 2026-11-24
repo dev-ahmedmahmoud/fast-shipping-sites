@@ -202,7 +202,7 @@ const kit = entry.template === 'support'
       {cr.interview && (
         <E.InterviewPlayer ctx={ctx} id="interview" title={cr.interview.title} video={video(cr.interview)!}
           summary={cr.interview.summary}
-          chapters={cr.interview.chapters.map((ch: any) => ({ t: ch.t, time: timeLabel(ch.t), label: ch.label, aria: `شاهد: ${ch.label} (عند ${timeLabel(ch.t)})` }))} />
+          chapters={(cr.interview.chapters ?? []).map((ch: any) => ({ t: ch.t, time: timeLabel(ch.t), label: ch.label, aria: `شاهد: ${ch.label} (عند ${timeLabel(ch.t)})` }))} />
       )}
       {cr.gallery?.length > 0 && <E.PhotoRow ctx={ctx} photos={cr.gallery.map((g: string) => media(g))} alt={c.name} label={cr.galleryLabel} hint={ui.galleryHint} />}
       {clipsForCandidate(c.slug).length > 0 && <E.ClipGrid ctx={ctx} title={cr.filesTitle} groups={clipsForCandidate(c.slug)} />}

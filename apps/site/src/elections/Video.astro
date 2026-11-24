@@ -4,7 +4,8 @@
 // buttons ([data-el-seek] inside the same [data-el-interview]) jump to their moment.
 // Behaviour lives in ./client/video.ts. Design systems place this inside their own
 // frame and style the hooks below (defaults in ./elections.css):
-//   .el-video            the box (16:9); gets .is-playing once the player is in, .is-loading while it buffers
+//   .el-video            the box (16:9, or 9:16 with .is-portrait for a vertical video); gets
+//                        .is-playing once the player is in, .is-loading while it buffers
 //   .el-video__play      the poster button
 //   .el-video__poster    the poster image
 //   .el-video__icon      the round play mark
@@ -33,7 +34,7 @@ const playLabel = `${ui.play ?? 'تشغيل الفيديو'}: ${video.label}`;
     {showCaption && video.caption && <span class="el-video__label" aria-hidden="true">{video.caption}</span>}
   </div>
 ) : (
-  <div class:list={['el-video', cls]} data-el-video data-src={video.src}>
+  <div class:list={['el-video', video.portrait && 'is-portrait', cls]} data-el-video data-src={video.src}>
     <button class="el-video__play" type="button" aria-label={playLabel}>
       <Image class="el-video__poster" src={video.poster} alt="" widths={widths} sizes={sizes} loading="lazy" />
       <span class="el-video__icon" aria-hidden="true"></span>

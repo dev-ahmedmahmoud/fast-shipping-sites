@@ -179,7 +179,14 @@
       "filesTitle": "المستشار محمد صدقي يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "mohamed-sedky-share.jpg",
-      "description": "نائب رئيس هيئة قضايا الدولة، وأمين صندوق نادي طنطا الرياضي حاليًا، وعضو مجلس إدارة النادي في دورة ٢٠١٧–٢٠٢١."
+      "description": "نائب رئيس هيئة قضايا الدولة، وأمين صندوق نادي طنطا الرياضي حاليًا، وعضو مجلس إدارة النادي في دورة ٢٠١٧–٢٠٢١.",
+      "interview": {
+        "title": "لقاء المستشار محمد صدقي",
+        "label": "لقاء المستشار محمد صدقي",
+        "src": "/videos/mohamed-sedky.mp4",
+        "poster": "mohamed-sedky-reel.jpg",
+        "portrait": true
+      }
     },
     {
       "slug": "waleed-afify",
@@ -217,7 +224,14 @@
       "filesTitle": "د. أحمد إبراهيم سويلم يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "ahmed-sweilem-share.jpg",
-      "description": "مدير المستشفى الرئيسي ومستشفى الجراحات الجديدة بجامعة طنطا، وأستاذ مساعد الجراحة العامة بكلية الطب – جامعة طنطا."
+      "description": "مدير المستشفى الرئيسي ومستشفى الجراحات الجديدة بجامعة طنطا، وأستاذ مساعد الجراحة العامة بكلية الطب – جامعة طنطا.",
+      "interview": {
+        "title": "لقاء د. أحمد إبراهيم سويلم",
+        "label": "لقاء د. أحمد إبراهيم سويلم",
+        "src": "/videos/ahmed-sweilem.mp4",
+        "poster": "ahmed-sweilem-reel.jpg",
+        "portrait": true
+      }
     },
     {
       "slug": "khaled-hamza",
@@ -255,7 +269,14 @@
       "filesTitle": "كابتن فتحي محمد سليم يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "fathy-selim-share.jpg",
-      "description": "لاعب سابق بالفريق الأول لكرة القدم بنادي طنطا الرياضي منذ عام ١٩٦٦، ومديره الفني لاحقًا، ومدرب كرة قدم محترف بخبرات دولية."
+      "description": "لاعب سابق بالفريق الأول لكرة القدم بنادي طنطا الرياضي منذ عام ١٩٦٦، ومديره الفني لاحقًا، ومدرب كرة قدم محترف بخبرات دولية.",
+      "interview": {
+        "title": "لقاء كابتن فتحي محمد سليم",
+        "label": "لقاء كابتن فتحي محمد سليم",
+        "src": "/videos/fathy-selim.mp4",
+        "poster": "fathy-selim-reel.jpg",
+        "portrait": true
+      }
     },
     {
       "slug": "karim-abu-elazm",
@@ -274,7 +295,14 @@
       "filesTitle": "المحاسب كريم ممدوح أبو العزم يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "karim-abu-elazm-share.jpg",
-      "description": "شريك ومدير تنفيذي لشركتي B&K لتوريدات المطاعم وEgy Mak Pharma، وعضو مجلس إدارة حالي (تحت السن)، ولاعب سباحة سابق بالنادي."
+      "description": "شريك ومدير تنفيذي لشركتي B&K لتوريدات المطاعم وEgy Mak Pharma، وعضو مجلس إدارة حالي (تحت السن)، ولاعب سباحة سابق بالنادي.",
+      "interview": {
+        "title": "لقاء المحاسب كريم ممدوح أبو العزم",
+        "label": "لقاء المحاسب كريم ممدوح أبو العزم",
+        "src": "/videos/karim-abu-elazm.mp4",
+        "poster": "karim-abu-elazm-reel.jpg",
+        "portrait": true
+      }
     },
     {
       "slug": "ashoush",
@@ -293,7 +321,14 @@
       "filesTitle": "أ. محمد رضا عشوش يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "ashoush-share.jpg",
-      "description": "حاصل على ليسانس الحقوق من جامعة طنطا، وصاحب شركات في التجارة والاستثمار السياحي والعقاري، وأحد أبناء نادي طنطا الرياضي."
+      "description": "حاصل على ليسانس الحقوق من جامعة طنطا، وصاحب شركات في التجارة والاستثمار السياحي والعقاري، وأحد أبناء نادي طنطا الرياضي.",
+      "interview": {
+        "title": "لقاء أ. محمد رضا عشوش",
+        "label": "لقاء أ. محمد رضا عشوش",
+        "src": "/videos/ashoush.mp4",
+        "poster": "ashoush-reel.jpg",
+        "portrait": true
+      }
     },
     {
       "slug": "mohamed-mabrouk",
@@ -330,7 +365,14 @@
       "filesTitle": "اللواء مصطفى الشرقاوي يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "mostafa-el-sharkawy-share.jpg",
-      "description": "لواء شرطة متخصص في إدارة الأمن منذ عام ١٩٩٣، خريج أكاديمية الشرطة، ومرشح القائمة لعضوية مجلس إدارة نادي طنطا الرياضي (فوق السن)."
+      "description": "لواء شرطة متخصص في إدارة الأمن منذ عام ١٩٩٣، خريج أكاديمية الشرطة، ومرشح القائمة لعضوية مجلس إدارة نادي طنطا الرياضي (فوق السن).",
+      "interview": {
+        "title": "لقاء اللواء مصطفى الشرقاوي",
+        "label": "لقاء اللواء مصطفى الشرقاوي",
+        "src": "/videos/mostafa-el-sharkawy.mp4",
+        "poster": "mostafa-el-sharkawy-reel.jpg",
+        "portrait": true
+      }
     },
     {
       "slug": "mohamed-attia",
@@ -349,7 +391,14 @@
       "filesTitle": "م. محمد السيد عطية يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "mohamed-attia-share.jpg",
-      "description": "مهندس معماري، وصاحب شركة المدينة المنورة للمقاولات وشركة Creative Line Construction (CLC) للتشطيبات والاستثمار العقاري."
+      "description": "مهندس معماري، وصاحب شركة المدينة المنورة للمقاولات وشركة Creative Line Construction (CLC) للتشطيبات والاستثمار العقاري.",
+      "interview": {
+        "title": "لقاء م. محمد السيد عطية",
+        "label": "لقاء م. محمد السيد عطية",
+        "src": "/videos/mohamed-attia.mp4",
+        "poster": "mohamed-attia-reel.jpg",
+        "portrait": true
+      }
     },
     {
       "slug": "mohamed-el-menshawy",
@@ -368,7 +417,14 @@
       "filesTitle": "د. محمد رياض المنشاوي يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "mohamed-el-menshawy-share.jpg",
-      "description": "دكتوراه في التدريب الرياضي ومدرس بقسم الرياضات المائية بكلية علوم الرياضة – جامعة طنطا، وأحد أبناء النادي ومديره الفني للسباحة سابقًا."
+      "description": "دكتوراه في التدريب الرياضي ومدرس بقسم الرياضات المائية بكلية علوم الرياضة – جامعة طنطا، وأحد أبناء النادي ومديره الفني للسباحة سابقًا.",
+      "interview": {
+        "title": "لقاء د. محمد رياض المنشاوي",
+        "label": "لقاء د. محمد رياض المنشاوي",
+        "src": "/videos/mohamed-el-menshawy.mp4",
+        "poster": "mohamed-el-menshawy-reel.jpg",
+        "portrait": true
+      }
     }
   ],
   "files": [
@@ -1346,8 +1402,7 @@
         },
         {
           "candidate": "mohamed-sedky",
-          "poster": "mohamed-sedky-poster.jpg",
-          "placeholder": true
+          "poster": "mohamed-sedky-poster.jpg"
         },
         {
           "candidate": "waleed-afify",
@@ -1356,8 +1411,7 @@
         },
         {
           "candidate": "ahmed-sweilem",
-          "poster": "ahmed-sweilem-poster.jpg",
-          "placeholder": true
+          "poster": "ahmed-sweilem-poster.jpg"
         },
         {
           "candidate": "khaled-hamza",
@@ -1366,18 +1420,15 @@
         },
         {
           "candidate": "fathy-selim",
-          "poster": "fathy-selim-poster.jpg",
-          "placeholder": true
+          "poster": "fathy-selim-poster.jpg"
         },
         {
           "candidate": "karim-abu-elazm",
-          "poster": "karim-abu-elazm-poster.jpg",
-          "placeholder": true
+          "poster": "karim-abu-elazm-poster.jpg"
         },
         {
           "candidate": "ashoush",
-          "poster": "ashoush-poster.jpg",
-          "placeholder": true
+          "poster": "ashoush-poster.jpg"
         },
         {
           "candidate": "mohamed-mabrouk",
@@ -1386,18 +1437,15 @@
         },
         {
           "candidate": "mostafa-el-sharkawy",
-          "poster": "mostafa-el-sharkawy-poster.jpg",
-          "placeholder": true
+          "poster": "mostafa-el-sharkawy-poster.jpg"
         },
         {
           "candidate": "mohamed-attia",
-          "poster": "mohamed-attia-poster.jpg",
-          "placeholder": true
+          "poster": "mohamed-attia-poster.jpg"
         },
         {
           "candidate": "mohamed-el-menshawy",
-          "poster": "mohamed-el-menshawy-poster.jpg",
-          "placeholder": true
+          "poster": "mohamed-el-menshawy-poster.jpg"
         }
       ]
     },

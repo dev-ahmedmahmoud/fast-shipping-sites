@@ -11,16 +11,18 @@ interface Props {
   id: string;
   title: string;
   video: VideoData;
-  summary: string;
-  chapters: { t: number; time: string; label: string; aria: string }[];
+  summary?: string;
+  chapters?: { t: number; time: string; label: string; aria: string }[];
 }
-const { id, title, video, summary, chapters } = Astro.props;
+const { id, title, video, summary = '', chapters = [] } = Astro.props;
+// A vertical video without topics: one tall window, centred.
+const tall = video.portrait && chapters.length === 0;
 ---
 <section class="section" id={id} data-el-interview aria-labelledby={`${id}-title`}>
   <div class="container wrap">
     <header class="st-title"><span class="st-sign st-rivets plate"><h2 id={`${id}-title`}>{title}</h2></span></header>
-    <div class="grid">
-      <div class="player"><Video video={video} sizes="(max-width: 900px) 100vw, 60vw" /></div>
+    <div class:list={['grid', tall && 'grid--tall']}>
+      <div class="player"><Video video={video} widths={video.portrait ? [360, 540, 720] : undefined} sizes={video.portrait ? '(max-width: 600px) 92vw, 380px' : '(max-width: 900px) 100vw, 60vw'} /></div>
       {chapters.length > 0 && (
         <details class="table" data-el-open-wide>
           <summary>
@@ -74,5 +76,8 @@ const { id, title, video, summary, chapters } = Astro.props;
   button:hover { background: color-mix(in oklab, var(--st-enamel-ink) 8%, transparent); }
   .t { flex: 0 0 auto; direction: ltr; min-inline-size: 4.2ch; font-size: var(--step-0); }
   .topic { line-height: 1.6; }
+  /* A vertical video: a phone-shaped window, as tall as the screen allows. */
+  .grid--tall { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .grid--tall .player { inline-size: min(100%, 24rem, calc((100svh - 9rem) * 9 / 16 + 24px)); }
   @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 </style>

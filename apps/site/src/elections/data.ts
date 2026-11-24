@@ -31,6 +31,8 @@ export interface VideoData {
    * elections.json; adding "src" later makes it a normal video.
    */
   soon?: string;
+  /** A vertical (9:16) video, such as a phone-filmed interview: shown in a tall frame. */
+  portrait?: boolean;
 }
 
 export interface CandidateCard {
@@ -116,7 +118,7 @@ export function video(v: any): VideoData | null {
     return { src: '', poster: media(v.poster), label: v.label ?? '', caption: v.caption, soon: typeof v.placeholder === 'string' ? v.placeholder : (ui.soon ?? 'قريبًا') };
   }
   if (!v.src) return null;
-  return { src: v.src, poster: media(v.poster), label: v.label ?? '', caption: v.caption };
+  return { src: v.src, poster: media(v.poster), label: v.label ?? '', caption: v.caption, portrait: !!v.portrait };
 }
 
 const groupLabel = (id: string) => (raw.groups ?? []).find((g: any) => g.id === id)?.label ?? '';

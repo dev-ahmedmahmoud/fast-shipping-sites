@@ -7,6 +7,7 @@
   position: relative; aspect-ratio: 16 / 9; inline-size: 100%;
   border-radius: var(--radius-m); overflow: hidden; background: var(--c-sunk);
 }
+:where(.el-video.is-portrait) { aspect-ratio: 9 / 16; }
 :where(.el-video) video, :where(.el-video__play) { inline-size: 100%; block-size: 100%; display: block; }
 :where(.el-video) video { object-fit: contain; background: #000; }
 :where(.el-video__play) { position: relative; padding: 0; border: 0; cursor: pointer; background: none; }
