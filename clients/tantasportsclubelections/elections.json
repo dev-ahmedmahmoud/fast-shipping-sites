@@ -179,14 +179,7 @@
       "filesTitle": "المستشار محمد صدقي يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "mohamed-sedky-share.jpg",
-      "description": "نائب رئيس هيئة قضايا الدولة، وأمين صندوق نادي طنطا الرياضي حاليًا، وعضو مجلس إدارة النادي في دورة ٢٠١٧–٢٠٢١.",
-      "interview": {
-        "title": "لقاء المستشار محمد صدقي",
-        "label": "لقاء المستشار محمد صدقي",
-        "src": "/videos/mohamed-sedky.mp4",
-        "poster": "mohamed-sedky-poster-tall.jpg",
-        "portrait": true
-      }
+      "description": "نائب رئيس هيئة قضايا الدولة، وأمين صندوق نادي طنطا الرياضي حاليًا، وعضو مجلس إدارة النادي في دورة ٢٠١٧–٢٠٢١."
     },
     {
       "slug": "waleed-afify",
@@ -269,14 +262,7 @@
       "filesTitle": "كابتن فتحي محمد سليم يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "fathy-selim-share.jpg",
-      "description": "لاعب سابق بالفريق الأول لكرة القدم بنادي طنطا الرياضي منذ عام ١٩٦٦، ومديره الفني لاحقًا، ومدرب كرة قدم محترف بخبرات دولية.",
-      "interview": {
-        "title": "لقاء كابتن فتحي محمد سليم",
-        "label": "لقاء كابتن فتحي محمد سليم",
-        "src": "/videos/fathy-selim.mp4",
-        "poster": "fathy-selim-poster-tall.jpg",
-        "portrait": true
-      }
+      "description": "لاعب سابق بالفريق الأول لكرة القدم بنادي طنطا الرياضي منذ عام ١٩٦٦، ومديره الفني لاحقًا، ومدرب كرة قدم محترف بخبرات دولية."
     },
     {
       "slug": "karim-abu-elazm",
@@ -1402,7 +1388,8 @@
         },
         {
           "candidate": "mohamed-sedky",
-          "poster": "mohamed-sedky-poster.jpg"
+          "poster": "mohamed-sedky-poster.jpg",
+          "placeholder": true
         },
         {
           "candidate": "waleed-afify",
@@ -1420,7 +1407,8 @@
         },
         {
           "candidate": "fathy-selim",
-          "poster": "fathy-selim-poster.jpg"
+          "poster": "fathy-selim-poster.jpg",
+          "placeholder": true
         },
         {
           "candidate": "karim-abu-elazm",
