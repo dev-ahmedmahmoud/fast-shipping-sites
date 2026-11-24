@@ -184,7 +184,7 @@
         "title": "لقاء المستشار محمد صدقي",
         "label": "لقاء المستشار محمد صدقي",
         "src": "/videos/mohamed-sedky.mp4",
-        "poster": "mohamed-sedky-reel.jpg",
+        "poster": "mohamed-sedky-poster-tall.jpg",
         "portrait": true
       }
     },
@@ -229,7 +229,7 @@
         "title": "لقاء د. أحمد إبراهيم سويلم",
         "label": "لقاء د. أحمد إبراهيم سويلم",
         "src": "/videos/ahmed-sweilem.mp4",
-        "poster": "ahmed-sweilem-reel.jpg",
+        "poster": "ahmed-sweilem-poster-tall.jpg",
         "portrait": true
       }
     },
@@ -274,7 +274,7 @@
         "title": "لقاء كابتن فتحي محمد سليم",
         "label": "لقاء كابتن فتحي محمد سليم",
         "src": "/videos/fathy-selim.mp4",
-        "poster": "fathy-selim-reel.jpg",
+        "poster": "fathy-selim-poster-tall.jpg",
         "portrait": true
       }
     },
@@ -300,7 +300,7 @@
         "title": "لقاء المحاسب كريم ممدوح أبو العزم",
         "label": "لقاء المحاسب كريم ممدوح أبو العزم",
         "src": "/videos/karim-abu-elazm.mp4",
-        "poster": "karim-abu-elazm-reel.jpg",
+        "poster": "karim-abu-elazm-poster-tall.jpg",
         "portrait": true
       }
     },
@@ -326,7 +326,7 @@
         "title": "لقاء أ. محمد رضا عشوش",
         "label": "لقاء أ. محمد رضا عشوش",
         "src": "/videos/ashoush.mp4",
-        "poster": "ashoush-reel.jpg",
+        "poster": "ashoush-poster-tall.jpg",
         "portrait": true
       }
     },
@@ -370,7 +370,7 @@
         "title": "لقاء اللواء مصطفى الشرقاوي",
         "label": "لقاء اللواء مصطفى الشرقاوي",
         "src": "/videos/mostafa-el-sharkawy.mp4",
-        "poster": "mostafa-el-sharkawy-reel.jpg",
+        "poster": "mostafa-el-sharkawy-poster-tall.jpg",
         "portrait": true
       }
     },
@@ -396,7 +396,7 @@
         "title": "لقاء م. محمد السيد عطية",
         "label": "لقاء م. محمد السيد عطية",
         "src": "/videos/mohamed-attia.mp4",
-        "poster": "mohamed-attia-reel.jpg",
+        "poster": "mohamed-attia-poster-tall.jpg",
         "portrait": true
       }
     },
@@ -422,7 +422,7 @@
         "title": "لقاء د. محمد رياض المنشاوي",
         "label": "لقاء د. محمد رياض المنشاوي",
         "src": "/videos/mohamed-el-menshawy.mp4",
-        "poster": "mohamed-el-menshawy-reel.jpg",
+        "poster": "mohamed-el-menshawy-poster-tall.jpg",
         "portrait": true
       }
     }

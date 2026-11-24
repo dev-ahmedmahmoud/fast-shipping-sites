@@ -195,15 +195,17 @@ const kit = entry.template === 'support'
 
   {entry.template === 'candidate' && c && cr && (
     <>
-      <E.CandidateHero ctx={ctx} candidate={c} kicker={action(cr.kicker)} numberLabel={`${ui.number} ${c.number}`} backdrop={backdrop} />
-      {cr.word && <E.MediaFrame ctx={ctx} video={video(cr.word)!} label={cr.word.title ?? cr.word.label} />}
-      <E.Panel ctx={ctx}><Content /></E.Panel>
-      {vf && <E.Ventures ctx={ctx} ventures={vf} />}
+      <E.CandidateHero ctx={ctx} candidate={c} kicker={action(cr.kicker)} numberLabel={`${ui.number} ${c.number}`} backdrop={backdrop}
+        watch={cr.interview?.src ? { label: ui.watch ?? 'شاهد اللقاء', href: '#interview' } : null} />
+      {/* The interview first, right under the header (it used to follow the whole bio). */}
       {cr.interview && (
         <E.InterviewPlayer ctx={ctx} id="interview" title={cr.interview.title} video={video(cr.interview)!}
           summary={cr.interview.summary}
           chapters={(cr.interview.chapters ?? []).map((ch: any) => ({ t: ch.t, time: timeLabel(ch.t), label: ch.label, aria: `شاهد: ${ch.label} (عند ${timeLabel(ch.t)})` }))} />
       )}
+      {cr.word && <E.MediaFrame ctx={ctx} video={video(cr.word)!} label={cr.word.title ?? cr.word.label} />}
+      <E.Panel ctx={ctx}><Content /></E.Panel>
+      {vf && <E.Ventures ctx={ctx} ventures={vf} />}
       {cr.gallery?.length > 0 && <E.PhotoRow ctx={ctx} photos={cr.gallery.map((g: string) => media(g))} alt={c.name} label={cr.galleryLabel} hint={ui.galleryHint} />}
       {clipsForCandidate(c.slug).length > 0 && <E.ClipGrid ctx={ctx} title={cr.filesTitle} groups={clipsForCandidate(c.slug)} />}
       <E.CandidateGrid ctx={ctx} variant="strip" title={cr.restTitle} groups={strip(c.slug)} cardMore={cardMore} numberLabel={ui.number} />

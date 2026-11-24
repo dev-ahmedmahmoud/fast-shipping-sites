@@ -8,8 +8,8 @@ import type { PageContext } from '@engine/context';
 import type { Action } from '@engine/content';
 import type { CandidateCard } from '@elections/data';
 import GoldWave from './GoldWave.astro';
-interface Props { ctx: PageContext; candidate: CandidateCard; kicker: Action | null; numberLabel: string; backdrop?: ImageMetadata | null }
-const { candidate: c, kicker, numberLabel, backdrop } = Astro.props;
+interface Props { ctx: PageContext; candidate: CandidateCard; kicker: Action | null; numberLabel: string; backdrop?: ImageMetadata | null; watch?: { label: string; href: string } | null }
+const { candidate: c, kicker, numberLabel, backdrop, watch } = Astro.props;
 ---
 <section class="person st-glass" data-st-ambient>
   {backdrop && <Image class="st-backdrop st-backdrop--whole" src={backdrop} alt="" widths={[640, 1000, 1600]} sizes="(max-width: 900px) 90vw, 44vw" loading="eager" />}
@@ -24,6 +24,11 @@ const { candidate: c, kicker, numberLabel, backdrop } = Astro.props;
       <h1 data-split-words>{c.name}</h1>
       <p class="st-pill seat">{c.seat}</p>
       <p class="num" data-st-flaps><span class="st-flap" data-st-flap>{numberLabel}</span></p>
+      {watch && (
+        <a class="watch" href={watch.href}>
+          <span class="watch__icon" aria-hidden="true"></span>{watch.label}
+        </a>
+      )}
     </div>
     <figure class="stand">
       <span class="beam" aria-hidden="true"></span>
@@ -72,6 +77,20 @@ const { candidate: c, kicker, numberLabel, backdrop } = Astro.props;
   h1 { font-size: var(--step-5); }
   .seat { font-family: var(--font-body); font-weight: 700; font-size: var(--step-1); padding-inline: var(--space-7); white-space: normal; }
   .num .st-flap { font-size: var(--step-3); padding: 0.1em 0.6em; }
+  /* «شاهد اللقاء»: a gold button that jumps to the interview right under the header. */
+  .watch {
+    display: inline-flex; align-items: center; gap: var(--space-3); min-block-size: 52px; padding: 0.35rem 1.4rem 0.35rem 0.4rem;
+    border-radius: 999px; background: var(--st-gold); color: var(--st-night); font-family: var(--font-body); font-weight: 800; font-size: var(--step-0); text-decoration: none;
+    box-shadow: 0 10px 22px -12px color-mix(in oklab, var(--c-ink) 80%, transparent);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  :global([dir='rtl']) .watch { padding: 0.35rem 0.4rem 0.35rem 1.4rem; }
+  .watch:hover { transform: translateY(-2px); }
+  .watch:focus-visible { outline: 3px solid var(--st-brass-hi); outline-offset: 3px; }
+  /* A play mark points right in every language. */
+  .watch__icon { position: relative; flex: none; inline-size: 2.6rem; block-size: 2.6rem; border-radius: 50%; background: var(--st-night); }
+  .watch__icon::after { content: ''; position: absolute; inset: 0; margin: auto; inline-size: 0; block-size: 0; border-block: 0.5rem solid transparent; border-left: 0.8rem solid var(--st-brass-hi); translate: 0.12rem 0; }
+  @media (prefers-reduced-motion: reduce) { .watch { transition: none; } }
   .stand { position: relative; margin: 0; display: grid; justify-items: center; align-items: end; min-inline-size: 0; }
   /* The arch is a window: the photo fills its width exactly and is trimmed to its shape, so a
      shoulder or an arm never crosses the brass, and where a photo was cropped at its side the

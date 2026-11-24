@@ -46,6 +46,8 @@ const tall = video.portrait && chapters.length === 0;
 </section>
 
 <style>
+  /* Jumped to from the header's «شاهد اللقاء»: its title stays clear of the sticky header. */
+  section { scroll-margin-block-start: 96px; }
   .wrap { display: flex; flex-direction: column; gap: var(--space-6); }
   .plate { padding-inline: var(--space-8); }
   .plate h2 { font-size: var(--step-2); }

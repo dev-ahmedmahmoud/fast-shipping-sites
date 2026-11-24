@@ -177,6 +177,8 @@ button.btn[aria-busy='true'] { opacity: 0.6; cursor: progress; }
   box-shadow: 0 0 0 6px color-mix(in oklab, var(--c-ink) 35%, transparent), 0 12px 28px color-mix(in oklab, var(--c-ink) 55%, transparent);
 }
 .el-video__icon::after { border-left-color: var(--c-ink); }
+/* A tall video's cover is the designed poster: the play mark sits in the arch above the head. */
+.el-video.is-portrait .el-video__icon { inset-block: 0 30%; }
 .el-video__label { font-family: var(--font-body); font-weight: 700; font-size: var(--step-1); padding: var(--space-6) var(--space-5) var(--space-4); }
 
 .el-video.is-soon .el-video__poster { filter: brightness(0.55) saturate(0.9); }
