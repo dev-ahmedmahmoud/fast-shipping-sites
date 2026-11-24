@@ -9,8 +9,14 @@
 //   [data-el-countdown] each number tile flips whenever the engine changes it
 //   [data-st-clock]     station clock hands keep the time of data-zone (Cairo), the second
 //                       hand stepping with a small overshoot
-//   [data-st-swing]     a hanging sign swings gently to rest on arrival
-//   [data-st-train]     a row of carriages pulls in from the side
+//   [data-st-swing]     a hanging sign swings gently to rest on arrival (its content swings,
+//                       the item itself stays still; origin: --st-swing-origin)
+//   [data-st-train]     a row of carriages pulls in from the side (each item's content moves)
+// The swing and the train move an item's CONTENT, never the item: in a scroll-snapping row the
+// items are the snap areas, and moving them makes the browser re-snap the row on every frame,
+// which Safari smooths into a visible overshoot and bounce back. They use the independent
+// translate and rotate properties, so a component's own transform (a carousel's tilt, a hover
+// lift) is left alone.
 //   [data-st-ambient]   steam and light move only on capable devices, and only while in view
 ---
 <script>
@@ -148,23 +154,24 @@
   }
 
   /* A hanging sign swings to rest on its chains. */
-  .st-motion [data-st-swing].st-in { animation: st-swing 1.8s cubic-bezier(0.3, 0.6, 0.3, 1) both; animation-delay: calc(var(--i, 0) * 120ms); transform-origin: 50% 0; }
+  .st-motion [data-st-swing].st-in > * { animation: st-swing 1.8s cubic-bezier(0.3, 0.6, 0.3, 1) backwards; animation-delay: calc(var(--i, 0) * 120ms); transform-origin: var(--st-swing-origin, 50% 0); }
   @keyframes st-swing {
-    0% { transform: rotate(4deg); }
-    30% { transform: rotate(-2.6deg); }
-    55% { transform: rotate(1.4deg); }
-    78% { transform: rotate(-0.6deg); }
-    100% { transform: rotate(0); }
+    0% { rotate: 4deg; }
+    30% { rotate: -2.6deg; }
+    55% { rotate: 1.4deg; }
+    78% { rotate: -0.6deg; }
+    100% { rotate: 0deg; }
   }
 
   /* A row of carriages pulls in from the inline end and eases to a stop. */
   [dir='rtl'] { --st-from: -1; }
   [dir='ltr'] { --st-from: 1; }
-  .st-motion [data-st-train]:not(.st-in) > li { opacity: 0; transform: translateX(calc(var(--st-from) * 140px)); }
-  .st-motion [data-st-train].st-in > li { animation: st-arrive 1.3s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 70ms); }
-  @keyframes st-arrive { from { opacity: 0; transform: translateX(calc(var(--st-from) * 140px)); } }
+  .st-motion [data-st-train]:not(.st-in) > li > * { opacity: 0; translate: calc(var(--st-from) * 140px) 0; }
+  .st-motion [data-st-train].st-in > li > * { animation: st-arrive 1.3s var(--ease-out) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
+  @keyframes st-arrive { from { opacity: 0; translate: calc(var(--st-from) * 140px) 0; } to { opacity: 1; translate: 0 0; } }
 
   @media (prefers-reduced-motion: reduce) {
-    .st-words [data-word], [data-st-reveal], [data-st-flaps] *, [data-st-swing], [data-st-train] > li { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+    .st-words [data-word], [data-st-reveal], [data-st-flaps] * { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+    [data-st-swing] > *, [data-st-train] > li > * { animation: none !important; opacity: 1 !important; translate: none !important; rotate: none !important; }
   }
 </style>
