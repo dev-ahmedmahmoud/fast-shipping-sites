@@ -67,7 +67,7 @@ h1 .gold{background:linear-gradient(180deg,#F3DD9E 10%,#D2A24C 55%,#9C7432);-web
   <div class="seal"><div><b>${day}</b><strong>${date.split(' ')[0]}</strong><span>${date.split(' ').slice(1).join(' ')}</span></div></div>
   <div class="txt">
     <img class="crest" src="${img('crest.webp')}">
-    <span class="kicker">انتخابات نادي طنطا الرياضي 2026</span>
+    <span class="kicker">انتخابات نادي طنطا الرياضي ٢٠٢٦</span>
     <h1><small>قائمة المهندس</small><span class="gold">حسين داود</span></h1>
     <p class="slogan">تاريخ نحترمه .. ومستقبل نصنعه</p>
     <p class="cta"><i>✓</i>انتخب القائمة كاملة</p>
