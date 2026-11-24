@@ -16,7 +16,7 @@ import ComplaintForm from './ComplaintForm.astro';
 import {
   action, ballotGroups, candidate, candidateGroups, candidateRaw, candidates, clipsForCandidate, clipsForFile,
   backdrop, complaints, countdown, crest, fileRaw, filesPage, home, list, programFiles, shareImage, supporters, teamPage,
-  timeLabel, ui, ventures, video, vote, election, shareKit, vision,
+  timeLabel, ui, ventures, video, vote, election, shareKit, vision, strategy,
 } from './data';
 import { media } from '@engine/media';
 import type { ImageMetadata } from 'astro';
@@ -174,7 +174,7 @@ const kit = entry.template === 'support'
       <E.ProgramFiles ctx={ctx} leadLabel={filesPage.leadLabel} title={home.filesTitle} files={programFiles} layout="strip" />
       {leader && (
         <E.LeaderSpotlight ctx={ctx} kicker={home.leader.kicker} name={leader.name} text={home.leader.text}
-          more={{ label: home.leader.more, href: leader.href }} video={video(home.leader.video)} photo={leader.photo} />
+          more={{ label: home.leader.more, href: leader.href }} extra={action(home.leader.strategy)} video={video(home.leader.video)} photo={leader.photo} />
       )}
       <E.CandidateGrid ctx={ctx} variant="strip" title={home.team.title} lead={home.team.lead} groups={strip()}
         more={{ label: home.team.all, href: teamHref }} cardMore={cardMore} numberLabel={ui.number} />
@@ -241,6 +241,16 @@ const kit = entry.template === 'support'
         share={vision.board?.share ? { label: vision.board.share.label, href: `https://wa.me/?text=${encodeURIComponent(String(vision.board.share.text).replaceAll('{url}', abs(entry.href)))}` } : null}
         more={action(vision.board?.more)}
         team={vision.board?.team ? { image: media(vision.board.team.image), alt: vision.board.team.alt ?? '' } : null} />
+    </>
+  )}
+
+  {entry.template === 'strategy' && strategy && (
+    <>
+      <E.PageBand ctx={ctx} title={strategy.title ?? entry.title} lead={strategy.lead} crest={crest} backdrop={backdrop}
+        leads={(strategy.leads ?? []).map((s: string) => { const c = candidate(s); return { name: c.name, seat: c.seat, href: c.href, photo: c.card }; })}
+        leadLabel={strategy.leadLabel} />
+      <E.FilePlan ctx={ctx} words={{ ...filesPage.planWords, ...strategy.words }}
+        plan={{ ...strategy.plan, groups: strategy.plan.groups.map((g: any) => ({ ...g, items: g.items.map((it: any) => (it.link ? { ...it, link: action(it.link) } : it)) })) }} />
     </>
   )}
 

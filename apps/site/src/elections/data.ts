@@ -106,6 +106,8 @@ export const filesPage = raw.filesPage ?? {};
 export const supporters = raw.support ?? {};
 /** The list's vision (template "vision"): chapters of cards, a flow, a grid, branches and rules, then a board. */
 export const vision = raw.vision ?? null;
+/** The leader's strategic vision page (elections.json strategy): projects shown as a plan. */
+export const strategy = raw.strategy ?? null;
 export const complaints = raw.complaints ?? {};
 
 export function video(v: any): VideoData | null {

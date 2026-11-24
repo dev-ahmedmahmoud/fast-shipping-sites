@@ -5,20 +5,38 @@
 // numbered stops on a gold line (zig-zag on computers, one column on phones). A stop shows its
 // title and two or three key phrases taken from its own text; the full text (word for word, as
 // the candidates wrote it) opens on a tap.
+// An initiative may carry labelled sections (a project's scope, components, location, funding,
+// revenue), each with an icon; funding sections are tinted gold, notes are gold-edged callouts,
+// short lists become chips and numbered lists gold numbers. plan.restart numbers each part from
+// one (the strategy page) instead of continuing across parts.
 import type { PageContext } from '@engine/context';
 import { formatNumber } from '@engine/i18n';
-interface Item { title: string; tags?: string[]; lead?: string; text?: string; points?: string[]; tail?: string }
+interface Section { label?: string; text?: string; points?: string[]; ordered?: boolean; note?: boolean }
+interface Item { title: string; tags?: string[]; lead?: string; text?: string; points?: string[]; tail?: string; sections?: Section[]; link?: { label: string; href: string } | null }
 interface Group { title?: string; intro?: string[]; vision?: string[]; items: Item[]; closing?: string }
 interface Words { glance: string; count: Record<string, string>; vision: string; more: string; all: string; none: string; parts: string }
-interface Props { ctx: PageContext; plan: { groups: Group[] }; words: Words }
+interface Props { ctx: PageContext; plan: { groups: Group[]; restart?: boolean }; words: Words }
 const { ctx, plan, words } = Astro.props;
 const loc = ctx.locale;
 const fmt = (n: number) => formatNumber(n, loc);
 const groups = plan.groups.filter((g) => g.items?.length);
 const total = groups.reduce((n, g) => n + g.items.length, 0);
 const countWord = words.count[new Intl.PluralRules(loc).select(total)] ?? words.count.other;
-// Continuous numbering across the parts, like stops along one line.
-const starts = groups.map((_, i) => groups.slice(0, i).reduce((n, g) => n + g.items.length, 0));
+// Continuous numbering across the parts, like stops along one line (or from one in each part).
+const starts = groups.map((_, i) => (plan.restart ? 0 : groups.slice(0, i).reduce((n, g) => n + g.items.length, 0)));
+// A section's icon, by what its label is about.
+const ICON: Record<string, string> = {
+  fund: '<circle cx="9" cy="9" r="6"/><path d="M15.5 9.5a6 6 0 1 1-6 6"/><path d="M9 6.5v5M7 8h3a1 1 0 0 1 0 2H8a1 1 0 0 0 0 2h3"/>',
+  place: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  gain: '<path d="M3 17l6-6 4 4 7-8"/><path d="M14 7h6v6"/>',
+  deal: '<path d="M8 3h7l4 4v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M10 13h6M10 17h4"/>',
+  list: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+};
+const iconOf = (label = '') => (label.includes('التعاقد') ? ICON.deal : label.includes('التمويل') ? ICON.fund : label.includes('الموقع') ? ICON.place : label.includes('العائد') ? ICON.gain : ICON.list);
+const isFund = (label = '') => label.includes('التمويل');
+// Short items read best as chips (without their closing full stop).
+const short = (pts: string[]) => pts.length > 1 && pts.every((p) => p.length <= 42);
+const chip = (p: string) => p.replace(/[.،]\s*$/, '');
 const many = groups.length > 1;
 ---
 <section class="section plan" data-plan>
@@ -77,7 +95,21 @@ const many = groups.length > 1;
                   {it.lead && <p class="card__lead">{it.lead}</p>}
                   {it.text && <p>{it.text}</p>}
                   {it.points?.length ? <ul class="checks" role="list">{it.points.map((p) => <li>{p}</li>)}</ul> : null}
+                  {it.sections?.map((sec) => (
+                    <div class:list={['sec', sec.note && 'sec--note', isFund(sec.label) && 'sec--fund']}>
+                      {sec.label && <h4 class="sec__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={iconOf(sec.label)} />{sec.label}</h4>}
+                      {sec.text && <p>{sec.text}</p>}
+                      {sec.points?.length ? (
+                        sec.ordered
+                          ? <ol class:list={['nums', short(sec.points) && 'nums--grid']} role="list">{sec.points.map((p, n) => <li><span class="nums__n" aria-hidden="true">{fmt(n + 1)}</span><span>{p}</span></li>)}</ol>
+                          : short(sec.points)
+                            ? <ul class="chips" role="list">{sec.points.map((p) => <li>{chip(p)}</li>)}</ul>
+                            : <ul class="checks" role="list">{sec.points.map((p) => <li>{p}</li>)}</ul>
+                      ) : null}
+                    </div>
+                  ))}
                   {it.tail && <p class="card__tail">{it.tail}</p>}
+                  {it.link && <a class="card__link" href={it.link.href}>{it.link.label}<svg class="flip-rtl" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></a>}
                 </div>
               </details>
             </li>
@@ -221,6 +253,33 @@ const many = groups.length > 1;
     border: solid var(--st-night); border-width: 0 2.5px 2.5px 0; rotate: 45deg;
   }
   @keyframes plan-in { from { opacity: 0; transform: translateY(-4px); } }
+
+  /* ---- labelled sections inside an initiative (strategy projects) ---- */
+  .sec { display: grid; gap: var(--space-2); }
+  .sec__label {
+    display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-body); font-size: 0.95rem; font-weight: 800; color: var(--c-accent);
+  }
+  .sec__label svg { flex: none; inline-size: 1.6rem; block-size: 1.6rem; padding: 0.25rem; border-radius: 50%; color: var(--st-night); background: var(--st-gold); }
+  .sec--fund { padding: var(--space-3) var(--space-4); border-radius: 12px; background: color-mix(in oklab, var(--st-brass-hi) 24%, var(--c-surface)); border: 1px solid color-mix(in oklab, var(--st-brass) 50%, transparent); }
+  .sec--note { padding: var(--space-3) var(--space-4); border-radius: 12px; background: color-mix(in oklab, var(--c-accent-soft) 70%, var(--c-surface)); border-inline-start: 4px solid var(--st-brass); color: var(--c-ink); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .chips li {
+    padding: 0.3em 0.9em; border-radius: 999px; font-size: 0.92rem; font-weight: 700; line-height: 1.6;
+    background: color-mix(in oklab, var(--st-night) 6%, var(--c-surface)); color: var(--c-accent);
+    border: 1px solid color-mix(in oklab, var(--st-brass) 45%, var(--c-line));
+  }
+  .nums { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .nums--grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr)); }
+  .nums li { display: flex; align-items: flex-start; gap: var(--space-2); line-height: 1.7; }
+  .nums__n {
+    flex: none; display: grid; place-items: center; inline-size: 1.7rem; block-size: 1.7rem; margin-block-start: 0.1rem; border-radius: 50%;
+    background: var(--st-night); color: var(--st-brass-hi); font-size: 0.85rem; font-weight: 800;
+  }
+  .card__link {
+    justify-self: start; display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 44px; padding-inline: var(--space-4);
+    border-radius: 999px; background: var(--st-night); color: var(--st-enamel-ink); font-weight: 800; text-decoration: none;
+  }
+  .card__link svg { color: var(--st-brass-hi); }
 
   /* A part's closing line (its motto or an execution note), centred under the line. */
   .closing {

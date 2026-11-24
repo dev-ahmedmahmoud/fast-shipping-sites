@@ -13,10 +13,12 @@ interface Props {
   name: string;
   text: string;
   more: { label: string; href: string };
+  /** A second button beside "more" (the strategic vision page). */
+  extra?: { label: string; href: string } | null;
   video: VideoData | null;
   photo: ImageMetadata;
 }
-const { kicker, name, text, more, video, photo } = Astro.props;
+const { kicker, name, text, more, extra, video, photo } = Astro.props;
 ---
 <section class="section leader" id="leader" aria-labelledby="el-leader-title">
   <div class="container grid">
@@ -29,7 +31,10 @@ const { kicker, name, text, more, video, photo } = Astro.props;
         </div>
       </div>
       <p class="text">{text}</p>
-      <a class="btn btn--primary" href={more.href}>{more.label}</a>
+      <p class="btns">
+        <a class="btn btn--primary" href={more.href}>{more.label}</a>
+        {extra && <a class="btn btn--brass" href={extra.href}>{extra.label}</a>}
+      </p>
     </div>
     {video && (
       <div class="window" data-st-reveal>
@@ -53,6 +58,8 @@ const { kicker, name, text, more, video, photo } = Astro.props;
   .kicker { font-family: var(--font-body); font-weight: 700; font-size: var(--step--1); padding: var(--space-1) var(--space-4); }
   h2 { font-size: var(--step-4); color: var(--st-enamel); }
   .text { font-size: var(--step-1); line-height: 1.85; max-inline-size: 40ch; }
+  .btns { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: 0; }
+  @media (max-width: 600px) { .btns { inline-size: 100%; } .btns .btn { flex: 1 1 0; padding-inline: var(--space-3); } }
   /* A brass carriage-window frame with a rivet in each corner (the corners are symmetric,
      so their physical positions read the same in both directions). */
   .window {
