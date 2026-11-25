@@ -37,7 +37,7 @@ const playLabel = playable ? `${ui.play ?? 'تشغيل الفيديو'}: ${playa
       <span class="beam" aria-hidden="true"></span>
       <span class="arch" data-hero-video={playable ? playable.src : undefined} data-play-label={playLabel || undefined}>
         <Image class="photo" src={c.photo} alt={c.photoAlt} widths={[360, 540, 800]} sizes="(max-width: 900px) 92vw, 26rem" loading="eager" fetchpriority="high" />
-        {playable && <button class="play" type="button" aria-label={playLabel}><span aria-hidden="true"></span></button>}
+        {playable && <button class="play" type="button" aria-label={playLabel} style={playable.playAt ? `--play-at: ${(playable.playAt * 100).toFixed(1)}%` : undefined}><span aria-hidden="true"></span></button>}
         {playable && <span class="bar" aria-hidden="true"><span class="bar__fill"></span></span>}
       </span>
     </figure>
@@ -98,9 +98,10 @@ const playLabel = playable ? `${ui.play ?? 'تشغيل الفيديو'}: ${playa
      goes to the video, so the arch keeps its height). */
   .arch.has-video { padding-block-start: 0; }
   .arch :global(video.clip) { display: block; inline-size: 100%; object-fit: cover; object-position: 50% 32%; background: var(--st-night); cursor: pointer; }
-  /* The play button: gold, at the top of the arch, above the head. */
+  /* The play button: gold, two thirds of the way down the arch (on the chest, clear of the face);
+     a close-up photo moves it lower (the video's playAt). */
   .play {
-    position: absolute; z-index: 3; inset-block-start: 3.5%; inset-inline-start: 50%; translate: 50% 0;
+    position: absolute; z-index: 3; inset-block-start: var(--play-at, 66.7%); inset-inline-start: 50%; translate: 50% -50%;
     display: grid; place-items: center; inline-size: clamp(54px, 15%, 66px); aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
     background: linear-gradient(145deg, var(--st-brass-hi), var(--st-brass) 55%, var(--st-brass-lo));
     box-shadow: 0 0 0 5px color-mix(in oklab, var(--st-night) 55%, transparent), 0 12px 26px -8px color-mix(in oklab, var(--c-ink) 85%, transparent);
@@ -116,7 +117,7 @@ const playLabel = playable ? `${ui.play ?? 'تشغيل الفيديو'}: ${playa
     }
   }
   .is-playing .play, .is-loading .play { animation: none; }
-  :global([dir='ltr']) .play { translate: -50% 0; }
+  :global([dir='ltr']) .play { translate: -50% -50%; }
   .play:hover { transform: scale(1.07); }
   .play:focus-visible { outline: 3px solid var(--st-brass-hi); outline-offset: 4px; }
   /* A play mark points right in every language, so it uses a physical side. */

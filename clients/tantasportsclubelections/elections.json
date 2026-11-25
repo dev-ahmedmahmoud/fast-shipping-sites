@@ -357,7 +357,8 @@
         "label": "لقاء اللواء مصطفى الشرقاوي",
         "src": "/videos/mostafa-el-sharkawy.mp4",
         "poster": "mostafa-el-sharkawy-poster-tall.jpg",
-        "portrait": true
+        "portrait": true,
+        "playAt": 0.8
       }
     },
     {

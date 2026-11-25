@@ -33,6 +33,11 @@ export interface VideoData {
   soon?: string;
   /** A vertical (9:16) video, such as a phone-filmed interview: shown in a tall frame. */
   portrait?: boolean;
+  /**
+   * Where the play button sits on a candidate's photo, as a share of the arch's height (default
+   * 0.667, on the chest). Lower it for a close-up photo whose chin reaches that far.
+   */
+  playAt?: number;
 }
 
 export interface CandidateCard {
@@ -118,7 +123,7 @@ export function video(v: any): VideoData | null {
     return { src: '', poster: media(v.poster), label: v.label ?? '', caption: v.caption, soon: typeof v.placeholder === 'string' ? v.placeholder : (ui.soon ?? 'قريبًا') };
   }
   if (!v.src) return null;
-  return { src: v.src, poster: media(v.poster), label: v.label ?? '', caption: v.caption, portrait: !!v.portrait };
+  return { src: v.src, poster: media(v.poster), label: v.label ?? '', caption: v.caption, portrait: !!v.portrait, playAt: typeof v.playAt === 'number' ? v.playAt : undefined };
 }
 
 const groupLabel = (id: string) => (raw.groups ?? []).find((g: any) => g.id === id)?.label ?? '';
