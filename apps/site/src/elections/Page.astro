@@ -153,7 +153,7 @@ const interviewCard = (it: any) => {
   const who = candidate(it.candidate);
   return it.placeholder
     ? { name: who.name, seat: who.seat, href: who.href, poster: media(it.poster), cta: ui.profileShort ?? ui.watch, soon: typeof it.placeholder === 'string' ? it.placeholder : (ui.soon ?? 'قريبًا') }
-    : { name: who.name, seat: who.seat, href: `${who.href}#interview`, poster: media(it.poster), cta: ui.watch };
+    : { name: who.name, seat: who.seat, href: candidateRaw(it.candidate)?.interview?.portrait ? who.href : `${who.href}#interview`, poster: media(it.poster), cta: ui.watch };
 };
 // A program file's page opens with its leads' interviews (the same videos as on the home page).
 const fileInterviews = file
@@ -195,10 +195,11 @@ const kit = entry.template === 'support'
 
   {entry.template === 'candidate' && c && cr && (
     <>
+      {/* A vertical interview plays in the header itself (the photo is its player); any other
+          interview (landscape, or with topics) keeps its own player right under the header. */}
       <E.CandidateHero ctx={ctx} candidate={c} kicker={action(cr.kicker)} numberLabel={`${ui.number} ${c.number}`} backdrop={backdrop}
-        watch={cr.interview?.src ? { label: ui.watch ?? 'شاهد اللقاء', href: '#interview' } : null} />
-      {/* The interview first, right under the header (it used to follow the whole bio). */}
-      {cr.interview && (
+        video={cr.interview?.portrait ? video(cr.interview) : null} />
+      {cr.interview && !cr.interview.portrait && (
         <E.InterviewPlayer ctx={ctx} id="interview" title={cr.interview.title} video={video(cr.interview)!}
           summary={cr.interview.summary}
           chapters={(cr.interview.chapters ?? []).map((ch: any) => ({ t: ch.t, time: timeLabel(ch.t), label: ch.label, aria: `شاهد: ${ch.label} (عند ${timeLabel(ch.t)})` }))} />
