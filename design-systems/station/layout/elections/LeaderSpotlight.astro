@@ -75,6 +75,15 @@ const { kicker, name, text, more, extra, video, photo } = Astro.props;
     box-shadow: var(--st-shadow), 0 40px 60px -40px color-mix(in oklab, var(--c-ink) 70%, transparent);
   }
   .window :global(.el-video) { border-radius: var(--radius-l); }
+  /* The cover is a frame of the video (the leader at his desk): the play mark sits low, on his
+     chest, so it never covers his face; on phones, smaller and on the empty wall beside him
+     (inline end), clear of his face and of the caption. */
+  .window :global(.el-video__icon) { inset-block: 38% 0; }
+  @media (max-width: 600px) {
+    .window :global(.el-video__icon) { inset-block: 0 12%; inset-inline: auto 9%; margin-inline: 0; inline-size: 56px; block-size: 56px; }
+    .window :global(.el-video__icon)::after { border-block-width: 10px; border-left-width: 16px; }
+    .window :global(.el-video__label) { font-size: var(--step-0); padding: var(--space-4) var(--space-4) var(--space-3); }
+  }
   @media (max-width: 900px) {
     .grid { grid-template-columns: minmax(0, 1fr); }
     .medal { inline-size: 96px; block-size: 96px; }
