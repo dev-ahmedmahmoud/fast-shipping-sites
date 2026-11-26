@@ -83,7 +83,7 @@ Until this route is live, `complaints.whatsapp` in `elections.json` (`number`, t
 
 | Field | Value |
 | --- | --- |
-| `membership` | 6 ASCII digits (required) |
+| `membership` | the member's number as written, up to 40 characters, Arabic-Indic digits turned into ASCII, spaces tidied (required; no format: the club's numbers vary) |
 | `full_name` | optional, up to 120 characters |
 | `phone` | WhatsApp number, digits with an optional leading `+` (required; Egyptian `01[0125]xxxxxxxx` or international) |
 | `kind` | `شكوى` or `مقترح` (required) |

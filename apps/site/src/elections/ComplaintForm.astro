@@ -1,7 +1,7 @@
 ---
 // The complaints and suggestions form, rendered from elections.json "complaints" with
 // the source's labels, options and messages. ./client/complaints.ts validates it with
-// the same rules (6-digit membership, a valid mobile, Arabic digits accepted, an image of
+// the same rules (a membership number in any form, a valid mobile, Arabic digits accepted, an image of
 // JPG/PNG up to 10 MB) and sends it through the API adapter (demo or live).
 // Hooks for design systems (defaults in ./elections.css):
 //   .el-form, .el-form__field, .el-form__label, .el-form__req, .el-form__input,
@@ -21,8 +21,8 @@ const id = (name: string) => `el-c-${name}`;
 
   <div class="el-form__field">
     <label class="el-form__label" for={id('membership')}>{f.membership.label} <span class="el-form__req" aria-hidden="true">*</span></label>
-    <input class="el-form__input" id={id('membership')} name="membership" type="text" dir="ltr" inputmode="numeric"
-           autocomplete="off" maxlength="12" placeholder={f.membership.placeholder} required aria-required="true" />
+    <input class="el-form__input" id={id('membership')} name="membership" type="text" dir="auto"
+           autocomplete="off" maxlength="40" placeholder={f.membership.placeholder} required aria-required="true" />
   </div>
 
   <div class="el-form__field">

@@ -1,7 +1,7 @@
 // The complaints and suggestions form ([data-el-complaints]): the source's rules and
 // messages, checked here before anything is sent; then one call through the API adapter.
 import type { Api } from './api';
-import { digits, validComplaintPhone } from './phone';
+import { digits, latin, validComplaintPhone } from './phone';
 import { turnstile } from './turnstile';
 
 interface WhatsApp {
@@ -18,6 +18,9 @@ interface WhatsApp {
 // A computer (a fine pointer that can hover): WhatsApp there is often not installed, so the
 // message goes to the visitor's phone through a QR code instead.
 const isComputer = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+/** A membership number as the member wrote it: Latin digits, spaces tidied. */
+const member = (v: string) => latin(v).replace(/\s+/g, ' ').trim();
 
 /**
  * The wa.me link for the QR code: Arabic letters stay as they are (UTF-8 in the code, which phone
@@ -196,9 +199,8 @@ export function mountComplaints(form: HTMLFormElement, api: Api, s: Settings, si
   function check(): string | null {
     const v = (n: string) => String((form.elements.namedItem(n) as HTMLInputElement | null)?.value ?? '').trim();
     const problems: [string, string][] = [];
-    const membership = digits(v('membership'));
-    if (!membership) problems.push(['membership', F.membership.required]);
-    else if (!/^\d{6}$/.test(membership)) problems.push(['membership', F.membership.digits]);
+    // Any membership number the member writes (the club's numbers vary): required, nothing more.
+    if (!member(v('membership'))) problems.push(['membership', F.membership.required]);
     const phone = v('phone');
     if (!phone) problems.push(['phone', F.phone.required]);
     else if (!validComplaintPhone(phone)) problems.push(['phone', F.phone.invalid]);
@@ -233,7 +235,7 @@ export function mountComplaints(form: HTMLFormElement, api: Api, s: Settings, si
       const lines = [
         `📩 ${kind} — ${wa.title}`,
         '',
-        `${L.membership}: ${digits(v('membership'))}`,
+        `${L.membership}: ${member(v('membership'))}`,
         v('full_name') ? `${L.full_name}: ${v('full_name')}` : null,
         `${L.phone}: ${digits(v('phone'))}`,
         `${L.topic}: ${v('topic')}`,
@@ -259,7 +261,7 @@ export function mountComplaints(form: HTMLFormElement, api: Api, s: Settings, si
     go.disabled = true;
     go.textContent = s.sending;
     const data = new FormData(form);
-    data.set('membership', digits(String(data.get('membership') || '')));
+    data.set('membership', member(String(data.get('membership') || '')));
     data.set('phone', digits(String(data.get('phone') || '')));
     if (!photo?.files?.length) data.delete('photo');
     data.set('ts', await ts.token(form));

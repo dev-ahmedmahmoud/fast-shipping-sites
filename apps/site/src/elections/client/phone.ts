@@ -56,12 +56,16 @@ export const COUNTRIES: [string, string, string][] = [
   ['المكسيك', '52', '2221234567'],
 ];
 
-/** Latin digits only, with spacing and punctuation removed (a leading + is kept). */
-export function digits(v: string): string {
+/** Arabic-Indic and Persian digits turned into Latin ones; nothing else changes. */
+export function latin(v: string): string {
   return v
     .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
-    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
-    .replace(/[\s\-().]/g, '');
+    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0));
+}
+
+/** Latin digits only, with spacing and punctuation removed (a leading + is kept). */
+export function digits(v: string): string {
+  return latin(v).replace(/[\s\-().]/g, '');
 }
 
 /**
