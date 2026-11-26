@@ -76,12 +76,15 @@ const { kicker, name, text, more, extra, video, photo } = Astro.props;
   }
   .window :global(.el-video) { border-radius: var(--radius-l); }
   /* The cover is a frame of the video (the leader at his desk): the play mark sits low, on his
-     chest, so it never covers his face; on phones, smaller and on the empty wall beside him
-     (inline end), clear of his face and of the caption. */
+     chest, so it never covers his face; on phones it is smaller (44px) and sits just under his
+     chin, clear of the caption. */
   .window :global(.el-video__icon) { inset-block: 38% 0; }
   @media (max-width: 600px) {
-    .window :global(.el-video__icon) { inset-block: 0 12%; inset-inline: auto 9%; margin-inline: 0; inline-size: 56px; block-size: 56px; }
-    .window :global(.el-video__icon)::after { border-block-width: 10px; border-left-width: 16px; }
+    .window :global(.el-video__icon) {
+      inset-block: 16% 0; inline-size: 44px; block-size: 44px;
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--c-ink) 35%, transparent), 0 8px 18px color-mix(in oklab, var(--c-ink) 50%, transparent);
+    }
+    .window :global(.el-video__icon)::after { border-block-width: 8px; border-left-width: 13px; translate: 2px 0; }
     .window :global(.el-video__label) { font-size: var(--step-0); padding: var(--space-4) var(--space-4) var(--space-3); }
   }
   @media (max-width: 900px) {
