@@ -71,6 +71,13 @@
       "filesTitle": "م. حسين داود يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "hussein-dawood-share.jpg",
+      "interview": {
+        "title": "لقاء م. حسين داود",
+        "label": "لقاء م. حسين داود",
+        "src": "/videos/hussein-dawood.mp4",
+        "poster": "hussein-dawood-poster-tall.jpg",
+        "portrait": true
+      },
       "description": "مهندس معماري ورجل أعمال، مؤسس ستايل هوم العقارية وكلييك للتطوير العقاري ومدارس طنطا مودرن سكول وفريندز للمقاولات العامة وسنكولوچي، ومرشح القائمة لمقعد رئيس مجلس الإدارة.",
       "ventures": {
         "title": "مؤسس مجموعة من الشركات الناجحة",
@@ -1363,9 +1370,9 @@
       "more": "الملف الشخصي",
       "text": "مهندس معماري ومؤسس مجموعة من الشركات الناجحة في التطوير العقاري والتعليم والتكنولوجيا، يقود قائمة من اثني عشر مرشحًا تجمعهم رؤية واحدة: تاريخ نحترمه .. ومستقبل نصنعه.",
       "video": {
-        "placeholder": true,
         "label": "كلمة م. حسين داود",
         "caption": "كلمة م. حسين داود",
+        "src": "/videos/hussein-dawood-word.mp4",
         "poster": "hussein-dawood-poster.jpg"
       },
       "strategy": {
@@ -1384,8 +1391,7 @@
       "items": [
         {
           "candidate": "hussein-dawood",
-          "poster": "hussein-dawood-poster.jpg",
-          "placeholder": true
+          "poster": "hussein-dawood-poster.jpg"
         },
         {
           "candidate": "mohamed-sedky",
