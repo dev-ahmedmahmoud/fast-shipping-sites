@@ -60,6 +60,8 @@ export interface CandidateCard {
 export interface FileCard {
   slug: string;
   title: string;
+  /** The file's full name in a sentence ("الملف الطبي", "ملف التطوير"): elections.json files[].name. */
+  name: string;
   tagline: string;
   /** Inline SVG markup for the file's icon (stroke uses currentColor). */
   icon: string;
@@ -165,6 +167,7 @@ export function candidateGroups(except?: string): { id: string; label: string; c
 export const programFiles: FileCard[] = (raw.files ?? []).map((f: any) => ({
   slug: f.slug,
   title: f.title,
+  name: f.name ?? `${ui.filePrefix ?? ''} ${f.title}`.trim(),
   tagline: f.tagline,
   icon: f.icon ?? '',
   href: isElections ? needEntry(`file-${f.slug}`).href : '#',
@@ -208,11 +211,19 @@ export function clipsForFile(slug: string): Clip[] {
   });
 }
 
+/** A candidate's video about their program file (their first clip), for the home strip. */
+export function fileClip(slug: string): VideoData | null {
+  const c = allClips.find((x) => x.candidate === slug);
+  if (!c) return null;
+  const f = programFiles.find((x) => x.slug === c.file);
+  return { src: c.src, poster: media(c.poster), label: `${candidate(slug).name} — ${f?.name ?? c.title}` };
+}
+
 /** A candidate's clips, grouped by program file in the files' order. */
 export function clipsForCandidate(slug: string): { title: string; href: string; clips: Clip[] }[] {
   const who = candidate(slug);
   return programFiles.map((f) => ({
-    title: (raw.files ?? []).find((x: any) => x.slug === f.slug)?.name ?? `${ui.filePrefix ?? ''} ${f.title}`.trim(),
+    title: f.name,
     href: f.href,
     clips: allClips.filter((c) => c.file === f.slug && c.candidate === slug).map((c) => ({
       video: { src: c.src, poster: media(c.poster), label: `${who.name} — ${c.title}` },

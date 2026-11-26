@@ -1486,12 +1486,8 @@
     },
     "interviews": {
       "title": "لقاءات القائمة",
-      "lead": "شاهد اللقاء الكامل مع كل مرشح",
+      "lead": "شاهد كل مرشح يتحدث عن ملفه في برنامج القائمة",
       "items": [
-        {
-          "candidate": "hussein-dawood",
-          "poster": "hussein-dawood-poster.jpg"
-        },
         {
           "candidate": "mohamed-sedky",
           "poster": "mohamed-sedky-poster.jpg"
@@ -1576,12 +1572,6 @@
       "one": "مسؤول الملف",
       "two": "مسؤولا الملف",
       "many": "مسؤولو الملف"
-    },
-    "videos": {
-      "one": "لقاء مسؤول الملف",
-      "oneLead": "شاهد اللقاء الكامل مع مسؤول الملف",
-      "many": "لقاءات مسؤولي الملف",
-      "manyLead": "شاهد اللقاء الكامل مع كل مسؤول عن الملف"
     }
   },
   "support": {
