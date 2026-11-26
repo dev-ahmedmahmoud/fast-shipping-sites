@@ -2,6 +2,7 @@
 // Short clips: on a program file's page every speaker on that file (with a profile link); on a
 // candidate's page the candidate's clips grouped by program file (group title links to the
 // file). Each clip sits in a small brass frame with its caption on an enamel plate.
+// featured: the file page's own videos at its top, large (one fills the width, two share it).
 import type { PageContext } from '@engine/context';
 import type { Clip } from '@elections/data';
 import Video from '@elections/Video.astro';
@@ -10,13 +11,14 @@ interface Props {
   id?: string;
   title?: string;
   groups: { title?: string; href?: string; clips: Clip[] }[];
+  featured?: boolean;
 }
-const { id, title, groups } = Astro.props;
+const { id, title, groups, featured = false } = Astro.props;
 // A candidate's page has several program files with a clip or two each: those groups sit side
 // by side instead of each taking a full-width row.
 const compact = groups.length > 1 && groups.every((g) => g.clips.length <= 2);
 ---
-<section class="section" id={id}>
+<section class:list={['section', { featured }]} id={id}>
   <div class="container wrap">
     {title && <header class="st-title"><span class="st-sign st-rivets plate"><h2>{title}</h2></span></header>}
     <div class:list={['groups', { compact }]}>
@@ -26,7 +28,7 @@ const compact = groups.length > 1 && groups.every((g) => g.clips.length <= 2);
         <div class="grid">
           {g.clips.map((clip) => (
             <figure data-st-reveal>
-              <div class="frame"><Video video={clip.video} sizes="(max-width: 700px) 100vw, 33vw" widths={[384, 768, 1024]} /></div>
+              <div class="frame"><Video video={clip.video} sizes={featured ? '(max-width: 900px) 100vw, 60rem' : '(max-width: 700px) 100vw, 33vw'} widths={featured ? [480, 768, 1024, 1440] : [384, 768, 1024]} /></div>
               <figcaption>
                 {clip.name && <strong>{clip.name}</strong>}
                 <span>{clip.title}</span>
@@ -65,4 +67,10 @@ const compact = groups.length > 1 && groups.every((g) => g.clips.length <= 2);
   figcaption strong { font-family: var(--font-body); font-weight: 700; font-size: var(--step-1); }
   figcaption span { font-size: var(--step-0); }
   figcaption a { display: inline-flex; align-items: center; min-block-size: 44px; color: var(--st-brass-hi); font-family: var(--font-body); font-weight: 700; }
+  .featured .wrap { max-inline-size: calc(60rem + 2 * var(--gutter)); }
+  .featured .grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+  .featured .frame { padding: 12px; border-radius: calc(var(--radius-l) + 6px); box-shadow: var(--st-shadow); }
+  .featured .frame :global(.el-video) { border-radius: var(--radius-l); }
+  .featured .frame :global(.el-video__icon) { inline-size: 84px; block-size: 84px; }
+  .featured figcaption { margin-inline: 14px; }
 </style>

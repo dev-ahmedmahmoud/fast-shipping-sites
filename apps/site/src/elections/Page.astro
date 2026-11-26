@@ -208,7 +208,8 @@ const kit = entry.template === 'support'
       <E.Panel ctx={ctx}><Content /></E.Panel>
       {vf && <E.Ventures ctx={ctx} ventures={vf} />}
       {cr.gallery?.length > 0 && <E.PhotoRow ctx={ctx} photos={cr.gallery.map((g: string) => media(g))} alt={c.name} label={cr.galleryLabel} hint={ui.galleryHint} />}
-      {clipsForCandidate(c.slug).length > 0 && <E.ClipGrid ctx={ctx} title={cr.filesTitle} groups={clipsForCandidate(c.slug)} />}
+      {clipsForCandidate(c.slug).length > 0 && <E.ClipGrid ctx={ctx} title={cr.filesTitle} groups={clipsForCandidate(c.slug)}
+        featured={clipsForCandidate(c.slug).reduce((n, g) => n + g.clips.length, 0) <= 2} />}
       <E.CandidateGrid ctx={ctx} variant="strip" title={cr.restTitle} groups={strip(c.slug)} cardMore={cardMore} numberLabel={ui.number} />
     </>
   )}
@@ -224,6 +225,7 @@ const kit = entry.template === 'support'
     <>
       <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} backdrop={backdrop}
         leads={programFiles.find((f) => f.slug === file.slug)?.leads} leadLabel={filesPage.leadLabel} />
+      {clipsForFile(file.slug).length > 0 && <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} featured />}
       {fileInterviews.length > 0 && filesPage.videos && (
         <E.InterviewStrip ctx={ctx} variant="file" items={fileInterviews}
           title={fileInterviews.length > 1 ? filesPage.videos.many : filesPage.videos.one}
@@ -232,7 +234,6 @@ const kit = entry.template === 'support'
       {file.plan?.groups?.length
         ? <E.FilePlan ctx={ctx} plan={file.plan} words={filesPage.planWords} />
         : <E.Panel ctx={ctx}><Content /></E.Panel>}
-      {clipsForFile(file.slug).length > 0 && <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} />}
       <E.ProgramFiles ctx={ctx} leadLabel={filesPage.leadLabel} title={file.othersTitle} files={programFiles.filter((f) => f.slug !== file.slug)} layout="strip" />
     </>
   )}

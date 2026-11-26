@@ -340,6 +340,13 @@
       "filesTitle": "د. محمد مختار مبروك يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "mohamed-mabrouk-share.jpg",
+      "interview": {
+        "title": "لقاء د. محمد مختار مبروك",
+        "label": "لقاء د. محمد مختار مبروك",
+        "src": "/videos/mohamed-mabrouk.mp4",
+        "poster": "mohamed-mabrouk-poster-tall.jpg",
+        "portrait": true
+      },
       "description": "أستاذ مساعد الأمراض الباطنة والجهاز الهضمي والمناظير بكلية الطب – جامعة طنطا، ومدير إدارة الجودة والاعتماد بمستشفيات جامعة طنطا."
     },
     {
@@ -425,6 +432,7 @@
     {
       "slug": "finance",
       "title": "المالي والحوكمة",
+      "name": "الملف المالي والحوكمة",
       "tagline": "شفافية في إدارة أموال النادي وحوكمة قراراته",
       "leads": [
         "waleed-afify"
@@ -484,6 +492,7 @@
     {
       "slug": "development",
       "title": "التطوير",
+      "name": "ملف التطوير",
       "tagline": "تطوير مرافق النادي وخدماته لأعضائه",
       "leads": [
         "mohamed-attia"
@@ -645,6 +654,7 @@
     {
       "slug": "investment",
       "title": "الاستثمار والتسويق",
+      "name": "ملف الاستثمار والتسويق",
       "tagline": "استثمار أصول النادي وتسويق اسمه",
       "leads": [
         "karim-abu-elazm",
@@ -787,6 +797,7 @@
     {
       "slug": "medical",
       "title": "الطبي",
+      "name": "الملف الطبي",
       "tagline": "رعاية طبية لأعضاء النادي ورياضييه",
       "leads": [
         "mohamed-mabrouk"
@@ -861,6 +872,7 @@
     {
       "slug": "digital",
       "title": "التحول الرقمي",
+      "name": "ملف التحول الرقمي",
       "tagline": "خدمات رقمية أسهل لأعضاء النادي",
       "leads": [
         "ahmed-sweilem"
@@ -914,6 +926,7 @@
     {
       "slug": "security",
       "title": "الأمني والإداري",
+      "name": "الملف الأمني والإداري",
       "tagline": "نادٍ آمن وإدارة منظّمة",
       "leads": [
         "mohamed-sedky",
@@ -1055,6 +1068,7 @@
     {
       "slug": "sports",
       "title": "الرياضي",
+      "name": "الملف الرياضي",
       "tagline": "الرياضة تعود لأبناء النادي",
       "leads": [
         "fathy-selim",
@@ -1300,7 +1314,22 @@
       }
     }
   ],
-  "clips": [],
+  "clips": [
+    {
+      "file": "medical",
+      "candidate": "mohamed-mabrouk",
+      "title": "يتحدث عن الملف",
+      "src": "/videos/mohamed-mabrouk-medical.mp4",
+      "poster": "mohamed-mabrouk-poster.jpg"
+    },
+    {
+      "file": "investment",
+      "candidate": "ashoush",
+      "title": "يتحدث عن الملف",
+      "src": "/videos/ashoush-investment.mp4",
+      "poster": "ashoush-poster.jpg"
+    }
+  ],
   "vote": {
     "title": "انتخب القائمة كاملة",
     "text": "فريق واحد.. وهدف واحد. احفظ الأرقام وشاركها مع أصدقائك من أعضاء النادي.",
@@ -1427,8 +1456,7 @@
         },
         {
           "candidate": "mohamed-mabrouk",
-          "poster": "mohamed-mabrouk-poster.jpg",
-          "placeholder": true
+          "poster": "mohamed-mabrouk-poster.jpg"
         },
         {
           "candidate": "mostafa-el-sharkawy",

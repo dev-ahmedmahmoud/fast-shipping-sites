@@ -212,7 +212,7 @@ export function clipsForFile(slug: string): Clip[] {
 export function clipsForCandidate(slug: string): { title: string; href: string; clips: Clip[] }[] {
   const who = candidate(slug);
   return programFiles.map((f) => ({
-    title: `${ui.filePrefix ?? ''} ${f.title}`.trim(),
+    title: (raw.files ?? []).find((x: any) => x.slug === f.slug)?.name ?? `${ui.filePrefix ?? ''} ${f.title}`.trim(),
     href: f.href,
     clips: allClips.filter((c) => c.file === f.slug && c.candidate === slug).map((c) => ({
       video: { src: c.src, poster: media(c.poster), label: `${who.name} — ${c.title}` },
