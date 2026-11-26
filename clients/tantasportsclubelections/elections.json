@@ -186,6 +186,13 @@
       "filesTitle": "المستشار محمد صدقي يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "mohamed-sedky-share.jpg",
+      "interview": {
+        "title": "لقاء المستشار محمد صدقي",
+        "label": "لقاء المستشار محمد صدقي",
+        "src": "/videos/mohamed-sedky.mp4",
+        "poster": "mohamed-sedky-poster-tall.jpg",
+        "portrait": true
+      },
       "description": "نائب رئيس هيئة قضايا الدولة، وأمين صندوق نادي طنطا الرياضي حاليًا، وعضو مجلس إدارة النادي في دورة ٢٠١٧–٢٠٢١."
     },
     {
@@ -205,6 +212,13 @@
       "filesTitle": "أ.د. وليد محمد عفيفي يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "waleed-afify-share.jpg",
+      "interview": {
+        "title": "لقاء أ.د. وليد محمد عفيفي",
+        "label": "لقاء أ.د. وليد محمد عفيفي",
+        "src": "/videos/waleed-afify.mp4",
+        "poster": "waleed-afify-poster-tall.jpg",
+        "portrait": true
+      },
       "description": "أستاذ الإحصاء الرياضي وعميد كلية التجارة بجامعة كفر الشيخ، وخريج كلية التجارة – جامعة طنطا."
     },
     {
@@ -250,6 +264,13 @@
       "filesTitle": "م. خالد عادل حمزة يتحدث عن ملفات القائمة",
       "restTitle": "باقي فريق القائمة",
       "shareImage": "khaled-hamza-share.jpg",
+      "interview": {
+        "title": "لقاء م. خالد عادل حمزة",
+        "label": "لقاء م. خالد عادل حمزة",
+        "src": "/videos/khaled-hamza.mp4",
+        "poster": "khaled-hamza-poster-tall.jpg",
+        "portrait": true
+      },
       "description": "مدير قطاع تجارة ونقل المواد البترولية بشركة غاز الشرق، ولاعب تنس طاولة سابق بنادي طنطا، من عائلة رياضية ارتبط اسمها بتاريخ النادي."
     },
     {
@@ -1316,11 +1337,25 @@
   ],
   "clips": [
     {
-      "file": "medical",
-      "candidate": "mohamed-mabrouk",
+      "file": "finance",
+      "candidate": "waleed-afify",
       "title": "يتحدث عن الملف",
-      "src": "/videos/mohamed-mabrouk-medical.mp4",
-      "poster": "mohamed-mabrouk-poster.jpg"
+      "src": "/videos/waleed-afify-finance.mp4",
+      "poster": "waleed-afify-poster.jpg"
+    },
+    {
+      "file": "development",
+      "candidate": "mohamed-attia",
+      "title": "يتحدث عن الملف",
+      "src": "/videos/mohamed-attia-development.mp4",
+      "poster": "mohamed-attia-poster.jpg"
+    },
+    {
+      "file": "investment",
+      "candidate": "karim-abu-elazm",
+      "title": "يتحدث عن الملف",
+      "src": "/videos/karim-abu-elazm-investment.mp4",
+      "poster": "karim-abu-elazm-poster.jpg"
     },
     {
       "file": "investment",
@@ -1328,6 +1363,41 @@
       "title": "يتحدث عن الملف",
       "src": "/videos/ashoush-investment.mp4",
       "poster": "ashoush-poster.jpg"
+    },
+    {
+      "file": "medical",
+      "candidate": "mohamed-mabrouk",
+      "title": "يتحدث عن الملف",
+      "src": "/videos/mohamed-mabrouk-medical.mp4",
+      "poster": "mohamed-mabrouk-poster.jpg"
+    },
+    {
+      "file": "digital",
+      "candidate": "ahmed-sweilem",
+      "title": "يتحدث عن الملف",
+      "src": "/videos/ahmed-sweilem-digital.mp4",
+      "poster": "ahmed-sweilem-poster.jpg"
+    },
+    {
+      "file": "security",
+      "candidate": "mohamed-sedky",
+      "title": "يتحدث عن الملف",
+      "src": "/videos/mohamed-sedky-security.mp4",
+      "poster": "mohamed-sedky-poster.jpg"
+    },
+    {
+      "file": "security",
+      "candidate": "mostafa-el-sharkawy",
+      "title": "يتحدث عن الملف",
+      "src": "/videos/mostafa-el-sharkawy-security.mp4",
+      "poster": "mostafa-el-sharkawy-poster.jpg"
+    },
+    {
+      "file": "sports",
+      "candidate": "mohamed-el-menshawy",
+      "title": "يتحدث عن الملف",
+      "src": "/videos/mohamed-el-menshawy-sports.mp4",
+      "poster": "mohamed-el-menshawy-poster.jpg"
     }
   ],
   "vote": {
@@ -1424,13 +1494,11 @@
         },
         {
           "candidate": "mohamed-sedky",
-          "poster": "mohamed-sedky-poster.jpg",
-          "placeholder": true
+          "poster": "mohamed-sedky-poster.jpg"
         },
         {
           "candidate": "waleed-afify",
-          "poster": "waleed-afify-poster.jpg",
-          "placeholder": true
+          "poster": "waleed-afify-poster.jpg"
         },
         {
           "candidate": "ahmed-sweilem",
@@ -1438,8 +1506,7 @@
         },
         {
           "candidate": "khaled-hamza",
-          "poster": "khaled-hamza-poster.jpg",
-          "placeholder": true
+          "poster": "khaled-hamza-poster.jpg"
         },
         {
           "candidate": "fathy-selim",
