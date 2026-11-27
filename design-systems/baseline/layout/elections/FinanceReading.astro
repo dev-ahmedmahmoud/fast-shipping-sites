@@ -1,0 +1,50 @@
+---
+// A program file's financial reading (elections.json files[].report), plain: the headline
+// figures, then each chapter as a heading with its figures as lists and tables. Design systems
+// replace this with their own charts (Station: FinanceReading.astro).
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; report: any; id?: string }
+const { report: r, id = 'reading' } = Astro.props;
+const fmt = (v: number, d = 2) =>
+  new Intl.NumberFormat('ar-EG', { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: false }).format(Math.abs(v));
+const num = (v: number, d = 2) => `${v < 0 ? '−' : ''}${fmt(v, d)}`;
+const pct = (v: number) => `${fmt(v, 1)}٪`;
+const o = r.overview;
+const unit = r.unit ?? '';
+---
+<section class="section" id={id}>
+  <div class="container prose">
+    <h2>{r.title}</h2>
+    {r.lead && <p>{r.lead}</p>}
+    <ul>
+      {o.tiles.map((t: any) => <li>{t.label}: <b dir="ltr">{num(t.value)}</b> {unit}{t.note && ` (${t.note})`}</li>)}
+      <li>{o.coverage.label}: <b>{pct(o.coverage.value)}</b>. {o.coverage.text}</li>
+      {(o.balances ?? []).map((b: any) => <li>{b.label}: <b>{num(b.value)}</b> {unit}</li>)}
+    </ul>
+    <p>{o.trend.title}: {o.trend.points.map((p: any) => `${p.year} ${num(p.value)}`).join('، ')}</p>
+    {o.conclusion && <p><b>{o.conclusion.label}:</b> {o.conclusion.text}</p>}
+    {(r.chapters ?? []).map((ch: any) => (
+      <>
+        <h3>{ch.title}{ch.sub && ` | ${ch.sub}`}</h3>
+        {ch.lead && <p>{ch.lead}</p>}
+        {ch.hero && <p><b>{ch.hero.percent ? pct(ch.hero.value) : num(ch.hero.value)}</b> {ch.hero.label}</p>}
+        {ch.items && ch.kind !== 'risks' && <ul>{ch.items.map((x: any) => <li>{x.label}: {num(x.value, ch.decimals ?? 2)} {unit}{x.share !== undefined && ` (${pct(x.share)})`}</li>)}</ul>}
+        {ch.balances && <ul>{ch.balances.map((x: any) => <li>{x.label}: {num(x.value)} {unit}</li>)}</ul>}
+        {ch.ratios && <ul>{ch.ratios.map((x: any) => <li>{x.label}: {x.text ?? `${num(x.value)} ${unit}`}</li>)}</ul>}
+        {ch.kind === 'risks' && (
+          <table>
+            <thead><tr><th>{ch.columns.challenge}</th><th>{ch.columns.level}</th><th>{ch.columns.evidence}</th><th>{ch.columns.action}</th></tr></thead>
+            <tbody>{ch.items.map((x: any) => <tr><td>{x.challenge}</td><td>{x.levelText}</td><td>{x.evidence}</td><td>{x.action}</td></tr>)}</tbody>
+          </table>
+        )}
+        {ch.phases?.map((ph: any) => <><h4>{ph.days}: {ph.title}</h4><ul>{ph.points.map((p: string) => <li>{p}</li>)}</ul><p>{ch.outputLabel}: <b>{ph.output}</b></p></>)}
+        {ch.center && <p><b>{ch.center}</b></p>}
+        {ch.tracks?.map((t: any) => <><h4>{t.title}</h4><ul>{t.points.map((p: string) => <li>{p}</li>)}</ul><p>{ch.kpiLabel}: {t.kpi}</p></>)}
+        {ch.aside && <p><b>{ch.aside.title}:</b> {ch.aside.text}</p>}
+        {ch.note && <p><b>{ch.note.label}:</b> {ch.note.text}</p>}
+        {ch.takeaway && <p><b>{ch.takeaway}</b></p>}
+      </>
+    ))}
+    {r.source && <p><small>{r.source}</small></p>}
+  </div>
+</section>

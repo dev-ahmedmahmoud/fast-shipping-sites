@@ -227,6 +227,7 @@ const kit = entry.template === 'support'
       <E.PageBand ctx={ctx} kicker={action(file.kicker)} title={file.title} lead={file.tagline} action={action(file.action)} crest={crest} backdrop={backdrop}
         leads={programFiles.find((f) => f.slug === file.slug)?.leads} leadLabel={filesPage.leadLabel} />
       {clipsForFile(file.slug).length > 0 && <E.ClipGrid ctx={ctx} id="videos" title={file.clipsTitle} groups={[{ clips: clipsForFile(file.slug) }]} featured />}
+      {file.report && (!file.report.draft || process.env.SHOW_DRAFTS === '1') && <E.FinanceReading ctx={ctx} report={file.report} />}
       {file.plan?.groups?.length
         ? <E.FilePlan ctx={ctx} plan={file.plan} words={filesPage.planWords} />
         : <E.Panel ctx={ctx}><Content /></E.Panel>}

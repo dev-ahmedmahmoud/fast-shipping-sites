@@ -1,0 +1,541 @@
+---
+// A program file's financial reading (elections.json files[].report; the finance file's 2026
+// figures from its lead's report), told calmly in two layers:
+//   1. a navy "departure board" that is always open: the year's three headline figures, the
+//      expense coverage as a gauge ("كل ١٠٠ جنيه مصروف…"), the last three years' surplus or
+//      deficit and the conclusion;
+//   2. the chapters, one at a time behind a row of tabs: revenue (donut), expenses and the four
+//      big sports (ranked bars), liquidity (balances on one scale + ratios), the risk map, the
+//      first 100 days (three stages on a line) and the 2030 vision (four tracks round a badge).
+// Every value is printed (legends, bar ends), so the charts never hide a number behind hover.
+// Without JavaScript every chapter shows, one under the other.
+import type { PageContext } from '@engine/context';
+interface Props { ctx: PageContext; report: any; id?: string }
+const { report: r, id = 'reading' } = Astro.props;
+
+const fmt = (v: number, d = 2) =>
+  new Intl.NumberFormat('ar-EG', { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: false }).format(Math.abs(v));
+const num = (v: number, d = 2) => `${v < 0 ? '−' : ''}${fmt(v, d)}`;
+const signed = (v: number, d = 2) => `${v < 0 ? '−' : '+'}${fmt(v, d)}`;
+const pct = (v: number) => `${fmt(v, 1)}٪`;
+const o = r.overview;
+const unit = r.unit ?? '';
+
+// Overview trend: columns up (surplus) or down (deficit) from one baseline.
+const trendMax = Math.max(...o.trend.points.map((p: any) => Math.abs(p.value)));
+
+// The donut (revenue): segments clockwise from the top, a 2px surface gap between them.
+const SERIES = ['#2B5FAE', '#C9922B', '#58A6D6', '#A94F6B'];
+const R = 86, C = 2 * Math.PI * R, GAP = 2.2;
+const donut = (items: any[], total: number) => {
+  let at = 0;
+  return items.map((it, i) => {
+    const len = (it.value / total) * C;
+    const seg = { ...it, color: SERIES[i % SERIES.length], dash: `${Math.max(len - GAP, 0)} ${C}`, offset: -at };
+    at += len;
+    return seg;
+  });
+};
+const chapters = (r.chapters ?? []) as any[];
+---
+<section class="section fin" id={id} data-fin>
+  <div class="container wrap">
+    <header class="st-title">
+      <span class="st-sign st-rivets plate"><h2>{r.title}</h2></span>
+      {r.lead && <p>{r.lead}</p>}
+    </header>
+
+    {/* ---- 1. the board ---- */}
+    <div class="board" data-st-reveal>
+      {o.title && <p class="board__title">{o.title}</p>}
+      <div class="tiles">
+        {o.tiles.map((t: any) => (
+          <div class:list={['tile', t.value < 0 && 'is-neg']}>
+            <span class="tile__label">{t.label}</span>
+            <b class="tile__value" dir="ltr">{num(t.value)}</b>
+            <span class="tile__unit">{unit}{t.note && `، ${t.note}`}</span>
+          </div>
+        ))}
+      </div>
+      <div class="board__row">
+        <figure class="gauge" aria-label={`${o.coverage.label}: ${pct(o.coverage.value)}`}>
+          <figcaption>{o.coverage.text}</figcaption>
+          <div class="gauge__bar" style={`--w:${o.coverage.value}%`}><span class="gauge__fill"></span></div>
+          <div class="gauge__scale"><span><b>{pct(o.coverage.value)}</b> {o.coverage.label}</span><span class="gauge__gap">{o.coverage.gapLabel} {pct(100 - o.coverage.value)}</span></div>
+          {o.balances?.length > 0 && (
+            <ul class="chips" role="list">
+              {o.balances.map((b: any) => <li><span>{b.label}</span><b>{num(b.value)}</b><small>{unit}</small></li>)}
+            </ul>
+          )}
+        </figure>
+        <figure class="trend" aria-label={o.trend.title}>
+          <figcaption>{o.trend.title} <small>({unit})</small></figcaption>
+          <ol class="trend__cols" role="list">
+            {o.trend.points.map((p: any) => (
+              <li class:list={['trend__col', p.value < 0 ? 'is-neg' : 'is-pos']} style={`--h:${(Math.abs(p.value) / trendMax) * 100}%`}>
+                <span class="trend__half trend__up"><span class="trend__bar"></span>{p.value >= 0 && <b dir="ltr">{signed(p.value)}</b>}</span>
+                <span class="trend__half trend__down"><span class="trend__bar"></span>{p.value < 0 && <b dir="ltr">{signed(p.value)}</b>}</span>
+                <span class="trend__year">{p.year}</span>
+              </li>
+            ))}
+          </ol>
+        </figure>
+      </div>
+      {o.conclusion && <p class="board__end"><b>{o.conclusion.label}:</b> {o.conclusion.text}</p>}
+    </div>
+
+    {/* ---- 2. the chapters ---- */}
+    <div class="chapters">
+      <div class="tabs" role="tablist" aria-label={r.title}>
+        {chapters.map((ch, i) => (
+          <button type="button" role="tab" class="tab" id={`${id}-tab-${ch.id}`} aria-controls={`${id}-${ch.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+            <span class="tab__no" aria-hidden="true">{new Intl.NumberFormat('ar-EG').format(i + 1)}</span>{ch.tab}
+          </button>
+        ))}
+      </div>
+
+      {chapters.map((ch, i) => {
+        const max = ch.items ? Math.max(...ch.items.map((x: any) => x.value)) : 0;
+        const dec = ch.decimals ?? 2;
+        return (
+          <section class="panel" role="tabpanel" id={`${id}-${ch.id}`} aria-labelledby={`${id}-tab-${ch.id}`} hidden={i !== 0 ? true : undefined} data-kind={ch.kind}>
+            <header class="panel__head">
+              {ch.sub && <span class="panel__sub">{ch.sub}</span>}
+              <h3>{ch.title}</h3>
+              {ch.lead && <p>{ch.lead}</p>}
+            </header>
+
+            {ch.kind === 'donut' && (
+              <div class="donut">
+                <figure class="donut__chart">
+                  <svg viewBox="0 0 220 220" role="img" aria-label={`${ch.title}: ${ch.items.map((x: any) => `${x.label} ${num(x.value)}`).join('، ')}`}>
+                    <g transform="rotate(-90 110 110)">
+                      {donut(ch.items, ch.total).map((s) => (
+                        <circle class="donut__seg" cx="110" cy="110" r={R} fill="none" stroke={s.color} stroke-width="30" stroke-dasharray={s.dash} stroke-dashoffset={s.offset}>
+                          <title>{`${s.label}: ${num(s.value)} ${unit} (${pct(s.share)})`}</title>
+                        </circle>
+                      ))}
+                    </g>
+                  </svg>
+                  <figcaption class="donut__total"><b>{num(ch.total)}</b><span>{unit}</span></figcaption>
+                </figure>
+                <ul class="legend" role="list">
+                  {ch.items.map((x: any, k: number) => (
+                    <li>
+                      <span class="legend__key" style={`--c:${SERIES[k % SERIES.length]}`} aria-hidden="true"></span>
+                      <span class="legend__label">{x.label}</span>
+                      <b>{num(x.value)}</b>
+                      <span class="legend__share">{pct(x.share)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {ch.kind === 'bars' && (
+              <div class:list={['bars-wrap', ch.aside && 'has-aside']}>
+                {ch.hero && (
+                  <div class="hero">
+                    <b dir="ltr">{ch.hero.percent ? pct(ch.hero.value) : num(ch.hero.value)}</b>
+                    <span>{ch.hero.percent ? ch.hero.label : `${ch.hero.label} (${unit})`}</span>
+                  </div>
+                )}
+                <ol class="bars" role="list">
+                  {ch.items.map((x: any, k: number) => (
+                    <li class:list={['bar', ch.highlight === k && 'is-hi']} style={`--w:${(x.value / max) * 100}%`}>
+                      <span class="bar__label">{x.label}</span>
+                      <span class="bar__track"><span class="bar__fill"></span></span>
+                      <span class="bar__value"><b>{num(x.value, dec)}</b> <small>{unit}</small></span>
+                    </li>
+                  ))}
+                </ol>
+                {ch.aside && <aside class="aside"><b>{ch.aside.title}</b><p>{ch.aside.text}</p></aside>}
+              </div>
+            )}
+
+            {ch.kind === 'liquidity' && (() => {
+              const top = Math.max(...ch.balances.map((b: any) => b.value));
+              return (
+                <div class="liq">
+                  <figure class="liq__compare">
+                    <figcaption>{ch.compare}</figcaption>
+                    <ol class="bars" role="list">
+                      {ch.balances.map((b: any) => (
+                        <li class:list={['bar', b.owed ? 'is-owed' : 'is-held']} style={`--w:${(b.value / top) * 100}%`}>
+                          <span class="bar__label">{b.label}</span>
+                          <span class="bar__track"><span class="bar__fill"></span></span>
+                          <span class="bar__value"><b>{num(b.value)}</b> <small>{unit}</small></span>
+                        </li>
+                      ))}
+                    </ol>
+                  </figure>
+                  <ul class="ratios" role="list">
+                    {ch.ratios.map((x: any) => (
+                      <li class:list={[x.value < 0 && 'is-neg']}>
+                        <span>{x.label}</span>
+                        <b dir={x.value !== undefined ? 'ltr' : undefined}>{x.text ?? num(x.value)}</b>
+                        {x.value !== undefined && <small>{unit}</small>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
+
+            {ch.kind === 'risks' && (
+              <div class="risks" role="table" aria-label={ch.title}>
+                <div class="risk risk--head" role="row">
+                  <span role="columnheader">{ch.columns.challenge}</span>
+                  <span role="columnheader">{ch.columns.level}</span>
+                  <span role="columnheader">{ch.columns.evidence}</span>
+                  <span role="columnheader">{ch.columns.action}</span>
+                </div>
+                {ch.items.map((x: any) => (
+                  <div class:list={['risk', `is-${x.level}`]} role="row">
+                    <b class="risk__name" role="cell">{x.challenge}</b>
+                    <span role="cell"><span class="lvl">{x.levelText}</span></span>
+                    <span class="risk__ev" role="cell"><small>{ch.columns.evidence}</small>{x.evidence}</span>
+                    <span class="risk__act" role="cell"><small>{ch.columns.action}</small>{x.action}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {ch.kind === 'phases' && (
+              <ol class="phases" role="list">
+                {ch.phases.map((ph: any, k: number) => (
+                  <li class="phase">
+                    <span class="phase__dot" aria-hidden="true">{new Intl.NumberFormat('ar-EG').format(k + 1)}</span>
+                    <span class="phase__days">{ph.days}</span>
+                    <h4>{ph.title}</h4>
+                    <ul role="list">{ph.points.map((pt: string) => <li>{pt}</li>)}</ul>
+                    <p class="phase__out"><small>{ch.outputLabel}</small><b>{ph.output}</b></p>
+                  </li>
+                ))}
+              </ol>
+            )}
+
+            {ch.kind === 'tracks' && (
+              <div class="tracks">
+                <p class="tracks__hub">{ch.center}</p>
+                {ch.tracks.map((t: any, k: number) => (
+                  <article class="track" style={`--c:${SERIES[k % SERIES.length]}`}>
+                    <h4>{t.title}</h4>
+                    <ul role="list">{t.points.map((pt: string) => <li>{pt}</li>)}</ul>
+                    <p class="track__kpi"><b>{ch.kpiLabel}:</b> {t.kpi}</p>
+                  </article>
+                ))}
+              </div>
+            )}
+
+            {ch.note && <p class="note"><b>{ch.note.label}:</b> {ch.note.text}</p>}
+            {ch.takeaway && <p class="takeaway">{ch.takeaway}</p>}
+          </section>
+        );
+      })}
+      {r.source && <p class="source">{r.source}</p>}
+    </div>
+  </div>
+  <noscript><style>.fin .tabs { display: none; } .fin .panel[hidden] { display: block; } .fin .panel + .panel { margin-block-start: var(--space-6); }</style></noscript>
+</section>
+
+<style>
+  .fin { scroll-margin-block-start: 90px; }
+  .wrap { display: flex; flex-direction: column; gap: var(--space-6); max-inline-size: calc(72rem + 2 * var(--gutter)); }
+  .plate { padding-inline: var(--space-8); }
+  .plate h2 { font-size: var(--step-2); }
+  b, strong { font-weight: 800; }
+
+  /* ---------- 1. the board ---------- */
+  .board {
+    --pos: #8EC3EE; --neg: #F0A08F;
+    display: grid; gap: var(--space-5); padding: var(--space-6);
+    border-radius: 24px; background: var(--st-night-grad); color: var(--st-enamel-ink);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--st-brass) 55%, transparent), inset 0 0 0 7px var(--st-night), inset 0 0 0 8px color-mix(in oklab, var(--st-brass) 35%, transparent), var(--st-shadow);
+  }
+  .board__title { justify-self: center; padding: 0.2em 1.1em 0.3em; border-radius: 999px; background: var(--st-gold); color: var(--st-night); font-weight: 800; font-size: var(--step--1); text-align: center; }
+  .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+  .tile {
+    display: grid; justify-items: center; gap: 2px; padding: var(--space-4) var(--space-2); border-radius: 16px; text-align: center;
+    background: color-mix(in oklab, var(--st-night-2) 55%, transparent); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--st-brass) 35%, transparent);
+  }
+  .tile__label { font-size: var(--step--1); font-weight: 700; color: color-mix(in oklab, var(--st-enamel-ink) 80%, var(--st-night)); }
+  .tile__value { font-family: var(--font-body); font-size: clamp(1.6rem, 4.6vw, 2.6rem); line-height: 1.15; color: var(--st-brass-hi); }
+  .tile.is-neg .tile__value { color: var(--neg); }
+  .tile__unit { font-size: 0.78rem; color: color-mix(in oklab, var(--st-enamel-ink) 65%, var(--st-night)); }
+  .board__row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--space-5); align-items: stretch; }
+  .board figure { margin: 0; display: grid; align-content: start; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-radius: 16px; background: color-mix(in oklab, var(--st-night-2) 40%, transparent); }
+  .board figcaption { font-weight: 800; font-size: var(--step-0); line-height: 1.6; }
+  .board figcaption small { font-weight: 600; opacity: 0.75; }
+  /* "Every 100 pounds spent": the gold fill is the revenue, the dark rest the shortfall. */
+  .gauge figcaption { font-size: var(--step-1); color: #fff; }
+  .gauge__bar { position: relative; block-size: 18px; border-radius: 999px; background: color-mix(in oklab, var(--st-night-2) 70%, #000); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--st-brass) 35%, transparent); overflow: hidden; }
+  .gauge__fill { position: absolute; inset-block: 2px; inset-inline-start: 2px; inline-size: calc(var(--w) - 4px); border-radius: 999px; background: var(--st-gold); }
+  .gauge__scale { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); font-size: var(--step--1); font-weight: 700; }
+  .gauge__scale b { font-size: var(--step-2); color: var(--st-brass-hi); }
+  .gauge__gap { color: var(--neg); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+  .chips li { display: inline-flex; align-items: baseline; gap: 0.4em; padding: 0.35em 0.9em; border-radius: 999px; font-size: var(--step--1); background: color-mix(in oklab, var(--st-night) 70%, #000); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--st-brass) 30%, transparent); }
+  .chips b { font-size: var(--step-0); color: #fff; }
+  .chips small { opacity: 0.7; }
+  /* Surplus up, deficit down, from one baseline. */
+  .trend__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding: 1.8em 0 0; list-style: none; }
+  .trend__col { display: grid; grid-template-rows: 64px 64px auto; justify-items: center; }
+  .trend__half { position: relative; inline-size: 100%; display: flex; justify-content: center; }
+  .trend__up { align-items: flex-end; border-block-end: 1px solid color-mix(in oklab, var(--st-enamel-ink) 45%, transparent); }
+  .trend__down { align-items: flex-start; }
+  .trend__bar { inline-size: 22px; block-size: 0; }
+  .is-pos .trend__up .trend__bar { block-size: var(--h); background: var(--pos); border-radius: 4px 4px 0 0; }
+  .is-neg .trend__down .trend__bar { block-size: var(--h); background: var(--neg); border-radius: 0 0 4px 4px; }
+  .trend__half b { position: absolute; inset-inline: 0; text-align: center; font-size: var(--step--1); white-space: nowrap; }
+  .is-pos .trend__up b { inset-block-end: calc(var(--h) + 4px); color: var(--pos); }
+  .is-neg .trend__down b { inset-block-start: calc(var(--h) + 4px); color: var(--neg); }
+  .trend__year { margin-block-start: var(--space-4); font-weight: 800; font-size: var(--step--1); }
+  .board__end { padding-block-start: var(--space-4); border-block-start: 1px solid color-mix(in oklab, var(--st-brass) 45%, transparent); text-align: center; font-size: var(--step-0); line-height: 1.7; }
+  .board__end b { color: var(--st-brass-hi); }
+
+  /* ---------- 2. the chapters ---------- */
+  .chapters { display: grid; gap: var(--space-5); }
+  .tabs {
+    display: flex; gap: var(--space-2); overflow-x: auto; scrollbar-width: none; justify-content: safe center;
+    padding: var(--space-1) var(--space-1) var(--space-2); margin-inline: calc(-1 * var(--space-1));
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: none; display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: 46px; padding: 0.35em 1.1em 0.35em 0.6em;
+    border-radius: 999px; border: 1px solid color-mix(in oklab, var(--st-brass) 55%, transparent); cursor: pointer;
+    background: var(--c-surface); color: var(--c-accent); font: inherit; font-weight: 800; font-size: var(--step--1);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  }
+  :global([dir='rtl']) .tab { padding: 0.35em 0.6em 0.35em 1.1em; }
+  .tab:hover { background: color-mix(in oklab, var(--st-brass-hi) 30%, var(--c-surface)); }
+  .tab[aria-selected='true'] { background: var(--st-night-grad); color: #fff; border-color: transparent; box-shadow: inset 0 0 0 2px var(--st-brass), 0 10px 20px -12px color-mix(in oklab, var(--st-night) 90%, transparent); }
+  .tab__no { display: grid; place-items: center; inline-size: 1.8em; block-size: 1.8em; border-radius: 50%; background: color-mix(in oklab, var(--st-brass-hi) 45%, var(--c-surface)); color: var(--st-night); font-size: 0.85em; }
+  .tab[aria-selected='true'] .tab__no { background: var(--st-gold); }
+  .tab:focus-visible { outline: 3px solid var(--st-brass); outline-offset: 3px; }
+
+  .panel {
+    padding: var(--space-6); border-radius: 24px; background: var(--c-surface);
+    border: 1px solid color-mix(in oklab, var(--st-brass) 40%, var(--c-line));
+    box-shadow: 0 18px 40px -26px color-mix(in oklab, var(--st-night) 70%, transparent);
+  }
+  .panel.is-in { animation: fin-in var(--dur-base) var(--ease-out); }
+  @keyframes fin-in { from { opacity: 0; translate: 0 10px; } }
+  .panel__head { display: grid; justify-items: center; gap: var(--space-2); text-align: center; margin-block-end: var(--space-6); }
+  .panel__sub { padding: 0.15em 0.9em 0.25em; border-radius: 999px; background: var(--st-gold); color: var(--st-night); font-weight: 800; font-size: var(--step--1); }
+  .panel__head h3 { font-size: var(--step-2); color: var(--c-accent); text-wrap: balance; }
+  .panel__head p { color: var(--c-muted); max-inline-size: 60ch; text-wrap: pretty; }
+
+  /* donut + legend */
+  .donut { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-6); align-items: center; }
+  .donut__chart { position: relative; margin: 0 auto; inline-size: min(100%, 300px); }
+  .donut__chart svg { display: block; inline-size: 100%; block-size: auto; }
+  .donut__seg { transition: opacity var(--dur-fast) var(--ease-out); }
+  .donut__chart:hover .donut__seg { opacity: 0.55; }
+  .donut__chart:hover .donut__seg:hover { opacity: 1; }
+  .donut__total { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; line-height: 1.2; }
+  .donut__total b { font-size: clamp(1.7rem, 5vw, 2.3rem); color: var(--c-ink); }
+  .donut__total span { font-size: var(--step--1); color: var(--c-muted); font-weight: 700; }
+  .legend { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+  .legend li {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-3);
+    padding: var(--space-3) var(--space-4); border-radius: 14px; background: color-mix(in oklab, var(--st-brass-hi) 14%, var(--c-surface));
+  }
+  .legend__key { inline-size: 14px; block-size: 14px; border-radius: 4px; background: var(--c); }
+  .legend__label { font-weight: 800; }
+  .legend b { font-size: var(--step-1); color: var(--c-ink); }
+  .legend__share { min-inline-size: 3.6em; text-align: end; color: var(--c-muted); font-weight: 700; font-size: var(--step--1); }
+
+  /* ranked bars (one series; the highlighted bar in gold) */
+  .bars-wrap { display: grid; gap: var(--space-5); }
+  .bars-wrap.has-aside { grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); grid-template-areas: 'hero hero' 'bars aside'; align-items: start; }
+  .bars-wrap.has-aside .hero { grid-area: hero; }
+  .bars-wrap.has-aside .bars { grid-area: bars; }
+  .bars-wrap.has-aside .aside { grid-area: aside; }
+  .hero { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: var(--space-2) var(--space-3); text-align: center; }
+  .hero b { font-size: clamp(2.4rem, 7vw, 3.4rem); line-height: 1; color: var(--c-accent); }
+  .hero span { font-weight: 700; color: var(--c-muted); }
+  .bars { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+  .bar { display: grid; grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); }
+  .bar__label { font-weight: 800; font-size: var(--step--1); }
+  .bar__track { position: relative; block-size: 22px; border-radius: 0 6px 6px 0; background: color-mix(in oklab, var(--c-accent) 7%, var(--c-surface)); }
+  :global([dir='rtl']) .bar__track { border-radius: 6px 0 0 6px; }
+  .bar__fill {
+    position: absolute; inset-block: 0; inset-inline-start: 0; inline-size: var(--w); min-inline-size: 3px;
+    border-start-end-radius: 4px; border-end-end-radius: 4px; background: #2B5FAE;
+    transition: inline-size 0.9s var(--ease-out);
+  }
+  .bar.is-hi .bar__fill { background: var(--st-gold); }
+  .bar.is-owed .bar__fill { background: #A94F6B; }
+  .bar.is-held .bar__fill { background: #2B5FAE; }
+  .bar__value { white-space: nowrap; }
+  .bar__value b { font-size: var(--step-0); color: var(--c-ink); }
+  .bar__value small { color: var(--c-muted); font-size: 0.75rem; }
+  /* Bars grow when their chapter opens (and stay full without JavaScript). */
+  .fin.is-ready .panel:not(.is-shown) .bar__fill { inline-size: 0; }
+  .aside { padding: var(--space-5); border-radius: 18px; background: color-mix(in oklab, var(--c-accent) 8%, var(--c-surface)); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c-accent) 18%, transparent); }
+  .aside b { display: block; color: var(--c-accent); margin-block-end: var(--space-2); }
+  .aside p { color: var(--c-ink); line-height: 1.8; }
+
+  /* liquidity */
+  .liq { display: grid; gap: var(--space-5); }
+  .liq__compare { margin: 0; display: grid; gap: var(--space-3); }
+  .liq__compare figcaption { font-weight: 800; color: var(--c-muted); font-size: var(--step--1); }
+  .ratios { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+  .ratios li {
+    display: grid; justify-items: center; gap: 2px; padding: var(--space-4) var(--space-2); text-align: center; border-radius: 16px;
+    background: color-mix(in oklab, var(--st-brass-hi) 16%, var(--c-surface)); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--st-brass) 30%, transparent);
+  }
+  .ratios span { font-weight: 700; font-size: var(--step--1); color: var(--c-muted); text-wrap: balance; }
+  .ratios b { font-size: clamp(1.4rem, 4vw, 2rem); color: var(--c-accent); }
+  .ratios .is-neg b { color: #A94F6B; }
+  .ratios small { color: var(--c-muted); font-size: 0.75rem; }
+
+  /* risk map: a table on wide screens, cards on phones; the level always written out */
+  .risks { display: grid; gap: var(--space-2); }
+  .risk {
+    --lv: var(--c-muted);
+    display: grid; grid-template-columns: minmax(0, 1.1fr) 9.5rem minmax(0, 1.2fr) minmax(0, 1.2fr); align-items: center; gap: var(--space-4);
+    padding: var(--space-3) var(--space-5); border-radius: 14px; background: color-mix(in oklab, var(--c-accent) 4%, var(--c-surface));
+    box-shadow: inset 4px 0 0 var(--lv);
+  }
+  :global([dir='rtl']) .risk { box-shadow: inset -4px 0 0 var(--lv); }
+  .risk--head, :global([dir='rtl']) .risk--head { background: var(--st-night); color: #fff; font-weight: 800; font-size: var(--step--1); box-shadow: none; }
+  .risk.is-high { --lv: #B23A3A; }
+  .risk.is-medium { --lv: #C9922B; }
+  .risk.is-check { --lv: #D8B26E; }
+  .risk.is-chance { --lv: #2E7D5B; }
+  .risk__name { font-size: var(--step-0); }
+  .risk small { display: none; }
+  .lvl { display: inline-block; white-space: nowrap; min-inline-size: 6.5em; padding: 0.2em 0.9em 0.3em; border-radius: 999px; text-align: center; font-weight: 800; font-size: var(--step--1); color: #fff; background: var(--lv); }
+  .is-medium .lvl, .is-check .lvl { color: var(--c-ink); }
+  .is-check .lvl { background: color-mix(in oklab, var(--lv) 45%, var(--c-surface)); box-shadow: inset 0 0 0 1px var(--lv); }
+
+  /* first 100 days: three stages on a line */
+  .phases { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); margin: 0; padding: var(--space-6) 0 0; list-style: none; }
+  .phases::before { content: ''; position: absolute; inset-block-start: calc(var(--space-6) + 21px); inset-inline: 12%; block-size: 4px; border-radius: 4px; background: var(--st-gold); }
+  .phase {
+    position: relative; display: grid; align-content: start; justify-items: start; gap: var(--space-2); padding: var(--space-7) var(--space-5) var(--space-5);
+    margin-block-start: 22px; border-radius: 18px; background: color-mix(in oklab, var(--c-accent) 5%, var(--c-surface)); box-shadow: inset 0 3px 0 var(--st-brass);
+  }
+  .phase__dot {
+    position: absolute; inset-block-start: -22px; inset-inline-start: calc(50% - 22px); display: grid; place-items: center; inline-size: 44px; block-size: 44px; border-radius: 50%;
+    background: var(--st-night-grad); color: var(--st-brass-hi); font-weight: 800; box-shadow: 0 0 0 4px var(--c-surface), 0 0 0 6px var(--st-brass);
+  }
+  .phase__days { padding: 0.1em 0.8em 0.2em; border-radius: 999px; background: color-mix(in oklab, var(--st-brass-hi) 40%, var(--c-surface)); color: var(--st-night); font-weight: 800; font-size: var(--step--1); }
+  .phase h4 { font-size: var(--step-1); color: var(--c-accent); }
+  .phase ul { display: grid; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+  .phase ul li { position: relative; padding-inline-start: 1.1em; line-height: 1.7; }
+  .phase ul li::before { content: ''; position: absolute; inset-inline-start: 0; inset-block-start: 0.7em; inline-size: 6px; block-size: 6px; border-radius: 50%; background: var(--st-brass); }
+  .phase__out { margin-block-start: auto; padding-block-start: var(--space-3); border-block-start: 1px solid color-mix(in oklab, var(--st-brass) 40%, transparent); inline-size: 100%; display: grid; gap: 2px; }
+  .phase__out small { color: var(--c-muted); font-weight: 700; }
+  .phase__out b { color: var(--c-accent); }
+
+  /* 2030: four tracks round a badge */
+  .tracks { display: grid; grid-template-columns: minmax(0, 1fr) minmax(10rem, 13rem) minmax(0, 1fr); grid-template-areas: 'a hub b' 'c hub d'; gap: var(--space-4); align-items: stretch; }
+  .tracks__hub {
+    grid-area: hub; align-self: center; display: grid; place-items: center; aspect-ratio: 1; padding: var(--space-4); border-radius: 50%; text-align: center;
+    background: var(--st-night-grad); color: #fff; font-weight: 800; font-size: var(--step-0); line-height: 1.6;
+    box-shadow: inset 0 0 0 5px var(--st-night), inset 0 0 0 7px var(--st-brass), 0 18px 30px -16px color-mix(in oklab, var(--st-night) 90%, transparent);
+  }
+  .track:nth-of-type(1) { grid-area: a; }
+  .track:nth-of-type(2) { grid-area: b; }
+  .track:nth-of-type(3) { grid-area: c; }
+  .track:nth-of-type(4) { grid-area: d; }
+  .track { display: grid; align-content: start; gap: var(--space-2); padding: var(--space-5); border-radius: 18px; background: color-mix(in oklab, var(--c-accent) 4%, var(--c-surface)); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c-accent) 12%, transparent); position: relative; }
+  .track::before { content: ''; position: absolute; inset-block: var(--space-4); inset-inline-start: 0; inline-size: 4px; border-radius: 4px; background: var(--c); }
+  .track h4 { font-size: var(--step-1); color: var(--c-accent); }
+  .track ul { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; color: var(--c-ink); line-height: 1.7; }
+  .track__kpi { margin-block-start: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: 10px; background: color-mix(in oklab, var(--st-brass-hi) 22%, var(--c-surface)); font-size: var(--step--1); line-height: 1.6; }
+
+  /* the chapter's note and its one-line takeaway */
+  .note { margin-block-start: var(--space-5); font-size: var(--step-0); line-height: 1.8; }
+  .note b { color: var(--c-accent); }
+  .takeaway {
+    margin-block-start: var(--space-5); padding: var(--space-4) var(--space-5); border-radius: 14px; font-weight: 800; font-size: var(--step-0); line-height: 1.7;
+    background: color-mix(in oklab, var(--st-brass-hi) 22%, var(--c-surface)); box-shadow: inset 4px 0 0 var(--st-brass);
+  }
+  :global([dir='rtl']) .takeaway { box-shadow: inset -4px 0 0 var(--st-brass); }
+  .source { text-align: center; color: var(--c-muted); font-size: var(--step--1); }
+
+  @media (max-width: 900px) {
+    .board__row, .donut { grid-template-columns: minmax(0, 1fr); }
+    .bars-wrap.has-aside { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'hero' 'bars' 'aside'; }
+    .phases { grid-template-columns: minmax(0, 1fr); padding-block-start: 0; gap: var(--space-6); }
+    .phases::before { inset-block: 22px 22px; inset-inline: auto; inset-inline-start: calc(50% - 2px); inline-size: 4px; block-size: auto; }
+    .tracks { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'hub' 'a' 'b' 'c' 'd'; }
+    .tracks__hub { inline-size: min(13rem, 70%); justify-self: center; }
+    .risk--head { display: none; }
+    .risk { grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2) var(--space-3); padding: var(--space-4); }
+    .risk__ev, .risk__act { grid-column: 1 / -1; display: grid; gap: 1px; }
+    .risk small { display: block; color: var(--c-muted); font-weight: 700; font-size: 0.75rem; }
+  }
+  @media (max-width: 600px) {
+    .board, .panel { padding: var(--space-5) var(--space-4); border-radius: 20px; }
+    .tiles { gap: var(--space-2); }
+    .tile { padding: var(--space-3) var(--space-1); }
+    .board figure { padding: var(--space-4); }
+    .bar { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'label value' 'track track'; row-gap: var(--space-1); }
+    .bar__label { grid-area: label; }
+    .bar__value { grid-area: value; }
+    .bar__track { grid-area: track; block-size: 16px; }
+    .ratios { grid-template-columns: minmax(0, 1fr); }
+    .ratios li { grid-template-columns: minmax(0, 1fr) auto auto; align-items: baseline; justify-items: start; text-align: start; gap: var(--space-2); padding: var(--space-3) var(--space-4); }
+    .legend li { padding: var(--space-3); gap: var(--space-2); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar__fill { transition: none; }
+    .panel.is-in { animation: none; }
+  }
+</style>
+
+<script>
+  // The chapters as tabs: one open at a time, arrow keys move between tabs (mirrored in RTL),
+  // Home/End jump to the ends; a chapter's bars grow as it opens.
+  document.querySelectorAll<HTMLElement>('[data-fin]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = tabs.map((t) => root.querySelector<HTMLElement>(`#${t.getAttribute('aria-controls')}`));
+    if (!tabs.length) return;
+    const show = (i: number, focus = false) => {
+      tabs.forEach((t, k) => {
+        const on = k === i;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const p = panels[k];
+        if (!p) return;
+        p.hidden = !on;
+        p.classList.toggle('is-in', on);
+        p.classList.remove('is-shown');
+      });
+      const p = panels[i];
+      if (p) requestAnimationFrame(() => requestAnimationFrame(() => p.classList.add('is-shown')));
+      if (focus) tabs[i].focus();
+      tabs[i].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => show(i));
+      t.addEventListener('keydown', (e) => {
+        const rtl = getComputedStyle(root).direction === 'rtl';
+        const next = rtl ? 'ArrowLeft' : 'ArrowRight';
+        const prev = rtl ? 'ArrowRight' : 'ArrowLeft';
+        let k = -1;
+        if (e.key === next) k = (i + 1) % tabs.length;
+        else if (e.key === prev) k = (i - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') k = 0;
+        else if (e.key === 'End') k = tabs.length - 1;
+        if (k < 0) return;
+        e.preventDefault();
+        show(k, true);
+      });
+    });
+    root.classList.add('is-ready');
+    // The first chapter's bars grow when the section comes into view.
+    const first = panels[0];
+    if (first && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((es) => {
+        if (es.some((x) => x.isIntersecting)) { first.classList.add('is-shown'); io.disconnect(); }
+      }, { threshold: 0.2 });
+      io.observe(first);
+    } else first?.classList.add('is-shown');
+  });
+</script>

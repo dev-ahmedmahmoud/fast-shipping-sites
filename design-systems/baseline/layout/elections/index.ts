@@ -20,8 +20,9 @@ import Ventures from './Ventures.astro';
 import ShareKit from './ShareKit.astro';
 import Vision from './Vision.astro';
 import FilePlan from './FilePlan.astro';
+import FinanceReading from './FinanceReading.astro';
 
 export const electionComponents = {
   ElectionHero, Countdown, ProgramFiles, LeaderSpotlight, CandidateGrid, InterviewStrip, BallotCard,
-  PageBand, CandidateHero, MediaFrame, InterviewPlayer, PhotoRow, ClipGrid, Panel, Ventures, ShareKit, Vision, FilePlan,
+  PageBand, CandidateHero, MediaFrame, InterviewPlayer, PhotoRow, ClipGrid, Panel, Ventures, ShareKit, Vision, FilePlan, FinanceReading,
 };
