@@ -6,6 +6,7 @@ import { mountComplaints } from './complaints';
 import { initCountdowns } from './countdown';
 import { mountSupporters } from './supporters';
 import { initVideos } from './video';
+import { initWhatsAppShare } from './whatsapp';
 
 interface Config {
   api: { mode: 'demo' | 'live'; base: string; turnstileSiteKey: string; key: string };
@@ -60,6 +61,7 @@ const api = createApi({
 
 initCountdowns(config.numerals || 'arab');
 initVideos();
+initWhatsAppShare();
 if (config.ballot) initBallotCards(config.ballot);
 
 // The bot check only guards the live backend; a demo never loads it.
