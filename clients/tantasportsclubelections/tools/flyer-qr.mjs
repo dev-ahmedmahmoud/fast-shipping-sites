@@ -4,8 +4,11 @@
 // correction, H, so the crest never stops it reading). Keep the white margin round it when placing
 // it, print it at least 2.5 cm wide, and always on white (a light code on a dark flyer won't scan).
 // Usage: node clients/tantasportsclubelections/tools/flyer-qr.mjs <out-dir>
-//   writes qr-code.svg (vector), qr-code.pdf (vector, 10 x 10 cm, for the printer) and
-//   qr-code.png (3000 x 3000, 300 dpi up to 25 cm wide).
+//   writes qr-code.svg (vector), qr-code.pdf (vector, 10 x 10 cm, for the printer),
+//   qr-code.png (3000 x 3000, 300 dpi up to 25 cm wide) and, for large prints (banners,
+//   posters), qr-code-large.pdf (vector, 100 x 100 cm) and qr-code-large.png (12000 x 12000,
+//   300 dpi up to 1 m wide). The SVG and PDFs scale to any size; the crest inside them is the
+//   full-size image, so it stays sharp on a big print too.
 // Needs Playwright with Chromium. Uses media/crest.webp.
 import { createRequire } from 'node:module';
 import { mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
@@ -25,7 +28,8 @@ if (!out) { console.error('usage: flyer-qr.mjs <out-dir>'); process.exit(1); }
 mkdirSync(out, { recursive: true });
 
 // PNG, not WebP, inside the SVG: print software (Illustrator, CorelDRAW) may not read WebP.
-const crestPng = await sharp(path.join(root, 'clients/tantasportsclubelections/media/crest.webp')).resize({ height: 700 }).png().toBuffer();
+// Full size (1164 x 1386), so the crest stays sharp when the code is printed a metre wide.
+const crestPng = await sharp(path.join(root, 'clients/tantasportsclubelections/media/crest.webp')).png().toBuffer();
 const crest = `data:image/png;base64,${crestPng.toString('base64')}`;
 
 /** A rounded square as a path, top-left (x, y), side s, corner radius r. */
@@ -84,6 +88,13 @@ await p.screenshot({ path: path.join(out, 'qr-code.raw.png') });
 await sharp(path.join(out, 'qr-code.raw.png')).withMetadata({ density: 300 }).toFile(path.join(out, 'qr-code.png'));
 await p.addStyleTag({ content: 'svg{width:10cm;height:10cm}' });
 await p.pdf({ path: path.join(out, 'qr-code.pdf'), width: '10cm', height: '10cm', printBackground: true, pageRanges: '1' });
+await p.addStyleTag({ content: '@page{size:100cm 100cm}svg{width:100cm;height:100cm}' });
+await p.pdf({ path: path.join(out, 'qr-code-large.pdf'), width: '100cm', height: '100cm', printBackground: true, pageRanges: '1' });
 await b.close();
 unlinkSync(path.join(out, 'qr-code.raw.png'));
-console.log(`wrote qr-code.svg, qr-code.png (3000 px) and qr-code.pdf in ${out} (${n} modules, level H)`);
+// The big picture straight from the vector code (librsvg), not a screenshot.
+const BIG = 12000;
+await sharp(Buffer.from(svg), { density: (72 * BIG) / (w * 20), limitInputPixels: false })
+  .resize(BIG, BIG).flatten({ background: '#ffffff' }).png({ compressionLevel: 9 }).withMetadata({ density: 300 })
+  .toFile(path.join(out, 'qr-code-large.png'));
+console.log(`wrote qr-code.svg, qr-code.png (3000 px), qr-code.pdf (10 cm), qr-code-large.png (${BIG} px) and qr-code-large.pdf (100 cm) in ${out} (${n} modules, level H)`);
